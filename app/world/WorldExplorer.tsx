@@ -17,6 +17,9 @@ import { EMPTY_FILTERS, filterEvents, type EventFilters } from "@/lib/filters";
 import { levelFor } from "@/lib/levels";
 import { useDemo } from "@/lib/store";
 import { fmtDate } from "@/lib/utils";
+import { useDaoQuery } from "@/lib/dao/client";
+import { STATUS_META } from "@/lib/dao/meta";
+import type { DaoSummaryDto } from "@/components/dao/EventDaoPanel";
 import type { FreakEvent } from "@/lib/types";
 
 const WorldMap = dynamic(() => import("@/components/map/WorldMap"), {
@@ -41,7 +44,9 @@ export function WorldExplorer() {
     [support, sim],
   );
   const results = useMemo(() => filterEvents(EVENTS, filters, stats), [filters, stats]);
-  const points = useMemo(() => results.map((e) => ({ event: e, level: levelFor(stats(e).supporters, stats(e).raised) })), [results, stats]);
+  const daoQ = useDaoQuery<{ daos: DaoSummaryDto[] }>("summary");
+  const daos = useMemo(() => new Map(daoQ.state.status === "ok" ? daoQ.state.data.daos.map((d) => [d.eventId, d]) : []), [daoQ.state]);
+  const points = useMemo(() => results.map((e) => ({ event: e, level: levelFor(stats(e).supporters, stats(e).raised), dao: daos.has(e.id) && daos.get(e.id)!.status !== "archived" })), [results, stats, daos]);
   const sel = results.find((e) => e.id === selected) ?? null;
 
   return (
@@ -84,7 +89,7 @@ export function WorldExplorer() {
         </div>
       )}
 
-      {sel && <MapEventSheet event={sel} onClose={() => setSelected(null)} />}
+      {sel && <MapEventSheet event={sel} dao={daos.get(sel.id) ?? null} onClose={() => setSelected(null)} />}
 
       <BottomSheet open={listOpen} onClose={() => setListOpen(false)} title={`${results.length} events`}>
         <div className="space-y-3">
@@ -99,7 +104,7 @@ export function WorldExplorer() {
 }
 
 /** In-map bottom sheet for the tapped pin. Non-modal so the map stays usable. */
-function MapEventSheet({ event, onClose }: { event: FreakEvent; onClose: () => void }) {
+function MapEventSheet({ event, dao, onClose }: { event: FreakEvent; dao: DaoSummaryDto | null; onClose: () => void }) {
   const support = useDemo((s) => s.support[event.id]);
   const sim = useDemo((s) => s.sim[event.id]);
   const supporters = sim?.supporters ?? event.supporters + (support?.supporters ?? 0);
@@ -140,6 +145,13 @@ function MapEventSheet({ event, onClose }: { event: FreakEvent; onClose: () => v
       <div className="mt-3">
         <EventProgress supporters={supporters} raised={raised} goal={event.goal} compactView />
       </div>
+      {dao && (
+        <Link href={`/dao/${event.id}`} className="mt-3 flex min-h-11 items-center gap-2 rounded-2xl bg-surface-2 px-3 py-2 text-[13px]" data-testid="map-dao">
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: STATUS_META[dao.status].color }}>{STATUS_META[dao.status].label}</span>
+          <span className="min-w-0 flex-1 truncate">{dao.members} members · {dao.activeVote ? `voting: ${dao.activeVote.title}` : `${dao.activeProposals} proposals`}</span>
+          <ArrowRight className="size-4 shrink-0 text-acid" aria-hidden />
+        </Link>
+      )}
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link href={`/events/${event.id}/tickets`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-coral font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b]">
           <Ticket className="size-4" aria-hidden /> Tickets

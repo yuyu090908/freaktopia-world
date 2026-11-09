@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { CalendarDays, MapPin, Star, Users, Check, MessageSquare } from "lucide-react";
+import { CalendarDays, MapPin, Star, Users, Check, MessageSquare, Sparkles } from "lucide-react";
 import { getVenue, EVENTS } from "@/lib/data";
 import { toast, useDemo, useHydrated } from "@/lib/store";
 import { VenueArt } from "@/components/art/Scenes";
@@ -88,7 +88,20 @@ export function VenueDetail({ id }: { id: string }) {
           </>
         )}
 
-        <Card className="mt-8 p-4">
+        <Card className="mt-8 border-acid/50 p-4" data-testid="venue-stage-designer">
+          <div className="flex items-center gap-2 font-bold"><Sparkles className="size-4 text-acid" aria-hidden /> AI Stage Designer</div>
+          <p className="mt-1 text-sm text-mute">Design a stage over this venue&apos;s photo in an event DAO, then let the community vote. AI concepts are not construction plans.</p>
+          {(() => {
+            const target = events.find((e) => e.status !== "ended");
+            return (
+              <Link href={target ? `/dao/${target.id}/stage-designer` : "/dao"} className="mt-2 inline-flex min-h-11 items-center font-bold text-acid">
+                {target ? `Open designer for ${target.name} →` : "Pick an event DAO →"}
+              </Link>
+            );
+          })()}
+        </Card>
+
+        <Card className="mt-4 p-4">
           <div className="flex items-center gap-2 font-bold"><Users className="size-4 text-purple" aria-hidden /> First event?</div>
           <p className="ja mt-1 text-sm text-mute">AIイベントプランナー（デモ）で、この会場に合う企画案を作れます。</p>
           <Link href={`/venues/planner?venue=${venue.id}`} className="mt-2 inline-flex min-h-11 items-center font-bold text-purple">Plan an event here →</Link>

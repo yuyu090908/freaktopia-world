@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, GitCompareArrows, List, Map as MapIcon, RefreshCw, Search, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
+import { ArrowRight, GitCompareArrows, Landmark, List, Map as MapIcon, RefreshCw, Search, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
 import { RankingArt } from "@/components/ranking/RankingArt";
 import { RankingCard, TopOneCard, TopSmallCard } from "@/components/ranking/RankingCards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
@@ -183,6 +183,7 @@ export function RankingsView() {
     state.level && { label: `LV.${state.level}`, clear: { level: undefined } },
     state.dj && { label: "DJ recruiting", clear: { dj: undefined } },
     state.ap && { label: "After party", clear: { ap: undefined } },
+    state.dao && { label: "DAO active", clear: { dao: undefined } },
   ].filter(Boolean) as { label: string; clear: Partial<UrlState> }[];
 
   return (
@@ -207,6 +208,10 @@ export function RankingsView() {
             {CATEGORY_META[c].label}
           </button>
         ))}
+        <button type="button" aria-pressed={!!state.dao} onClick={() => update({ dao: state.dao ? undefined : true })} className={chip(!!state.dao)}>
+          <Landmark className="size-4" aria-hidden />
+          DAO active
+        </button>
       </nav>
       <p className="ja mt-2 px-4 text-xs text-mute md:px-0">
         <span className="font-bold text-cream">{meta.label}:</span> {meta.ja}
@@ -485,6 +490,7 @@ export function RankingsView() {
           <div className="space-y-2">
             <ToggleRow checked={!!draft.dj} onChange={(v) => setDraft({ ...draft, dj: v || undefined })} label="DJ recruiting" sub="DJ募集中のイベントのみ" />
             <ToggleRow checked={!!draft.ap} onChange={(v) => setDraft({ ...draft, ap: v || undefined })} label="After party available" sub="アフターパーティーありのみ" />
+            <ToggleRow checked={!!draft.dao} onChange={(v) => setDraft({ ...draft, dao: v || undefined })} label="DAO active" sub="コミュニティDAOが活動中のイベントのみ" />
             <ToggleRow checked={personalize} onChange={setPersonalize} label="Personalized FOR YOU" sub="好きなジャンル・都市・DJ・フォロー中のイベントでおすすめ順を作成（この端末のみ）" />
           </div>
         </div>

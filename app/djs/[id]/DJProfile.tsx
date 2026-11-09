@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { CalendarCheck, Heart, MapPin, Pause, Play, Trophy, Users, Radio, Gauge } from "lucide-react";
+import { CalendarCheck, Heart, Landmark, MapPin, Pause, Play, Trophy, Users, Radio, Gauge } from "lucide-react";
 import type { DJ } from "@/lib/types";
 import { Alien } from "@/components/art/Alien";
 import { BottomSheet } from "@/components/ui/BottomSheet";
@@ -64,6 +64,14 @@ export function DJProfile({ dj }: { dj: DJ }) {
             </Button>
             <Button onClick={() => setBook(true)}><CalendarCheck className="size-4" aria-hidden /> Booking</Button>
             <ButtonLink href={`/djs/${dj.id}/audition`} variant="ghost" className="col-span-2"><Radio className="size-4" aria-hidden /> Watch audition (demo)</ButtonLink>
+            {(() => {
+              const ev = EVENTS.find((e) => e.status !== "ended" && (e.auditionDjIds.includes(dj.id) || e.lineup.includes(dj.id))) ?? EVENTS.find((e) => e.status !== "ended");
+              return ev ? (
+                <ButtonLink href={`/dao/${ev.id}/proposals?new=1&dj=${dj.id}`} variant="purple" className="col-span-2" data-testid="dj-nominate">
+                  <Landmark className="size-4" aria-hidden /> Nominate in {ev.name} DAO
+                </ButtonLink>
+              ) : null;
+            })()}
           </div>
         </div>
       </section>

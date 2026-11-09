@@ -39,6 +39,7 @@ Requirements: Node 20 or later.
 | `/venues`, `/venues/[id]`, `/venues/new`, `/venues/planner` | Venue market, listing wizard, and planner |
 | `/after-party`, `/after-party/[id]`, `/after-party/new` | After parties linked to a main event |
 | `/rankings`, `/rankings/compare` | WORLD RANKING: 8 public categories plus FOR YOU, search, URL-synced filters, TOP 3, map view, compare and follow. See `docs/WORLD_RANKING.md` |
+| `/dao`, `/dao/[eventId]` + `/discussion`, `/proposals`, `/proposals/[proposalId]`, `/votes`, `/stage-designer`, `/gallery`, `/treasury`, `/roadmap`, `/members`, `/settings` | FESTIVAL DAO: stake-to-join event DAOs, discussion, proposal lifecycle, one-account-one-vote voting, AI Stage Designer, treasury, build game. **Demo: no blockchain or payment connected.** See `docs/FESTIVAL_DAO.md` |
 | `/alerts` | In-app alerts for followed events, with per-type settings |
 | `/live` | Live festival map. Location is opt-in and zone-level only, with no precise tracking |
 | `/avatar` | Alien builder: SLIME BEAT, COSMIC FUZZ, VINYL MUTANT, JELLY RAVER |
@@ -56,7 +57,7 @@ Requirements: Node 20 or later.
 - Payments: Stripe or Stripe Connect for tickets, venue booking, and crowdfunding escrow
 - Accounts and auth, plus a server-side database
 - Live streaming and audition audio or video
-- Wallets and NFT minting (collectibles exist as UI only)
+- Wallets and NFT minting (collectibles exist as UI only). The FESTIVAL DAO uses a throwaway demo wallet that only signs in; staking is a demo ledger
 - Real-time live map with consented, zone-level presence
 - AI features (recommendations, matching)
 - Japanese and English locale toggle (copy is English-first, with Japanese line-breaking support)
@@ -74,5 +75,6 @@ Requirements: Node 20 or later.
 ## Tests
 - `tests/flows.spec.ts`: 13 Playwright flows. All pass.
 - `tests/rankings.spec.ts`: 12 Playwright tests for WORLD RANKING. All pass.
-- `tests/unit` and `tests/integration`: 46 vitest tests for the ranking engine and API. All pass.
+- `tests/dao.spec.ts`: 12 Playwright tests for the FESTIVAL DAO (join, post, upload, propose, vote, double vote, compare, integrations, 375–1440 px). All pass.
+- `tests/unit` and `tests/integration`: 89 vitest tests for the ranking engine, ranking API, DAO domain logic and DAO API. All pass.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.

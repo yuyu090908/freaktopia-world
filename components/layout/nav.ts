@@ -12,6 +12,7 @@ export const ALL_PAGES = [
   { group: "Explore", items: [
     { href: "/world", label: "World Map" },
     { href: "/rankings", label: "World Ranking" },
+    { href: "/dao", label: "Festival DAO" },
     { href: "/events", label: "Events" },
     { href: "/djs", label: "DJ Arena" },
     { href: "/venues", label: "Venue Market" },

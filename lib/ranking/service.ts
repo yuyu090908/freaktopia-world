@@ -5,6 +5,7 @@
  */
 import { levelFor } from "@/lib/levels";
 import type { EventLevel } from "@/lib/types";
+import { allDaoSummaries } from "@/lib/dao/api";
 import { RANKING_CONFIG } from "./config";
 import { computeMetrics, rank } from "./engine";
 import { getSource, type RankingSource } from "./source";
@@ -44,8 +45,21 @@ async function levels(src: RankingSource, asOf: number) {
   return map;
 }
 
+/** Attach live community DAO stats (demo store) so cards and the DAO ACTIVE filter can use them. */
+function withDao(events: RankableEvent[]): RankableEvent[] {
+  let daos: ReturnType<typeof allDaoSummaries> = [];
+  try {
+    daos = allDaoSummaries();
+  } catch {
+    return events; // DAO data source not configured (production without DB): rank without DAO info.
+  }
+  const m = new Map(daos.map((d) => [d.eventId, { status: d.status, members: d.members, activeProposals: d.activeProposals, participationRate: d.participationRate, openVotes: d.openVotes }]));
+  return events.map((e) => (m.has(e.id) ? { ...e, dao: m.get(e.id) } : e));
+}
+
 async function rankAt(src: RankingSource, q: RankingQuery, asOf: number) {
-  const [{ events, metrics }, lv] = await Promise.all([snapshot(src, q.period, asOf), levels(src, asOf)]);
+  const [{ events: raw, metrics }, lv] = await Promise.all([snapshot(src, q.period, asOf), levels(src, asOf)]);
+  const events = withDao(raw);
   return rank(events, metrics, q.category, q, q.personalization, (id) => lv.get(id) ?? 1);
 }
 

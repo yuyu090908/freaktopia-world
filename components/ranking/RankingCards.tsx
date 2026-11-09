@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowDown, ArrowUp, CalendarDays, Check, GitCompareArrows, HandHeart, MapPin, Mic2, Minus, Ticket, Trophy } from "lucide-react";
+import { ArrowDown, ArrowUp, CalendarDays, Check, GitCompareArrows, HandHeart, Landmark, MapPin, Mic2, Minus, Ticket, Trophy } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { FollowButton } from "./FollowButton";
@@ -97,6 +97,12 @@ function Meta({ e }: { e: RankedEntry }) {
         <Tag>{ev.genres[0]}</Tag>
         {ev.isDemo && <DemoBadge />}
       </div>
+      {ev.dao && (
+        <Link href={`/dao/${ev.id}`} className="relative z-[1] mt-2 inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-acid/50 px-3 text-[11px] font-extrabold uppercase text-acid hover:bg-acid/10" data-testid="rank-dao">
+          <Landmark className="size-3.5 shrink-0" aria-hidden />
+          <span className="truncate">DAO · {ev.dao.members} members · {ev.dao.activeProposals} proposals · {Math.round(ev.dao.participationRate * 100)}% voted</span>
+        </Link>
+      )}
     </>
   );
 }

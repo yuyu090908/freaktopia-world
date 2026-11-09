@@ -227,6 +227,7 @@ export function matchesFilters(ev: RankableEvent, level: EventLevel, f: RankingF
   if (f.level && level !== f.level) return false;
   if (f.djRecruiting && !ev.djRecruiting) return false;
   if (f.afterParty && !ev.afterParty) return false;
+  if (f.daoActive && !(ev.dao && ev.dao.status !== "archived")) return false;
   return true;
 }
 

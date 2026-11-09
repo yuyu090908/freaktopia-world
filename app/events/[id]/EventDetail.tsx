@@ -21,6 +21,7 @@ import { EventCover } from "@/components/cards/Cards";
 import { Stage } from "@/components/art/Stage";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { EventProgress } from "@/components/event/EventProgress";
+import { EventDaoPanel } from "@/components/dao/EventDaoPanel";
 import { AfterPartyCard, AlienAvatar } from "@/components/cards/Cards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, ButtonLink, Card, DemoBadge, DemoNotice, Progress, Tag } from "@/components/ui/primitives";
@@ -154,6 +155,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
       <nav aria-label="Event sections" className="rail mt-8 !gap-2 md:!px-6">
         {[
           ["evolution", "Evolution"],
+          ["dao", "Community DAO"],
           ["lineup", "Lineup"],
           ["auditions", "Auditions"],
           ["venue", "Venue"],
@@ -284,6 +286,12 @@ export function EventDetail({ event }: { event: FreakEvent }) {
             </Card>
           </section>
         )}
+
+        {/* COMMUNITY DAO */}
+        <section id="dao" aria-labelledby="dao-h">
+          <h2 id="dao-h" className="text-3xl uppercase">Community DAO</h2>
+          <div className="mt-3"><EventDaoPanel eventId={event.id} ended={event.status === "ended"} /></div>
+        </section>
 
         {/* FUNDING */}
         <section id="funding" aria-labelledby="fund-h">

@@ -23,6 +23,7 @@ export const rankingQuerySchema = z.object({
   level: z.coerce.number().int().min(1).max(5).optional(),
   dj: bool.optional(),
   ap: bool.optional(),
+  dao: bool.optional(),
   page: z.coerce.number().int().min(1).max(1000).default(1),
   pageSize: z.coerce.number().int().min(1).max(RANKING_CONFIG.pageSizeMax).default(RANKING_CONFIG.pageSizeDefault),
   // personalization (FOR YOU only)
@@ -52,6 +53,7 @@ export function parseRankingQuery(params: URLSearchParams): { ok: true; query: R
     level: d.level as RankingQuery["level"],
     djRecruiting: d.dj || undefined,
     afterParty: d.ap || undefined,
+    daoActive: d.dao || undefined,
     page: d.page,
     pageSize: d.pageSize,
   };
@@ -79,6 +81,7 @@ export interface UrlState {
   level?: number;
   dj?: boolean;
   ap?: boolean;
+  dao?: boolean;
   view?: "list" | "map";
 }
 
@@ -98,6 +101,7 @@ export function readUrlState(params: URLSearchParams): UrlState {
     level: q.level,
     dj: q.djRecruiting,
     ap: q.afterParty,
+    dao: q.daoActive,
     view: params.get("view") === "map" ? "map" : "list",
   };
 }
@@ -115,9 +119,10 @@ export function toSearchParams(s: UrlState) {
   if (s.level) p.set("level", String(s.level));
   if (s.dj) p.set("dj", "1");
   if (s.ap) p.set("ap", "1");
+  if (s.dao) p.set("dao", "1");
   if (s.view === "map") p.set("view", "map");
   return p;
 }
 
 export const activeFilterCount = (s: UrlState) =>
-  [s.country, s.city, s.genre, s.status, s.price, s.level, s.dj, s.ap].filter(Boolean).length + (s.period !== "all" ? 1 : 0);
+  [s.country, s.city, s.genre, s.status, s.price, s.level, s.dj, s.ap, s.dao].filter(Boolean).length + (s.period !== "all" ? 1 : 0);

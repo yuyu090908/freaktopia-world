@@ -11,6 +11,7 @@ import { getEvent } from "@/lib/data";
 import { useDemo, useIsHydrated } from "@/lib/store";
 import type { FreakEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useDaoQuery } from "@/lib/dao/client";
 
 /** In-app alert inbox + per-type settings. External push is not connected in Phase 1. */
 export function AlertsView() {
@@ -77,6 +78,7 @@ export function AlertsView() {
           )}
         </section>
       )}
+      {consent && <DaoAlerts />}
       <section aria-labelledby="alert-settings">
         <h2 id="alert-settings" className="text-2xl uppercase">Alert settings</h2>
         <div className="mt-3 space-y-2">
@@ -87,5 +89,30 @@ export function AlertsView() {
         </div>
       </section>
     </div>
+  );
+}
+
+/** DAO notifications (new votes, replies, proposal moves, results) from the server, for signed-in DAO members. */
+function DaoAlerts() {
+  const { state } = useDaoQuery<{ items: { id: string; at: number; title: string; body: string; href: string }[]; signedIn: boolean }>("notifications");
+  if (state.status !== "ok" || !state.data.signedIn) return null;
+  return (
+    <section aria-labelledby="dao-alerts" data-testid="dao-alerts">
+      <h2 id="dao-alerts" className="text-2xl uppercase">Festival DAO</h2>
+      {state.data.items.length === 0 ? (
+        <p className="mt-2 text-sm text-mute">No DAO notifications yet.</p>
+      ) : (
+        <ul className="mt-3 space-y-2">
+          {state.data.items.map((a) => (
+            <li key={a.id}>
+              <Link href={a.href} className="flex min-h-14 flex-col justify-center rounded-2xl border-2 border-purple/50 bg-purple/10 p-3">
+                <span className="font-bold">{a.title}</span>
+                <span className="text-sm text-mute">{a.body}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
   );
 }

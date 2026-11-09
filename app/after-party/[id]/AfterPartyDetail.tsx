@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, MapPin, Ticket, Users } from "lucide-react";
+import { Clock, Landmark, MapPin, Ticket, Users } from "lucide-react";
 import { getAfterParty, getDJ, getEvent } from "@/lib/data";
 import { useDemo, useHydrated } from "@/lib/store";
 import { AlienAvatar } from "@/components/cards/Cards";
@@ -61,6 +61,11 @@ export function AfterPartyDetail({ id }: { id: string }) {
         </Card>
         {main && (
           <ButtonLink href={`/events/${main.id}/tickets`} size="lg" className="mt-5 w-full"><Ticket className="size-5" aria-hidden /> Get after party ticket</ButtonLink>
+        )}
+        {main && main.status !== "ended" && (
+          <ButtonLink href={`/dao/${main.id}/proposals?new=1&cat=after_party&title=${encodeURIComponent(`After party idea: ${p.name}`)}`} variant="purple" className="mt-3 w-full" data-testid="ap-propose">
+            <Landmark className="size-5" aria-hidden /> Propose in the event DAO
+          </ButtonLink>
         )}
       </div>
     </div>

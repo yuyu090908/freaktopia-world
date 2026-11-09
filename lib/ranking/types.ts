@@ -112,6 +112,8 @@ export interface RankableEvent {
   lineup: string[];
   capacity: number;
   isDemo: boolean;
+  /** Community DAO stats (demo DAO store), attached server-side when ranking. */
+  dao?: { status: string; members: number; activeProposals: number; participationRate: number; openVotes: number };
 }
 
 export interface EventActivity {
@@ -155,6 +157,8 @@ export interface RankingFilters {
   level?: EventLevel;
   djRecruiting?: boolean;
   afterParty?: boolean;
+  /** Only events with an active community DAO. */
+  daoActive?: boolean;
 }
 
 export interface Personalization {

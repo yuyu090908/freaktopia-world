@@ -22,7 +22,7 @@ export type EventLevel = 1 | 2 | 3 | 4 | 5;
 
 export type Species = "slime" | "fuzz" | "vinyl" | "jelly";
 export type Outfit = "none" | "hoodie" | "jacket" | "vest" | "kimono";
-export type Accessory = "none" | "headphones" | "shades" | "crown" | "antenna" | "cap";
+export type Accessory = "none" | "headphones" | "shades" | "crown" | "antenna" | "cap" | "dao_antenna";
 
 export interface AlienLook {
   species: Species;

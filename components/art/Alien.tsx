@@ -206,6 +206,16 @@ function AccessoryLayer({ look }: { look: AlienLook }) {
           <circle cx="130" cy={a.top - 38} r="10" fill={acc} stroke={INK} strokeWidth={5} />
         </g>
       );
+    case "dao_antenna":
+      // Festival DAO cosmetic: one tall antenna with a purple ballot orb and an acid halo.
+      return (
+        <g>
+          <path d={`M100 ${a.top + 6} L100 ${a.top - 40}`} stroke={INK} strokeWidth={6} strokeLinecap="round" />
+          <ellipse cx="100" cy={a.top - 50} rx="22" ry="6" fill="none" stroke="#B6F05C" strokeWidth={4} />
+          <circle cx="100" cy={a.top - 52} r="12" fill="#A276E9" stroke={INK} strokeWidth={5} />
+          <path d={`M95 ${a.top - 52} L99 ${a.top - 47} L106 ${a.top - 57}`} stroke={INK} strokeWidth={3.5} fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+      );
     case "cap":
       return (
         <g>

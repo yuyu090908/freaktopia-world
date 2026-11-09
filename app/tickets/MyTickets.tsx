@@ -7,6 +7,7 @@ import { getEvent, EVENTS } from "@/lib/data";
 import { EmptyState, LoadingSkeleton } from "@/components/ui/States";
 import { ButtonLink, DemoBadge } from "@/components/ui/primitives";
 import { fmtDate, money } from "@/lib/utils";
+import { TicketDaoInfo } from "@/components/dao/TicketDaoInfo";
 
 export function MyTickets() {
   const ok = useHydrated();
@@ -36,6 +37,7 @@ export function MyTickets() {
               <span className="shrink-0 font-display">{money(o.total)}</span>
               <ArrowRight className="size-5 shrink-0" aria-hidden />
             </Link>
+            {e && <TicketDaoInfo eventId={e.id} />}
           </li>
         );
       })}

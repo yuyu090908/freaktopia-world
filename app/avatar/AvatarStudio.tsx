@@ -10,6 +10,7 @@ import { grantXp, toast, useDemo, useHydrated } from "@/lib/store";
 import { userLevel } from "@/lib/levels";
 import type { Accessory, AlienLook, Outfit } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useDaoQuery } from "@/lib/dao/client";
 
 const OUTFITS: { id: Outfit; label: string; lv: number }[] = [
   { id: "none", label: "None", lv: 1 },
@@ -40,6 +41,9 @@ function Studio() {
   const [name, setName] = useState(profile.avatarName);
   const [starter, setStarter] = useState(() => STARTERS.find((s) => s.look.species === profile.look.species)?.id ?? STARTERS[0].id);
   const lv = userLevel(profile.xp);
+  // DAO cosmetic: unlocked server-side by the cosmetic_antenna badge (100 DAO XP in any event DAO).
+  const daoSession = useDaoQuery<{ memberships: { badges: string[] }[] }>("session");
+  const daoAntenna = daoSession.state.status === "ok" && daoSession.state.data.memberships.some((m) => m.badges.includes("cosmetic_antenna"));
   const dirty = JSON.stringify(look) !== JSON.stringify(profile.look) || name !== profile.avatarName;
 
   useEffect(() => {
@@ -126,16 +130,17 @@ function Studio() {
           <fieldset>
             <legend className="font-display text-xl uppercase">Accessory</legend>
             <div className="mt-2 flex flex-wrap gap-2">
-              {ACCESSORIES.map((a) => {
-                const locked = lv.level < a.lv;
+              {[...ACCESSORIES, { id: "dao_antenna" as Accessory, label: "DAO Antenna", lv: 1 }].map((a) => {
+                const daoItem = a.id === "dao_antenna";
+                const locked = daoItem ? !daoAntenna : lv.level < a.lv;
                 return (
-                  <Chip key={a.id} active={look.accessory === a.id} disabled={locked} onClick={() => setLook({ ...look, accessory: a.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? `${a.label}, unlocks at level ${a.lv}` : a.label}>
-                    {locked && <Lock className="size-3.5" aria-hidden />}{a.label}{locked && <span className="text-xs">LV.{a.lv}</span>}
+                  <Chip key={a.id} active={look.accessory === a.id} disabled={locked} onClick={() => setLook({ ...look, accessory: a.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? `${a.label}, ${daoItem ? "unlocks at 100 DAO XP" : `unlocks at level ${a.lv}`}` : a.label} data-testid={daoItem ? "dao-cosmetic" : undefined}>
+                    {locked && <Lock className="size-3.5" aria-hidden />}{a.label}{locked && <span className="text-xs">{daoItem ? "100 DAO XP" : `LV.${a.lv}`}</span>}
                   </Chip>
                 );
               })}
             </div>
-            <p className="ja mt-2 text-xs text-mute">ロックされたアイテムは、イベントの応援・チケット購入・投票でXPを貯めると解放されます。</p>
+            <p className="ja mt-2 text-xs text-mute">ロックされたアイテムは、イベントの応援・チケット購入・投票でXPを貯めると解放されます。DAO Antenna は、いずれかのイベントDAOで 100 DAO XP を貯めると解放されます（<a href="/dao" className="underline">Festival DAO</a>）。</p>
           </fieldset>
 
           <div className="sticky bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom)+12px)] z-30 flex gap-3 rounded-full bg-ink/90 p-1.5 lg:bottom-6">
