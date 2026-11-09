@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import { ART } from "@/lib/art";
 
 export function LogoMark({ className = "size-8" }: { className?: string }) {
   return (
@@ -13,13 +15,10 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
-export function Logo() {
+export function Logo({ className = "h-[42px] w-auto sm:h-[48px]" }: { className?: string }) {
   return (
-    <Link href="/" className="flex min-h-11 items-center gap-2 rounded-xl pr-1" aria-label="FREAKTOPIA WORLD home">
-      <LogoMark />
-      <span className="font-display text-[17px] leading-none tracking-tight min-[400px]:text-[19px] sm:text-[22px]">
-        FREAKTOPIA
-      </span>
+    <Link href="/" className="flex min-h-11 shrink-0 items-center rounded-xl" aria-label="FREAKTOPIA WORLD home">
+      <Image src={ART.logo} alt="" priority sizes="130px" className={className} />
     </Link>
   );
 }

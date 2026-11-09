@@ -76,6 +76,7 @@ export function EventsBrowser() {
         />
       ) : (
         <>
+          <h2 className="sr-only">Event results</h2>
           <ul className="mt-4 space-y-3 px-4 md:hidden">
             {list.map((e) => (
               <li key={e.id} className="cv-auto [contain-intrinsic-size:auto_130px]">

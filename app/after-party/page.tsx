@@ -1,3 +1,4 @@
+import { ART } from "@/lib/art";
 import type { Metadata } from "next";
 import { AfterPartyList } from "./AfterPartyList";
 import { PageTitle } from "@/components/ui/primitives";
@@ -7,7 +8,7 @@ export const metadata: Metadata = { title: "After Party", description: "Official
 export default function Page() {
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle kicker="After Party" title="The night isn’t over" sub="メインイベントの後も、夜は続く。公式アフターパーティー一覧。" />
+      <PageTitle art={{ src: ART.panelAfterparty, pos: "50% 50%" }} kicker="After Party" title="The night isn’t over" sub="メインイベントの後も、夜は続く。公式アフターパーティー一覧。" />
       <AfterPartyList />
     </div>
   );

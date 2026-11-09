@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CheckCircle2, ArrowRight, Info } from "lucide-react";
 import { useDemo, useHydrated } from "@/lib/store";
 import { getEvent } from "@/lib/data";
-import { EventArt } from "@/components/art/Scenes";
+import { EventCover } from "@/components/cards/Cards";
 import { Alien } from "@/components/art/Alien";
 import { ButtonLink, Card } from "@/components/ui/primitives";
 import { ErrorState, LoadingSkeleton } from "@/components/ui/States";
@@ -49,7 +49,7 @@ export function OrderView({ orderId }: { orderId: string }) {
 
       <div className="mt-6 overflow-hidden rounded-[28px] border-[3px] border-ink bg-cream text-ink shadow-[0_8px_0_#000]">
         <div className="relative aspect-[5/2]">
-          <EventArt id={e.id} palette={e.palette} className="h-full w-full" />
+          <EventCover id={e.id} sizes="(min-width:640px) 600px, 100vw" />
           <span className="absolute right-3 top-3 -rotate-6 rounded-lg border-[3px] border-coral bg-cream px-2 py-1 font-display text-sm text-coral">SAMPLE · NOT VALID</span>
         </div>
         <div className="p-5">

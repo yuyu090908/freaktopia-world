@@ -1,4 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
+import type { ArtPick } from "@/lib/art";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { FlaskConical } from "lucide-react";
@@ -58,7 +60,7 @@ export function Chip({ active, className, ...p }: ComponentProps<"button"> & { a
       aria-pressed={active}
       className={cn(
         "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border-2 px-4 text-sm font-bold transition-colors",
-        active ? "border-acid bg-acid text-ink" : "border-line bg-surface text-cream hover:border-cream/40",
+        active ? "border-acid bg-acid text-ink shadow-[0_0_16px_-2px_rgba(182,240,92,0.6)]" : "border-cream/25 bg-ink/70 text-cream hover:border-cream/60",
         className,
       )}
       {...p}
@@ -127,7 +129,7 @@ export function SectionHeader({ title, sub, action, id }: { title: string; sub?:
 }
 
 export function Card({ className, ...p }: ComponentProps<"div">) {
-  return <div className={cn("rounded-3xl border border-line bg-surface", className)} {...p} />;
+  return <div className={cn("neon rounded-3xl border bg-surface/90", className)} {...p} />;
 }
 
 export function Stat({ label, value, accent = "#F5F2EA" }: { label: string; value: ReactNode; accent?: string }) {
@@ -141,11 +143,19 @@ export function Stat({ label, value, accent = "#F5F2EA" }: { label: string; valu
   );
 }
 
-export function PageTitle({ kicker, title, sub, children }: { kicker?: string; title: string; sub?: string; children?: ReactNode }) {
+export function PageTitle({ kicker, title, sub, children, art }: { kicker?: string; title: string; sub?: string; children?: ReactNode; art?: ArtPick }) {
   return (
-    <div className="px-4 pb-5 pt-4 md:px-0 md:pt-8">
-      {kicker && <div className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-acid">{kicker}</div>}
-      <h1 className="text-[40px] uppercase sm:text-6xl">{title}</h1>
+    <div className={cn("px-4 pb-5 md:px-0", art ? "pt-0 md:pt-6" : "pt-4 md:pt-8")}>
+      {art && (
+        <div className="relative -mx-4 h-40 overflow-hidden sm:h-52 md:mx-0 md:h-60 md:rounded-[28px] md:border-2 md:border-purple/50 md:shadow-[0_0_36px_-12px_rgba(162,118,233,0.7)]" aria-hidden>
+          <Image src={art.src} alt="" fill priority quality={60} sizes="(min-width:1152px) 1100px, 100vw" className="object-cover" style={{ objectPosition: art.pos }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/20 to-transparent" />
+        </div>
+      )}
+      <div className={art ? "relative -mt-12 md:-mt-14 md:px-6" : undefined}>
+        {kicker && <div className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-acid drop-shadow-[0_1px_0_#080808]">{kicker}</div>}
+        <h1 className="text-[40px] uppercase drop-shadow-[0_3px_0_#080808] sm:text-6xl">{title}</h1>
+      </div>
       {sub && <p className="ja mt-3 max-w-2xl text-[15px] leading-relaxed text-mute">{sub}</p>}
       {children}
     </div>

@@ -36,8 +36,8 @@ export function Header() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] focus:rounded-full focus:bg-acid focus:px-4 focus:py-3 focus:text-ink">
         Skip to content
       </a>
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-ink/[.97] pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex h-[60px] max-w-6xl items-center gap-0.5 px-2 min-[400px]:gap-1 min-[400px]:px-3 md:px-6">
+      <header className="sticky top-0 z-50 border-b border-purple/20 bg-ink/[.96] shadow-[0_8px_30px_-12px_rgba(162,118,233,0.45)] pt-[env(safe-area-inset-top)]">
+        <div className="mx-auto flex h-[64px] max-w-6xl items-center gap-0.5 px-2 min-[400px]:gap-1 min-[400px]:px-3 md:px-6">
           {!top && (
             <button type="button" onClick={goBack} aria-label="Go back" className="-ml-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
               <ArrowLeft className="size-5" />
@@ -53,7 +53,7 @@ export function Header() {
                   key={n.href}
                   href={n.href}
                   aria-current={active ? "page" : undefined}
-                  className={cn("rounded-full px-3.5 py-2.5 text-sm font-bold uppercase tracking-wide", active ? "bg-cream text-ink" : "text-cream/80 hover:text-cream")}
+                  className={cn("rounded-full px-3.5 py-2.5 text-sm font-bold uppercase tracking-wide", active ? "bg-acid text-ink" : "text-cream/80 hover:text-cream")}
                 >
                   {n.label}
                 </Link>

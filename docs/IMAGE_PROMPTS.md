@@ -1,6 +1,6 @@
 # Image generation prompts and asset structure
 
-The current build uses only original inline SVG. These prompts are for optional raster art later. **Style rule:** all art must be original. Use thick black outlines, flat psychedelic colours from the brand palette, and goofy aliens. Do not copy any existing brand's characters, logo or layout, including mood references.
+Since the redesign, the site uses the team-supplied key art in `assets/art/` (see `lib/art.ts`). Use these prompts for additional or replacement art. **Style rule:** all art must be original. Use thick black outlines, flat psychedelic colours from the brand palette, and goofy aliens. Do not copy any existing brand's characters, logo or layout, including mood references.
 
 Palette: #080808 #171717 #F5F2EA acid #B6F05C coral #FF625C purple #A276E9 blue #55BCEB orange #FFAD5B
 

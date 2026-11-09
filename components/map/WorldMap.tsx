@@ -31,12 +31,13 @@ const STYLE: StyleSpecification = {
     grid: { type: "geojson", data: graticule() },
   },
   layers: [
-    { id: "bg", type: "background", paint: { "background-color": "#0c0b12" } },
-    { id: "grid", type: "line", source: "grid", paint: { "line-color": "#A276E9", "line-opacity": 0.12, "line-width": 1, "line-dasharray": [2, 3] } },
-    { id: "land-shadow", type: "line", source: "countries", paint: { "line-color": "#000", "line-width": 6, "line-opacity": 0.8, "line-translate": [2, 3] } },
-    { id: "land", type: "fill", source: "countries", paint: { "fill-color": "#1d1c26" } },
-    { id: "coast", type: "line", source: "countries", paint: { "line-color": "#B6F05C", "line-width": ["interpolate", ["linear"], ["zoom"], 0, 0.6, 5, 1.6], "line-opacity": 0.55 } },
-    { id: "borders", type: "line", source: "borders", paint: { "line-color": "#55BCEB", "line-width": 0.6, "line-opacity": 0.3 } },
+    { id: "bg", type: "background", paint: { "background-color": "#0b1030" } },
+    { id: "grid", type: "line", source: "grid", paint: { "line-color": "#A276E9", "line-opacity": 0.28, "line-width": 1, "line-dasharray": [2, 3] } },
+    { id: "glow", type: "line", source: "countries", paint: { "line-color": "#A276E9", "line-width": 14, "line-opacity": 0.35, "line-blur": 10 } },
+    { id: "land-shadow", type: "line", source: "countries", paint: { "line-color": "#000", "line-width": 7, "line-opacity": 0.9, "line-translate": [2, 4] } },
+    { id: "land", type: "fill", source: "countries", paint: { "fill-color": "#9BDC4C" } },
+    { id: "borders", type: "line", source: "borders", paint: { "line-color": "#2f6a1b", "line-width": 0.8, "line-opacity": 0.9 } },
+    { id: "coast", type: "line", source: "countries", paint: { "line-color": "#080808", "line-width": ["interpolate", ["linear"], ["zoom"], 0, 1.6, 5, 3] } },
   ],
 };
 
@@ -217,7 +218,7 @@ export default function WorldMap({
         .fk-count{position:absolute;top:-6px;right:-8px;min-width:24px;height:24px;padding:0 5px;border-radius:999px;background:#F5F2EA;color:#080808;border:2.5px solid #080808;font:800 12px/19px var(--font-sans);}
         .fk-live{position:absolute;left:50%;bottom:0;width:18px;height:8px;margin-left:-9px;border-radius:50%;background:#FF625C;animation:fk-pulse 1.6s ease-out infinite}
         @keyframes fk-pulse{from{transform:scale(1);opacity:.9}to{transform:scale(4);opacity:0}}
-        .maplibregl-ctrl-group{background:#171717!important;border:1px solid #2e2e2e}
+        .maplibregl-ctrl-group{background:#0d0b12!important;border:1.5px solid rgba(162,118,233,.6);border-radius:16px!important;box-shadow:0 0 18px -4px rgba(162,118,233,.6)!important;overflow:hidden}
         .maplibregl-ctrl-group button{width:44px!important;height:44px!important}
         .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:invert(1)}
         .maplibregl-ctrl-attrib{background:rgba(8,8,8,.7)!important;color:#b9b5ab}

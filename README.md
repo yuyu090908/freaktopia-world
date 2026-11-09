@@ -21,7 +21,9 @@ Requirements: Node 20 or later.
 - Next.js 15 (App Router, static generation), React 19, TypeScript, Tailwind CSS v4
 - Zustand with `persist` (localStorage key `freaktopia-demo-v1`), React Hook Form with Zod
 - MapLibre GL. The world map uses bundled Natural Earth GeoJSON (`public/`), so it needs no tile server or API key.
-- All art is original inline SVG (`components/art/`): aliens, stages, scenes. No external images.
+- Key art (logo, hero posters, illustrated maps, scene panels) is supplied by the FREAKTOPIA team. It is cropped and stored in `assets/art/*.webp`, mapped in `lib/art.ts`, and served through `next/image` (AVIF/WebP, responsive sizes).
+- Avatars, LV1–5 stage evolution, venue art and map pins are original inline SVG (`components/art/`, `components/map/markers.ts`).
+- The space backdrop (stars and purple smoke) is pure CSS (`body::before` in `app/globals.css`), and cards use the `.neon` outline style.
 
 ## Pages
 | Route | What it does |

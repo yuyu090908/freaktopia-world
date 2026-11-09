@@ -10,9 +10,9 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Primary"
-      className="hide-on-kb fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-ink/95 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="hide-on-kb fixed inset-x-0 bottom-0 z-50 bg-gradient-to-t from-ink from-70% to-transparent px-2 pb-[max(env(safe-area-inset-bottom),6px)] lg:hidden"
     >
-      <ul className="mx-auto grid h-[var(--nav-h)] max-w-xl grid-cols-5">
+      <ul className="mx-auto grid h-[calc(var(--nav-h)-6px)] max-w-xl grid-cols-5 rounded-[26px] border border-purple/45 bg-[#0d0b12]/95 shadow-[0_-6px_30px_-8px_rgba(162,118,233,0.55)]">
         {MAIN_NAV.map(({ href, label, icon: Icon }) => {
           const active = href === "/" ? path === "/" : path === href || path.startsWith(href + "/");
           return (
@@ -20,17 +20,18 @@ export function MobileBottomNav() {
               <Link
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className="group flex flex-1 flex-col items-center justify-center gap-1 text-[11px] font-bold uppercase tracking-wide"
+                className="group relative flex flex-1 flex-col items-center justify-center gap-0.5 text-[11px] font-bold tracking-wide"
               >
                 <span
                   className={cn(
-                    "flex h-8 w-14 items-center justify-center rounded-full transition-colors",
-                    active ? "bg-acid text-ink" : "text-cream/75 group-hover:text-cream",
+                    "flex h-8 w-12 items-center justify-center rounded-full transition-colors",
+                    active ? "text-acid drop-shadow-[0_0_8px_rgba(182,240,92,0.7)]" : "text-cream/80 group-hover:text-cream",
                   )}
                 >
                   <Icon className="size-[22px]" strokeWidth={active ? 2.6 : 2} aria-hidden />
                 </span>
-                <span className={active ? "text-cream" : "text-cream/70"}>{label}</span>
+                <span className={active ? "text-acid" : "text-cream/75"}>{label}</span>
+                {active && <span aria-hidden className="absolute bottom-1.5 h-[3px] w-7 rounded-full bg-acid shadow-[0_0_10px_#B6F05C]" />}
               </Link>
             </li>
           );

@@ -12,7 +12,7 @@ test("home → world map → pin → bottom sheet → event", async ({ page }) =
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("dancefloor", { ignoreCase: true });
   await noHorizontalScroll(page);
-  await page.getByRole("link", { name: /explore world/i }).click();
+  await page.getByRole("link", { name: /^explore$/i }).click();
   await expect(page).toHaveURL(/\/world$/);
   const pin = page.getByRole("button", { name: /NEON SLIME SUMMIT, Berlin/ });
   await expect(pin).toBeVisible({ timeout: 15_000 });

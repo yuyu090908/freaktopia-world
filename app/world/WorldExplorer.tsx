@@ -3,11 +3,11 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowRight, CalendarDays, List, MapPin, Users, X } from "lucide-react";
+import { ArrowRight, CalendarDays, List, MapPin, Ticket, Users, X } from "lucide-react";
 import { FilterBar } from "@/components/event/FilterBar";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { EventProgress } from "@/components/event/EventProgress";
-import { EventArt } from "@/components/art/Scenes";
+import { EventCover } from "@/components/cards/Cards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { DemoBadge, Tag } from "@/components/ui/primitives";
 import { LoadingSkeleton, EmptyState } from "@/components/ui/States";
@@ -108,7 +108,7 @@ function MapEventSheet({ event, onClose }: { event: FreakEvent; onClose: () => v
   return (
     <section
       aria-label={`${event.name} summary`}
-      className="absolute inset-x-0 bottom-0 z-20 mx-auto max-w-lg animate-[sheet-in_220ms_ease-out] rounded-t-[28px] border-2 border-b-0 border-line bg-surface p-4 pt-2 shadow-[0_-16px_40px_rgba(0,0,0,0.6)] md:bottom-4 md:left-4 md:right-auto md:w-[400px] md:rounded-[28px] md:border-b-2"
+      className="absolute inset-x-0 bottom-0 z-20 mx-auto max-w-lg animate-[sheet-in_220ms_ease-out] neon rounded-t-[28px] border-2 border-b-0 bg-surface/95 p-4 pt-2 backdrop-blur md:bottom-4 md:left-4 md:right-auto md:w-[400px] md:rounded-[28px] md:border-b-2"
     >
       <style>{`@keyframes sheet-in{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}`}</style>
       <div className="mb-2 flex justify-center md:hidden" aria-hidden>
@@ -116,7 +116,7 @@ function MapEventSheet({ event, onClose }: { event: FreakEvent; onClose: () => v
       </div>
       <div className="flex gap-3">
         <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl">
-          <EventArt id={event.id} palette={event.palette} className="h-full w-full" />
+          <EventCover id={event.id} sizes="96px" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
@@ -140,9 +140,14 @@ function MapEventSheet({ event, onClose }: { event: FreakEvent; onClose: () => v
       <div className="mt-3">
         <EventProgress supporters={supporters} raised={raised} goal={event.goal} compactView />
       </div>
-      <Link href={`/events/${event.id}`} className="mt-4 flex min-h-12 items-center justify-center gap-2 rounded-full bg-acid font-extrabold uppercase text-ink">
-        View event <ArrowRight className="size-4" aria-hidden />
-      </Link>
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <Link href={`/events/${event.id}/tickets`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-coral font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b]">
+          <Ticket className="size-4" aria-hidden /> Tickets
+        </Link>
+        <Link href={`/events/${event.id}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-acid font-extrabold uppercase text-ink shadow-[0_4px_0_0_#5f8a22]">
+          View event <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </div>
     </section>
   );
 }

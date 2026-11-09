@@ -19,26 +19,24 @@
 ## Crawl
 I crawled 99 pages at 375, 390, 430, 768 and 1440px. Results: 0 broken links, 0 horizontal overflow, 0 console errors.
 
-## Lighthouse (mobile, median of 3 runs)
-These were measured in a cloud container with **software GPU rendering (SwiftShader)**. WebGL and heavy-SVG pages score low because of it, and real devices will probably score higher. The numbers have not been verified on a real device.
+## Lighthouse (mobile), after the key-art redesign (two runs per page)
+These were measured in a cloud container with **software GPU rendering (SwiftShader)**. Scores vary by about ±8 between runs, and real devices have not been tested.
 
-| Page | Perf | A11y | Best practices | SEO | LCP | CLS |
-|---|---|---|---|---|---|---|
-| / | 86–89 | 100 | 100 | 100 | 3.0s | 0 |
-| /events/void-jelly-rave | 90–93 | 100 | 100 | 100 | 2.9s | 0 |
-| /events/…/tickets | 96–97 | 100 | 100 | 100 | 2.6s | 0 |
-| /profile | 94–95 | 100 | 100 | 100 | 2.6s | 0 |
-| /world (map) | 50–54 | 100 | 100 | 100 | ~5s | 0.004 |
-| /avatar | ~67 | 100 | 100 | 100 | 3.1s | 0 |
-| /live | ~65 | 100 | 100 | 100 | – | 0 |
-| /djs | ~67 | 100 | 100 | 100 | – | 0 |
+| Page | Perf | A11y | Best practices | SEO | LCP | TBT | CLS |
+|---|---|---|---|---|---|---|---|
+| / | 85–93 | 100 | 100 | 100 | 3.0–3.7s | 140–230ms | 0 |
+| /events | 80–92 | 100 | 100 | 100 | 3.3–4.5s | 90–230ms | 0 |
+| /events/void-jelly-rave | 89–91 | 100 | 100 | 100 | 3.2–3.5s | 180ms | 0 |
+| /events/…/tickets | 96 | 100 | 100 | 100 | 2.8s | 70–80ms | 0 |
+| /world (map) | 71–72 | 100 | 100 | 100 | 2.6–2.8s | ~1.3s | 0 |
+| /djs | 87–91 | 100 | 100 | 100 | 3.3–3.9s | 110–140ms | 0 |
+| /live | 93–94 | 100 | 100 | 100 | 3.0s | 90–130ms | 0 |
+| /avatar | 93–96 | 100 | 100 | 100 | 2.8–3.2s | 60–80ms | 0 |
+| /profile | 96 | 100 | 100 | 100 | 2.7s | 60–80ms | 0 |
+| /venues | 87–95 | 98* | 100 | 100 | 2.8–3.9s | 90–120ms | 0 |
 
-The **90+ performance target is met on 3 of the 8 pages measured**. On the low-scoring pages, Total Blocking Time is the main cost (1.7–4s), and the traces show it as GPU raster and WebGL tasks.
+\* After the measurement I fixed the /venues heading-order issue that cost 2 points. That page has not been re-measured.
 
-Next steps:
-- Lazy-init the map after first paint.
-- Rasterize the large SVG scenes to AVIF.
-- Reduce the number of animated aliens.
-- Re-measure on a real device.
+/world stays below 90. Its Total Blocking Time comes from WebGL running on the software GPU.
 
 Screenshots are in `docs/screenshots/` at 390px, plus 1440px for home and world.

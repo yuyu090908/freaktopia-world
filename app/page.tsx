@@ -1,21 +1,44 @@
 import Link from "next/link";
-import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio } from "lucide-react";
-import { HeroArt } from "@/components/art/Scenes";
+import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio, CalendarDays, Headphones, Building2, Moon, MapPin } from "lucide-react";
+import Image, { getImageProps } from "next/image";
+import { ART } from "@/lib/art";
 import { DJCard, EventCard, IllustratedCard } from "@/components/cards/Cards";
 import { ButtonLink, SectionHeader } from "@/components/ui/primitives";
 import { DJS, EVENTS } from "@/lib/data";
 import { HomePlayerStrip } from "./HomePlayerStrip";
+import { HomeFeatured } from "./HomeFeatured";
 
 const EXPLORE = [
-  { href: "/world", title: "World Map", sub: "Find raves on a real map", kind: "world", color: "#55BCEB" },
-  { href: "/djs", title: "DJ Arena", sub: "Auditions & rankings", kind: "dj", color: "#FFAD5B" },
-  { href: "/events", title: "Events", sub: "Support & get tickets", kind: "events", color: "#B6F05C" },
-  { href: "/venues", title: "Venues", sub: "Book or list a space", kind: "venues", color: "#A276E9" },
-  { href: "/live", title: "Live Festival", sub: "Enter the venue map", kind: "live", color: "#FF625C" },
-  { href: "/after-party", title: "After Party", sub: "The night continues", kind: "afterparty", color: "#55BCEB" },
-  { href: "/avatar", title: "Alien World", sub: "Make your alien", kind: "alien", color: "#B6F05C" },
-  { href: "/nft", title: "NFT Market", sub: "Collectibles preview", kind: "nft", color: "#FFAD5B" },
+  { href: "/world", title: "World Map", sub: "Find raves worldwide", kind: "world", color: "#55BCEB", art: { src: ART.panelMap, pos: "50% 50%" } },
+  { href: "/events/create", title: "Create Event", sub: "Start a new party", kind: "events", color: "#B6F05C", art: { src: ART.panelUniverse, pos: "88% 75%" } },
+  { href: "/venues", title: "List Venue", sub: "Book or list a space", kind: "venues", color: "#A276E9", art: { src: ART.panelMarket, pos: "50% 40%" } },
+  { href: "/djs", title: "DJ Audition", sub: "Auditions & rankings", kind: "dj", color: "#FFAD5B", art: { src: ART.mapIsland, pos: "40% 75%" } },
+  { href: "/after-party", title: "After Party", sub: "The night continues", kind: "afterparty", color: "#FF625C", art: { src: ART.panelAfterparty, pos: "50% 50%" } },
+  { href: "/live", title: "Live Festival", sub: "Enter the venue map", kind: "live", color: "#55BCEB", art: { src: ART.mapValley, pos: "50% 40%" } },
+  { href: "/avatar", title: "Alien World", sub: "Make your alien", kind: "alien", color: "#B6F05C", art: { src: ART.posterCity, pos: "75% 100%" } },
+  { href: "/nft", title: "Collectibles", sub: "NFT market preview", kind: "nft", color: "#FFAD5B", art: { src: ART.panelStage, pos: "50% 30%" } },
 ] as const;
+
+const MAP_CHIPS = [
+  { href: "/events", label: "All events", icon: CalendarDays, active: true },
+  { href: "/live", label: "Live now", icon: Radio },
+  { href: "/djs", label: "DJ open", icon: Headphones },
+  { href: "/venues", label: "Venues", icon: Building2 },
+  { href: "/after-party", label: "After party", icon: Moon },
+];
+
+function HeroPicture() {
+  const common = { alt: "FREAKTOPIA WORLD: a crowd of aliens raving around a slime DJ. The world is your dancefloor.", priority: true, fetchPriority: "high" as const };
+  const { props: { srcSet: wide } } = getImageProps({ ...common, src: ART.heroWide, sizes: "(min-width:1152px) 1152px, 100vw", quality: 72 });
+  const { props: mobile } = getImageProps({ ...common, src: ART.heroPoster, sizes: "100vw", quality: 70 });
+  return (
+    <picture>
+      <source media="(min-width: 768px)" srcSet={wide} sizes="(min-width:1152px) 1152px, 100vw" />
+      {/* eslint-disable-next-line jsx-a11y/alt-text */}
+      <img {...mobile} className="block h-auto w-full" />
+    </picture>
+  );
+}
 
 const STEPS = [
   { icon: Compass, title: "Discover", body: "Find events on the world map by city, genre and date.", ja: "世界地図からイベントを見つける", color: "#55BCEB" },
@@ -28,32 +51,70 @@ const STEPS = [
 export default function HomePage() {
   const featured = [...EVENTS].sort((a, b) => b.supporters - a.supporters).slice(0, 8);
   const live = EVENTS.find((e) => e.status === "live");
+  const spotlight = featured.find((e) => e.status !== "live" && e.djRecruiting) ?? featured[0];
   return (
     <div className="mx-auto max-w-6xl">
-      {/* HERO */}
-      <section aria-labelledby="hero-title" className="relative px-4 pb-8 pt-5 md:grid md:grid-cols-[1.1fr_1fr] md:items-center md:gap-8 md:px-6 md:pb-14 md:pt-12">
-        <div className="relative z-10">
-          <p className="mb-3 text-xs font-extrabold uppercase tracking-[0.22em] text-acid">Discover. Support. Create. Rave.</p>
-          <h1 id="hero-title" className="text-[clamp(2.4rem,10.4vw,5.6rem)] uppercase leading-[0.88]">
-            The world is your <span className="text-acid">dance</span>floor.
-          </h1>
-          <p className="mt-4 max-w-md text-[17px] leading-relaxed text-cream/85">
-            A living world of music, aliens, DJs, festivals and unforgettable nights.
-          </p>
-          <p className="ja mt-1.5 max-w-md text-sm text-mute">音楽・DJ・イベント・ゲームがつながる、宇宙人たちのダンスフロア。</p>
-          <div className="mt-6 flex flex-col gap-3 min-[420px]:flex-row">
-            <ButtonLink href="/world" size="lg" className="w-full min-[420px]:w-auto">
-              Explore world <ArrowRight className="size-5" aria-hidden />
+      {/* HERO: key art supplied by the FREAKTOPIA team */}
+      <section aria-labelledby="hero-title" className="relative">
+        <div className="relative overflow-hidden md:mx-6 md:mt-6 md:rounded-[32px] md:border-2 md:border-purple/50 md:shadow-[0_0_40px_-10px_rgba(162,118,233,0.7)]">
+          <HeroPicture />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink to-transparent" aria-hidden />
+        </div>
+        <div className="relative z-10 -mt-2 px-4 md:mt-0 md:flex md:items-end md:justify-between md:gap-8 md:px-6 md:pt-8">
+          <div className="min-w-0">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid">Discover. Support. Create. Rave.</p>
+            <h1 id="hero-title" className="sr-only md:not-sr-only md:mt-3 md:text-6xl md:uppercase md:leading-[0.9]">
+              The world is your <span className="text-acid glow-text">dance</span>floor.
+            </h1>
+            <p className="ja mt-2 max-w-md text-[15px] leading-relaxed text-cream/85">音楽・DJ・イベント・ゲームがつながる、宇宙人たちのダンスフロア。</p>
+          </div>
+          <div className="mt-5 grid grid-cols-2 gap-3 md:mt-0 md:flex md:shrink-0">
+            <ButtonLink href="/world" size="lg" className="whitespace-nowrap px-3">
+              Explore <ArrowRight className="size-5" aria-hidden />
             </ButtonLink>
-            <ButtonLink href="/events/create" variant="ghost" size="lg" className="w-full min-[420px]:w-auto">
+            <ButtonLink href="/events/create" variant="coral" size="lg" className="whitespace-nowrap px-3 text-[15px]">
               Create event
             </ButtonLink>
           </div>
         </div>
-        <div className="relative mx-auto mt-8 w-full max-w-[420px] md:mt-0">
-          <HeroArt className="h-auto w-full" />
-        </div>
       </section>
+
+      {/* WORLD MAP teaser */}
+      <section aria-labelledby="network" className="mt-10 md:px-6">
+        <div className="px-4 md:px-0">
+          <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-mute">Global festival network</p>
+          <h2 id="network" className="mt-1 text-[28px] uppercase sm:text-4xl">Where’s the party?</h2>
+        </div>
+        <Link href="/world" className="group relative mx-4 mt-4 block overflow-hidden rounded-[28px] border-2 border-blue/60 shadow-[0_0_30px_-10px_#55BCEB] md:mx-0">
+          <Image src={ART.mapNeon} alt="Illustrated world map with festival stages in New York, Rio, Berlin, Bangkok and Tokyo" sizes="(min-width:1152px) 1100px, 100vw" className="h-auto w-full transition-transform duration-700 group-hover:scale-[1.03]" />
+          <span className="absolute bottom-3 right-3 inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-ink bg-acid px-4 font-extrabold uppercase text-ink shadow-[0_4px_0_#080808]">
+            <MapPin className="size-4" aria-hidden /> Open world map
+          </span>
+        </Link>
+        <nav aria-label="Quick filters" className="rail mt-4 md:px-0">
+          {MAP_CHIPS.map((c) => (
+            <Link
+              key={c.href}
+              href={c.href}
+              className={
+                c.active
+                  ? "inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-acid bg-acid px-4 text-sm font-extrabold uppercase text-ink shadow-[0_0_16px_-2px_rgba(182,240,92,0.6)]"
+                  : "inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-cream/25 bg-ink/70 px-4 text-sm font-extrabold uppercase text-cream hover:border-cream/60"
+              }
+            >
+              <c.icon className="size-4" aria-hidden /> {c.label}
+            </Link>
+          ))}
+        </nav>
+      </section>
+
+      {/* SPOTLIGHT */}
+      {spotlight && (
+        <section aria-labelledby="spotlight" className="mt-10 px-4 md:px-6">
+          <h2 id="spotlight" className="sr-only">Spotlight event</h2>
+          <HomeFeatured event={spotlight} />
+        </section>
+      )}
 
       {/* LIVE NOW strip */}
       {live && (
@@ -75,9 +136,9 @@ export default function HomePage() {
       {/* EXPLORE */}
       <section aria-labelledby="explore" className="mt-12 md:px-6">
         <SectionHeader id="explore" title="Explore" sub="8つの入口から、FREAKTOPIAの世界へ。" />
-        <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-3 md:px-0 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 md:px-0">
           {EXPLORE.map((e) => (
-            <IllustratedCard key={e.href} {...e} />
+            <IllustratedCard key={e.href} {...e} art={e.art} />
           ))}
         </div>
       </section>
@@ -161,7 +222,7 @@ export default function HomePage() {
 
       {/* CREATE */}
       <section aria-labelledby="create" className="mt-14 px-4 md:px-6">
-        <div className="overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid p-6 text-ink md:p-10">
+        <div className="relative overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid p-6 text-ink md:p-10">
           <h2 id="create" className="text-[34px] uppercase sm:text-5xl">Start something weird.</h2>
           <p className="ja mt-3 max-w-lg font-medium">イベントを企画する、DJとして応募する、会場を掲載する。どこからでも始められます。</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-3">

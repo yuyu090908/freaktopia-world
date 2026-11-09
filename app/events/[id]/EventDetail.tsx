@@ -17,7 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import type { FreakEvent } from "@/lib/types";
-import { EventArt } from "@/components/art/Scenes";
+import { EventCover } from "@/components/cards/Cards";
 import { Stage } from "@/components/art/Stage";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { EventProgress } from "@/components/event/EventProgress";
@@ -78,17 +78,18 @@ export function EventDetail({ event }: { event: FreakEvent }) {
     <div className="mx-auto max-w-6xl">
       {/* HERO */}
       <section aria-labelledby="ev-title" className="md:grid md:grid-cols-2 md:gap-8 md:px-6 md:pt-6">
-        <div className="relative aspect-[5/3] overflow-hidden md:rounded-[32px] md:border md:border-line">
-          <EventArt id={event.id} palette={event.palette} className="h-full w-full" label={`${event.name} main visual`} />
+        <div className="relative aspect-[5/3] overflow-hidden md:rounded-[32px] md:border-2 md:border-purple/50 md:shadow-[0_0_36px_-10px_rgba(162,118,233,0.7)]">
+          <EventCover id={event.id} priority sizes="(min-width:768px) 560px, 100vw" />
+          <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-ink to-transparent md:hidden" aria-hidden />
           <div className="absolute left-4 top-4 flex flex-wrap gap-1.5">
             <EventLevelBadge level={stats.level} long />
             {event.status === "live" && <Tag color="#FF625C" dark>● Live now</Tag>}
           </div>
-          <DemoBadge label="Demo event" className="absolute right-4 top-4 bg-ink/85" />
+          <DemoBadge label="Demo event" className="absolute right-4 top-4 bg-ink" />
         </div>
         <div className="px-4 pt-5 md:px-0 md:pt-2">
           <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-acid">{event.tagline}</p>
-          <h1 id="ev-title" className="mt-2 text-[44px] uppercase sm:text-6xl">{event.name}</h1>
+          <h1 id="ev-title" className="mt-2 text-[44px] uppercase italic sm:text-6xl">{event.name}</h1>
           <ul className="mt-4 space-y-2 text-[15px]">
             <li className="flex items-center gap-2"><MapPin className="size-4 shrink-0 text-mute" aria-hidden />{event.city}, {event.country}{venue ? ` · ${venue.name}` : ""}</li>
             <li className="flex items-center gap-2"><CalendarDays className="size-4 shrink-0 text-mute" aria-hidden /><time dateTime={event.startsAt}>{fmtDateLong(event.startsAt)}</time></li>
@@ -342,7 +343,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
 
       {/* STICKY CTA */}
       <div className="h-24" aria-hidden />
-      <div className="sticky-cta fixed inset-x-0 z-40 border-t border-line bg-ink/95 px-4 py-3">
+      <div className="sticky-cta fixed inset-x-0 z-40 border-t border-purple/40 bg-ink px-4 py-3 shadow-[0_-10px_30px_-12px_rgba(162,118,233,0.5)]">
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="hidden min-w-0 flex-1 sm:block">
             <div className="truncate font-display text-lg uppercase">{event.name}</div>

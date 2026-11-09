@@ -1,5 +1,6 @@
 "use client";
 
+import { ART } from "@/lib/art";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowRight, Mic2, Play, Search, Trophy, X } from "lucide-react";
@@ -32,7 +33,7 @@ export function DJArena() {
 
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle kicker="DJ Arena" title="Who rules the booth?" sub="DJを探して、オーディションを視聴し、投票でランキングを動かそう。" />
+      <PageTitle art={{ src: ART.mapIsland, pos: "40% 78%" }} kicker="DJ Arena" title="Who rules the booth?" sub="DJを探して、オーディションを視聴し、投票でランキングを動かそう。" />
 
       {/* On-air audition banner */}
       <div className="px-4 md:px-0">

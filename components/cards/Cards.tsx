@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { afterPartyArt, eventArt, type ArtPick } from "@/lib/art";
 import { ArrowRight, CalendarDays, Heart, MapPin, Users, Speaker, Clock, Ticket } from "lucide-react";
 import type { AfterParty, DJ, FreakEvent, Venue } from "@/lib/types";
-import { EventArt, ExploreArt, VenueArt, type ExploreKind } from "@/components/art/Scenes";
+import { ExploreArt, VenueArt, type ExploreKind } from "@/components/art/Scenes";
 import { Alien } from "@/components/art/Alien";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { EventProgress } from "@/components/event/EventProgress";
@@ -13,7 +15,31 @@ import { cn, compact, fmtDate, fmtTime, money } from "@/lib/utils";
 import { getEvent } from "@/lib/data";
 
 /* ---------------- Explore card ---------------- */
-export function IllustratedCard({ href, title, sub, kind, color, big = false }: { href: string; title: string; sub: string; kind: ExploreKind; color: string; big?: boolean }) {
+export function IllustratedCard({ href, title, sub, kind, color, art, big = false }: { href: string; title: string; sub: string; kind: ExploreKind; color: string; art?: ArtPick; big?: boolean }) {
+  if (art) {
+    return (
+      <Link
+        href={href}
+        className={cn(
+          "group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[24px] border-2 text-cream transition-transform active:scale-[0.98] sm:aspect-[4/4.4]",
+          big ? "w-[72vw] max-w-[300px] sm:w-[280px]" : "w-full",
+        )}
+        style={{ borderColor: color, boxShadow: `0 0 22px -8px ${color}` }}
+      >
+        <Image src={art.src} alt="" fill sizes="(min-width:1024px) 260px, (min-width:640px) 33vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: art.pos }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-transparent" aria-hidden />
+        <div className="relative p-3 pt-10">
+          <div className="font-display text-[18px] uppercase leading-[0.95] drop-shadow-[0_2px_0_#080808] min-[400px]:text-[20px]">{title}</div>
+          <div className="mt-1 flex items-center justify-between gap-2">
+            <span className="text-[12px] font-semibold leading-snug text-cream/85">{sub}</span>
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-ink" style={{ background: color }} aria-hidden>
+              <ArrowRight className="size-4" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
   return (
     <Link
       href={href}
@@ -40,18 +66,30 @@ export function IllustratedCard({ href, title, sub, kind, color, big = false }: 
   );
 }
 
+/** Raster cover for an event, with a soft bottom fade. */
+export function EventCover({ id, sizes, priority = false, className }: { id: string; sizes: string; priority?: boolean; className?: string }) {
+  const a = eventArt(id);
+  return (
+    <Image src={a.src} alt="" fill sizes={sizes} priority={priority} className={cn("object-cover", className)} style={{ objectPosition: a.pos }} />
+  );
+}
+
 /* ---------------- Event card ---------------- */
 export function EventCard({ event, className, wide = false }: { event: FreakEvent; className?: string; wide?: boolean }) {
   const s = useEventStats(event);
   return (
-    <article className={cn("flex flex-col overflow-hidden rounded-[26px] border border-line bg-surface", wide ? "w-full" : "w-[80vw] max-w-[330px] sm:w-[320px]", className)}>
+    <article className={cn("flex flex-col overflow-hidden neon rounded-[26px] border bg-surface", wide ? "w-full" : "w-[80vw] max-w-[330px] sm:w-[320px]", className)}>
       <Link href={`/events/${event.id}`} className="relative block aspect-[5/3] overflow-hidden" aria-hidden="true" tabIndex={-1}>
-        <EventArt id={event.id} palette={event.palette} className="h-full w-full" label={`${event.name} cover art`} />
+        <EventCover id={event.id} sizes="(min-width:640px) 320px, 80vw" className="transition-transform duration-500 hover:scale-105" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface to-transparent" aria-hidden />
+        {event.djRecruiting && event.status !== "live" && (
+          <span className="absolute bottom-3 left-3 -rotate-3 rounded-xl border-2 border-ink bg-coral px-2.5 py-1 font-display text-[13px] uppercase text-ink shadow-[0_3px_0_#080808]">Event open</span>
+        )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           <EventLevelBadge level={s.level} long />
           {event.status === "live" && <Tag color="#FF625C" dark>● Live now</Tag>}
         </div>
-        <DemoBadge className="absolute right-3 top-3 bg-ink/80" />
+        <DemoBadge className="absolute right-3 top-3 bg-ink" />
       </Link>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
@@ -72,7 +110,7 @@ export function EventCard({ event, className, wide = false }: { event: FreakEven
           {event.djRecruiting && <Tag color="#A276E9" dark>DJs wanted</Tag>}
         </div>
         <EventProgress supporters={s.supporters} raised={s.raised} goal={event.goal} compactView />
-        <Link href={`/events/${event.id}`} className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-cream font-extrabold uppercase text-ink hover:bg-white">
+        <Link href={`/events/${event.id}`} className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-coral font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b] hover:bg-[#ff7a75]">
           View details <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
@@ -86,7 +124,7 @@ export function EventRow({ event }: { event: FreakEvent }) {
   return (
     <Link href={`/events/${event.id}`} className="flex gap-3 rounded-3xl border border-line bg-surface p-3 hover:border-cream/30">
       <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl sm:w-28">
-        <EventArt id={event.id} palette={event.palette} className="h-full w-full" />
+        <EventCover id={event.id} sizes="112px" />
       </div>
       <div className="min-w-0 flex-1 py-0.5">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -120,7 +158,7 @@ export function AlienAvatar({ look, size = 64, ring = "#2a2a2a", title, classNam
 export function DJCard({ dj, className }: { dj: DJ; className?: string }) {
   const fav = useDemo((s) => s.favorites.includes(dj.id));
   return (
-    <article className={cn("relative flex w-[62vw] max-w-[240px] flex-col overflow-hidden rounded-[26px] border border-line bg-surface sm:w-[230px]", className)}>
+    <article className={cn("relative flex w-[62vw] max-w-[240px] flex-col overflow-hidden neon rounded-[26px] border bg-surface sm:w-[230px]", className)}>
       <Link href={`/djs/${dj.id}`} className="relative block aspect-square" style={{ background: dj.look.accent }} tabIndex={-1} aria-hidden="true">
         <div className="halftone absolute inset-0" aria-hidden />
         <Alien look={dj.look} className="relative mx-auto h-full w-[86%] pt-3" />
@@ -148,7 +186,7 @@ export function DJCard({ dj, className }: { dj: DJ; className?: string }) {
 /* ---------------- Venue card ---------------- */
 export function VenueCard({ venue, className }: { venue: Venue; className?: string }) {
   return (
-    <article className={cn("flex flex-col overflow-hidden rounded-[26px] border border-line bg-surface", className)}>
+    <article className={cn("flex flex-col overflow-hidden neon rounded-[26px] border bg-surface", className)}>
       <div className="relative aspect-[5/3]">
         {venue.photos?.[0] ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -156,7 +194,7 @@ export function VenueCard({ venue, className }: { venue: Venue; className?: stri
         ) : (
           <VenueArt id={venue.id} palette={venue.palette} className="h-full w-full" label={`${venue.name} illustration`} />
         )}
-        {venue.isDemo ? <DemoBadge className="absolute right-3 top-3 bg-ink/80" /> : <Tag color="#B6F05C" dark className="absolute right-3 top-3">Your listing</Tag>}
+        {venue.isDemo ? <DemoBadge className="absolute right-3 top-3 bg-ink" /> : <Tag color="#B6F05C" dark className="absolute right-3 top-3">Your listing</Tag>}
       </div>
       <div className="flex flex-1 flex-col gap-2 p-4">
         <h3 className="text-xl uppercase leading-none">{venue.name}</h3>
@@ -185,15 +223,10 @@ export function AfterPartyCard({ party, className }: { party: AfterParty; classN
   const main = getEvent(party.eventId);
   const low = party.seatsLeft <= 15;
   return (
-    <article className={cn("flex flex-col overflow-hidden rounded-[26px] border border-line bg-surface", className)}>
-      <div className="relative h-28 overflow-hidden" style={{ background: party.palette[0] }}>
-        <div className="halftone absolute inset-0" aria-hidden />
-        <svg viewBox="0 0 300 110" className="absolute inset-0 h-full w-full" preserveAspectRatio="xMidYMid slice" aria-hidden>
-          <circle cx="250" cy="40" r="34" fill="#F5F2EA" stroke="#080808" strokeWidth="5" />
-          <circle cx="266" cy="30" r="30" fill={party.palette[0]} />
-          <path d="M0 110 Q60 60 120 92 T240 80 T300 90 V110 Z" fill={party.palette[1]} stroke="#080808" strokeWidth="5" />
-          <path d="M40 30 l4 -10 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 Z" fill="#080808" />
-        </svg>
+    <article className={cn("flex flex-col overflow-hidden neon rounded-[26px] border bg-surface", className)}>
+      <div className="relative h-32 overflow-hidden" style={{ background: party.palette[0] }}>
+        <Image src={afterPartyArt(party.id).src} alt="" fill sizes="(min-width:640px) 360px, 90vw" className="object-cover" style={{ objectPosition: afterPartyArt(party.id).pos }} />
+        <div className="absolute inset-0 bg-gradient-to-t from-surface/80 to-transparent" aria-hidden />
         <div className="absolute left-3 top-3 flex gap-1.5">
           <Tag color="#080808">After party</Tag>
           {party.isDemo ? <DemoBadge className="bg-ink/80" /> : <Tag color="#B6F05C" dark>Yours</Tag>}

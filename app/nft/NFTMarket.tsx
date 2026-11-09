@@ -1,5 +1,6 @@
 "use client";
 
+import { ART } from "@/lib/art";
 import { useState } from "react";
 import { Bookmark, BookmarkCheck, Wallet } from "lucide-react";
 import { Alien } from "@/components/art/Alien";
@@ -11,7 +12,7 @@ export function NFTMarket() {
   const [wish, setWish] = useState<string[]>([]);
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle kicker="Collectibles" title="NFT market" sub="将来のデジタルコレクションのプレビューです。Phase 1ではNFTの発行・販売・ウォレット接続は行いません。" />
+      <PageTitle art={{ src: ART.panelStage, pos: "50% 35%" }} kicker="Collectibles" title="NFT market" sub="将来のデジタルコレクションのプレビューです。Phase 1ではNFTの発行・販売・ウォレット接続は行いません。" />
       <DemoNotice className="mx-4 md:mx-0"><strong>Preview only.</strong> Nothing here is minted, sold or on any blockchain. No wallet is connected.</DemoNotice>
       <ul className="mt-6 grid grid-cols-2 gap-3 px-4 sm:grid-cols-3 md:px-0">
         {COLLECTIBLES.map((c) => {

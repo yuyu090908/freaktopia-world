@@ -96,7 +96,7 @@ export function VenueDetail({ id }: { id: string }) {
       </div>
 
       <div className="h-24" aria-hidden />
-      <div className="sticky-cta fixed inset-x-0 z-40 border-t border-line bg-ink/95 px-4 py-3">
+      <div className="sticky-cta fixed inset-x-0 z-40 border-t border-purple/40 bg-ink px-4 py-3 shadow-[0_-10px_30px_-12px_rgba(162,118,233,0.5)]">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
           <div className="min-w-0 flex-1">
             <div className="text-xs font-bold uppercase text-mute">{date ? new Date(date + "T00:00:00Z").toDateString() : "Pick a date"}</div>

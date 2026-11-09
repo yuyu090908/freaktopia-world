@@ -1,5 +1,6 @@
 "use client";
 
+import { ART } from "@/lib/art";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Building2, Search, Sparkles, X } from "lucide-react";
@@ -35,7 +36,7 @@ export function VenueMarket() {
 
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle kicker="Venue Market" title="Spaces for strange nights" sub="会場を探す、または自分の会場を掲載してイベント主催者とつながろう。" />
+      <PageTitle art={{ src: ART.panelMarket, pos: "50% 45%" }} kicker="Venue Market" title="Spaces for strange nights" sub="会場を探す、または自分の会場を掲載してイベント主催者とつながろう。" />
 
       <div className="grid gap-3 px-4 sm:grid-cols-2 md:px-0">
         <Link href="/venues/new" className="flex min-h-20 items-center gap-4 rounded-[24px] border-[3px] border-ink bg-acid p-4 text-ink">
@@ -68,6 +69,7 @@ export function VenueMarket() {
         <span className="text-sm font-bold" aria-live="polite">{list.length} venues</span>
         <DemoBadge label="Sample listings" />
       </div>
+      <h2 className="sr-only">Venues</h2>
       {list.length ? (
         <ul className="mt-3 grid gap-4 px-4 sm:grid-cols-2 md:px-0 lg:grid-cols-3">
           {list.map((v) => <li key={v.id} className="cv-auto flex"><VenueCard venue={v} className="w-full" /></li>)}

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { LogoMark } from "./Logo";
+import Image from "next/image";
+import { ART } from "@/lib/art";
 
 const LINKS = [
   { href: "/about", label: "About" },
@@ -12,14 +13,11 @@ const LINKS = [
 
 export function Footer() {
   return (
-    <footer className="mt-16 border-t border-line px-4 pb-8 pt-10 md:px-6">
+    <footer className="mt-16 border-t border-purple/30 bg-ink/70 px-4 pb-8 pt-10 md:px-6">
       <div className="mx-auto max-w-6xl">
         <div className="flex items-center gap-3">
-          <LogoMark className="size-10" />
-          <div>
-            <div className="font-display text-2xl leading-none">FREAKTOPIA WORLD</div>
-            <div className="mt-1 text-sm text-mute">Discover. Support. Create. Rave.</div>
-          </div>
+          <Image src={ART.logo} alt="FREAKTOPIA WORLD" sizes="160px" className="h-14 w-auto" />
+          <div className="text-sm font-bold uppercase tracking-[0.18em] text-acid">Discover. Support. Create. Rave.</div>
         </div>
         <nav aria-label="Footer" className="mt-6">
           <ul className="grid grid-cols-2 gap-x-6 sm:grid-cols-3 md:flex md:flex-wrap md:gap-x-8">
