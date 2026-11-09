@@ -21,6 +21,7 @@ import type {
   Venue,
 } from "./types";
 import { levelFor, userLevel } from "./levels";
+import type { AlertType } from "./alerts";
 
 export const DEFAULT_LOOK: AlienLook = {
   species: "slime",
@@ -87,6 +88,13 @@ interface DemoState {
   ownedItems: string[];
   club: { name: string; tier: number };
   inquiriesAnswered: string[];
+  /** WORLD RANKING (demo, this browser only) */
+  followedEvents: string[];
+  personalize: boolean;
+  compareIds: string[];
+  alertPrefs: Record<AlertType, boolean>;
+  alertsConsent: boolean;
+  readAlerts: string[];
 
   addXp: (n: number) => { leveledUp: boolean; level: number };
   updateProfile: (p: Partial<UserProfile>) => void;
@@ -110,6 +118,13 @@ interface DemoState {
   setLive: (p: Partial<Pick<DemoState, "liveShowAvatar" | "liveZone" | "liveCheckedIn">>) => void;
   setClub: (c: Partial<DemoState["club"]>) => void;
   answerInquiry: (id: string) => void;
+  toggleFollow: (eventId: string) => boolean;
+  setPersonalize: (on: boolean) => void;
+  toggleCompare: (eventId: string) => "added" | "removed" | "full";
+  clearCompare: () => void;
+  setAlertPref: (t: AlertType, on: boolean) => void;
+  setAlertsConsent: (on: boolean) => void;
+  markAlertsRead: (ids: string[]) => void;
   resetAll: () => void;
 }
 
@@ -137,6 +152,12 @@ const initial = {
   ownedItems: ["headphones", "hoodie", "cap"],
   club: { name: "MY FIRST CLUB", tier: 1 },
   inquiriesAnswered: [],
+  followedEvents: [] as string[],
+  personalize: true,
+  compareIds: [] as string[],
+  alertPrefs: { top10: true, tickets_on_sale: true, tickets_low: true, dj_open: true, after_party: true, confirmed: true, cancelled: true } as Record<AlertType, boolean>,
+  alertsConsent: false,
+  readAlerts: [] as string[],
 };
 
 const useDemoRaw = create<DemoState>()(
@@ -213,6 +234,26 @@ const useDemoRaw = create<DemoState>()(
       setLive: (p) => set(p),
       setClub: (c) => set((s) => ({ club: { ...s.club, ...c } })),
       answerInquiry: (id) => set((s) => ({ inquiriesAnswered: [...s.inquiriesAnswered, id] })),
+      toggleFollow: (eventId) => {
+        const has = get().followedEvents.includes(eventId);
+        set((s) => ({ followedEvents: has ? s.followedEvents.filter((x) => x !== eventId) : [...s.followedEvents, eventId] }));
+        return !has;
+      },
+      setPersonalize: (on) => set({ personalize: on }),
+      toggleCompare: (eventId) => {
+        const cur = get().compareIds;
+        if (cur.includes(eventId)) {
+          set({ compareIds: cur.filter((x) => x !== eventId) });
+          return "removed";
+        }
+        if (cur.length >= 3) return "full";
+        set({ compareIds: [...cur, eventId] });
+        return "added";
+      },
+      clearCompare: () => set({ compareIds: [] }),
+      setAlertPref: (t, on) => set((s) => ({ alertPrefs: { ...s.alertPrefs, [t]: on } })),
+      setAlertsConsent: (on) => set({ alertsConsent: on }),
+      markAlertsRead: (ids) => set((s) => ({ readAlerts: Array.from(new Set([...s.readAlerts, ...ids])).slice(-500) })),
       resetAll: () => set({ ...initial }),
     }),
     {

@@ -9,6 +9,10 @@ import { MARKER_SIZE, markerSvg } from "./markers";
 export interface MapPoint {
   event: FreakEvent;
   level: EventLevel;
+  /** Optional chip on the pin, e.g. ranking position "#1". */
+  label?: string;
+  /** Location is city-level only (venue not confirmed). */
+  approximate?: boolean;
 }
 
 /** Graticule lines every 30° for a bit of "world game" atmosphere. */
@@ -103,19 +107,20 @@ export default function WorldMap({
         markers.current.delete(id);
       }
     });
-    points.forEach(({ event, level }) => {
+    points.forEach(({ event, level, label, approximate }) => {
       const existing = markers.current.get(event.id);
-      if (existing && existing.node.dataset.level === String(level)) return;
+      if (existing && existing.node.dataset.level === String(level) && existing.node.dataset.label === (label ?? "")) return;
       existing?.marker.remove();
       const size = MARKER_SIZE[level];
       const node = document.createElement("button");
       node.type = "button";
       node.dataset.level = String(level);
+      node.dataset.label = label ?? "";
       node.className = "fk-marker";
-      node.setAttribute("aria-label", `${event.name}, ${event.city}, level ${level}${event.status === "live" ? ", live now" : ""}`);
+      node.setAttribute("aria-label", `${label ? `Rank ${label.replace("#", "")}: ` : ""}${event.name}, ${event.city}, level ${level}${event.status === "live" ? ", live now" : ""}${approximate ? ", approximate location" : ""}`);
       node.style.width = `${Math.max(44, size)}px`;
       node.style.height = `${Math.max(44, size * 1.16)}px`;
-      node.innerHTML = `${event.status === "live" ? '<span class="fk-live"></span>' : ""}<span class="fk-pin" style="width:${size}px;height:${size * 1.16}px">${markerSvg(level)}</span>`;
+      node.innerHTML = `${event.status === "live" ? '<span class="fk-live"></span>' : ""}<span class="fk-pin" style="width:${size}px;height:${size * 1.16}px">${markerSvg(level)}</span>${label ? `<span class="fk-rank">${label}</span>` : ""}`;
       node.addEventListener("click", (e) => {
         e.stopPropagation();
         const entry = markers.current.get(event.id);
@@ -216,6 +221,7 @@ export default function WorldMap({
         .fk-marker:hover .fk-pin,.fk-marker.is-selected .fk-pin{transform:scale(1.25);}
         .fk-marker:focus-visible{outline:3px solid #B6F05C;outline-offset:2px;border-radius:12px}
         .fk-count{position:absolute;top:-6px;right:-8px;min-width:24px;height:24px;padding:0 5px;border-radius:999px;background:#F5F2EA;color:#080808;border:2.5px solid #080808;font:800 12px/19px var(--font-sans);}
+        .fk-rank{position:absolute;top:-8px;left:-10px;min-width:28px;height:24px;padding:0 6px;border-radius:999px;background:#B6F05C;color:#080808;border:2.5px solid #080808;font:900 12px/19px var(--font-sans);box-shadow:0 2px 0 #080808}
         .fk-live{position:absolute;left:50%;bottom:0;width:18px;height:8px;margin-left:-9px;border-radius:50%;background:#FF625C;animation:fk-pulse 1.6s ease-out infinite}
         @keyframes fk-pulse{from{transform:scale(1);opacity:.9}to{transform:scale(4);opacity:0}}
         .maplibregl-ctrl-group{background:#0d0b12!important;border:1.5px solid rgba(162,118,233,.6);border-radius:16px!important;box-shadow:0 0 18px -4px rgba(162,118,233,.6)!important;overflow:hidden}

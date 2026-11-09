@@ -48,11 +48,11 @@ export interface ArtPick {
 const EVENT_POOL: ArtPick[] = [
   { src: panelStage, pos: "50% 40%" },
   { src: mapBangkok, pos: "50% 45%" },
-  { src: heroWide, pos: "88% 60%" },
+  { src: mapCities, pos: "50% 50%" },
   { src: posterCity, pos: "50% 45%" },
   { src: panelUniverse, pos: "88% 75%" },
   { src: mapValley, pos: "50% 45%" },
-  { src: heroPoster, pos: "50% 52%" },
+  { src: panelMarket, pos: "50% 45%" },
   { src: mapIsland, pos: "50% 30%" },
 ];
 

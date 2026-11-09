@@ -153,6 +153,17 @@ export const AFTER_PARTIES: AfterParty[] = [
   { id: "ap-reef-dawn", eventId: "deep-reef-disco", name: "REEF DAWN", venueName: "Pier 3 Beach Deck", city: "Melbourne", startsAt: "2027-01-01T03:00:00Z", endsAt: "2027-01-01T09:00:00Z", djIds: ["tentacle"], price: 28, seatsLeft: 140, capacity: 500, description: "First sunrise of the year with ambient waves.", palette: ["#55BCEB", "#FF625C", "#080808"], isDemo: true },
 ];
 
+/**
+ * Completed demo events. Kept separate from EVENTS so the map and the
+ * event browser keep showing only upcoming/live nights; the WORLD RANKING
+ * uses them for "Most attended" and the "Completed" filter.
+ */
+export const ARCHIVE_EVENTS: FreakEvent[] = [
+  makeEvent({ id: "spore-party-2026", name: "SPORE PARTY 2026", city: "Amsterdam", country: "Netherlands", lat: 52.37, lng: 4.9, startsAt: "2026-10-17T20:00:00Z", endsAt: "2026-10-18T06:00:00Z", genres: ["Techno", "Psytrance"], supporters: 2650, raised: 58000, goal: 50000, status: "ended", djRecruiting: false, venueId: "v-canal", lineup: ["hyperfungi", "vulture", "mika"], palette: ["#A276E9", "#B6F05C", "#FFAD5B"], tagline: "The mushrooms said yes.", description: "A completed demo event used to show attendance rankings.", capacity: 1800, organizer: "Spore Union", ticketBase: 38 }),
+  makeEvent({ id: "wobble-weekender", name: "WOBBLE WEEKENDER", city: "London", country: "UK", lat: 51.51, lng: -0.08, startsAt: "2026-11-01T21:00:00Z", endsAt: "2026-11-02T07:00:00Z", genres: ["Drum & Bass", "Garage"], supporters: 1430, raised: 27500, goal: 25000, status: "ended", djRecruiting: false, venueId: "v-swamp", lineup: ["subtoad", "tentacle"], palette: ["#55BCEB", "#FF625C", "#B6F05C"], tagline: "Three nights of wobble.", description: "A completed demo event used to show attendance rankings.", capacity: 900, organizer: "Swamp Sound", ticketBase: 26 }),
+  makeEvent({ id: "kaiju-free-picnic", name: "KAIJU FREE PICNIC", city: "Osaka", country: "Japan", lat: 34.67, lng: 135.5, startsAt: "2026-11-03T03:00:00Z", endsAt: "2026-11-03T10:00:00Z", genres: ["Ambient", "House"], supporters: 610, raised: 3200, goal: 3000, status: "ended", djRecruiting: false, venueId: "v-river", lineup: ["kombu"], palette: ["#B6F05C", "#55BCEB", "#FFAD5B"], tagline: "Free daytime noodles and drones.", description: "A completed free demo event used to show attendance rankings.", capacity: 400, organizer: "Kawa Crew", ticketBase: 0 }),
+];
+
 export const CITIES = Array.from(new Set(EVENTS.map((e) => e.city))).sort();
 
 export const PAST_EVENTS = [
@@ -161,7 +172,7 @@ export const PAST_EVENTS = [
   { name: "WOBBLE WEEKENDER", city: "London", date: "2025-05-24" },
 ];
 
-export const getEvent = (id: string) => EVENTS.find((e) => e.id === id);
+export const getEvent = (id: string) => EVENTS.find((e) => e.id === id) ?? ARCHIVE_EVENTS.find((e) => e.id === id);
 export const getDJ = (id: string) => DJS.find((d) => d.id === id);
 export const getVenue = (id: string) => VENUES.find((v) => v.id === id);
 export const getAfterParty = (id: string) => AFTER_PARTIES.find((a) => a.id === id);

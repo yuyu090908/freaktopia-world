@@ -28,6 +28,8 @@ import { getAfterParty, getDJ, getVenue } from "@/lib/data";
 import { LEVELS, levelInfo } from "@/lib/levels";
 import { grantXp, toast, useDemo, useEventStats } from "@/lib/store";
 import { cn, fmtDate, fmtDateLong, fmtTime, money } from "@/lib/utils";
+import { FollowButton } from "@/components/ranking/FollowButton";
+import { EventRankingPanel } from "@/components/ranking/EventRankingPanel";
 
 export function EventDetail({ event }: { event: FreakEvent }) {
   const stats = useEventStats(event);
@@ -40,6 +42,19 @@ export function EventDetail({ event }: { event: FreakEvent }) {
   const venue = getVenue(event.venueId);
   const after = event.afterPartyId ? getAfterParty(event.afterPartyId) : undefined;
   const info = levelInfo(stats.level);
+  const ended = event.status === "ended";
+  const toggleFollow = useDemo((s) => s.toggleFollow);
+
+  // Deep links from WORLD RANKING cards: ?action=support | follow
+  useEffect(() => {
+    const action = new URLSearchParams(window.location.search).get("action");
+    if (action === "support" && !ended) setSheet(true);
+    if (action === "follow" && !useDemo.getState().followedEvents.includes(event.id)) {
+      toggleFollow(event.id);
+      toast({ title: "Following", body: `${event.name}: alerts appear in your inbox (demo).`, tone: "success" });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Level-up celebration whenever the level increases
   useEffect(() => {
@@ -103,7 +118,10 @@ export function EventDetail({ event }: { event: FreakEvent }) {
           <p className="ja mt-4 leading-relaxed text-cream/85">{event.description}</p>
 
           {/* ACTIONS */}
-          <div className="mt-5 grid grid-cols-2 gap-2.5">
+          {ended && (
+            <DemoNotice className="mt-5">This event has ended. Support and tickets are closed; it still appears in the WORLD RANKING (Most attended).</DemoNotice>
+          )}
+          <div className={cn("mt-5 grid grid-cols-2 gap-2.5", ended && "hidden")}>
             <Button onClick={() => setSheet(true)} className="col-span-2" size="lg">
               <HandHeart className="size-5" aria-hidden /> {stats.supported ? "Support again" : "Support event"}
             </Button>
@@ -113,9 +131,21 @@ export function EventDetail({ event }: { event: FreakEvent }) {
             <ButtonLink href={`/djs/apply?event=${event.id}`} variant="purple">
               <Mic2 className="size-4" aria-hidden /> Apply as DJ
             </ButtonLink>
-            <Button variant="ghost" onClick={share} className="col-span-2">
-              <Share2 className="size-4" aria-hidden /> Share event
+            <FollowButton eventId={event.id} eventName={event.name} />
+            <Button variant="ghost" onClick={share}>
+              <Share2 className="size-4" aria-hidden /> Share
             </Button>
+          </div>
+          {ended && (
+            <div className="mt-3 grid grid-cols-2 gap-2.5">
+              <FollowButton eventId={event.id} eventName={event.name} />
+              <Button variant="ghost" onClick={share}>
+                <Share2 className="size-4" aria-hidden /> Share
+              </Button>
+            </div>
+          )}
+          <div className="mt-5">
+            <EventRankingPanel eventId={event.id} />
           </div>
         </div>
       </section>
@@ -343,6 +373,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
 
       {/* STICKY CTA */}
       <div className="h-24" aria-hidden />
+      <div className={cn(ended && "hidden")}>
       <div className="sticky-cta fixed inset-x-0 z-40 border-t border-purple/40 bg-ink px-4 py-3 shadow-[0_-10px_30px_-12px_rgba(162,118,233,0.5)]">
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="hidden min-w-0 flex-1 sm:block">
@@ -356,6 +387,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
             <Ticket className="size-5" aria-hidden /> Tickets
           </ButtonLink>
         </div>
+      </div>
       </div>
 
       {/* SUPPORT SHEET */}

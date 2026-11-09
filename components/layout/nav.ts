@@ -11,6 +11,7 @@ export const MAIN_NAV = [
 export const ALL_PAGES = [
   { group: "Explore", items: [
     { href: "/world", label: "World Map" },
+    { href: "/rankings", label: "World Ranking" },
     { href: "/events", label: "Events" },
     { href: "/djs", label: "DJ Arena" },
     { href: "/venues", label: "Venue Market" },
@@ -22,6 +23,7 @@ export const ALL_PAGES = [
     { href: "/quests", label: "Quests & Rankings" },
     { href: "/nft", label: "NFT Market (preview)" },
     { href: "/tickets", label: "My Tickets" },
+    { href: "/alerts", label: "Alerts" },
   ]},
   { group: "Create", items: [
     { href: "/events/create", label: "Create Event" },

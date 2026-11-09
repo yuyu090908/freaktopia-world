@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Menu, Search, X } from "lucide-react";
 import { Logo } from "./Logo";
+import { AlertsBell } from "./AlertsBell";
 import { ALL_PAGES, MAIN_NAV, isTopLevel, parentOf } from "./nav";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { DemoBadge } from "@/components/ui/primitives";
@@ -46,7 +47,7 @@ export function Header() {
           <Logo />
           <span className="ml-1 hidden min-[400px]:inline-flex"><DemoBadge /></span>
           <nav aria-label="Main" className="ml-6 hidden flex-1 items-center gap-1 lg:flex">
-            {[...MAIN_NAV.slice(1), { href: "/djs", label: "DJ Arena" }, { href: "/venues", label: "Venues" }].map((n) => {
+            {[...MAIN_NAV.slice(1), { href: "/rankings", label: "Ranking" }, { href: "/djs", label: "DJ Arena" }].map((n) => {
               const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
               return (
                 <Link
@@ -67,6 +68,7 @@ export function Header() {
             <button type="button" onClick={() => setSearch(true)} aria-label="Search events, DJs and venues" className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
               <Search className="size-5" />
             </button>
+            <AlertsBell />
             <button type="button" onClick={() => setMenu(true)} aria-label="Open menu" aria-expanded={menu} className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
               <Menu className="size-5" />
             </button>

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { EVENTS, getEvent } from "@/lib/data";
+import { ARCHIVE_EVENTS, EVENTS, getEvent } from "@/lib/data";
 import { EventDetail } from "./EventDetail";
 
 export function generateStaticParams() {
-  return EVENTS.map((e) => ({ id: e.id }));
+  return [...EVENTS, ...ARCHIVE_EVENTS].map((e) => ({ id: e.id }));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {

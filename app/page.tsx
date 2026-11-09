@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio, CalendarDays, Headphones, Building2, Moon, MapPin } from "lucide-react";
+import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio, Trophy, CalendarDays, Headphones, Building2, Moon, MapPin } from "lucide-react";
 import Image, { getImageProps } from "next/image";
 import { ART } from "@/lib/art";
 import { DJCard, EventCard, IllustratedCard } from "@/components/cards/Cards";
@@ -16,12 +16,13 @@ const EXPLORE = [
   { href: "/after-party", title: "After Party", sub: "The night continues", kind: "afterparty", color: "#FF625C", art: { src: ART.panelAfterparty, pos: "50% 50%" } },
   { href: "/live", title: "Live Festival", sub: "Enter the venue map", kind: "live", color: "#55BCEB", art: { src: ART.mapValley, pos: "50% 40%" } },
   { href: "/avatar", title: "Alien World", sub: "Make your alien", kind: "alien", color: "#B6F05C", art: { src: ART.posterCity, pos: "75% 100%" } },
-  { href: "/nft", title: "Collectibles", sub: "NFT market preview", kind: "nft", color: "#FFAD5B", art: { src: ART.panelStage, pos: "50% 30%" } },
+  { href: "/rankings", title: "World Ranking", sub: "Top festivals now", kind: "nft", color: "#FFAD5B", art: { src: ART.panelStage, pos: "50% 30%" } },
 ] as const;
 
 const MAP_CHIPS = [
   { href: "/events", label: "All events", icon: CalendarDays, active: true },
   { href: "/live", label: "Live now", icon: Radio },
+  { href: "/rankings", label: "Ranking", icon: Trophy },
   { href: "/djs", label: "DJ open", icon: Headphones },
   { href: "/venues", label: "Venues", icon: Building2 },
   { href: "/after-party", label: "After party", icon: Moon },

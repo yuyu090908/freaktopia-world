@@ -12,7 +12,8 @@ npm run dev          # http://localhost:3000
 npm run build && npm run start
 npm run typecheck
 npx playwright install chromium   # first time only (outside this container)
-npm run test:e2e     # 13 user-flow tests, mobile 390px
+npm test             # vitest: ranking engine unit tests + API integration tests
+npm run test:e2e     # Playwright: user flows + WORLD RANKING (375–1440px)
 ```
 
 Requirements: Node 20 or later.
@@ -37,6 +38,8 @@ Requirements: Node 20 or later.
 | `/djs`, `/djs/[id]`, `/djs/[id]/audition`, `/djs/apply` | DJ Arena: profiles, auditions (vote, like, comment), and applications |
 | `/venues`, `/venues/[id]`, `/venues/new`, `/venues/planner` | Venue market, listing wizard, and planner |
 | `/after-party`, `/after-party/[id]`, `/after-party/new` | After parties linked to a main event |
+| `/rankings`, `/rankings/compare` | WORLD RANKING: 8 public categories plus FOR YOU, search, URL-synced filters, TOP 3, map view, compare and follow. See `docs/WORLD_RANKING.md` |
+| `/alerts` | In-app alerts for followed events, with per-type settings |
 | `/live` | Live festival map. Location is opt-in and zone-level only, with no precise tracking |
 | `/avatar` | Alien builder: SLIME BEAT, COSMIC FUZZ, VINYL MUTANT, JELLY RAVER |
 | `/profile` | Profile, XP and level, history |
@@ -70,4 +73,6 @@ Requirements: Node 20 or later.
 
 ## Tests
 - `tests/flows.spec.ts`: 13 Playwright flows. All pass.
+- `tests/rankings.spec.ts`: 12 Playwright tests for WORLD RANKING. All pass.
+- `tests/unit` and `tests/integration`: 46 vitest tests for the ranking engine and API. All pass.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.
