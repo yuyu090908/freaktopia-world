@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Disc3, EyeOff, Eye, Star, Ticket, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, Disc3, ExternalLink, EyeOff, Eye, Sparkles, Star, Ticket, Trash2, Upload } from "lucide-react";
 import { Alien } from "@/components/art/Alien";
 import { useLocalHref } from "@/components/i18n/LocaleContext";
 import { Field, Select, Textarea } from "@/components/forms/Fields";
@@ -19,7 +19,7 @@ import type { AlienLook } from "@/lib/types";
 
 type Vis = "public" | "attendees" | "hidden";
 interface MediaItem { id: string; kind: "official" | "attendee"; type: "image" | "video"; caption: string; visibility: Vis; hiddenByOrganizer: boolean; mine: boolean; at: string }
-interface EventData {
+export interface EventData {
   event: { id: string; name: string; city: string; country: string; venueName: string; startAt: string; endAt: string; timezone: string; genres: string[]; level: number; theme: Theme; demo: boolean };
   owner: { publicId: string | null; name: string | null };
   state: PlanetState;
@@ -27,14 +27,16 @@ interface EventData {
   djs: string[];
   reviews: { rating: number; text: string; at: string; mine: boolean; author: { publicId: string | null; name: string | null; look: AlienLook | null } | null }[];
   media: { official: MediaItem[]; attendee: MediaItem[] };
-  my: { status: "going" | "checked_in" | "cancelled" | null; counted: boolean; isTeam: boolean; canManage: boolean; canReview: boolean; canUpload: boolean; canRsvp: boolean; myReview: { rating: number; text: string } | null };
+  tickets: { capacity: number | null; taken: number; waitlist: number };
+  archives: { url: string; label: string; host: string }[];
+  highlights: string[];
+  my: { status: "going" | "waitlist" | "checked_in" | "cancelled" | null; counted: boolean; isTeam: boolean; canManage: boolean; canReview: boolean; canUpload: boolean; canRsvp: boolean; myReview: { rating: number; text: string } | null };
 }
 
-export function Memories({ handle, eventId }: { handle: string; eventId: string }) {
+export function Memories({ handle, eventId, initial = null }: { handle: string; eventId: string; initial?: EventData | null }) {
   const t = useTranslations("party");
   const href = useLocalHref();
-  const status = useAuth((s) => s.status);
-  const { data, error, reload } = useParty<EventData>(status === "loading" ? null : `/api/party/events/${eventId}`);
+  const { data, error, reload } = useParty<EventData>(`/api/party/events/${eventId}`, initial);
   return (
     <div className="mx-auto max-w-5xl pb-24 md:px-6">
       <div className="px-4 pt-4 md:px-0 md:pt-6">
@@ -43,7 +45,7 @@ export function Memories({ handle, eventId }: { handle: string; eventId: string 
         </Link>
       </div>
       <div className="px-4 md:px-0">
-        {error ? <EmptyState title={t("eventNotFound")} body={t("eventNotFoundBody")} /> : !data ? <div className="h-72 animate-pulse rounded-3xl bg-surface" /> : <Inner d={data} reload={reload} />}
+        {error ? <EmptyState title={t("eventNotFound")} body={t("eventNotFoundBody")} /> : !data ? <div className="min-h-[100svh] animate-pulse rounded-3xl bg-surface" aria-busy="true" /> : <Inner d={data} reload={reload} />}
       </div>
     </div>
   );
@@ -99,19 +101,32 @@ function Inner({ d, reload }: { d: EventData; reload: () => Promise<void> }) {
       {(d.my.canRsvp || d.my.status) && (
         <Section title={t("yourAttendance")} id="my-att">
           <p className="text-sm" data-testid="my-status">{t(`myStatus.${d.my.status ?? "none"}`)}</p>
+          {d.tickets.capacity !== null && (
+            <p className="mt-1 text-xs font-bold text-acid" data-testid="tickets-left">
+              {t("ticketsLeft", { left: Math.max(d.tickets.capacity - d.tickets.taken, 0), cap: d.tickets.capacity })}
+              {d.tickets.waitlist > 0 ? ` · ${t("waitlistCount", { n: d.tickets.waitlist })}` : ""}
+            </p>
+          )}
           <div className="mt-3 flex flex-wrap gap-2">
             {status !== "signedIn" ? (
               <Link href={href(`/login?returnTo=${encodeURIComponent(location.pathname)}`)} className="inline-flex min-h-11 items-center rounded-full bg-acid px-4 text-sm font-extrabold uppercase text-ink">{t("signInToRsvp")}</Link>
-            ) : d.my.status === "going" ? (
+            ) : d.my.status === "going" || d.my.status === "waitlist" ? (
               <>
-                <Button onClick={() => setPass((x) => !x)} data-testid="show-pass"><Ticket className="size-4" aria-hidden /> {t("myPass")}</Button>
+                <Button onClick={() => setPass((x) => !x)} data-testid="show-pass"><Ticket className="size-4" aria-hidden /> {d.my.status === "waitlist" ? t("waitlistPosition") : t("myPass")}</Button>
                 {d.my.canRsvp && <Button variant="ghost" disabled={busy} onClick={() => run(`events/${e.id}/cancel`, {}, t("rsvpCancelled"))} data-testid="rsvp-cancel">{t("cancelRsvp")}</Button>}
               </>
             ) : d.my.canRsvp ? (
-              <Button disabled={busy || e.demo} onClick={() => run(`events/${e.id}/rsvp`, {}, t("rsvpDone"))} data-testid="rsvp">{t("rsvp")}</Button>
+              (() => {
+                const full = d.tickets.capacity !== null && d.tickets.taken >= d.tickets.capacity;
+                return (
+                  <Button disabled={busy || e.demo} onClick={() => run(`events/${e.id}/rsvp`, {}, full ? t("waitlistJoined") : t("rsvpDone"))} data-testid="rsvp">
+                    {full ? t("joinWaitlist") : d.tickets.capacity !== null ? t("getTicket") : t("rsvp")}
+                  </Button>
+                );
+              })()
             ) : null}
           </div>
-          {pass && d.my.status === "going" && <PassCard eventId={e.id} />}
+          {pass && (d.my.status === "going" || d.my.status === "waitlist") && <PassCard eventId={e.id} />}
           <p className="mt-2 text-xs text-mute">{t("rsvpNote")}</p>
         </Section>
       )}
@@ -123,6 +138,38 @@ function Inner({ d, reload }: { d: EventData; reload: () => Promise<void> }) {
               <li key={n} className="inline-flex items-center gap-1 rounded-full bg-surface-2 px-3 py-1 text-sm font-bold"><Disc3 className="size-4 text-acid" aria-hidden /> {n}</li>
             ))}
           </ul>
+        </Section>
+      )}
+
+      {d.highlights.length > 0 && (
+        <MediaSection
+          title={t("highlights")}
+          items={d.highlights.map((h) => [...d.media.official, ...d.media.attendee].find((m) => m.id === h)).filter((m): m is MediaItem => !!m)}
+          empty=""
+          canManage={false}
+          reload={reload}
+          testid="media-highlights"
+          icon
+        />
+      )}
+
+      {d.archives.length > 0 && (
+        <Section title={t("archives")} id="archives">
+          <ul className="space-y-2" data-testid="archives">
+            {d.archives.map((a) => (
+              <li key={a.url}>
+                <a href={a.url} target="_blank" rel="noopener noreferrer nofollow" className="flex min-h-12 items-center justify-between gap-2 rounded-2xl bg-ink px-3 py-2 hover:text-acid">
+                  <span className="min-w-0">
+                    <span className="block truncate font-bold">{a.label || a.host}</span>
+                    <span className="text-xs text-mute">{a.host}</span>
+                  </span>
+                  <ExternalLink className="size-4 shrink-0" aria-hidden />
+                  <span className="sr-only">{t("opensNewTab")}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-xs text-mute">{t("archivesNote")}</p>
         </Section>
       )}
 
@@ -166,11 +213,11 @@ function Fig({ k, v, testid }: { k: string; v: string | number; testid?: string 
   );
 }
 
-function MediaSection({ title, items, empty, canManage, reload, testid }: { title: string; items: MediaItem[]; empty: string; canManage: boolean; reload: () => Promise<void>; testid: string }) {
+function MediaSection({ title, items, empty, canManage, reload, testid, icon }: { title: string; items: MediaItem[]; empty: string; canManage: boolean; reload: () => Promise<void>; testid: string; icon?: boolean }) {
   const t = useTranslations("party");
   const post = usePartyPost();
   return (
-    <Section title={title} id={testid}>
+    <Section title={title} id={testid} action={icon ? <Sparkles className="size-5 text-acid" aria-hidden /> : undefined}>
       {items.length === 0 ? (
         <p className="text-sm text-mute">{empty}</p>
       ) : (

@@ -12,9 +12,11 @@ interface Pass {
   startAt: string;
   endAt: string;
   timezone: string;
-  code: string;
-  payload: string;
+  code: string | null;
+  payload: string | null;
   checkedInAt: string | null;
+  waitlist: boolean;
+  position: number | null;
 }
 
 /** QR entry pass for one RSVP. The door team scans it (or types the code); the RSVP itself never counts as attendance. */
@@ -23,7 +25,7 @@ export function PassCard({ eventId }: { eventId: string }) {
   const when = useWhen();
   const { data, error } = useParty<{ pass: Pass }>(`/api/party/pass/${eventId}`);
   const svg = useMemo(() => {
-    if (!data) return "";
+    if (!data?.pass.payload) return "";
     const q = qrcode(0, "M");
     q.addData(data.pass.payload);
     q.make();
@@ -32,6 +34,13 @@ export function PassCard({ eventId }: { eventId: string }) {
   if (error) return <p className="mt-3 text-sm text-orange">{t("passUnavailable")}</p>;
   if (!data) return <div className="mt-3 h-64 w-56 animate-pulse rounded-3xl bg-surface" />;
   const p = data.pass;
+  if (p.waitlist)
+    return (
+      <div className="mt-3 rounded-3xl border-2 border-dashed border-orange/60 p-4 text-sm" data-testid="pass-waitlist">
+        <div className="font-extrabold uppercase text-orange">{t("waitlistTitle")}</div>
+        <p className="mt-1">{t("waitlistBody", { n: p.position ?? 1 })}</p>
+      </div>
+    );
   return (
     <div className="mt-3 inline-block rounded-3xl border-[3px] border-ink bg-cream p-4 text-ink" data-testid="pass">
       <div className="text-xs font-extrabold uppercase tracking-wider">{t("passKicker")}</div>

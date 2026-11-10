@@ -205,4 +205,74 @@ test.describe("party universe", () => {
     await org.page.getByTestId("open-world").click();
     await expect(org.page).toHaveURL(new RegExp(`/u/${org.publicId}/world$`));
   });
+
+  test("free tickets with a waitlist, promotion on cancel, recording links, highlights, email opt-in", async ({ browser }) => {
+    const org = await person(browser, 1440);
+    const a = await person(browser);
+    const b = await person(browser);
+    const eid = await liveParty(org.page, `Tiny Room ${TAG}`);
+
+    // Organizer: publish, set capacity 1 and a recording link from the Door tab.
+    await org.page.goto(`/events/manage/${eid}?tab=door`);
+    await org.page.getByRole("switch").first().click();
+    await expect.poll(async () => (await (await org.page.request.get(`/api/party/door/${eid}`)).json()).door.published).toBe(true);
+    // An official photo to highlight.
+    const up = await post(org.page, `/api/party/events/${eid}/media`, { mime: "image/png", data: PNG.toString("base64"), caption: "Main floor", visibility: "public" });
+    expect(up.status).toBe(200);
+    await org.page.reload();
+    await org.page.getByTestId("ps-capacity").fill("1");
+    await org.page.getByTestId("ps-archive-0").fill("https://soundcloud.com/freaktopia/closing-set");
+    await org.page.getByTestId("ps-highlight").first().click();
+    await org.page.getByTestId("ps-save").click();
+    await expect.poll(async () => (await (await org.page.request.get(`/api/party/door/${eid}`)).json()).door.settings.capacity).toBe(1);
+    // A bad link is refused, not saved.
+    await org.page.getByTestId("ps-archive-0").fill("https://evil.example/x");
+    await org.page.getByTestId("ps-save").click();
+    await expect.poll(async () => (await (await org.page.request.get(`/api/party/door/${eid}`)).json()).door.settings.archives[0]?.host).toBe("SoundCloud");
+
+    // A takes the only ticket.
+    await a.page.goto(`/u/${org.publicId}/world/${eid}`);
+    await expect(a.page.getByTestId("tickets-left")).toBeVisible();
+    await a.page.getByTestId("rsvp").click();
+    await a.page.getByTestId("show-pass").click();
+    await expect(a.page.getByTestId("pass-code")).toBeVisible();
+    // Recording link and highlight are shown to everyone.
+    await expect(a.page.getByTestId("archives").locator("a")).toHaveAttribute("href", "https://soundcloud.com/freaktopia/closing-set");
+    await expect(a.page.getByTestId("archives").locator("a")).toHaveAttribute("target", "_blank");
+    await expect(a.page.getByTestId("media-highlights").getByTestId("media-item")).toHaveCount(1);
+
+    // B: full → waitlist, no pass code.
+    await b.page.goto(`/u/${org.publicId}/world/${eid}`);
+    await b.page.getByTestId("rsvp").click();
+    await expect(b.page.getByTestId("my-status")).toHaveText(/waitlist/i);
+    await b.page.getByTestId("show-pass").click();
+    await expect(b.page.getByTestId("pass-waitlist")).toBeVisible();
+    await expect(b.page.getByTestId("pass-code")).toHaveCount(0);
+    await noHorizontalScroll(b.page);
+    const door = (await (await org.page.request.get(`/api/party/door/${eid}`)).json()).door;
+    expect(door.waitlist).toBe(1);
+
+    // A cancels → B is promoted, gets a pass and a note.
+    await a.page.getByTestId("rsvp-cancel").click();
+    await expect.poll(async () => (await (await b.page.request.get(`/api/party/pass/${eid}`)).json()).pass?.waitlist).toBe(false);
+    await b.page.reload();
+    await b.page.getByTestId("show-pass").click();
+    await expect(b.page.getByTestId("pass-code")).toBeVisible();
+    const notes = (await (await b.page.request.get("/api/ops/notifications")).json()).notifications as { key: string }[];
+    expect(notes.some((n) => n.key === "notif.partyPromoted")).toBe(true);
+
+    // Email opt-in: shown only with notify on, saved per organizer, listed in My parties.
+    await b.page.goto(`/u/${org.publicId}/world`);
+    await b.page.getByTestId("follow").click();
+    await expect(b.page.getByTestId("toggle-email")).toBeVisible();
+    await b.page.getByTestId("toggle-email").click();
+    await expect.poll(async () => (await (await b.page.request.get("/api/party/me")).json()).follows[0]?.email).toBe(true);
+    const eid2 = await liveParty(org.page, `Mail ${TAG}`, 48);
+    expect((await post(org.page, `/api/party/events/${eid2}/publish`, { published: true })).json.notified).toBe(1);
+    await b.page.goto("/auth/mailbox");
+    await expect(b.page.locator("body")).toContainText(`Mail ${TAG}`);
+    await b.page.goto("/profile/parties");
+    await b.page.getByTestId("mine-email").click();
+    await expect.poll(async () => (await (await b.page.request.get("/api/party/me")).json()).follows[0]?.email).toBe(false);
+  });
 });

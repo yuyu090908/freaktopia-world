@@ -228,6 +228,11 @@
       "subject": "FREAKTOPIA WORLDのアカウントはすでにあります",
       "body": "このメールアドレスで新規登録が試みられましたが、すでにアカウントがあります。こちらからログインするか、パスワードを忘れた場合は再設定してください：",
       "footer": "心当たりがない場合は、このメールを無視してください。何も変更されていません。"
+    },
+    "partyNew": {
+      "subject": "{organizer}が新しいパーティーを発表しました",
+      "body": "{organizer}がFREAKTOPIA WORLDで{event}を発表しました。このオーガナイザーの新しいパーティーのお知らせを希望されていました。",
+      "footer": "このメールを止めるには、マイパーティーで「メールを止める」を選ぶか、オーガナイザーをミュートまたはフォロー解除してください。"
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "イベントチームに追加されました。",
       "taskAssigned": "新しいタスク：{title}",
       "incident": "{event}で緊急のインシデントが発生しました。",
-      "partyNew": "{organizer}が新しいパーティーを発表しました:{event}"
+      "partyNew": "{organizer}が新しいパーティーを発表しました:{event}",
+      "partyPromoted": "空きが出ました:{event}のチケットが確保されました。"
     },
     "err": {
       "generic": "問題が発生しました。もう一度お試しください。",
@@ -3960,7 +3966,8 @@
       "going": "RSVP済み",
       "checked_in": "入場済み",
       "cancelled": "取り消し済み",
-      "team": "チーム"
+      "team": "チーム",
+      "waitlist": "キャンセル待ち"
     },
     "djs": "DJ",
     "officialMedia": "公式の写真と動画",
@@ -4057,7 +4064,8 @@
       "duplicate": "入場済み(再カウントしません)",
       "not_found": "このコードのパスはありません",
       "cancelled": "このRSVPは取り消されています",
-      "not_entry_time": "入場時間外です"
+      "not_entry_time": "入場時間外です",
+      "waitlist": "キャンセル待ち(チケットなし)"
     },
     "doorList": "ゲストリスト(チームのみ)",
     "methodManual": "手動",
@@ -4074,7 +4082,10 @@
       "unpublish": "ワールドから外す",
       "guests": "ゲストリストを変更",
       "hide_media": "メディアを非表示",
-      "unhide_media": "メディアを再表示"
+      "unhide_media": "メディアを再表示",
+      "waitlist": "キャンセル待ちに登録",
+      "promote": "キャンセル待ちから繰り上げ",
+      "party_settings": "チケット・アーカイブ・ハイライトを変更"
     },
     "guestsTitle": "ゲストリストの人数",
     "guestsBody": "現在:{n}人。ゲストリストの人数は別に表示し、検証済みの来場には数えません。",
@@ -4087,7 +4098,7 @@
     "scannerStop": "カメラを止める",
     "scannerAlt": "パスをスキャンするカメラ映像",
     "scannerError": "カメラを開けませんでした。コードを入力してください。",
-    "scannerUnsupported": "このブラウザはカメラでQRコードを読み取れません。QRの下のコードを入力してください。",
+    "scannerUnsupported": "このブラウザではカメラを使えません。QRの下のコードを入力してください。",
     "universes": "パーティーユニバース",
     "universesSub": "検証済みのパーティーで育ったオーガナイザーのワールドと、これからのパーティー。",
     "directoryTitle": "オーガナイザーのワールド",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "チームメンバーは自分のパーティーをレビューできません。",
       "TEAM_MEMBER": "あなたはこのパーティーのチームメンバーです。",
       "TOO_LARGE": "ファイルが大きすぎます。",
-      "NOT_PUBLISHED": "このパーティーは公開されていません。"
-    }
+      "NOT_PUBLISHED": "このパーティーは公開されていません。",
+      "INVALID_URL": "YouTube、SoundCloud、Mixcloud、Vimeo、Twitchのhttpsリンクを使ってください。"
+    },
+    "waitlistTitle": "キャンセル待ち中",
+    "waitlistBody": "満員です。あなたはキャンセル待ち{n}番目です。空きが出たらパスと通知が届きます。",
+    "ticketsLeft": "無料チケット:残り{left}/{cap}枚",
+    "waitlistCount": "キャンセル待ち{n}人",
+    "waitlistPosition": "キャンセル待ちの順番",
+    "waitlistJoined": "キャンセル待ちに登録しました。",
+    "joinWaitlist": "キャンセル待ちに登録",
+    "getTicket": "無料チケットを受け取る",
+    "highlights": "ハイライト",
+    "archives": "アーカイブ",
+    "opensNewTab": "(新しいタブで開きます)",
+    "archivesNote": "このパーティーの記録として、オーガナイザーが追加した外部サイトへのリンクです。",
+    "partySettings": "チケット・アーカイブ・ハイライト",
+    "capacity": "無料チケット(定員)",
+    "capacityHint": "空欄なら上限なし。満員になると新しいRSVPはキャンセル待ちになり、誰かが取り消すと自動で繰り上がります。決済はありません。",
+    "archivesHint": "このパーティーの記録へのhttpsリンクを5件まで(YouTube、SoundCloud、Mixcloud、Vimeo、Twitch)。",
+    "archiveUrl": "記録へのリンク",
+    "archiveLabel": "タイトル(任意)",
+    "addLink": "リンクを追加",
+    "highlightsHint": "最初に見せる公開写真・クリップを6件まで、タップした順に選びます。自動生成はしません。",
+    "highlightsNone": "公開中の写真やクリップはまだありません。",
+    "emailOff": "メール通知をオフにしました",
+    "emailOn": "新しいパーティーのお知らせがメールでも届きます",
+    "stopEmail": "メールを止める",
+    "emailMe": "メールでも受け取る"
   }
 }

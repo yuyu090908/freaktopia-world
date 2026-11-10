@@ -228,6 +228,11 @@
       "subject": "Você já tem uma conta no FREAKTOPIA WORLD",
       "body": "Alguém tentou se cadastrar com este e-mail, mas ele já tem uma conta. Entre aqui ou redefina sua senha se a esqueceu:",
       "footer": "Se não foi você, ignore este e-mail. Nada mudou."
+    },
+    "partyNew": {
+      "subject": "{organizer} anunciou uma nova festa",
+      "body": "{organizer} acabou de anunciar {event} na FREAKTOPIA WORLD. Você pediu para saber das festas novas deste organizador.",
+      "footer": "Para parar estes e-mails, abra Minhas festas e escolha “Parar e-mails”, ou silencie ou deixe de seguir o organizador."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "Você foi adicionado à equipe de um evento.",
       "taskAssigned": "Nova tarefa para você: {title}",
       "incident": "Incidente urgente em {event}.",
-      "partyNew": "{organizer} anunciou uma nova festa: {event}."
+      "partyNew": "{organizer} anunciou uma nova festa: {event}.",
+      "partyPromoted": "Abriu uma vaga: você tem ingresso para {event}."
     },
     "err": {
       "generic": "Algo deu errado. Tente novamente.",
@@ -3960,7 +3966,8 @@
       "going": "Confirmado",
       "checked_in": "Check-in feito",
       "cancelled": "Cancelado",
-      "team": "Equipe"
+      "team": "Equipe",
+      "waitlist": "Na lista de espera"
     },
     "djs": "DJs",
     "officialMedia": "Fotos e vídeo oficiais",
@@ -4057,7 +4064,8 @@
       "duplicate": "Check-in já feito (não conta de novo)",
       "not_found": "Nenhum passe com este código",
       "cancelled": "Este RSVP foi cancelado",
-      "not_entry_time": "Fora do horário de entrada"
+      "not_entry_time": "Fora do horário de entrada",
+      "waitlist": "Na lista de espera, sem ingresso"
     },
     "doorList": "Lista de convidados (só equipe)",
     "methodManual": "Manual",
@@ -4074,7 +4082,10 @@
       "unpublish": "Removida do mundo",
       "guests": "Lista de convidados alterada",
       "hide_media": "Mídia ocultada",
-      "unhide_media": "Mídia mostrada de novo"
+      "unhide_media": "Mídia mostrada de novo",
+      "waitlist": "Entrou na lista de espera",
+      "promote": "Subiu da lista de espera",
+      "party_settings": "Ingressos, gravações ou destaques alterados"
     },
     "guestsTitle": "Número da lista de convidados",
     "guestsBody": "Atual: {n}. A lista de convidados aparece à parte e nunca conta como presença verificada.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "Parar câmera",
     "scannerAlt": "Imagem da câmera para ler passes",
     "scannerError": "Não foi possível abrir a câmera. Digite o código.",
-    "scannerUnsupported": "Este navegador não lê QR com a câmera. Digite o código abaixo do QR.",
+    "scannerUnsupported": "Este navegador não pode usar a câmera aqui. Digite o código abaixo do QR.",
     "universes": "Universos de festas",
     "universesSub": "Mundos de organizadores feitos de festas verificadas, e o que vem por aí.",
     "directoryTitle": "Mundos de organizadores",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "Membros da equipe não podem avaliar a própria festa.",
       "TEAM_MEMBER": "Você está na equipe desta festa.",
       "TOO_LARGE": "O arquivo é grande demais.",
-      "NOT_PUBLISHED": "Esta festa não está publicada."
-    }
+      "NOT_PUBLISHED": "Esta festa não está publicada.",
+      "INVALID_URL": "Use um link https do YouTube, SoundCloud, Mixcloud, Vimeo ou Twitch."
+    },
+    "waitlistTitle": "Na lista de espera",
+    "waitlistBody": "A festa está lotada. Você é o número {n} na lista de espera. Se abrir uma vaga, você recebe um passe e um aviso.",
+    "ticketsLeft": "Ingressos grátis: restam {left} de {cap}",
+    "waitlistCount": "{n} na lista de espera",
+    "waitlistPosition": "Meu lugar na fila",
+    "waitlistJoined": "Você está na lista de espera.",
+    "joinWaitlist": "Entrar na lista de espera",
+    "getTicket": "Pegar ingresso grátis",
+    "highlights": "Destaques",
+    "archives": "Gravações",
+    "opensNewTab": "(abre em nova aba)",
+    "archivesNote": "Links do organizador para gravações desta festa em outros sites.",
+    "partySettings": "Ingressos, gravações e destaques",
+    "capacity": "Ingressos grátis (capacidade)",
+    "capacityHint": "Deixe vazio para não limitar. Quando lotar, novos RSVPs entram numa lista de espera e sobem sozinhos quando alguém cancela. Não há pagamento.",
+    "archivesHint": "Até 5 links https para gravações desta festa no YouTube, SoundCloud, Mixcloud, Vimeo ou Twitch.",
+    "archiveUrl": "Link da gravação",
+    "archiveLabel": "Título (opcional)",
+    "addLink": "Adicionar link",
+    "highlightsHint": "Escolha até 6 fotos ou clipes públicos para mostrar primeiro, na ordem em que tocar. Nada é gerado.",
+    "highlightsNone": "Ainda não há fotos ou clipes públicos.",
+    "emailOff": "E-mails desligados",
+    "emailOn": "Você também vai receber e-mail sobre festas novas",
+    "stopEmail": "Parar e-mails",
+    "emailMe": "Também me avise por e-mail"
   }
 }

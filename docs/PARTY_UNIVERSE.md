@@ -23,7 +23,8 @@ One row per (party, person) in `ops_attendance`, with a history of every change.
 |---|---|
 | Viewing the page | never |
 | RSVP (`going`) | never. It only creates the QR pass. |
-| Ticket | there is no ticket purchase. The QR pass is the entry credential. |
+| Waitlist (`waitlist`) | never. The party is full; there is no pass until the person is promoted. |
+| Ticket | free only. There is no ticket purchase. The QR pass is the entry credential. |
 | Checked in by QR at the door | yes, once the party is verified |
 | Checked in manually by the owner or a manager | yes, but only with a reason (≥ 5 characters) and confirmation. It is recorded in the row history and the audit log, and shown as "manual". |
 | Cancelled / revoked | never. Revoking needs a reason and is audited. |
@@ -31,6 +32,22 @@ One row per (party, person) in `ops_attendance`, with a history of every change.
 Scanning the same pass again, or two scanners at once, is logged as a duplicate and never counted twice. Scans outside the entry window (start −6 h to end +6 h), unknown codes and cancelled passes are logged and rejected. Team members never count as attendees and cannot review their own party.
 
 A party is **verified** when it has ended, was not cancelled, and has at least 3 QR check-ins from different people outside the team. Only verified parties appear in the dashboard figures, the growth stage and Party Impact. Very small parties (fewer than 3 scanned guests) therefore cannot be verified. This is intentional.
+
+## Free tickets and waitlist
+
+- The owner or a manager sets a **capacity** in the Door tab (1–500,000, or empty for no limit).
+- When the party is full, an RSVP goes on the **waitlist**. A waitlisted person has no pass code, and a scan of their code is logged as "waitlist" and not counted.
+- A cancelled ticket or a higher capacity **promotes** people in RSVP order. Each promoted person gets one in-app note ("notif.partyPromoted").
+- If two people take the last place at the same moment, the later RSVP is moved back to the waitlist.
+- Someone who cancels and RSVPs again goes to the back of the line.
+- The door team can still confirm a waitlisted person manually, with a reason, as for anyone else.
+- There are no payments. Paid tickets are not built.
+
+## Recordings and highlights
+
+- **Recording links:** up to 5 per party, https only, on YouTube, SoundCloud, Mixcloud, Vimeo or Twitch. Other hosts, `http:` and links with credentials are refused (`INVALID_URL`). They open in a new tab with `noopener noreferrer nofollow`. Nothing is embedded, downloaded or generated.
+- **Highlights:** the owner or a manager picks up to 6 items from media of the party that is already public and not hidden. If an item is hidden or deleted later, it drops out of the highlights automatically.
+- Every change is recorded in the audit log ("party_settings").
 
 ## Dashboard definitions
 
@@ -82,7 +99,8 @@ Milestones and genre areas (Tech House, Afro House, Melodic Techno, Festival) ar
   - Effects stay subtle. Tapping an alien opens its public profile.
 - **Per-device caps** for drawn aliens and crowd dots: 120 aliens and 1,500 dots on capable devices, 40 and 400 on low-power devices. Everyone not drawn is still counted, and the totals are printed under the world.
 - **Level of detail:** aliens hide when the camera is far away, and the crowd dots stay.
-- **Lite** (SVG): chosen automatically with reduced motion, no WebGL, `saveData`, ≤ 2 GB memory or ≤ 2 cores. The visitor's choice is remembered.
+- **Lite** (SVG): chosen automatically on phone-width screens (under 768 px), with reduced motion, no WebGL, `saveData`, ≤ 2 GB memory or ≤ 2 cores. 3D is one tap away, and the visitor's choice is remembered. Phones start in Lite because loading three.js on a mid-range phone blocked the page for about 6 seconds in Lighthouse.
+- The world and memories pages are rendered on the server with the same data as the API, so the first view does not wait for a client fetch.
 - **Controls and performance:** drag, pinch/scroll zoom, tap. The animation pauses when the tab is hidden or the world is scrolled away, and there is no auto-rotate with reduced motion. If WebGL fails, the page falls back to Lite.
 - **Accessible links:** in both modes every planet is a real link with an accessible name.
 
@@ -112,6 +130,10 @@ Milestones and genre areas (Tech House, Afro House, Melodic Techno, Festival) ar
 - **No direct messages.** Mute turns notify off. Block removes the follow and stops everything.
 - **Rate limits:** 120 writes per minute per person and 240 door scans per minute. Every POST is same-origin checked.
 - **Where notes appear:** in `/profile/parties` ("New parties") and in the existing notifications list in `/events/manage`.
+- **Email (opt-in):** with notify on, a follower can also turn on email for that organizer (on the world page or in `/profile/parties`). Emails are sent only to verified addresses, once per party (they follow the in-app dedupe), in the person's account language.
+  - With `RESEND_API_KEY` and `MAIL_FROM` set, emails go through Resend.
+  - In demo mode they go to the demo mailbox `/auth/mailbox`.
+  - In production without those settings, **no email is sent**; the in-app note still arrives.
 
 ## Anti-fraud
 
@@ -137,6 +159,8 @@ Milestones and genre areas (Tech House, Afro House, Melodic Techno, Festival) ar
 
 ## Data
 
+`db/migrations/0009_party_tickets.sql` adds `ops_party_settings` (capacity, recording links, highlights; cascade FK to `ops_events`, RLS) and allows the `waitlist` status, with a partial index on waitlisted rows. It is additive and was applied twice in testing.
+
 `db/migrations/0008_party_universe.sql` adds 10 `ops_*` tables to the existing event-operations store:
 
 - attendance
@@ -154,9 +178,9 @@ They have foreign keys to `users` and `ops_events` with cascade, a unique pass-c
 
 ## Not built
 
-- Ticket sales or payments. The QR pass is the entry credential.
-- Links to LIVE stream archives. There is no real archive to link.
+- Paid tickets or payments. Tickets are free; the QR pass is the entry credential.
+- Embedded or hosted recordings. Recordings are external links only.
 - DJ entries come from agreed bookings in event operations; demo DJs are not accounts.
 - AI highlight reels.
-- Push or email delivery of notifications. They are in-app only.
-- Camera scanning needs the browser's `BarcodeDetector` (Chrome/Edge on Android, and others). Elsewhere the page says so and code entry is used.
+- Push notifications. Notes are in-app, plus email for people who opt in.
+- Camera scanning uses the browser's `BarcodeDetector` where it exists and jsQR elsewhere (iPhone Safari, Firefox). It still needs camera permission and `getUserMedia`; without them the page says so and code entry is used. Not tested on real phones.

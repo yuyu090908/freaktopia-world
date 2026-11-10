@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { rollAlien } from "@/lib/alien/generate";
+import { demoOutboxFor } from "@/lib/auth/mail";
 import { memoryStore, resetMemoryStore } from "@/lib/auth/memory";
 import { createPgStore } from "@/lib/auth/pg";
 import { getStore, setStore } from "@/lib/auth/store";
@@ -237,6 +238,109 @@ describe.each(stores)("personal party universe on %s store", (_name, auth, opsSt
     expect(await code(party.rsvp((await user({ verified: false })).id, e.id))).toBe("EMAIL_NOT_VERIFIED");
     expect(await code(party.checkIn(org.id, e.id, (await party.myPass(fan.id, e.id)).code, "ip"))).toBe("OK"); // logged, not counted
     expect((await party.doorView(org.id, e.id)).checkedIn).toBe(0); // outside the entry window
+  });
+
+  it("free tickets: a full party puts RSVPs on the waitlist without a pass; a cancel promotes the next in line and tells them", async () => {
+    const org = await user();
+    const e = await liveParty(org.id);
+    await party.setPartySettings(org.id, e.id, { capacity: 1 });
+    const [a, b, c] = [await user(), await user(), await user()];
+    expect((await party.rsvp(a.id, e.id)).status).toBe("going");
+    expect((await party.rsvp(b.id, e.id)).status).toBe("waitlist");
+    expect((await party.rsvp(b.id, e.id)).status).toBe("waitlist"); // idempotent
+    expect((await party.rsvp(c.id, e.id)).status).toBe("waitlist");
+    const pb = await party.myPass(b.id, e.id);
+    expect(pb).toMatchObject({ waitlist: true, code: null, payload: null });
+    expect((await party.myPass(c.id, e.id)).position).toBeGreaterThanOrEqual(pb.position!);
+    // A waitlisted code can't be scanned in: there is no pass.
+    const bRow = (await getOpsStore().get<{ passCode: string }>("attendance", `${e.id}:${b.id}`))!;
+    expect((await party.checkIn(org.id, e.id, bRow.passCode, "ip")).result).toBe("waitlist");
+    expect((await party.doorView(org.id, e.id)).checkedIn).toBe(0);
+    let v = await party.partyEvent(b.id, e.id);
+    expect(v.tickets).toMatchObject({ capacity: 1, taken: 1, waitlist: 2 });
+    expect(v.my?.status).toBe("waitlist");
+    // A cancels → B (first in line) is promoted and notified, C keeps waiting.
+    await party.cancelRsvp(a.id, e.id);
+    expect((await party.myPass(b.id, e.id))).toMatchObject({ waitlist: false });
+    expect((await party.myPass(b.id, e.id)).code).toBe(bRow.passCode);
+    expect((await party.myPass(c.id, e.id)).waitlist).toBe(true);
+    const promoted = (await ops.notifications(b.id)).filter((x) => x.key === "notif.partyPromoted");
+    expect(promoted.length).toBe(1);
+    expect((await ops.notifications(c.id)).filter((x) => x.key === "notif.partyPromoted").length).toBe(0);
+    // A re-joins: back of the line.
+    expect((await party.rsvp(a.id, e.id)).status).toBe("waitlist");
+    // Raising capacity promotes everyone who now fits; removing it promotes the rest.
+    await party.setPartySettings(org.id, e.id, { capacity: 2 });
+    expect((await party.myPass(c.id, e.id)).waitlist).toBe(false);
+    expect((await party.myPass(a.id, e.id)).waitlist).toBe(true);
+    await party.setPartySettings(org.id, e.id, { capacity: null });
+    expect((await party.myPass(a.id, e.id)).waitlist).toBe(false);
+    v = await party.partyEvent(null, e.id);
+    expect(v.tickets).toMatchObject({ capacity: null, waitlist: 0 });
+    // Only the owner or a manager can change it; bad values are refused.
+    expect(await code(party.setPartySettings(a.id, e.id, { capacity: 5 }))).toBe("NOT_FOUND");
+    expect(await code(party.setPartySettings(org.id, e.id, { capacity: 0 }))).toBe("INVALID_INPUT");
+    expect(await code(party.setPartySettings(org.id, e.id, { capacity: 1.5 }))).toBe("INVALID_INPUT");
+    // Manual confirmation also works for someone on the waitlist (e.g. let in at the door).
+    await party.setPartySettings(org.id, e.id, { capacity: 3 });
+    const d = await user();
+    expect((await party.rsvp(d.id, e.id)).status).toBe("waitlist");
+    expect(await code(party.confirmManually(org.id, e.id, d.id, "Space opened up at the door", true))).toBe("OK");
+  });
+
+  it("recording links only to known https hosts; highlights only from public, visible media", async () => {
+    const org = await user();
+    const e = await liveParty(org.id);
+    const [a, b, c] = [await user(), await user(), await user()];
+    await attend(e.id, [a, b, c], org.id);
+    expect(await code(party.setPartySettings(org.id, e.id, { archives: [{ url: "http://youtube.com/watch?v=1" }] }))).toBe("INVALID_URL");
+    expect(await code(party.setPartySettings(org.id, e.id, { archives: [{ url: "https://evil.example/watch" }] }))).toBe("INVALID_URL");
+    expect(await code(party.setPartySettings(org.id, e.id, { archives: [{ url: "https://user:pw@youtube.com/x" }] }))).toBe("INVALID_URL");
+    expect(await code(party.setPartySettings(org.id, e.id, { archives: [{ url: "javascript:alert(1)" }] }))).toBe("INVALID_URL");
+    expect(await code(party.setPartySettings(org.id, e.id, { archives: [{ url: "not a url" }] }))).toBe("INVALID_URL");
+    const s = await party.setPartySettings(org.id, e.id, { archives: [{ url: "https://soundcloud.com/freak/set", label: "Closing set" }, { url: "https://youtu.be/abc" }] });
+    expect(s.archives.map((x) => x.host)).toEqual(["SoundCloud", "YouTube"]);
+    const png = Buffer.from("89504e470d0a1a0a0000000d49484452", "hex").toString("base64");
+    const official = await party.uploadMedia(org.id, e.id, { mime: "image/png", data: png });
+    const privatePost = await party.uploadMedia(a.id, e.id, { mime: "image/png", data: png, visibility: "attendees" });
+    const publicPost = await party.uploadMedia(b.id, e.id, { mime: "image/png", data: png, visibility: "public" });
+    expect(await code(party.setPartySettings(org.id, e.id, { highlights: [privatePost.id] }))).toBe("INVALID_INPUT");
+    expect(await code(party.setPartySettings(org.id, e.id, { highlights: ["nope"] }))).toBe("INVALID_INPUT");
+    await party.setPartySettings(org.id, e.id, { highlights: [official.id, publicPost.id, official.id] });
+    let v = await party.partyEvent(null, e.id);
+    expect(v.archives.map((x) => x.label)).toEqual(["Closing set", ""]);
+    expect(v.highlights).toEqual([official.id, publicPost.id]);
+    // Hidden or deleted later → it drops out of the highlights.
+    await party.updateMedia(org.id, publicPost.id, { hiddenByOrganizer: true });
+    v = await party.partyEvent(null, e.id);
+    expect(v.highlights).toEqual([official.id]);
+  });
+
+  it("email: only for followers who asked, verified addresses only, once per party, in their language", async () => {
+    const org = await user();
+    const mailFan = await user();
+    const appOnly = await user();
+    await party.follow(mailFan.id, org.id, true, true);
+    await party.follow(appOnly.id, org.id, true);
+    expect((await party.follow(appOnly.id, org.id, false, true)).email).toBe(false); // email needs notify on
+    await party.follow(appOnly.id, org.id, true);
+    await getStore().updateProfile(mailFan.id, { locale: "ja" });
+    const now = Date.now();
+    const e = await ops.createEvent(org.id, {
+      name: `Mail party ${RUN}`, city: "Bangkok", venueName: "Club", setting: "indoor", startAt: iso(now + 72 * HOUR), endAt: iso(now + 78 * HOUR), genres: ["Afro House"],
+      attendance: 80, budgetUsd: 1000, ticketing: false, djs: true, streaming: false, templateId: "club_night", ownedEquipment: [], venueFacilities: [], services: [],
+    });
+    expect((await party.publishEvent(org.id, e.id, true, "https://freak.example")).notified).toBe(2);
+    await party.publishEvent(org.id, e.id, true, "https://freak.example");
+    const box = demoOutboxFor(mailFan.email);
+    expect(box.length).toBe(1);
+    expect(box[0].text).toContain(`Mail party ${RUN}`);
+    expect(box[0].locale).toBe("ja");
+    expect(box[0].link).toBe(`https://freak.example/u/${org.publicId}/world/${e.id}`);
+    expect(demoOutboxFor(appOnly.email).length).toBe(0);
+    // Keeping notify on keeps the email choice; turning notify off turns email off too.
+    expect((await party.follow(mailFan.id, org.id, true)).email).toBe(true);
+    expect((await party.follow(mailFan.id, org.id, false)).email).toBe(false);
   });
 });
 

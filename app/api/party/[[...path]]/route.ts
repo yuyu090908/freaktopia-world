@@ -5,7 +5,7 @@
  */
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { currentUser, fail, limit, ok, readJson, sameOrigin } from "@/lib/auth/http";
+import { baseUrl, currentUser, fail, limit, ok, readJson, sameOrigin } from "@/lib/auth/http";
 import { clientKey } from "@/lib/ranking/guard";
 import * as party from "@/lib/party/service";
 import { OpsError } from "@/lib/ops/types";
@@ -102,9 +102,9 @@ export async function POST(req: Request, { params }: Params) {
       // Visitors use the public handle (FREAK-…); "My parties" uses the id it was given for its own follows.
       const oid = zId.safeParse(p[1]).success ? p[1] : (await party.resolveHandle(p[1])).userId;
       if (p[2] === "follow") {
-        const r = parse(z.object({ notify: z.boolean() }).strict(), body);
+        const r = parse(z.object({ notify: z.boolean(), email: z.boolean().optional() }).strict(), body);
         if ("error" in r) return r.error;
-        return ok({ follow: await party.follow(uid, oid, r.data.notify) });
+        return ok({ follow: await party.follow(uid, oid, r.data.notify, r.data.email) });
       }
       if (p[2] === "unfollow") return ok({ done: (await party.unfollow(uid, oid), true) });
       if (p[2] === "block") return ok({ done: (await party.block(uid, oid), true) });
@@ -124,7 +124,19 @@ export async function POST(req: Request, { params }: Params) {
       if (rest === "publish") {
         const r = parse(z.object({ published: z.boolean() }).strict(), body);
         if ("error" in r) return r.error;
-        return ok(await party.publishEvent(uid, eid, r.data.published));
+        return ok(await party.publishEvent(uid, eid, r.data.published, baseUrl(req)));
+      }
+      if (rest === "settings") {
+        const r = parse(
+          z.object({
+            capacity: z.number().int().min(1).max(500_000).nullable(),
+            archives: z.array(z.object({ url: z.string().trim().max(500), label: zText(60).optional() }).strict()).max(5),
+            highlights: z.array(zId).max(6),
+          }).partial().strict(),
+          body,
+        );
+        if ("error" in r) return r.error;
+        return ok({ settings: await party.setPartySettings(uid, eid, r.data) });
       }
       if (rest === "rsvp") return ok({ attendance: await party.rsvp(uid, eid) });
       if (rest === "cancel") return ok({ attendance: await party.cancelRsvp(uid, eid) });

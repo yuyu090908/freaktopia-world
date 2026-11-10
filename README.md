@@ -118,7 +118,14 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
   - Privacy is opt-in, and a person can delete their party data at `/profile/parties`.
   - The admin anomaly view is at `/world/audit`.
 - `db/migrations/0008_party_universe.sql` adds 10 `ops_*` tables. It is additive and re-runnable.
-- **Not built:** ticket sales or payments, LIVE archive links, AI highlights, and push or email notifications.
+- **9.1 additions:**
+  - Free tickets: a capacity per party, then a waitlist with no pass. A cancel or a higher capacity promotes the next person, who gets an in-app note.
+  - Recording links (YouTube, SoundCloud, Mixcloud, Vimeo, Twitch; https only) per party. They are links only, never embedded or generated.
+  - Highlights: up to 6 photos or videos picked by the organizer from media that is already public. Nothing is AI-generated.
+  - Opt-in email for new parties through the existing mail pipeline (Resend when configured, the demo mailbox in demo mode).
+  - Door scanning works without `BarcodeDetector` (iPhone Safari, Firefox) through jsQR.
+  - `db/migrations/0009_party_tickets.sql` adds `ops_party_settings` and the `waitlist` status. It is additive and re-runnable.
+- **Not built:** paid tickets or payments, AI highlights, and push notifications.
 - Details are in `docs/PARTY_UNIVERSE.md`.
 
 ## Backend plan (Phase 2)
@@ -138,6 +145,6 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - `tests/world.spec.ts`: 19 Playwright tests for the WORLD MAP 7.0 (search, filters + URL, Map/List, LIVE, DAO, ranking, mobile sheet, camera, clusters, lite renderer, level admin, 375–1440 px).
 - `tests/identity.spec.ts`: 27 Playwright tests for 8.0/8.1 (12-language switching, switcher keeps URL params and map camera, account language on another device, SEO alternates, missing keys, per-language page check, sign-up, Google demo, logout, reset, Reveal, Alien ID, onboarding resume, same alien after re-login, map/LIVE/DAO identity, 375–1440 px with CJK/Thai/Cyrillic/Vietnamese fonts).
 - `tests/ops.spec.ts`: 7 Playwright flows for event operations at 390 px: small event, 2,000-person festival, quote request to a sound company, DJ application + equipment rental + double booking + budget overrun, staff shortage, permissions, and phone layout + language switching. `tests/integration/ops-service.test.ts` runs the same service on the memory and the Postgres store (10 scenarios each).
-- `tests/party.spec.ts`: 2 Playwright flows for the party universe. The first is the demo world: Lite planet links aligned with the drawing, tap to select then open, memories, back to the world, 3D canvas, and Japanese. The second is a full door flow: publish, follow, RSVP and QR pass at 390 px, RSVPs not counted, scan, duplicate, unknown code, manual confirm with a required reason, review, attendee photo upload with only-me visibility and deletion, team cannot review, the follower notified of the next party, privacy switch, delete my data, and desktop world and profile. `tests/integration/party-service.test.ts` runs the party service on memory and Postgres, and `tests/unit/party-stats.test.ts` covers definitions, Party Impact, growth, tiers and anomalies.
+- `tests/party.spec.ts`: 3 Playwright flows for the party universe. The first is the demo world: Lite planet links aligned with the drawing, tap to select then open, memories, back to the world, 3D canvas, and Japanese. The second is a full door flow: publish, follow, RSVP and QR pass at 390 px, RSVPs not counted, scan, duplicate, unknown code, manual confirm with a required reason, review, attendee photo upload with only-me visibility and deletion, team cannot review, the follower notified of the next party, privacy switch, delete my data, and desktop world and profile. The third covers capacity 1: a second person is waitlisted with no pass code, the first cancels and the second is promoted with a pass and a note; it also covers a recording link and a highlight on the memories page, a refused bad link, and the email opt-in arriving in the demo mailbox. `tests/unit/party-qr.test.ts` renders a pass and decodes it with jsQR. `tests/integration/party-service.test.ts` runs the party service on memory and Postgres, and `tests/unit/party-stats.test.ts` covers definitions, Party Impact, growth, tiers and anomalies.
 - `tests/unit` and `tests/integration`: i18n dictionaries and formatting, alien generation, the account service (memory and Postgres), vitest tests for the world map (growth levels, landmarks, search, URL state, `/api/map`), the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.

@@ -228,6 +228,11 @@
       "subject": "Kamu sudah punya akun FREAKTOPIA WORLD",
       "body": "Seseorang mencoba mendaftar dengan email ini, tetapi email ini sudah punya akun. Masuk di sini, atau atur ulang kata sandi jika kamu lupa:",
       "footer": "Jika itu bukan kamu, abaikan email ini. Tidak ada yang berubah."
+    },
+    "partyNew": {
+      "subject": "{organizer} mengumumkan pesta baru",
+      "body": "{organizer} baru saja mengumumkan {event} di FREAKTOPIA WORLD. Kamu meminta kabar pesta baru dari penyelenggara ini.",
+      "footer": "Untuk menghentikan email ini, buka Pestaku lalu pilih “Hentikan email”, atau bisukan atau berhenti mengikuti penyelenggara."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "Anda ditambahkan ke tim acara.",
       "taskAssigned": "Tugas baru untuk Anda: {title}",
       "incident": "Insiden mendesak di {event}.",
-      "partyNew": "{organizer} mengumumkan pesta baru: {event}."
+      "partyNew": "{organizer} mengumumkan pesta baru: {event}.",
+      "partyPromoted": "Ada tempat kosong: kamu sekarang punya tiket untuk {event}."
     },
     "err": {
       "generic": "Terjadi kesalahan. Silakan coba lagi.",
@@ -3960,7 +3966,8 @@
       "going": "Sudah RSVP",
       "checked_in": "Sudah check-in",
       "cancelled": "Dibatalkan",
-      "team": "Tim"
+      "team": "Tim",
+      "waitlist": "Dalam daftar tunggu"
     },
     "djs": "DJ",
     "officialMedia": "Foto & video resmi",
@@ -4057,7 +4064,8 @@
       "duplicate": "Sudah check-in (tidak dihitung lagi)",
       "not_found": "Tidak ada pass dengan kode ini",
       "cancelled": "RSVP ini sudah dibatalkan",
-      "not_entry_time": "Di luar jam masuk"
+      "not_entry_time": "Di luar jam masuk",
+      "waitlist": "Dalam daftar tunggu, tanpa tiket"
     },
     "doorList": "Daftar tamu (khusus tim)",
     "methodManual": "Manual",
@@ -4074,7 +4082,10 @@
       "unpublish": "Dihapus dari dunia",
       "guests": "Daftar tamu diubah",
       "hide_media": "Media disembunyikan",
-      "unhide_media": "Media ditampilkan lagi"
+      "unhide_media": "Media ditampilkan lagi",
+      "waitlist": "Masuk daftar tunggu",
+      "promote": "Naik dari daftar tunggu",
+      "party_settings": "Tiket, rekaman, atau sorotan diubah"
     },
     "guestsTitle": "Jumlah daftar tamu",
     "guestsBody": "Saat ini: {n}. Jumlah daftar tamu ditampilkan terpisah dan tidak pernah dihitung sebagai kehadiran terverifikasi.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "Matikan kamera",
     "scannerAlt": "Tampilan kamera untuk memindai pass",
     "scannerError": "Kamera tidak bisa dibuka. Ketik kodenya saja.",
-    "scannerUnsupported": "Browser ini tidak bisa memindai QR dengan kamera. Ketik kode di bawah QR.",
+    "scannerUnsupported": "Browser ini tidak bisa memakai kamera di sini. Ketik kode di bawah QR.",
     "universes": "Semesta pesta",
     "universesSub": "Dunia penyelenggara yang dibangun dari pesta terverifikasi, dan yang akan datang.",
     "directoryTitle": "Dunia penyelenggara",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "Anggota tim tidak bisa mengulas pestanya sendiri.",
       "TEAM_MEMBER": "Kamu termasuk tim pesta ini.",
       "TOO_LARGE": "File terlalu besar.",
-      "NOT_PUBLISHED": "Pesta ini belum dipublikasikan."
-    }
+      "NOT_PUBLISHED": "Pesta ini belum dipublikasikan.",
+      "INVALID_URL": "Gunakan tautan https ke YouTube, SoundCloud, Mixcloud, Vimeo, atau Twitch."
+    },
+    "waitlistTitle": "Dalam daftar tunggu",
+    "waitlistBody": "Pesta sudah penuh. Kamu nomor {n} di daftar tunggu. Jika ada tempat kosong, kamu mendapat pass dan notifikasi.",
+    "ticketsLeft": "Tiket gratis: sisa {left} dari {cap}",
+    "waitlistCount": "{n} di daftar tunggu",
+    "waitlistPosition": "Posisi tungguku",
+    "waitlistJoined": "Kamu masuk daftar tunggu.",
+    "joinWaitlist": "Masuk daftar tunggu",
+    "getTicket": "Ambil tiket gratis",
+    "highlights": "Sorotan",
+    "archives": "Rekaman",
+    "opensNewTab": "(terbuka di tab baru)",
+    "archivesNote": "Tautan dari penyelenggara ke rekaman pesta ini di situs lain.",
+    "partySettings": "Tiket, rekaman, dan sorotan",
+    "capacity": "Tiket gratis (kapasitas)",
+    "capacityHint": "Kosongkan jika tanpa batas. Saat penuh, RSVP baru masuk daftar tunggu dan naik otomatis jika ada yang membatalkan. Tidak ada pembayaran.",
+    "archivesHint": "Maksimal 5 tautan https ke rekaman pesta ini di YouTube, SoundCloud, Mixcloud, Vimeo, atau Twitch.",
+    "archiveUrl": "Tautan rekaman",
+    "archiveLabel": "Judul (opsional)",
+    "addLink": "Tambah tautan",
+    "highlightsHint": "Pilih hingga 6 foto atau klip publik untuk ditampilkan lebih dulu, sesuai urutan ketukan. Tidak ada yang dibuat otomatis.",
+    "highlightsNone": "Belum ada foto atau klip publik.",
+    "emailOff": "Email dimatikan",
+    "emailOn": "Kamu juga akan mendapat email untuk pesta baru",
+    "stopEmail": "Hentikan email",
+    "emailMe": "Kirim juga lewat email"
   }
 }

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { api } from "@/lib/auth/client";
+import { api, useAuth } from "@/lib/auth/client";
 import { toast } from "@/lib/store";
 import type { AlienLook } from "@/lib/types";
 
@@ -30,9 +30,10 @@ export function usePartyPost() {
   );
 }
 
-/** GET JSON from /api/party/… (works signed out for public data). */
-export function useParty<T>(url: string | null) {
-  const [data, setData] = useState<T | null>(null);
+/** GET JSON from /api/party/… (works signed out for public data). `initial` is server-rendered data for the same URL. */
+export function useParty<T>(url: string | null, initial: T | null = null) {
+  const [data, setData] = useState<T | null>(initial);
+  const skipFirst = useRef(initial !== null);
   const [error, setError] = useState<{ code: string; status: number } | null>(null);
   const load = useCallback(async () => {
     if (!url) return;
@@ -48,8 +49,21 @@ export function useParty<T>(url: string | null) {
     }
   }, [url]);
   useEffect(() => {
+    if (skipFirst.current) {
+      skipFirst.current = false;
+      return;
+    }
     void load();
   }, [load]);
+  // The first request already carries the session cookie, so it doesn't wait for the auth check.
+  // If the person signs in or out afterwards, the viewer-specific parts are fetched again.
+  const status = useAuth((s) => s.status);
+  const seen = useRef<string | null>(null);
+  useEffect(() => {
+    if (status === "loading") return;
+    if (seen.current !== null && seen.current !== status) void load();
+    seen.current = status;
+  }, [status, load]);
   return { data, error, reload: load };
 }
 
@@ -96,9 +110,9 @@ export interface WorldData {
   impact: { score: number | null; status: "ok" | "insufficient"; confidence: "low" | "medium" | "high" | null; parts: Record<"satisfaction" | "community" | "engagement" | "consistency" | "scale", number | null>; reviewCount: number };
   growth: { stage: 0 | 1 | 2 | 3 | 4 | 5; milestones: { key: string; reached: boolean }[]; areas: Theme[] };
   planets: Planet[];
-  next: (Planet & { myStatus: "going" | null }) | null;
+  next: (Planet & { myStatus: "going" | "waitlist" | null }) | null;
   community: { shown: Shown[]; anonymous: number; tiers: Record<Tier, number>; total: number };
-  follow: { following: boolean; notify: boolean; blocked: boolean } | null;
+  follow: { following: boolean; notify: boolean; email: boolean; blocked: boolean } | null;
   followers: number;
   me: { visits: number; tier: Tier | null; privacy: { showInWorlds: boolean; showHistory: boolean } } | null;
 }
@@ -120,9 +134,11 @@ export function deviceTier(): "high" | "low" {
   return "high";
 }
 
-/** True when the light 2D world fits better: reduced motion, no WebGL, or a low-power device. */
+/** True when the light 2D world fits better: reduced motion, a phone-width screen, no WebGL, or a low-power device.
+ * Phones start in Lite (fast first paint, less battery); 3D is one tap away and the choice is remembered. */
 export function prefersLite(): boolean {
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return true;
+  if (window.matchMedia("(max-width: 767px)").matches) return true;
   if (deviceTier() === "low") return true;
   try {
     const c = document.createElement("canvas");

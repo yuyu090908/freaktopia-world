@@ -12,8 +12,8 @@ import { PassCard } from "@/components/party/PassCard";
 import { useParty, usePartyPost, type Tier } from "@/components/party/shared";
 
 interface Mine {
-  items: { eventId: string; name: string; city: string; startAt: string; endAt: string; timezone: string; status: "going" | "checked_in" | "cancelled" | "team"; ended: boolean; organizer: { publicId: string | null; name: string | null; visits: number; userId: string } }[];
-  follows: { organizerId: string; notify: boolean; name: string | null; publicId: string | null }[];
+  items: { eventId: string; name: string; city: string; startAt: string; endAt: string; timezone: string; status: "going" | "waitlist" | "checked_in" | "cancelled" | "team"; ended: boolean; organizer: { publicId: string | null; name: string | null; visits: number; userId: string } }[];
+  follows: { organizerId: string; notify: boolean; email: boolean; name: string | null; publicId: string | null }[];
   blocks: { organizerId: string; name: string | null }[];
   privacy: { showInWorlds: boolean; showHistory: boolean };
   myPublicId: string | null;
@@ -68,9 +68,9 @@ function Inner() {
   const [pass, setPass] = useState<string | null>(null);
   const [del, setDel] = useState(false);
   const [busy, setBusy] = useState(false);
-  if (!data) return <div className="h-64 animate-pulse rounded-3xl bg-surface" />;
-  const upcoming = data.items.filter((i) => !i.ended && i.status === "going");
-  const past = data.items.filter((i) => i.ended || i.status !== "going");
+  if (!data) return <div className="min-h-[100svh] animate-pulse rounded-3xl bg-surface" aria-busy="true" />;
+  const upcoming = data.items.filter((i) => !i.ended && (i.status === "going" || i.status === "waitlist"));
+  const past = data.items.filter((i) => i.ended || (i.status !== "going" && i.status !== "waitlist"));
   const setPrivacy = async (patch: Partial<Mine["privacy"]>) => {
     if (await post("privacy", patch, t("saved"))) await reload();
   };
@@ -99,7 +99,7 @@ function Inner() {
                     <div className="truncate font-extrabold uppercase">{i.name}</div>
                     <div className="text-xs text-mute">{when(i.startAt, i.timezone)} · {i.city} · {i.organizer.name}</div>
                   </div>
-                  <Button size="sm" onClick={() => setPass(pass === i.eventId ? null : i.eventId)}><Ticket className="size-4" aria-hidden /> {t("myPass")}</Button>
+                  <Button size="sm" onClick={() => setPass(pass === i.eventId ? null : i.eventId)}><Ticket className="size-4" aria-hidden /> {i.status === "waitlist" ? t("waitlistPosition") : t("myPass")}</Button>
                 </div>
                 {pass === i.eventId && <PassCard eventId={i.eventId} />}
               </li>
@@ -156,6 +156,11 @@ function Inner() {
                 {f.publicId ? <Link href={href(`/u/${f.publicId}/world`)} className="font-extrabold hover:text-acid">{f.name}</Link> : <span className="font-extrabold">{f.name}</span>}
                 <span className="flex gap-2">
                   <Button size="sm" variant="ghost" onClick={async () => (await post(`organizers/${f.organizerId}/follow`, { notify: !f.notify }, t("saved"))) && reload()}>{f.notify ? t("stopNotify") : t("notifyMe")}</Button>
+                  {f.notify && (
+                    <Button size="sm" variant="ghost" aria-pressed={f.email} onClick={async () => (await post(`organizers/${f.organizerId}/follow`, { notify: true, email: !f.email }, t("saved"))) && reload()} data-testid="mine-email">
+                      {f.email ? t("stopEmail") : t("emailMe")}
+                    </Button>
+                  )}
                   <Button size="sm" variant="ghost" onClick={async () => (await post(`organizers/${f.organizerId}/unfollow`, {}, t("unfollowed"))) && reload()}>{t("unfollow")}</Button>
                 </span>
               </li>

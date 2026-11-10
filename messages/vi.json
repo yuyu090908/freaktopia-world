@@ -228,6 +228,11 @@
       "subject": "Bạn đã có tài khoản FREAKTOPIA WORLD",
       "body": "Có người đã thử đăng ký bằng email này, nhưng email đã có tài khoản. Hãy đăng nhập tại đây, hoặc đặt lại mật khẩu nếu bạn quên:",
       "footer": "Nếu không phải bạn, hãy bỏ qua email này. Không có gì thay đổi."
+    },
+    "partyNew": {
+      "subject": "{organizer} vừa công bố tiệc mới",
+      "body": "{organizer} vừa công bố {event} trên FREAKTOPIA WORLD. Bạn đã chọn nhận tin về tiệc mới của nhà tổ chức này.",
+      "footer": "Để dừng các email này, mở “Tiệc của tôi” và chọn “Dừng email”, hoặc tắt tiếng hay bỏ theo dõi nhà tổ chức."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "Bạn đã được thêm vào nhóm sự kiện.",
       "taskAssigned": "Công việc mới cho bạn: {title}",
       "incident": "Sự cố khẩn cấp tại {event}.",
-      "partyNew": "{organizer} vừa công bố tiệc mới: {event}."
+      "partyNew": "{organizer} vừa công bố tiệc mới: {event}.",
+      "partyPromoted": "Đã có chỗ trống: bạn đã có vé cho {event}."
     },
     "err": {
       "generic": "Đã xảy ra lỗi. Vui lòng thử lại.",
@@ -3960,7 +3966,8 @@
       "going": "Đã RSVP",
       "checked_in": "Đã check-in",
       "cancelled": "Đã hủy",
-      "team": "Đội ngũ"
+      "team": "Đội ngũ",
+      "waitlist": "Đang chờ"
     },
     "djs": "DJ",
     "officialMedia": "Ảnh & video chính thức",
@@ -4057,7 +4064,8 @@
       "duplicate": "Đã check-in rồi (không tính lại)",
       "not_found": "Không có vé với mã này",
       "cancelled": "RSVP này đã bị hủy",
-      "not_entry_time": "Ngoài giờ vào cửa"
+      "not_entry_time": "Ngoài giờ vào cửa",
+      "waitlist": "Đang chờ, chưa có vé"
     },
     "doorList": "Danh sách khách (chỉ đội ngũ)",
     "methodManual": "Thủ công",
@@ -4074,7 +4082,10 @@
       "unpublish": "Đã gỡ khỏi thế giới",
       "guests": "Đã đổi danh sách khách mời",
       "hide_media": "Đã ẩn nội dung",
-      "unhide_media": "Đã hiện lại nội dung"
+      "unhide_media": "Đã hiện lại nội dung",
+      "waitlist": "Đã vào danh sách chờ",
+      "promote": "Được lên từ danh sách chờ",
+      "party_settings": "Đã đổi vé, bản ghi hoặc điểm nhấn"
     },
     "guestsTitle": "Số khách mời",
     "guestsBody": "Hiện tại: {n}. Số khách mời được hiển thị riêng và không bao giờ tính là tham dự đã xác minh.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "Tắt camera",
     "scannerAlt": "Hình camera để quét vé",
     "scannerError": "Không mở được camera. Hãy nhập mã.",
-    "scannerUnsupported": "Trình duyệt này không quét được QR bằng camera. Hãy nhập mã dưới QR.",
+    "scannerUnsupported": "Trình duyệt này không dùng được camera ở đây. Hãy nhập mã dưới QR.",
     "universes": "Vũ trụ tiệc",
     "universesSub": "Thế giới của nhà tổ chức được xây từ các bữa tiệc đã xác minh, và những gì sắp tới.",
     "directoryTitle": "Thế giới nhà tổ chức",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "Thành viên đội ngũ không thể đánh giá bữa tiệc của mình.",
       "TEAM_MEMBER": "Bạn thuộc đội ngũ của bữa tiệc này.",
       "TOO_LARGE": "Tệp quá lớn.",
-      "NOT_PUBLISHED": "Bữa tiệc này chưa được công khai."
-    }
+      "NOT_PUBLISHED": "Bữa tiệc này chưa được công khai.",
+      "INVALID_URL": "Hãy dùng liên kết https tới YouTube, SoundCloud, Mixcloud, Vimeo hoặc Twitch."
+    },
+    "waitlistTitle": "Đang trong danh sách chờ",
+    "waitlistBody": "Bữa tiệc đã kín chỗ. Bạn đứng thứ {n} trong danh sách chờ. Nếu có chỗ trống, bạn sẽ nhận vé và thông báo.",
+    "ticketsLeft": "Vé miễn phí: còn {left}/{cap}",
+    "waitlistCount": "{n} người đang chờ",
+    "waitlistPosition": "Vị trí chờ của tôi",
+    "waitlistJoined": "Bạn đã vào danh sách chờ.",
+    "joinWaitlist": "Vào danh sách chờ",
+    "getTicket": "Nhận vé miễn phí",
+    "highlights": "Điểm nhấn",
+    "archives": "Bản ghi",
+    "opensNewTab": "(mở trong tab mới)",
+    "archivesNote": "Liên kết do nhà tổ chức thêm tới bản ghi của bữa tiệc này trên trang khác.",
+    "partySettings": "Vé, bản ghi và điểm nhấn",
+    "capacity": "Vé miễn phí (sức chứa)",
+    "capacityHint": "Để trống nếu không giới hạn. Khi kín chỗ, RSVP mới sẽ vào danh sách chờ và tự động được lên khi có người hủy. Không có thanh toán.",
+    "archivesHint": "Tối đa 5 liên kết https tới bản ghi của bữa tiệc này trên YouTube, SoundCloud, Mixcloud, Vimeo hoặc Twitch.",
+    "archiveUrl": "Liên kết bản ghi",
+    "archiveLabel": "Tiêu đề (tùy chọn)",
+    "addLink": "Thêm liên kết",
+    "highlightsHint": "Chọn tối đa 6 ảnh hoặc clip công khai để hiện trước, theo thứ tự bạn chạm. Không có gì được tạo tự động.",
+    "highlightsNone": "Chưa có ảnh hoặc clip công khai.",
+    "emailOff": "Đã tắt email",
+    "emailOn": "Bạn cũng sẽ nhận email khi có tiệc mới",
+    "stopEmail": "Dừng email",
+    "emailMe": "Gửi cả email cho tôi"
   }
 }

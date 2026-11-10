@@ -3,7 +3,7 @@ import type { Locale } from "@/i18n/config";
 import { loadMessages } from "@/i18n/messages";
 import { authConfig } from "./config";
 
-export type MailTemplate = "verify" | "reset" | "resetNoAccount" | "signupExisting";
+export type MailTemplate = "verify" | "reset" | "resetNoAccount" | "signupExisting" | "partyNew";
 
 export interface OutboxMessage {
   id: string;
@@ -23,11 +23,11 @@ export function demoOutboxFor(email: string): OutboxMessage[] {
   return outbox().filter((m) => m.to === email.toLowerCase()).slice(-20).reverse();
 }
 
-export async function renderMail(template: MailTemplate, locale: Locale, link: string | null) {
+export async function renderMail(template: MailTemplate, locale: Locale, link: string | null, values: Record<string, string> = {}) {
   const messages = await loadMessages(locale);
-  const t = createTranslator({ locale, messages, namespace: "email" });
-  const subject = t(`${template}.subject`);
-  const lines = [t("greeting"), "", t(`${template}.body`), ...(link ? ["", link] : []), "", t(`${template}.footer`), "", t("signature")];
+  const t = createTranslator({ locale, messages, namespace: "email" }) as unknown as (key: string, values?: Record<string, string>) => string;
+  const subject = t(`${template}.subject`, values);
+  const lines = [t("greeting"), "", t(`${template}.body`, values), ...(link ? ["", link] : []), "", t(`${template}.footer`, values), "", t("signature")];
   return { subject, text: lines.join("\n") };
 }
 
@@ -35,8 +35,8 @@ export async function renderMail(template: MailTemplate, locale: Locale, link: s
  * Sends a transactional email. With RESEND_API_KEY + MAIL_FROM it goes through Resend.
  * Without them, demo mode drops it into the demo mailbox, and production mode refuses (the caller reports it).
  */
-export async function sendMail(to: string, template: MailTemplate, locale: Locale, link: string | null): Promise<"sent" | "demo" | "not-configured"> {
-  const { subject, text } = await renderMail(template, locale, link);
+export async function sendMail(to: string, template: MailTemplate, locale: Locale, link: string | null, values: Record<string, string> = {}): Promise<"sent" | "demo" | "not-configured"> {
+  const { subject, text } = await renderMail(template, locale, link, values);
   const cfg = authConfig();
   if (cfg.email === "connected") {
     const res = await fetch("https://api.resend.com/emails", {

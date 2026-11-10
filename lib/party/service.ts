@@ -24,8 +24,10 @@ import {
 import {
   tierFor,
   type Attendance, type AttendeeView, type Block, type CheckinLog, type EventFacts, type EventReview, type Follow, type GuestCount, type Media,
-  type MediaVisibility, type PartyAudit, type WorldPrivacy, type WorldSettings,
+  type MediaVisibility, type PartyAudit, type PartySettings, type WorldPrivacy, type WorldSettings,
 } from "./types";
+
+import { sendMail } from "@/lib/auth/mail";
 
 const store = () => getOpsStore();
 const auth = () => getAuthStore();
@@ -99,6 +101,80 @@ async function isPublished(e: OpsEvent) {
   return (await settingsOf(e.ownerId)).publishedEventIds.includes(e.id);
 }
 
+async function partySettingsOf(eventId: string): Promise<PartySettings> {
+  return (await store().get<PartySettings>("party_settings", eventId)) ?? { eventId, capacity: null, archives: [], highlights: [], updatedAt: nowIso(), by: "" };
+}
+
+/** Recording hosts we link to. Links only: nothing is embedded, downloaded or generated. */
+export const ARCHIVE_HOSTS: Record<string, string> = {
+  "youtube.com": "YouTube", "www.youtube.com": "YouTube", "m.youtube.com": "YouTube", "youtu.be": "YouTube",
+  "soundcloud.com": "SoundCloud", "on.soundcloud.com": "SoundCloud", "mixcloud.com": "Mixcloud", "www.mixcloud.com": "Mixcloud",
+  "vimeo.com": "Vimeo", "twitch.tv": "Twitch", "www.twitch.tv": "Twitch",
+};
+
+/** Capacity (free tickets), recording links and highlights. Owner or manager; every change is audited. */
+export async function setPartySettings(uid: string, eventId: string, patch: { capacity?: number | null; archives?: { url: string; label?: string }[]; highlights?: string[] }) {
+  await ready();
+  await eventOf(eventId);
+  await managerOf(eventId, uid);
+  const cur = await partySettingsOf(eventId);
+  const next: PartySettings = { ...cur, updatedAt: nowIso(), by: uid };
+  if (patch.capacity !== undefined) {
+    if (patch.capacity !== null && (!Number.isInteger(patch.capacity) || patch.capacity < 1 || patch.capacity > 500_000)) throw err(400, "INVALID_INPUT");
+    next.capacity = patch.capacity;
+  }
+  if (patch.archives) {
+    if (patch.archives.length > 5) throw err(400, "INVALID_INPUT");
+    next.archives = patch.archives.map((a) => {
+      let u: URL;
+      try {
+        u = new URL(a.url.trim());
+      } catch {
+        throw err(400, "INVALID_URL");
+      }
+      const host = ARCHIVE_HOSTS[u.hostname.toLowerCase()];
+      if (u.protocol !== "https:" || !host || u.username || u.password) throw err(400, "INVALID_URL");
+      return { url: u.toString(), label: (a.label ?? "").trim().slice(0, 60), host };
+    });
+  }
+  if (patch.highlights) {
+    const ids = [...new Set(patch.highlights)].slice(0, 6);
+    for (const mid of ids) {
+      const m = await store().get<Media>("media", mid);
+      // Only media everyone may already see can be highlighted.
+      if (!m || m.eventId !== eventId || m.visibility !== "public" || m.hiddenByOrganizer) throw err(400, "INVALID_INPUT");
+    }
+    next.highlights = ids;
+  }
+  await store().put("party_settings", next);
+  await audit(uid, eventId, "party_settings", "", { capacity: next.capacity, archives: next.archives.length, highlights: next.highlights.length });
+  if (patch.capacity !== undefined) await promoteWaitlist(eventId);
+  return next;
+}
+
+/** Fills free places from the waitlist in RSVP order and tells each promoted person. */
+async function promoteWaitlist(eventId: string) {
+  const ps = await partySettingsOf(eventId);
+  const rows = await store().list<Attendance>("attendance", { eventId });
+  let free = ps.capacity === null ? Infinity : ps.capacity - rows.filter((a) => a.status === "going").length;
+  const waiting = rows.filter((a) => a.status === "waitlist").sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  const e = await eventOf(eventId);
+  const owner = await identity(e.ownerId);
+  for (const a of waiting) {
+    if (free <= 0) break;
+    const t = nowIso();
+    try {
+      await store().put("attendance", { ...a, status: "going", updatedAt: t, version: a.version + 1, history: [...a.history, { at: t, by: "system", action: "promote" }] }, a.version);
+    } catch (x) {
+      if (x instanceof OpsError && x.code === "STALE_VERSION") continue;
+      throw x;
+    }
+    free--;
+    const link = owner.publicId ? `/u/${owner.publicId}/world/${eventId}` : "/profile/parties";
+    await store().notifyOnce({ id: id(), userId: a.userId, eventId, key: "notif.partyPromoted", values: { event: e.name, link }, dedupeKey: `party-promoted:${eventId}:${a.userId}:${a.version}`, read: false, at: t });
+  }
+}
+
 const facts = (e: OpsEvent): EventFacts => ({
   id: e.id, name: e.name, city: e.city, country: e.country, venueName: e.venueName, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone,
   genres: e.genres, level: effectiveLevel(e), status: e.status, plannedAttendance: e.attendance,
@@ -118,7 +194,7 @@ async function doorStaffOf(eventId: string, uid: string) {
 }
 
 /** Organizer chooses which events appear in their world. Publishing an upcoming event notifies followers who asked for it. */
-export async function publishEvent(uid: string, eventId: string, published: boolean) {
+export async function publishEvent(uid: string, eventId: string, published: boolean, baseUrl = "") {
   await ready();
   const e = await eventOf(eventId);
   await managerOf(eventId, uid);
@@ -129,11 +205,11 @@ export async function publishEvent(uid: string, eventId: string, published: bool
   await store().put("world_settings", { ...s, publishedEventIds: [...ids], updatedAt: nowIso() });
   await audit(uid, eventId, published ? "publish" : "unpublish");
   let notified = 0;
-  if (published && e.status !== "cancelled" && Date.parse(e.startAt) > Date.now()) notified = await notifyFollowers(e);
+  if (published && e.status !== "cancelled" && Date.parse(e.startAt) > Date.now()) notified = await notifyFollowers(e, baseUrl);
   return { published, notified };
 }
 
-async function notifyFollowers(e: OpsEvent) {
+async function notifyFollowers(e: OpsEvent, baseUrl: string) {
   const owner = await identity(e.ownerId);
   const followers = (await store().list<Follow>("follows", { organizerId: e.ownerId })).filter((f) => f.notify);
   let n = 0;
@@ -141,7 +217,21 @@ async function notifyFollowers(e: OpsEvent) {
     if (await store().get<Block>("blocks", `${f.userId}:${e.ownerId}`)) continue;
     const link = owner.publicId ? `/u/${owner.publicId}/world/${e.id}` : "/profile/parties";
     const note: Notification = { id: id(), userId: f.userId, eventId: e.id, key: "notif.partyNew", values: { organizer: owner.name ?? "—", event: e.name, link }, dedupeKey: `party-new:${e.id}`, read: false, at: nowIso() };
-    if (await store().notifyOnce(note)) n++;
+    if (await store().notifyOnce(note)) {
+      n++;
+      // Email only for people who asked for it, only once per party (it follows the in-app dedupe), never to unverified addresses.
+      if (f.email) {
+        const u = await auth().findUserById(f.userId);
+        if (u?.emailVerified && baseUrl) {
+          try {
+            const locale = (await auth().getProfile(f.userId))?.locale ?? "en";
+            await sendMail(u.email, "partyNew", locale, `${baseUrl}${link}`, { organizer: owner.name ?? "—", event: e.name });
+          } catch (x) {
+            console.error("[party] email", x);
+          }
+        }
+      }
+    }
   }
   return n;
 }
@@ -179,21 +269,36 @@ export async function rsvp(uid: string, eventId: string) {
   if (await store().get<Block>("blocks", `${uid}:${e.ownerId}`)) throw err(400, "BLOCKED_ORGANIZER");
   const cur = await store().get<Attendance>("attendance", `${eventId}:${uid}`);
   const t = nowIso();
+  if (cur && (cur.status === "going" || cur.status === "waitlist")) return cur;
+  if (cur?.checkedInAt) throw err(400, "ALREADY_CHECKED_IN");
+  // Free tickets: when the party is full, the RSVP joins the waitlist and gets no pass.
+  const ps = await partySettingsOf(eventId);
+  const going = ps.capacity === null ? 0 : (await store().list<Attendance>("attendance", { eventId })).filter((a) => a.status === "going").length;
+  const status = ps.capacity !== null && going >= ps.capacity ? "waitlist" : "going";
+  let saved: Attendance;
   if (cur) {
-    if (cur.status === "going") return cur;
-    if (cur.checkedInAt) throw err(400, "ALREADY_CHECKED_IN");
-    const next: Attendance = { ...cur, status: "going", updatedAt: t, version: cur.version + 1, history: [...cur.history, { at: t, by: uid, action: "rsvp" }] };
-    await store().put("attendance", next, cur.version);
-    return next;
+    // Re-joining after a cancel goes to the back of the line.
+    saved = { ...cur, status, createdAt: t, updatedAt: t, version: cur.version + 1, history: [...cur.history, { at: t, by: uid, action: status === "going" ? "rsvp" : "waitlist" }] };
+    await store().put("attendance", saved, cur.version);
+  } else {
+    saved = { eventId, userId: uid, status, passCode: newPassCode(), checkedInAt: null, method: null, by: null, createdAt: t, updatedAt: t, version: 0, history: [{ at: t, by: uid, action: status === "going" ? "rsvp" : "waitlist" }] };
+    try {
+      await store().insert("attendance", saved);
+    } catch (e) {
+      if (e instanceof OpsError && e.code === "DUPLICATE") return (await store().get<Attendance>("attendance", `${eventId}:${uid}`))!;
+      throw e;
+    }
   }
-  const a: Attendance = { eventId, userId: uid, status: "going", passCode: newPassCode(), checkedInAt: null, method: null, by: null, createdAt: t, updatedAt: t, version: 0, history: [{ at: t, by: uid, action: "rsvp" }] };
-  try {
-    await store().insert("attendance", a);
-  } catch (e) {
-    if (e instanceof OpsError && e.code === "DUPLICATE") return (await store().get<Attendance>("attendance", `${eventId}:${uid}`))!;
-    throw e;
+  if (status === "going" && ps.capacity !== null) {
+    // Two people taking the last place at once: the later RSVP moves to the waitlist.
+    const holders = (await store().list<Attendance>("attendance", { eventId })).filter((a) => a.status === "going").sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.userId.localeCompare(b.userId));
+    if (holders.findIndex((a) => a.userId === uid) >= ps.capacity) {
+      const me = (await store().get<Attendance>("attendance", `${eventId}:${uid}`))!;
+      saved = { ...me, status: "waitlist", updatedAt: nowIso(), version: me.version + 1, history: [...me.history, { at: nowIso(), by: "system", action: "waitlist" }] };
+      await store().put("attendance", saved, me.version);
+    }
   }
-  return a;
+  return saved;
 }
 
 export async function cancelRsvp(uid: string, eventId: string) {
@@ -204,6 +309,7 @@ export async function cancelRsvp(uid: string, eventId: string) {
   const t = nowIso();
   const next: Attendance = { ...cur, status: "cancelled", updatedAt: t, version: cur.version + 1, history: [...cur.history, { at: t, by: uid, action: "cancel" }] };
   await store().put("attendance", next, cur.version);
+  if (cur.status === "going") await promoteWaitlist(eventId);
   return next;
 }
 
@@ -212,7 +318,11 @@ export async function myPass(uid: string, eventId: string) {
   const a = await store().get<Attendance>("attendance", `${eventId}:${uid}`);
   if (!a || a.status === "cancelled") throw err(404, "NOT_FOUND");
   const e = await eventOf(eventId);
-  return { eventId, eventName: e.name, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone, code: a.passCode, payload: passPayload(eventId, a.passCode), checkedInAt: a.checkedInAt };
+  if (a.status === "waitlist") {
+    const ahead = (await store().list<Attendance>("attendance", { eventId })).filter((x) => x.status === "waitlist" && x.createdAt < a.createdAt).length;
+    return { eventId, eventName: e.name, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone, waitlist: true, position: ahead + 1, code: null, payload: null, checkedInAt: null };
+  }
+  return { waitlist: false, position: null, eventId, eventName: e.name, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone, code: a.passCode, payload: passPayload(eventId, a.passCode), checkedInAt: a.checkedInAt };
 }
 
 // ------------------------------------------------------------------ door check-in, manual confirmation, guests
@@ -237,6 +347,7 @@ export async function checkIn(staffUid: string, eventId: string, raw: string, ip
   const who = await identity(a.userId);
   const attendee = { name: who.name, look: who.look };
   if (a.status === "cancelled") return { result: await log("cancelled", a.userId), attendee };
+  if (a.status === "waitlist") return { result: await log("waitlist", a.userId), attendee }; // no ticket: the door can confirm manually if they let them in
   if (a.checkedInAt) return { result: await log("duplicate", a.userId), attendee }; // re-entry / re-scan: never counted twice
   const t = nowIso();
   const next: Attendance = { ...a, checkedInAt: t, method: "qr", by: staffUid, updatedAt: t, version: a.version + 1, history: [...a.history, { at: t, by: staffUid, action: "checkin" }] };
@@ -314,6 +425,9 @@ export async function doorView(uid: string, eventId: string) {
     entryOpensAt: new Date(Date.parse(e.startAt) - ENTRY_EARLY_MS).toISOString(),
     entryClosesAt: new Date(Date.parse(e.endAt) + ENTRY_LATE_MS).toISOString(),
     going: rows.filter((a) => a.status === "going" && !a.checkedInAt).length,
+    waitlist: rows.filter((a) => a.status === "waitlist").length,
+    settings: await partySettingsOf(eventId),
+    media: manage ? (await store().list<Media>("media", { eventId })).filter((m) => m.visibility === "public" && !m.hiddenByOrganizer).map((m) => ({ id: m.id, kind: m.kind, type: m.type, caption: m.caption })) : [],
     checkedIn: rows.filter((a) => isCounted(a, team)).length,
     qr: rows.filter((a) => isCounted(a, team) && a.method === "qr").length,
     manual: rows.filter((a) => isCounted(a, team) && a.method === "manual").length,
@@ -451,13 +565,14 @@ export async function mediaBlob(viewer: string | null, mediaId: string) {
 
 // ------------------------------------------------------------------ follows and blocks (no direct messages exist)
 
-export async function follow(uid: string, organizerId: string, notify: boolean) {
+export async function follow(uid: string, organizerId: string, notify: boolean, email?: boolean) {
   await ready();
   await verifiedUser(uid);
   if (uid === organizerId) throw err(400, "SELF");
   if (isDemoUser(organizerId)) throw err(400, "DEMO_EVENT");
   if (await store().get<Block>("blocks", `${uid}:${organizerId}`)) await store().remove("blocks", `${uid}:${organizerId}`);
-  const f: Follow = { organizerId, userId: uid, notify, at: nowIso() };
+  const cur = await store().get<Follow>("follows", `${organizerId}:${uid}`);
+  const f: Follow = { organizerId, userId: uid, notify, email: notify && (email ?? cur?.email ?? false), at: cur?.at ?? nowIso() };
   await store().put("follows", f);
   return f;
 }
@@ -586,9 +701,9 @@ export async function world(viewer: string | null, handle: string) {
     impact,
     growth: g,
     planets,
-    next: next ? { ...next, myStatus: myGoing && myGoing.status === "going" ? "going" : null } : null,
+    next: next ? { ...next, myStatus: myGoing && (myGoing.status === "going" || myGoing.status === "waitlist") ? myGoing.status : null } : null,
     community: { shown, anonymous, tiers, total: stats.uniqueVisitors },
-    follow: viewer && !isOwner ? { following: !!fol, notify: !!fol?.notify, blocked: !!blk } : null,
+    follow: viewer && !isOwner ? { following: !!fol, notify: !!fol?.notify, email: !!fol?.email, blocked: !!blk } : null,
     followers: (await store().list<Follow>("follows", { organizerId: ownerId })).length,
     me: viewer ? { visits: myVisits, tier: myVisits ? tierFor(myVisits) : null, privacy: await getWorldPrivacy(viewer) } : null,
   };
@@ -632,7 +747,12 @@ export async function partyEvent(viewer: string | null, eventId: string) {
   const counted = !!my && isCounted(my, team);
   const owner = await identity(e.ownerId);
   const manage = !!member && (member.role === "owner" || member.role === "manager");
+  const ps = await partySettingsOf(eventId);
+  const visibleIds = new Set(visible.map((m) => m.id));
   return {
+    tickets: { capacity: ps.capacity, taken: rows.filter((a) => a.status === "going").length, waitlist: rows.filter((a) => a.status === "waitlist").length },
+    archives: ps.archives,
+    highlights: ps.highlights.filter((h) => visibleIds.has(h)),
     event: { ...facts(e), theme: themeFor(e.genres, effectiveLevel(e)), demo: !!(e as OpsEvent & { demo?: boolean }).demo },
     owner: { publicId: owner.publicId, name: owner.name },
     state: e.status === "cancelled" ? "cancelled" : !f.ended ? "upcoming" : f.verified ? "verified" : "unverified",
@@ -641,7 +761,7 @@ export async function partyEvent(viewer: string | null, eventId: string) {
     reviews: visibleReviews,
     media: { official: visible.filter((m) => m.kind === "official"), attendee: visible.filter((m) => m.kind === "attendee") },
     my: {
-      status: !my ? null : my.status === "cancelled" ? "cancelled" : my.checkedInAt ? "checked_in" : "going",
+      status: !my ? null : my.status === "cancelled" ? "cancelled" : my.checkedInAt ? "checked_in" : my.status === "waitlist" ? "waitlist" : "going",
       counted,
       isTeam: !!member,
       canManage: manage,
@@ -665,7 +785,7 @@ export async function myParties(uid: string) {
     const owner = await identity(e.ownerId);
     items.push({
       eventId: e.id, name: e.name, city: e.city, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone,
-      status: a.status === "cancelled" ? "cancelled" : a.checkedInAt ? (isCounted(a, team) ? "checked_in" : "team") : "going",
+      status: a.status === "cancelled" ? "cancelled" : a.checkedInAt ? (isCounted(a, team) ? "checked_in" : "team") : a.status === "waitlist" ? "waitlist" : "going",
       ended: Date.parse(e.endAt) < Date.now(),
       organizer: { publicId: owner.publicId, name: owner.name, userId: e.ownerId },
     });
@@ -678,7 +798,7 @@ export async function myParties(uid: string) {
   const me = await identity(uid);
   return {
     items: items.map((i) => ({ ...i, organizer: { publicId: i.organizer.publicId, name: i.organizer.name, visits: perOrganizer.get(i.organizer.userId) ?? 0, userId: i.organizer.userId } })),
-    follows: follows.map((f) => ({ organizerId: f.organizerId, notify: f.notify, name: f.organizer.name, publicId: f.organizer.publicId })),
+    follows: follows.map((f) => ({ organizerId: f.organizerId, notify: f.notify, email: !!f.email, name: f.organizer.name, publicId: f.organizer.publicId })),
     blocks,
     privacy: await getWorldPrivacy(uid),
     myPublicId: me.publicId,

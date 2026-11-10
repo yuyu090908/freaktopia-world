@@ -228,6 +228,11 @@
       "subject": "Du hast bereits ein FREAKTOPIA WORLD-Konto",
       "body": "Jemand hat versucht, sich mit dieser E-Mail zu registrieren, aber es gibt schon ein Konto. Melde dich hier an oder setze dein Passwort zurück, falls du es vergessen hast:",
       "footer": "Falls du das nicht warst, ignoriere diese E-Mail. Es wurde nichts geändert."
+    },
+    "partyNew": {
+      "subject": "{organizer} hat eine neue Party angekündigt",
+      "body": "{organizer} hat gerade {event} auf FREAKTOPIA WORLD angekündigt. Du wolltest über neue Partys dieses Veranstalters informiert werden.",
+      "footer": "Um diese E-Mails zu stoppen, öffne „Meine Partys“ und wähle „E-Mails stoppen“, oder schalte den Veranstalter stumm bzw. entfolge ihm."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "Du wurdest einem Veranstaltungsteam hinzugefügt.",
       "taskAssigned": "Neue Aufgabe für dich: {title}",
       "incident": "Dringender Vorfall bei {event}.",
-      "partyNew": "{organizer} hat eine neue Party angekündigt: {event}."
+      "partyNew": "{organizer} hat eine neue Party angekündigt: {event}.",
+      "partyPromoted": "Ein Platz ist frei geworden: Du hast jetzt ein Ticket für {event}."
     },
     "err": {
       "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
@@ -3960,7 +3966,8 @@
       "going": "Zugesagt",
       "checked_in": "Eingecheckt",
       "cancelled": "Zurückgezogen",
-      "team": "Team"
+      "team": "Team",
+      "waitlist": "Auf der Warteliste"
     },
     "djs": "DJs",
     "officialMedia": "Offizielle Fotos & Videos",
@@ -4057,7 +4064,8 @@
       "duplicate": "Bereits eingecheckt (nicht erneut gezählt)",
       "not_found": "Kein Pass mit diesem Code",
       "cancelled": "Diese Zusage wurde zurückgezogen",
-      "not_entry_time": "Außerhalb der Einlasszeit"
+      "not_entry_time": "Außerhalb der Einlasszeit",
+      "waitlist": "Auf der Warteliste, kein Ticket"
     },
     "doorList": "Gästeliste (nur Team)",
     "methodManual": "Manuell",
@@ -4074,7 +4082,10 @@
       "unpublish": "Aus Welt entfernt",
       "guests": "Gästeliste geändert",
       "hide_media": "Medium ausgeblendet",
-      "unhide_media": "Medium wieder gezeigt"
+      "unhide_media": "Medium wieder gezeigt",
+      "waitlist": "Auf die Warteliste gesetzt",
+      "promote": "Von der Warteliste nachgerückt",
+      "party_settings": "Tickets, Aufnahmen oder Highlights geändert"
     },
     "guestsTitle": "Gästelisten-Anzahl",
     "guestsBody": "Aktuell: {n}. Gästelisten-Zahlen werden getrennt gezeigt und nie als verifizierter Besuch gezählt.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "Kamera stoppen",
     "scannerAlt": "Kamerabild zum Scannen von Pässen",
     "scannerError": "Kamera konnte nicht geöffnet werden. Gib den Code ein.",
-    "scannerUnsupported": "Dieser Browser kann QR-Codes nicht mit der Kamera scannen. Gib den Code unter dem QR ein.",
+    "scannerUnsupported": "Dieser Browser kann die Kamera hier nicht nutzen. Gib den Code unter dem QR ein.",
     "universes": "Party-Universen",
     "universesSub": "Veranstalter-Welten aus verifizierten Partys und was als Nächstes kommt.",
     "directoryTitle": "Veranstalter-Welten",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "Teammitglieder können ihre eigene Party nicht bewerten.",
       "TEAM_MEMBER": "Du bist im Team dieser Party.",
       "TOO_LARGE": "Die Datei ist zu groß.",
-      "NOT_PUBLISHED": "Diese Party ist nicht veröffentlicht."
-    }
+      "NOT_PUBLISHED": "Diese Party ist nicht veröffentlicht.",
+      "INVALID_URL": "Nutze einen https-Link zu YouTube, SoundCloud, Mixcloud, Vimeo oder Twitch."
+    },
+    "waitlistTitle": "Auf der Warteliste",
+    "waitlistBody": "Die Party ist voll. Du bist Nummer {n} auf der Warteliste. Wird ein Platz frei, bekommst du einen Pass und eine Nachricht.",
+    "ticketsLeft": "Kostenlose Tickets: {left} von {cap} übrig",
+    "waitlistCount": "{n} auf der Warteliste",
+    "waitlistPosition": "Mein Wartelistenplatz",
+    "waitlistJoined": "Du stehst auf der Warteliste.",
+    "joinWaitlist": "Auf die Warteliste",
+    "getTicket": "Kostenloses Ticket holen",
+    "highlights": "Highlights",
+    "archives": "Aufnahmen",
+    "opensNewTab": "(öffnet in neuem Tab)",
+    "archivesNote": "Links des Veranstalters zu Aufnahmen dieser Party auf anderen Seiten.",
+    "partySettings": "Tickets, Aufnahmen und Highlights",
+    "capacity": "Kostenlose Tickets (Kapazität)",
+    "capacityHint": "Leer lassen für kein Limit. Ist es voll, kommen neue Zusagen auf eine Warteliste und rücken automatisch nach, wenn jemand absagt. Es gibt keine Zahlung.",
+    "archivesHint": "Bis zu 5 https-Links zu Aufnahmen dieser Party auf YouTube, SoundCloud, Mixcloud, Vimeo oder Twitch.",
+    "archiveUrl": "Link zur Aufnahme",
+    "archiveLabel": "Titel (optional)",
+    "addLink": "Link hinzufügen",
+    "highlightsHint": "Wähle bis zu 6 öffentliche Fotos oder Clips, die zuerst gezeigt werden, in der Reihenfolge deines Antippens. Nichts wird generiert.",
+    "highlightsNone": "Noch keine öffentlichen Fotos oder Clips.",
+    "emailOff": "E-Mails aus",
+    "emailOn": "Du bekommst neue Partys auch per E-Mail",
+    "stopEmail": "E-Mails stoppen",
+    "emailMe": "Auch per E-Mail"
   }
 }

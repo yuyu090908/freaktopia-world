@@ -16,7 +16,8 @@ type ISODate = string;
  * A row is counted only when `checkedInAt` is set (door QR scan or an organizer confirmation with a reason)
  * AND the event is verified as held (see `isVerifiedEvent`).
  */
-export type AttendanceStatus = "going" | "cancelled";
+/** going = holds a (free) ticket and a pass; waitlist = the party is full, no pass until a place opens. */
+export type AttendanceStatus = "going" | "waitlist" | "cancelled";
 export type CheckinMethod = "qr" | "manual";
 
 export interface Attendance {
@@ -33,7 +34,7 @@ export interface Attendance {
   updatedAt: ISODate;
   version: number;
   /** Every change with who and why. */
-  history: { at: ISODate; by: string; action: "rsvp" | "cancel" | "checkin" | "manual_confirm" | "revoke" | "restore"; reason?: string }[];
+  history: { at: ISODate; by: string; action: "rsvp" | "waitlist" | "promote" | "cancel" | "checkin" | "manual_confirm" | "revoke" | "restore"; reason?: string }[];
   demo?: boolean;
 }
 
@@ -44,7 +45,7 @@ export interface CheckinLog {
   userId: string | null;
   by: string;
   at: ISODate;
-  result: "ok" | "duplicate" | "not_found" | "cancelled" | "not_entry_time";
+  result: "ok" | "duplicate" | "not_found" | "cancelled" | "not_entry_time" | "waitlist";
   /** Truncated hash of the scanner's IP (never the IP itself). */
   ipHash: string | null;
 }
@@ -88,6 +89,8 @@ export interface Follow {
   userId: string;
   /** New-event notifications; off by default until the follower turns them on. */
   notify: boolean;
+  /** Also send new-party notes by email (opt-in, off by default). */
+  email?: boolean;
   at: ISODate;
 }
 
@@ -156,3 +159,16 @@ export interface AttendeeView {
 
 export type VisitTier = "first" | "aura" | "glow" | "regular";
 export const tierFor = (visits: number): VisitTier => (visits >= 10 ? "regular" : visits >= 5 ? "glow" : visits >= 2 ? "aura" : "first");
+
+/** Per-party settings chosen by the owner or a manager. */
+export interface PartySettings {
+  eventId: string;
+  /** Free tickets: at most this many people hold a pass; the rest wait. null = no limit. */
+  capacity: number | null;
+  /** Links to recordings of this party (stream archive, DJ mix). Links only; nothing is embedded or generated. */
+  archives: { url: string; label: string; host: string }[];
+  /** Media the organizer picked to show first (chosen by a person, not generated). */
+  highlights: string[];
+  updatedAt: ISODate;
+  by: string;
+}

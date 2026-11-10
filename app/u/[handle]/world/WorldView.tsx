@@ -36,11 +36,10 @@ class Fallback extends Component<{ onError: () => void; children: ReactNode }, {
 }
 const MODE_KEY = "fk-world-mode";
 
-export function WorldView({ handle }: { handle: string }) {
+export function WorldView({ handle, initial = null }: { handle: string; initial?: { world: WorldData } | null }) {
   const t = useTranslations("party");
   const href = useLocalHref();
-  const status = useAuth((s) => s.status);
-  const { data, error, reload } = useParty<{ world: WorldData }>(status === "loading" ? null : `/api/party/worlds/${handle}`);
+  const { data, error, reload } = useParty<{ world: WorldData }>(`/api/party/worlds/${handle}`, initial);
   const w = data?.world;
   return (
     <div className="mx-auto max-w-6xl pb-24 md:px-6">
@@ -53,7 +52,7 @@ export function WorldView({ handle }: { handle: string }) {
         {error ? (
           <EmptyState title={t("worldNotFound")} body={t("worldNotFoundBody")} />
         ) : !w ? (
-          <div className="mt-2 h-[420px] animate-pulse rounded-[32px] bg-surface" aria-busy="true" />
+          <div className="mt-2 min-h-[100svh] animate-pulse rounded-[32px] bg-surface" aria-busy="true" />
         ) : (
           <Inner w={w} handle={handle} reload={reload} />
         )}
@@ -311,7 +310,7 @@ function Community({ w }: { w: WorldData }) {
                 {a.publicId ? (
                   <Link href={href(`/u/${a.publicId}`)} aria-label={label} title={label} className="relative block">{inner}</Link>
                 ) : (
-                  <span aria-label={label} title={label} className="relative block">{inner}</span>
+                  <span role="img" aria-label={label} title={label} className="relative block">{inner}</span>
                 )}
               </li>
             );
@@ -387,9 +386,9 @@ function NextParty({ w, handle, reload }: { w: WorldData; handle: string; reload
               <p className="text-xs text-mute">{t("ownerNextNote")}</p>
             ) : status !== "signedIn" ? (
               <Link href={href(`/login?returnTo=${encodeURIComponent(`/u/${handle}/world`)}`)} className="inline-flex min-h-11 items-center rounded-full bg-acid px-4 text-sm font-extrabold uppercase text-ink">{t("signInToRsvp")}</Link>
-            ) : n.myStatus === "going" ? (
+            ) : n.myStatus ? (
               <>
-                <Button onClick={() => setShowPass((x) => !x)} data-testid="show-pass"><Ticket className="size-4" aria-hidden /> {t("myPass")}</Button>
+                <Button onClick={() => setShowPass((x) => !x)} data-testid="show-pass"><Ticket className="size-4" aria-hidden /> {n.myStatus === "waitlist" ? t("waitlistPosition") : t("myPass")}</Button>
                 <Button variant="ghost" disabled={busy} onClick={() => run(`events/${n.id}/cancel`, t("rsvpCancelled"))} data-testid="rsvp-cancel">{t("cancelRsvp")}</Button>
               </>
             ) : (
@@ -397,7 +396,7 @@ function NextParty({ w, handle, reload }: { w: WorldData; handle: string; reload
             )}
           </div>
           <p className="mt-2 text-xs text-mute">{t("rsvpNote")}</p>
-          {showPass && n.myStatus === "going" && <PassCard eventId={n.id} />}
+          {showPass && n.myStatus && <PassCard eventId={n.id} />}
         </div>
       )}
     </Section>
@@ -442,6 +441,11 @@ function FollowBox({ w, handle, reload }: { w: WorldData; handle: string; reload
               <Button variant="ghost" disabled={busy} onClick={() => run("follow", { notify: !f.notify }, f.notify ? t("notifyOff") : t("notifyOn"))} data-testid="toggle-notify">
                 {f.notify ? <BellOff className="size-4" aria-hidden /> : <Bell className="size-4" aria-hidden />} {f.notify ? t("stopNotify") : t("notifyMe")}
               </Button>
+              {f.notify && (
+                <Button variant="ghost" disabled={busy} onClick={() => run("follow", { notify: true, email: !f.email }, f.email ? t("emailOff") : t("emailOn"))} data-testid="toggle-email" aria-pressed={f.email}>
+                  {f.email ? t("stopEmail") : t("emailMe")}
+                </Button>
+              )}
               <Button variant="ghost" disabled={busy} onClick={() => run("unfollow", {}, t("unfollowed"))} data-testid="unfollow">{t("unfollow")}</Button>
             </>
           ) : (

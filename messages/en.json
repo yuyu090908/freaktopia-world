@@ -228,6 +228,11 @@
       "subject": "You already have a FREAKTOPIA WORLD account",
       "body": "Someone tried to sign up with this email, but it already has an account. Sign in here, or reset your password if you forgot it:",
       "footer": "If it wasn't you, ignore this email. Nothing changed."
+    },
+    "partyNew": {
+      "subject": "{organizer} announced a new party",
+      "body": "{organizer} just announced {event} on FREAKTOPIA WORLD. You asked to hear about new parties from them.",
+      "footer": "To stop these emails, open My parties and choose “Stop emails”, or mute or unfollow the organizer."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "You were added to an event team.",
       "taskAssigned": "New task for you: {title}",
       "incident": "Urgent incident at {event}.",
-      "partyNew": "{organizer} announced a new party: {event}."
+      "partyNew": "{organizer} announced a new party: {event}.",
+      "partyPromoted": "A place opened up: you now have a ticket for {event}."
     },
     "err": {
       "generic": "Something went wrong. Please try again.",
@@ -3960,7 +3966,8 @@
       "going": "RSVP’d",
       "checked_in": "Checked in",
       "cancelled": "Cancelled",
-      "team": "Team"
+      "team": "Team",
+      "waitlist": "On the waitlist"
     },
     "djs": "DJs",
     "officialMedia": "Official photos & video",
@@ -4057,7 +4064,8 @@
       "duplicate": "Already checked in (not counted again)",
       "not_found": "No pass with this code",
       "cancelled": "This RSVP was cancelled",
-      "not_entry_time": "Outside the entry time"
+      "not_entry_time": "Outside the entry time",
+      "waitlist": "On the waitlist, no ticket"
     },
     "doorList": "Guest list (team only)",
     "methodManual": "Manual",
@@ -4074,7 +4082,10 @@
       "unpublish": "Removed from world",
       "guests": "Guest list changed",
       "hide_media": "Media hidden",
-      "unhide_media": "Media shown again"
+      "unhide_media": "Media shown again",
+      "waitlist": "Joined the waitlist",
+      "promote": "Moved up from the waitlist",
+      "party_settings": "Tickets, recordings or highlights changed"
     },
     "guestsTitle": "Guest list count",
     "guestsBody": "Current: {n}. Guest-list numbers are shown separately and never counted as verified attendance.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "Stop camera",
     "scannerAlt": "Camera view for scanning passes",
     "scannerError": "Couldn’t open the camera. Type the code instead.",
-    "scannerUnsupported": "This browser can’t scan QR codes with the camera. Type the code under the QR instead.",
+    "scannerUnsupported": "This browser can’t use the camera here. Type the code under the QR instead.",
     "universes": "Party universes",
     "universesSub": "Organizer worlds built from verified parties, and what’s coming up.",
     "directoryTitle": "Organizer worlds",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "Team members can’t review their own party.",
       "TEAM_MEMBER": "You’re on this party’s team.",
       "TOO_LARGE": "File is too large.",
-      "NOT_PUBLISHED": "This party isn’t published."
-    }
+      "NOT_PUBLISHED": "This party isn’t published.",
+      "INVALID_URL": "Use an https link to YouTube, SoundCloud, Mixcloud, Vimeo or Twitch."
+    },
+    "waitlistTitle": "On the waitlist",
+    "waitlistBody": "The party is full. You’re number {n} on the waitlist. If a place opens, you get a pass and a notification.",
+    "ticketsLeft": "Free tickets: {left} of {cap} left",
+    "waitlistCount": "{n} on the waitlist",
+    "waitlistPosition": "My waitlist place",
+    "waitlistJoined": "You’re on the waitlist.",
+    "joinWaitlist": "Join the waitlist",
+    "getTicket": "Get a free ticket",
+    "highlights": "Highlights",
+    "archives": "Recordings",
+    "opensNewTab": "(opens in a new tab)",
+    "archivesNote": "Links added by the organizer to recordings of this party on other sites.",
+    "partySettings": "Tickets, recordings and highlights",
+    "capacity": "Free tickets (capacity)",
+    "capacityHint": "Leave empty for no limit. When full, new RSVPs join a waitlist and move up automatically when someone cancels. There is no payment.",
+    "archivesHint": "Up to 5 https links to YouTube, SoundCloud, Mixcloud, Vimeo or Twitch recordings of this party.",
+    "archiveUrl": "Recording link",
+    "archiveLabel": "Title (optional)",
+    "addLink": "Add a link",
+    "highlightsHint": "Pick up to 6 public photos or clips to show first, in the order you tap them. Nothing is generated.",
+    "highlightsNone": "No public photos or clips yet.",
+    "emailOff": "Email notes off",
+    "emailOn": "You’ll also get an email for new parties",
+    "stopEmail": "Stop emails",
+    "emailMe": "Also email me"
   }
 }

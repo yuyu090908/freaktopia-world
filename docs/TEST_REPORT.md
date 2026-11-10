@@ -181,3 +181,62 @@ Not measured this round: Lighthouse.
 - Screenshots: `docs/screenshots/party-ja-390-3d.png`, `party-ja-390-lite.png`, `party-ja-1440-3d.png`, `party-ja-390-memories.png`.
 - WebGL in this container is software-rendered (SwiftShader). Real phones have not been tested, and 3D frame rates were not measured.
 - **Lighthouse was not run for the new pages.** No performance score is claimed.
+
+## 9.1: Party universe, unfinished parts (2026-11-10)
+
+### Built
+- Free tickets with capacity and a waitlist, with promotion on cancel or capacity change.
+- Recording links per party, and highlights picked from public media.
+- Opt-in email for new parties.
+- jsQR fallback for door scanning.
+- Migration `0009_party_tickets.sql`.
+
+### Automated
+- **vitest: 232 of 232 pass**, including Postgres on a fresh database with migrations 0005–0009 (`0009` applied twice).
+  - `tests/unit/party-qr.test.ts`: a pass rendered with qrcode-generator decodes with jsQR to the same event and code; a blank frame decodes to nothing.
+  - `tests/integration/party-service.test.ts`, 3 new scenarios on memory and Postgres:
+    - waitlist without a pass, "waitlist" scan not counted, promotion on cancel with a note, back of the line on re-join, promotion on higher or no capacity, manager-only settings, manual confirm of a waitlisted person;
+    - recording links: `http:`, unknown host, credentials, `javascript:` and junk refused; highlights only from public, visible media, dropped when hidden later;
+    - email: only for followers who opted in, once per party, in their language, with the right link; notify off turns email off.
+- **Playwright: 114 of 114 pass** (production build, 2 workers). New: the third flow in `tests/party.spec.ts` (capacity 1 → waitlist → cancel → promotion, recording link and highlight, refused bad link, email opt-in in the demo mailbox).
+- **i18n:** 36 new or changed keys in all 11 languages. `check-i18n`: 3938/3938 in every locale. `find-hardcoded`: 0.
+- **TypeScript:** `tsc --noEmit` is clean.
+
+### Lighthouse (mobile, two runs per page, demo data)
+Measured in this cloud container with software GPU rendering. Real devices have not been tested.
+
+First measurement (before fixes):
+
+| Page | Perf | A11y | BP | SEO | LCP | TBT | CLS |
+|---|---|---|---|---|---|---|---|
+| /u/demo/world | 23–27 | 96 | 100 | 92 | 4.6–5.6s | 6.3–6.7s | 0.848 |
+| /u/demo/world/[event] | 67 | 100 | 100 | 92 | 4.4s | 90–130ms | 0.304 |
+| /world/universes | 96 | 100 | 100 | 92 | 2.0s | 80–100ms | 0.078 |
+| /profile/parties | 96–97 | 100 | 100 | 92 | 2.0s | 120–140ms | 0.02 |
+
+Fixes:
+- Phones start in Lite, so three.js is not loaded until someone picks 3D. three.js was the 6-second blocking time.
+- Loading placeholders are now full-height, so the footer no longer jumps. This was the cause of the layout shift.
+- The world and memories pages are rendered on the server. Before, the data fetch waited for the sign-in check.
+- `htmlLimitedBots` makes Next put title and description in `<head>` for every browser. Before, they were streamed into `<body>`, and Lighthouse reported a missing description.
+- Aliens without a profile link got `role="img"`, so their `aria-label` is allowed.
+
+After the fixes:
+
+| Page | Perf | A11y | BP | SEO | LCP | TBT | CLS |
+|---|---|---|---|---|---|---|---|
+| /u/demo/world | 83–95 | 100 | 100 | 100 | 2.1–4.1s | 160ms | 0 |
+| /ja/u/demo/world | 94–95 | 100 | 100 | 100 | 2.3s | 140–160ms | 0 |
+| /u/demo/world/[event] | 96–97 | 100 | 100 | 100 | 2.1s | 90ms | 0 |
+| /ja/u/demo/world/[event] | 96 | 100 | 100 | 100 | 2.1s | 100ms | 0.006 |
+| /world/universes | 97–98 | 100 | 100 | 100 | 2.0s | 50–80ms | 0.033 |
+| /profile/parties | 97 | 100 | 100 | 69* | 2.0s | 80–90ms | 0.02 |
+| /u/demo | 86–97 | 100 | 100 | 100 | 2.0–3.9s | 50–60ms | 0.066 |
+
+\* `/profile/parties` is a private page with `noindex` on purpose. That is the only SEO item it fails.
+
+The 3D mode itself was not measured by Lighthouse after the change (it is no longer the phone default). On desktop it still loads three.js.
+
+### Not tested
+- Real phones, including camera scanning with jsQR on iPhone Safari.
+- Email through Resend: no API key is configured here. Only the demo mailbox path was tested.

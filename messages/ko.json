@@ -228,6 +228,11 @@
       "subject": "이미 FREAKTOPIA WORLD 계정이 있습니다",
       "body": "이 이메일로 가입이 시도되었지만 이미 계정이 있습니다. 여기서 로그인하거나, 비밀번호를 잊었다면 재설정하세요:",
       "footer": "본인이 아니라면 이 메일을 무시하세요. 아무것도 바뀌지 않았습니다."
+    },
+    "partyNew": {
+      "subject": "{organizer}님이 새 파티를 발표했어요",
+      "body": "{organizer}님이 FREAKTOPIA WORLD에서 {event}을(를) 발표했어요. 이 오거나이저의 새 파티 소식을 받겠다고 설정하셨어요.",
+      "footer": "이메일을 그만 받으려면 내 파티에서 '이메일 중지'를 누르거나, 오거나이저를 음소거 또는 언팔로우하세요."
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "행사 팀에 추가되었습니다.",
       "taskAssigned": "새 작업: {title}",
       "incident": "{event}에서 긴급 사고가 발생했습니다.",
-      "partyNew": "{organizer}님이 새 파티를 발표했어요: {event}"
+      "partyNew": "{organizer}님이 새 파티를 발표했어요: {event}",
+      "partyPromoted": "자리가 났어요: {event} 티켓이 생겼어요."
     },
     "err": {
       "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
@@ -3960,7 +3966,8 @@
       "going": "RSVP함",
       "checked_in": "체크인함",
       "cancelled": "취소됨",
-      "team": "팀"
+      "team": "팀",
+      "waitlist": "대기 중"
     },
     "djs": "DJ",
     "officialMedia": "공식 사진·영상",
@@ -4057,7 +4064,8 @@
       "duplicate": "이미 체크인함 (다시 집계 안 함)",
       "not_found": "이 코드의 패스가 없어요",
       "cancelled": "취소된 RSVP예요",
-      "not_entry_time": "입장 시간이 아니에요"
+      "not_entry_time": "입장 시간이 아니에요",
+      "waitlist": "대기 명단 (티켓 없음)"
     },
     "doorList": "게스트 명단 (팀 전용)",
     "methodManual": "수동",
@@ -4074,7 +4082,10 @@
       "unpublish": "월드에서 제외",
       "guests": "게스트 리스트 변경",
       "hide_media": "미디어 숨김",
-      "unhide_media": "미디어 다시 표시"
+      "unhide_media": "미디어 다시 표시",
+      "waitlist": "대기 명단 등록",
+      "promote": "대기에서 승격",
+      "party_settings": "티켓·녹화·하이라이트 변경"
     },
     "guestsTitle": "게스트 리스트 인원",
     "guestsBody": "현재: {n}명. 게스트 리스트 인원은 따로 표시되며 검증된 참석으로 집계하지 않아요.",
@@ -4087,7 +4098,7 @@
     "scannerStop": "카메라 끄기",
     "scannerAlt": "패스 스캔용 카메라 화면",
     "scannerError": "카메라를 열 수 없어요. 코드를 입력하세요.",
-    "scannerUnsupported": "이 브라우저는 카메라로 QR을 읽을 수 없어요. QR 아래 코드를 입력하세요.",
+    "scannerUnsupported": "이 브라우저에서는 카메라를 쓸 수 없어요. QR 아래 코드를 입력하세요.",
     "universes": "파티 유니버스",
     "universesSub": "검증된 파티로 만들어진 오거나이저 월드와 다가오는 파티.",
     "directoryTitle": "오거나이저 월드",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "팀원은 자기 파티를 리뷰할 수 없어요.",
       "TEAM_MEMBER": "이 파티의 팀원이에요.",
       "TOO_LARGE": "파일이 너무 커요.",
-      "NOT_PUBLISHED": "공개되지 않은 파티예요."
-    }
+      "NOT_PUBLISHED": "공개되지 않은 파티예요.",
+      "INVALID_URL": "YouTube, SoundCloud, Mixcloud, Vimeo, Twitch의 https 링크를 사용하세요."
+    },
+    "waitlistTitle": "대기 명단",
+    "waitlistBody": "파티가 꽉 찼어요. 대기 {n}번이에요. 자리가 나면 패스와 알림을 받아요.",
+    "ticketsLeft": "무료 티켓: {cap}장 중 {left}장 남음",
+    "waitlistCount": "대기 {n}명",
+    "waitlistPosition": "내 대기 순번",
+    "waitlistJoined": "대기 명단에 올랐어요.",
+    "joinWaitlist": "대기 명단 등록",
+    "getTicket": "무료 티켓 받기",
+    "highlights": "하이라이트",
+    "archives": "녹화",
+    "opensNewTab": "(새 탭에서 열림)",
+    "archivesNote": "오거나이저가 추가한, 다른 사이트에 있는 이 파티의 녹화 링크예요.",
+    "partySettings": "티켓·녹화·하이라이트",
+    "capacity": "무료 티켓 (정원)",
+    "capacityHint": "비워 두면 제한 없음. 꽉 차면 새 RSVP는 대기 명단에 들어가고, 누군가 취소하면 자동으로 올라가요. 결제는 없어요.",
+    "archivesHint": "이 파티의 YouTube, SoundCloud, Mixcloud, Vimeo, Twitch 녹화 https 링크 최대 5개.",
+    "archiveUrl": "녹화 링크",
+    "archiveLabel": "제목 (선택)",
+    "addLink": "링크 추가",
+    "highlightsHint": "먼저 보여 줄 공개 사진이나 클립을 탭한 순서대로 최대 6개 고르세요. 자동 생성하지 않아요.",
+    "highlightsNone": "공개된 사진이나 클립이 아직 없어요.",
+    "emailOff": "이메일 알림 끔",
+    "emailOn": "새 파티 소식을 이메일로도 받아요",
+    "stopEmail": "이메일 중지",
+    "emailMe": "이메일로도 받기"
   }
 }

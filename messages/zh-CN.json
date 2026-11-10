@@ -228,6 +228,11 @@
       "subject": "你已经有 FREAKTOPIA WORLD 账户了",
       "body": "有人尝试用此邮箱注册，但它已经有账户。请在这里登录，忘记密码的话也可以重置：",
       "footer": "如果不是你本人操作，请忽略此邮件。没有任何更改。"
+    },
+    "partyNew": {
+      "subject": "{organizer} 发布了新派对",
+      "body": "{organizer} 刚刚在 FREAKTOPIA WORLD 发布了 {event}。你曾选择接收此主办方的新派对通知。",
+      "footer": "如需停止这些邮件,请在「我的派对」中选择「停止邮件」,或将主办方静音或取消关注。"
     }
   },
   "alien": {
@@ -3710,7 +3715,8 @@
       "addedToTeam": "你已被加入活动团队。",
       "taskAssigned": "你的新任务：{title}",
       "incident": "{event} 发生紧急事故。",
-      "partyNew": "{organizer} 发布了新派对:{event}"
+      "partyNew": "{organizer} 发布了新派对:{event}",
+      "partyPromoted": "有空位了:你已获得 {event} 的门票。"
     },
     "err": {
       "generic": "出了点问题，请重试。",
@@ -3960,7 +3966,8 @@
       "going": "已 RSVP",
       "checked_in": "已入场",
       "cancelled": "已取消",
-      "team": "团队"
+      "team": "团队",
+      "waitlist": "候补中"
     },
     "djs": "DJ",
     "officialMedia": "官方照片与视频",
@@ -4057,7 +4064,8 @@
       "duplicate": "已入场(不会重复计数)",
       "not_found": "没有这个代码的凭证",
       "cancelled": "此 RSVP 已取消",
-      "not_entry_time": "不在入场时间内"
+      "not_entry_time": "不在入场时间内",
+      "waitlist": "候补中,没有票"
     },
     "doorList": "来宾名单(仅团队可见)",
     "methodManual": "手动",
@@ -4074,7 +4082,10 @@
       "unpublish": "已从世界移除",
       "guests": "嘉宾名单已修改",
       "hide_media": "媒体已隐藏",
-      "unhide_media": "媒体已重新显示"
+      "unhide_media": "媒体已重新显示",
+      "waitlist": "加入候补",
+      "promote": "从候补递补",
+      "party_settings": "修改了票务、录像或精彩瞬间"
     },
     "guestsTitle": "嘉宾名单人数",
     "guestsBody": "当前:{n}。嘉宾名单人数单独显示,永远不计入已验证到场。",
@@ -4087,7 +4098,7 @@
     "scannerStop": "关闭相机",
     "scannerAlt": "用于扫描凭证的相机画面",
     "scannerError": "无法打开相机。请改为输入代码。",
-    "scannerUnsupported": "此浏览器无法用相机扫描二维码。请输入二维码下方的代码。",
+    "scannerUnsupported": "此浏览器无法在这里使用相机。请输入二维码下方的代码。",
     "universes": "派对宇宙",
     "universesSub": "由已验证派对打造的主办方世界,以及即将到来的派对。",
     "directoryTitle": "主办方的世界",
@@ -4131,7 +4142,33 @@
       "TEAM_CANNOT_REVIEW": "团队成员不能评价自己的派对。",
       "TEAM_MEMBER": "你是这场派对的团队成员。",
       "TOO_LARGE": "文件太大。",
-      "NOT_PUBLISHED": "这场派对尚未公开。"
-    }
+      "NOT_PUBLISHED": "这场派对尚未公开。",
+      "INVALID_URL": "请使用 YouTube、SoundCloud、Mixcloud、Vimeo 或 Twitch 的 https 链接。"
+    },
+    "waitlistTitle": "候补中",
+    "waitlistBody": "派对已满。你是候补第 {n} 位。有空位时会收到入场凭证和通知。",
+    "ticketsLeft": "免费票:剩余 {left}/{cap} 张",
+    "waitlistCount": "{n} 人候补",
+    "waitlistPosition": "我的候补位置",
+    "waitlistJoined": "你已加入候补名单。",
+    "joinWaitlist": "加入候补",
+    "getTicket": "领取免费票",
+    "highlights": "精彩瞬间",
+    "archives": "录像",
+    "opensNewTab": "(在新标签页打开)",
+    "archivesNote": "主办方添加的、这场派对在其他网站上的录像链接。",
+    "partySettings": "票务、录像与精彩瞬间",
+    "capacity": "免费票(名额)",
+    "capacityHint": "留空表示不限。名额满后,新的 RSVP 会进入候补,有人取消时自动递补。不涉及付款。",
+    "archivesHint": "最多 5 个这场派对录像的 https 链接(YouTube、SoundCloud、Mixcloud、Vimeo 或 Twitch)。",
+    "archiveUrl": "录像链接",
+    "archiveLabel": "标题(可选)",
+    "addLink": "添加链接",
+    "highlightsHint": "按点按顺序选择最多 6 张公开照片或短片优先展示。不会自动生成任何内容。",
+    "highlightsNone": "还没有公开的照片或短片。",
+    "emailOff": "邮件通知已关闭",
+    "emailOn": "新派对也会通过邮件通知你",
+    "stopEmail": "停止邮件",
+    "emailMe": "也发邮件给我"
   }
 }

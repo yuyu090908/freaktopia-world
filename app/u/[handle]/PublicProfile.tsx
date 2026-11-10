@@ -9,7 +9,6 @@ import { DemoBadge } from "@/components/ui/primitives";
 import { EmptyState } from "@/components/ui/States";
 import { Section, useWhen } from "@/components/ops/shared";
 import { useParty } from "@/components/party/shared";
-import { useAuth } from "@/lib/auth/client";
 import type { AlienLook } from "@/lib/types";
 
 interface Profile {
@@ -28,8 +27,7 @@ export function PublicProfile({ handle }: { handle: string }) {
   const t = useTranslations("party");
   const href = useLocalHref();
   const when = useWhen();
-  const status = useAuth((s) => s.status);
-  const { data, error } = useParty<{ profile: Profile }>(status === "loading" ? null : `/api/party/profiles/${handle}`);
+  const { data, error } = useParty<{ profile: Profile }>(`/api/party/profiles/${handle}`);
   if (error) return <div className="mx-auto max-w-3xl p-4"><EmptyState title={t("profileNotFound")} body={t("profileNotFoundBody")} /></div>;
   if (!data) return <div className="mx-auto max-w-3xl p-4"><div className="h-56 animate-pulse rounded-3xl bg-surface" /></div>;
   const p = data.profile;
