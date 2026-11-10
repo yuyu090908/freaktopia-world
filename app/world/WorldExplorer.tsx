@@ -126,7 +126,7 @@ function MapEventSheet({ event, dao, onClose }: { event: FreakEvent; dao: DaoSum
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             <EventLevelBadge level={level} long />
-            {event.status === "live" && <Tag color="#FF625C" dark>● Live</Tag>}
+            {event.status === "live" && <Tag color="#FF625C" dark>● Demo live</Tag>}
           </div>
           <h2 className="mt-2 text-xl uppercase leading-none">{event.name}</h2>
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] text-mute">
@@ -150,6 +150,11 @@ function MapEventSheet({ event, dao, onClose }: { event: FreakEvent; dao: DaoSum
           <span className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: STATUS_META[dao.status].color }}>{STATUS_META[dao.status].label}</span>
           <span className="min-w-0 flex-1 truncate">{dao.members} members · {dao.activeVote ? `voting: ${dao.activeVote.title}` : `${dao.activeProposals} proposals`}</span>
           <ArrowRight className="size-4 shrink-0 text-acid" aria-hidden />
+        </Link>
+      )}
+      {event.status === "live" && (
+        <Link href={`/live/${event.id}`} className="mt-3 flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-coral font-extrabold uppercase text-coral" data-testid="map-enter-live">
+          Enter festival (demo live) <ArrowRight className="size-4" aria-hidden />
         </Link>
       )}
       <div className="mt-4 grid grid-cols-2 gap-2">

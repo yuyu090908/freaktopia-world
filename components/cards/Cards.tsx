@@ -87,7 +87,7 @@ export function EventCard({ event, className, wide = false }: { event: FreakEven
         )}
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           <EventLevelBadge level={s.level} long />
-          {event.status === "live" && <Tag color="#FF625C" dark>● Live now</Tag>}
+          {event.status === "live" && <Tag color="#FF625C" dark>● Demo live</Tag>}
         </div>
         <DemoBadge className="absolute right-3 top-3 bg-ink" />
       </Link>
@@ -129,7 +129,7 @@ export function EventRow({ event }: { event: FreakEvent }) {
       <div className="min-w-0 flex-1 py-0.5">
         <div className="flex flex-wrap items-center gap-1.5">
           <EventLevelBadge level={s.level} />
-          {event.status === "live" && <Tag color="#FF625C" dark>● Live</Tag>}
+          {event.status === "live" && <Tag color="#FF625C" dark>● Demo live</Tag>}
           {event.djRecruiting && <Tag color="#A276E9" dark>DJs wanted</Tag>}
         </div>
         <h3 className="mt-2 truncate text-lg uppercase leading-none">{event.name}</h3>

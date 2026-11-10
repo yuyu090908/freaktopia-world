@@ -11,6 +11,8 @@ export interface MapPoint {
   level: EventLevel;
   /** Optional chip on the pin, e.g. ranking position "#1". */
   label?: string;
+  /** "rank" (default) reads the label as a ranking position; "status" reads it as a status chip. */
+  labelKind?: "rank" | "status";
   /** Location is city-level only (venue not confirmed). */
   approximate?: boolean;
   /** Event has an active community DAO (shows a small DAO badge). */
@@ -109,7 +111,7 @@ export default function WorldMap({
         markers.current.delete(id);
       }
     });
-    points.forEach(({ event, level, label, approximate, dao }) => {
+    points.forEach(({ event, level, label, labelKind = "rank", approximate, dao }) => {
       const existing = markers.current.get(event.id);
       if (existing && existing.node.dataset.level === String(level) && existing.node.dataset.label === (label ?? "") && existing.node.dataset.dao === (dao ? "1" : "")) return;
       existing?.marker.remove();
@@ -120,7 +122,7 @@ export default function WorldMap({
       node.dataset.label = label ?? "";
       node.dataset.dao = dao ? "1" : "";
       node.className = "fk-marker";
-      node.setAttribute("aria-label", `${label ? `Rank ${label.replace("#", "")}: ` : ""}${event.name}, ${event.city}, level ${level}${event.status === "live" ? ", live now" : ""}${approximate ? ", approximate location" : ""}${dao ? ", community DAO active" : ""}`);
+      node.setAttribute("aria-label", `${label ? (labelKind === "rank" ? `Rank ${label.replace("#", "")}: ` : `${label}: `) : ""}${event.name}, ${event.city}, level ${level}${event.status === "live" ? ", demo live simulation" : ""}${approximate ? ", approximate location" : ""}${dao ? ", community DAO active" : ""}`);
       node.style.width = `${Math.max(44, size)}px`;
       node.style.height = `${Math.max(44, size * 1.16)}px`;
       node.innerHTML = `${event.status === "live" ? '<span class="fk-live"></span>' : ""}<span class="fk-pin" style="width:${size}px;height:${size * 1.16}px">${markerSvg(level)}</span>${label ? `<span class="fk-rank">${label}</span>` : ""}${dao ? '<span class="fk-dao" aria-hidden="true">DAO</span>' : ""}`;

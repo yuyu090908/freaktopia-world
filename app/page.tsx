@@ -127,7 +127,7 @@ export default function HomePage() {
             </span>
             <Radio className="size-5 shrink-0 text-coral" aria-hidden />
             <span className="min-w-0 flex-1 truncate text-sm font-bold">
-              <span className="text-coral">LIVE NOW</span> · {live.name} · {live.city}
+              <span className="text-coral">DEMO LIVE</span> · {live.name} · {live.city} · simulation
             </span>
             <ArrowRight className="size-5 shrink-0" aria-hidden />
           </Link>

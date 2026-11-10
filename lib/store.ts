@@ -22,6 +22,7 @@ import type {
 } from "./types";
 import { levelFor, userLevel } from "./levels";
 import type { AlertType } from "./alerts";
+import type { QuestProgress } from "./live/quests";
 
 export const DEFAULT_LOOK: AlienLook = {
   species: "slime",
@@ -85,6 +86,15 @@ interface DemoState {
   liveShowAvatar: boolean;
   liveZone: string;
   liveCheckedIn: boolean;
+  /** LIVE FESTIVAL 6.0 (this browser only) */
+  liveVisibility: "public" | "friends" | "hidden";
+  liveDance: "bounce" | "wiggle" | "spin";
+  liveEmote: "wave" | "heart" | "fire" | "alien" | "none";
+  liveQuests: Record<string, QuestProgress>;
+  liveReminders: string[]; // set ids
+  liveTz: "venue" | "local";
+  liveLikes: string[]; // event ids
+  liveBadges: string[];
   ownedItems: string[];
   club: { name: string; tier: number };
   inquiriesAnswered: string[];
@@ -115,7 +125,10 @@ interface DemoState {
   addComment: (djId: string, c: Comment) => void;
   like: (djId: string) => void;
   vote: (djId: string, stars: number) => void;
-  setLive: (p: Partial<Pick<DemoState, "liveShowAvatar" | "liveZone" | "liveCheckedIn">>) => void;
+  setLive: (p: Partial<Pick<DemoState, "liveShowAvatar" | "liveZone" | "liveCheckedIn" | "liveVisibility" | "liveDance" | "liveEmote" | "liveTz">>) => void;
+  setLiveQuests: (eventId: string, p: QuestProgress, badges?: string[]) => void;
+  toggleReminder: (setId: string) => boolean;
+  toggleLiveLike: (eventId: string) => boolean;
   setClub: (c: Partial<DemoState["club"]>) => void;
   answerInquiry: (id: string) => void;
   toggleFollow: (eventId: string) => boolean;
@@ -149,6 +162,14 @@ const initial = {
   liveShowAvatar: false,
   liveZone: "entrance",
   liveCheckedIn: false,
+  liveVisibility: "public" as "public" | "friends" | "hidden",
+  liveDance: "bounce" as "bounce" | "wiggle" | "spin",
+  liveEmote: "none" as "wave" | "heart" | "fire" | "alien" | "none",
+  liveQuests: {} as Record<string, QuestProgress>,
+  liveReminders: [] as string[],
+  liveTz: "venue" as "venue" | "local",
+  liveLikes: [] as string[],
+  liveBadges: [] as string[],
   ownedItems: ["headphones", "hoodie", "cap"],
   club: { name: "MY FIRST CLUB", tier: 1 },
   inquiriesAnswered: [],
@@ -232,6 +253,18 @@ const useDemoRaw = create<DemoState>()(
       like: (djId) => set((s) => ({ likes: { ...s.likes, [djId]: (s.likes[djId] ?? 0) + 1 } })),
       vote: (djId, stars) => set((s) => ({ votes: { ...s.votes, [djId]: stars } })),
       setLive: (p) => set(p),
+      setLiveQuests: (eventId, p, badges = []) =>
+        set((s) => ({ liveQuests: { ...s.liveQuests, [eventId]: p }, liveBadges: Array.from(new Set([...s.liveBadges, ...badges])) })),
+      toggleReminder: (setId) => {
+        const has = get().liveReminders.includes(setId);
+        set((s) => ({ liveReminders: has ? s.liveReminders.filter((x) => x !== setId) : [...s.liveReminders, setId] }));
+        return !has;
+      },
+      toggleLiveLike: (eventId) => {
+        const has = get().liveLikes.includes(eventId);
+        set((s) => ({ liveLikes: has ? s.liveLikes.filter((x) => x !== eventId) : [...s.liveLikes, eventId] }));
+        return !has;
+      },
       setClub: (c) => set((s) => ({ club: { ...s.club, ...c } })),
       answerInquiry: (id) => set((s) => ({ inquiriesAnswered: [...s.inquiriesAnswered, id] })),
       toggleFollow: (eventId) => {

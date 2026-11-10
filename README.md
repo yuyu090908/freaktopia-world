@@ -41,7 +41,8 @@ Requirements: Node 20 or later.
 | `/rankings`, `/rankings/compare` | WORLD RANKING: 8 public categories plus FOR YOU, search, URL-synced filters, TOP 3, map view, compare and follow. See `docs/WORLD_RANKING.md` |
 | `/dao`, `/dao/[eventId]` + `/discussion`, `/proposals`, `/proposals/[proposalId]`, `/votes`, `/stage-designer`, `/gallery`, `/treasury`, `/roadmap`, `/members`, `/settings` | FESTIVAL DAO: stake-to-join event DAOs, discussion, proposal lifecycle, one-account-one-vote voting, AI Stage Designer, treasury, build game. **Demo: no blockchain or payment connected.** See `docs/FESTIVAL_DAO.md` |
 | `/alerts` | In-app alerts for followed events, with per-type settings |
-| `/live` | Live festival map. Location is opt-in and zone-level only, with no precise tracking |
+| `/live` | LIVE discovery: featured festival with honest status (no real stream is connected, so the demo shows as **DEMO LIVE**), category chips, search, sort and the live world map. See `docs/LIVE_FESTIVAL.md` |
+| `/live/[eventId]` | Festival room with tabs Watch / Map / Schedule / Community / More: demo DJ player, isometric 10-zone festival map with avatars, timetable in venue or your time zone, chat, reactions, energy game, quests, door check-in demo, after party portal, DAO and ranking. **Demo: no stream, payment or door system connected.** |
 | `/avatar` | Alien builder: SLIME BEAT, COSMIC FUZZ, VINYL MUTANT, JELLY RAVER |
 | `/profile` | Profile, XP and level, history |
 | `/dashboard?role=` | Fan, organizer, DJ and venue dashboards |
@@ -58,7 +59,7 @@ Requirements: Node 20 or later.
 - Accounts and auth, plus a server-side database
 - Live streaming and audition audio or video
 - Wallets and NFT minting (collectibles exist as UI only). The FESTIVAL DAO uses a throwaway demo wallet that only signs in; staking is a demo ledger
-- Real-time live map with consented, zone-level presence
+- Production realtime transport for the live room (the demo polls an in-memory API; see `docs/LIVE_FESTIVAL.md`), real stream provider (Mux or LiveKit) and door-staff accounts
 - AI features (recommendations, matching)
 - Japanese and English locale toggle (copy is English-first, with Japanese line-breaking support)
 - Moderation, reporting, notifications, email
@@ -76,5 +77,6 @@ Requirements: Node 20 or later.
 - `tests/flows.spec.ts`: 13 Playwright flows. All pass.
 - `tests/rankings.spec.ts`: 12 Playwright tests for WORLD RANKING. All pass.
 - `tests/dao.spec.ts`: 12 Playwright tests for the FESTIVAL DAO (join, post, upload, propose, vote, double vote, compare, integrations, 375–1440 px). All pass.
-- `tests/unit` and `tests/integration`: 89 vitest tests for the ranking engine, ranking API, DAO domain logic and DAO API. All pass.
+- `tests/live.spec.ts`: 21 Playwright tests for the LIVE FESTIVAL (15 flows, upcoming-event check, 375–1440 px layout and tap targets).
+- `tests/unit` and `tests/integration`: vitest tests for the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.

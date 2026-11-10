@@ -10,6 +10,7 @@ import {
   MapPin,
   Mic2,
   Play,
+  Radio,
   RotateCcw,
   Share2,
   Ticket,
@@ -99,7 +100,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
           <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-ink to-transparent md:hidden" aria-hidden />
           <div className="absolute left-4 top-4 flex flex-wrap gap-1.5">
             <EventLevelBadge level={stats.level} long />
-            {event.status === "live" && <Tag color="#FF625C" dark>● Live now</Tag>}
+            {event.status === "live" && <Tag color="#FF625C" dark>● Demo live</Tag>}
           </div>
           <DemoBadge label="Demo event" className="absolute right-4 top-4 bg-ink" />
         </div>
@@ -121,6 +122,11 @@ export function EventDetail({ event }: { event: FreakEvent }) {
           {/* ACTIONS */}
           {ended && (
             <DemoNotice className="mt-5">This event has ended. Support and tickets are closed; it still appears in the WORLD RANKING (Most attended).</DemoNotice>
+          )}
+          {event.status === "live" && (
+            <ButtonLink href={`/live/${event.id}`} variant="coral" size="lg" className="mt-5 w-full">
+              <Radio className="size-5" aria-hidden /> Enter festival (demo live)
+            </ButtonLink>
           )}
           <div className={cn("mt-5 grid grid-cols-2 gap-2.5", ended && "hidden")}>
             <Button onClick={() => setSheet(true)} className="col-span-2" size="lg">

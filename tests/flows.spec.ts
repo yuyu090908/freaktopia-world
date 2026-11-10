@@ -122,14 +122,16 @@ test("audition: vote, like, comment", async ({ page }) => {
 });
 
 test("live map: consent toggle and move zone", async ({ page }) => {
-  await page.goto("/live");
+  await page.goto("/live/bassmutant-tokyo#map");
   await page.getByRole("group", { name: "Move my avatar" }).getByRole("button", { name: "Bar" }).click();
   await expect(page.getByText("Turn on ‘Show my avatar’ first")).toBeVisible();
   await page.getByRole("switch", { name: /show my avatar/i }).click();
   await page.getByRole("group", { name: "Move my avatar" }).getByRole("button", { name: "Bar" }).click();
   await expect(page.getByText("Moved to Bar")).toBeVisible();
-  await page.getByRole("button", { name: /check in/i }).click();
-  await expect(page.getByText(/checked in \(demo\)/i)).toBeVisible();
+  await page.getByRole("tab", { name: "More" }).click();
+  await page.getByRole("button", { name: "Get a demo ticket" }).click();
+  await page.getByRole("button", { name: /scan my qr/i }).click();
+  await expect(page.getByText(/checked in \(demo\)/i).first()).toBeVisible();
 });
 
 test("venue listing flow", async ({ page }) => {
