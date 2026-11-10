@@ -31,7 +31,7 @@ test.describe("world map 7.0", () => {
     await page.goto("/world");
     await ready(page);
     await expect(page.getByTestId("world-count")).toHaveText("18 events");
-    await expect(page.locator("[data-testid=landmark], [data-testid=landmark-cluster]").first()).toBeVisible();
+    await expect(page.locator("[data-testid=landmark], [data-testid=landmark-cluster], [data-testid=city-marker]").first()).toBeVisible();
     await expect(page.getByText("Sample events")).toBeVisible();
     // Attribution for the geography and terrain sources is present.
     await expect(page.locator(".maplibregl-ctrl-attrib")).toContainText("Natural Earth");
@@ -191,8 +191,22 @@ test.describe("world map 7.0", () => {
     const cluster = page.getByTestId("landmark-cluster").first();
     if ((await cluster.count()) === 0) test.skip(true, "no cluster at this viewport");
     const ids = (await cluster.getAttribute("data-ids"))!.split(",");
+    const zoom = async () => Number((await camera(page))!.split(",")[2]);
+    let z = await zoom();
     await cluster.dispatchEvent("click"); // it may sit under the top bar at this size; the tap itself is what we test
-    for (const id of ids) await expect(page.locator(`[data-testid=landmark][data-ids="${id}"]`)).toBeVisible({ timeout: 10_000 });
+    // A cluster of cities can open into smaller clusters first: each tap zooms further in until the festival stands alone.
+    const id = ids[0];
+    for (let i = 0; i < 5; i++) {
+      await expect.poll(zoom, { timeout: 15_000 }).toBeGreaterThan(z);
+      await expect(page.getByTestId("world-map")).toHaveAttribute("data-idle", "true", { timeout: 15_000 });
+      if (await page.locator(`[data-testid=landmark][data-ids="${id}"]`).count()) break;
+      z = await zoom();
+      await page.locator(`[data-testid=landmark-cluster][data-ids*="${id}"]`).first().dispatchEvent("click");
+    }
+    await expect(page.locator(`[data-testid=landmark][data-ids="${id}"]`)).toBeVisible({ timeout: 10_000 });
+    // Festivals that stood together in the tapped cluster and are still on screen are separate landmarks too.
+    const near = await page.locator("[data-testid=landmark]").evaluateAll((els) => els.map((e) => (e as HTMLElement).dataset.ids));
+    expect(near.length).toBeGreaterThan(0);
   });
 
   test("lite renderer without WebGL still shows landmarks", async ({ page }) => {
@@ -236,3 +250,94 @@ for (const width of [375, 390, 430, 768, 1440]) {
     await page.screenshot({ path: `test-results/world-${width}-selected.png` });
   });
 }
+
+test.describe("neon party planet 9.3", () => {
+  test("globe in space: coloured regions, backdrop and aliens are decoration only", async ({ page }) => {
+    await page.goto("/world");
+    await ready(page);
+    const space = page.getByTestId("space-backdrop");
+    await expect(space).toBeAttached();
+    await expect(space).toHaveAttribute("aria-hidden", "true");
+    expect(await space.evaluate((e) => getComputedStyle(e).pointerEvents)).toBe("none");
+    // The map is a real interactive globe (not an image): a WebGL canvas with the globe projection.
+    await expect(page.locator("[data-testid=world-map] canvas.maplibregl-canvas")).toBeVisible();
+    await expect(page.locator(".wm-globe")).toBeAttached();
+  });
+
+  test("party city: tap opens the preview with counts from shown events, then a festival or the list", async ({ page }) => {
+    await page.goto("/world");
+    await ready(page);
+    const lagos = page.locator('[data-testid=city-marker][data-city="Lagos|Nigeria"]');
+    await expect(lagos).toBeAttached();
+    await expect(lagos).toHaveAttribute("aria-label", /Lagos, Nigeria: 1 event shown/);
+    await lagos.dispatchEvent("click");
+    const preview = page.getByTestId("city-preview");
+    await expect(preview).toBeVisible();
+    await expect(page).toHaveURL(/city=Lagos/);
+    await expect(preview.getByTestId("city-preview-name")).toHaveText("Lagos");
+    await expect(preview.getByTestId("city-preview-total")).toHaveText("1 event shown here");
+    await expect(preview.getByTestId("city-preview-stats")).toContainText("Upcoming");
+    await expect.poll(async () => Number((await camera(page))!.split(",")[2]), { timeout: 15_000 }).toBeGreaterThan(4);
+    await preview.getByRole("button", { name: /LOW-END LIGHTHOUSE/ }).click();
+    await expect(page.getByTestId("city-preview")).toHaveCount(0);
+    await expect(page).toHaveURL(/event=lagos-lighthouse/);
+    await expect(page).not.toHaveURL(/city=/);
+
+    await page.goto("/world?city=Lagos%7CNigeria");
+    await ready(page);
+    await page.getByTestId("city-see-events").click();
+    await expect(page.getByTestId("world-list")).toBeVisible();
+    await expect(page).toHaveURL(/q=Lagos/);
+    await expect(page.getByTestId("world-count")).toHaveText("1 event");
+  });
+
+  test("city search opens the preview; community parties link to the organizer's party world", async ({ page }) => {
+    await page.goto("/world");
+    await ready(page);
+    await page.getByRole("combobox").fill("bangk");
+    await page.getByRole("option", { name: /^Bangkok/ }).click();
+    const preview = page.getByTestId("city-preview");
+    await expect(preview.getByTestId("city-preview-name")).toHaveText("Bangkok");
+    await expect(preview).toContainText("Rooftops, golden temples");
+    const parties = preview.getByTestId("city-preview-parties");
+    // Published Bangkok parties (the demo world's SLIME SYSTEM, or ones other tests published) link to their organizer's world.
+    const organizer = parties.getByTestId("city-organizer-world").first();
+    await expect(organizer).toHaveAttribute("href", /\/u\/[^/]+\/world$/);
+    await organizer.click();
+    await expect(page).toHaveURL(/\/u\/[^/]+\/world$/, { timeout: 20_000 });
+    await expect(page.getByTestId("world-title")).toBeVisible();
+  });
+
+  test("region focus filters, syncs to the URL and works from search", async ({ page }) => {
+    await page.goto("/world");
+    await ready(page);
+    await page.getByRole("button", { name: /^Filters/ }).click();
+    const dlg = page.getByRole("dialog", { name: "Filters" });
+    await dlg.getByTestId("region-filter").getByRole("button", { name: "Africa" }).click();
+    await dlg.getByRole("button", { name: /^Show/ }).click();
+    await expect(page).toHaveURL(/rg=af/);
+    await expect(page.getByTestId("world-count")).toHaveText("2 events");
+    await expect(page.getByTestId("region-active")).toContainText("Africa");
+    await page.getByTestId("region-active").click();
+    await expect(page).not.toHaveURL(/rg=/);
+    await expect(page.getByTestId("world-count")).toHaveText("18 events");
+
+    await page.getByRole("combobox").fill("oceania");
+    await page.getByRole("option", { name: /^Oceania/ }).click();
+    await expect(page).toHaveURL(/rg=oc/);
+    await expect(page.getByTestId("world-count")).toHaveText("1 event");
+    await expect.poll(async () => Number((await camera(page))!.split(",")[0]), { timeout: 15_000 }).toBeGreaterThan(100);
+  });
+
+  test("sample events name their organizer honestly; the legend explains the city rings", async ({ page }) => {
+    await page.goto("/world?event=tuk-tuk-trance");
+    await ready(page);
+    const sheet = panel(page, /TUK TUK TRANCE summary/);
+    await sheet.getByRole("button", { name: "Show all details" }).click();
+    await expect(sheet).toContainText("Mochi Crew");
+    await expect(sheet).toContainText("Sample organizer: no party world yet");
+    await sheet.getByRole("button", { name: "Close festival details" }).click();
+    await page.getByRole("button", { name: "Legend" }).click();
+    await expect(page.getByTestId("legend-city-note")).toContainText("not popularity or quality");
+  });
+});

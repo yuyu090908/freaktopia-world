@@ -537,7 +537,9 @@
       "eventFinished": "Acara selesai",
       "soldOut": "Habis terjual",
       "notOnSale": "Belum dijual sampai terkonfirmasi",
-      "ticketsLeft": "Sisa {count} · mulai {price} (pembayaran demo)"
+      "ticketsLeft": "Sisa {count} · mulai {price} (pembayaran demo)",
+      "organizer": "Penyelenggara",
+      "organizerSample": "Penyelenggara contoh: belum punya dunia pesta"
     },
     "actions": {
       "enterDemoLive": "Masuk festival (live demo)",
@@ -563,7 +565,8 @@
       "country": "Negara",
       "venue": "Venue",
       "dj": "DJ",
-      "genre": "Genre"
+      "genre": "Genre",
+      "region": "Wilayah"
     },
     "keys": {
       "viewers": "Penonton online",
@@ -634,7 +637,59 @@
     "markerTrending": "TREN",
     "markerTrendingTitle": "Tren (7 hari)",
     "markerFunding": "PENDANAAN {pct}%",
-    "signed": "ditandatangani"
+    "signed": "ditandatangani",
+    "cityEvents": "{count} acara",
+    "cityAria": "{city}, {country}: {count} acara ditampilkan{live, plural, =0 {} other {, # siaran langsung demo}}. Buka pratinjau kota",
+    "cityClusterAria": "{cities}: {count} acara di kota-kota terdekat. Perbesar",
+    "cityLiveBadge": "DEMO LANGSUNG",
+    "regionFocus": "Fokus wilayah",
+    "regionAll": "Seluruh planet",
+    "regionClear": "Hapus wilayah {region}",
+    "legendCityNote": "Pada tampilan dunia, setiap kota adalah satu panggung. Cincinnya menunjukkan berapa banyak acara yang ditampilkan ada di sana (1, 2, 3 atau lebih), bukan popularitas atau kualitas. Denyut merah berarti ada acara yang sedang siaran langsung (demo).",
+    "regions": {
+      "na": "Amerika Utara",
+      "sa": "Amerika Selatan",
+      "eu": "Eropa",
+      "as": "Asia",
+      "me": "Timur Tengah",
+      "af": "Afrika",
+      "oc": "Oseania",
+      "an": "Antarktika"
+    },
+    "city": {
+      "eyebrow": "Pratinjau festival kota",
+      "aria": "Festival di {city}",
+      "close": "Tutup pratinjau kota",
+      "total": "{count} acara ditampilkan di sini",
+      "stats": {
+        "upcoming": "Akan datang",
+        "live": "Demo langsung",
+        "djWanted": "Cari DJ",
+        "funding": "Pendanaan",
+        "dao": "DAO",
+        "afterParty": "After party"
+      },
+      "countsNote": "Dihitung dari acara yang ditampilkan di peta (filter Anda berlaku).",
+      "events": "Acara",
+      "more": "{count} lagi di daftar",
+      "community": "Pesta komunitas",
+      "organizerWorld": "Dunia pesta {name}",
+      "demoWorld": "dunia demo",
+      "seeEvents": "Lihat acara",
+      "taglineRegion": "Kota pesta di {region}.",
+      "taglineGeneric": "Kota pesta di planet FREAKTOPIA.",
+      "tagline": {
+        "berlin": "Kota techno: bunker beton, laser ungu, dan malam panjang.",
+        "ibiza": "Pulau beach club dan set matahari terbit di tepi laut.",
+        "bangkok": "Rooftop, kuil emas, dan malam neon di tepi sungai.",
+        "new_york": "Kota pencakar langit dengan rave gudang dan pesta jalanan.",
+        "dubai": "Cakrawala gurun dengan panggung terbuka di bawah bintang.",
+        "rio": "Irama tropis di kaki gunung, dari pantai ke jalanan.",
+        "sydney": "Pesta pelabuhan dengan layar putih bercahaya biru.",
+        "tokyo": "Papan neon, klub mungil, dan sound system besar.",
+        "london": "Klub, gudang, dan akar radio bajakan."
+      }
+    }
   },
   "ranking": {
     "title": "Peringkat dunia",

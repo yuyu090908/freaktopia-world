@@ -537,7 +537,9 @@
       "eventFinished": "Evento encerrado",
       "soldOut": "Esgotado",
       "notOnSale": "À venda só depois da confirmação",
-      "ticketsLeft": "Restam {count} · a partir de {price} (checkout de demonstração)"
+      "ticketsLeft": "Restam {count} · a partir de {price} (checkout de demonstração)",
+      "organizer": "Organizador",
+      "organizerSample": "Organizador de exemplo: ainda sem mundo de festas"
     },
     "actions": {
       "enterDemoLive": "Entrar no festival (demo ao vivo)",
@@ -563,7 +565,8 @@
       "country": "País",
       "venue": "Casa",
       "dj": "DJ",
-      "genre": "Gênero"
+      "genre": "Gênero",
+      "region": "Região"
     },
     "keys": {
       "viewers": "Espectadores online",
@@ -634,7 +637,59 @@
     "markerTrending": "EM ALTA",
     "markerTrendingTitle": "Em alta (7 dias)",
     "markerFunding": "FINANCIAMENTO {pct}%",
-    "signed": "assinado"
+    "signed": "assinado",
+    "cityEvents": "{count, plural, one {# evento} other {# eventos}}",
+    "cityAria": "{city}, {country}: {count, plural, one {# evento} other {# eventos}} exibidos{live, plural, =0 {} other {, # ao vivo (demo)}}. Abrir prévia da cidade",
+    "cityClusterAria": "{cities}: {count, plural, one {# evento} other {# eventos}} em cidades próximas. Aproximar",
+    "cityLiveBadge": "DEMO AO VIVO",
+    "regionFocus": "Foco por região",
+    "regionAll": "Planeta inteiro",
+    "regionClear": "Limpar região {region}",
+    "legendCityNote": "Na visão mundial cada cidade é um palco. Os anéis mostram quantos dos eventos exibidos estão lá (1, 2, 3 ou mais), não popularidade nem qualidade. Um pulso vermelho indica um evento ao vivo (demo).",
+    "regions": {
+      "na": "América do Norte",
+      "sa": "América do Sul",
+      "eu": "Europa",
+      "as": "Ásia",
+      "me": "Oriente Médio",
+      "af": "África",
+      "oc": "Oceania",
+      "an": "Antártida"
+    },
+    "city": {
+      "eyebrow": "Prévia de festivais da cidade",
+      "aria": "Festivais em {city}",
+      "close": "Fechar prévia da cidade",
+      "total": "{count, plural, one {# evento exibido aqui} other {# eventos exibidos aqui}}",
+      "stats": {
+        "upcoming": "Em breve",
+        "live": "Demo ao vivo",
+        "djWanted": "Procura-se DJ",
+        "funding": "Financiamento",
+        "dao": "DAO",
+        "afterParty": "After party"
+      },
+      "countsNote": "Contado a partir dos eventos exibidos no mapa (seus filtros se aplicam).",
+      "events": "Eventos",
+      "more": "Mais {count} na lista",
+      "community": "Festas da comunidade",
+      "organizerWorld": "Mundo de festas de {name}",
+      "demoWorld": "mundo demo",
+      "seeEvents": "Ver eventos",
+      "taglineRegion": "Uma cidade de festa na região {region}.",
+      "taglineGeneric": "Uma cidade de festa no planeta FREAKTOPIA.",
+      "tagline": {
+        "berlin": "Cidade do techno: bunkers de concreto, lasers roxos e noites longas.",
+        "ibiza": "Ilha de beach clubs e sets ao nascer do sol à beira-mar.",
+        "bangkok": "Rooftops, templos dourados e noites de neon à beira do rio.",
+        "new_york": "Cidade dos arranha-céus, raves em galpões e festas de rua.",
+        "dubai": "Horizonte do deserto com palcos ao ar livre sob as estrelas.",
+        "rio": "Batidas tropicais sob a montanha, da praia à rua.",
+        "sydney": "Festas no porto com as velas brancas em azul.",
+        "tokyo": "Letreiros de neon, clubes minúsculos e grandes sistemas de som.",
+        "london": "Clubes, galpões e raízes de rádio pirata."
+      }
+    }
   },
   "ranking": {
     "title": "Ranking mundial",

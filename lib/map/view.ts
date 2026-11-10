@@ -6,6 +6,7 @@ import { DEMO_NOW, type DateRange } from "@/lib/filters";
 import { computeFestivalLevel, type GrowthConfig, type GrowthResult } from "./growth";
 import { STATUS_META } from "./landmarks";
 import type { MapEventDto } from "./types";
+import { isRegionKey, regionOfCountry, type RegionKey } from "./regions";
 
 export interface WorldEvent extends MapEventDto {
   growthResult: GrowthResult;
@@ -31,9 +32,11 @@ export interface MapFilters {
   levels: EventLevel[];
   genres: Genre[];
   date: DateRange;
+  /** Region focus (display region of the event's country). */
+  region?: Exclude<RegionKey, "an"> | null;
 }
 
-export const EMPTY_MAP_FILTERS: MapFilters = { q: "", flags: [], levels: [], genres: [], date: "any" };
+export const EMPTY_MAP_FILTERS: MapFilters = { q: "", flags: [], levels: [], genres: [], date: "any", region: null };
 
 export function toWorldEvents(events: MapEventDto[], cfg: GrowthConfig, local?: (id: string) => { supporters: number; fundingUsd: number } | undefined): WorldEvent[] {
   return events.map((e) => {
@@ -80,6 +83,7 @@ export function filterWorld<T extends MapEventDto>(events: T[], f: MapFilters, n
     for (const k of f.flags) if (!matchFlag(e, k, now)) return false;
     if (f.levels.length && !f.levels.includes(e.level)) return false;
     if (f.genres.length && !e.genres.some((g) => f.genres.includes(g))) return false;
+    if (f.region && regionOfCountry(e.country) !== f.region) return false;
     const t = Date.parse(e.startsAt);
     const end = Date.parse(e.endsAt);
     if (f.date === "30d" && (t > now + 30 * 864e5 || end < now)) return false;
@@ -89,9 +93,9 @@ export function filterWorld<T extends MapEventDto>(events: T[], f: MapFilters, n
   });
 }
 
-export const filterCount = (f: MapFilters) => f.flags.length + f.levels.length + f.genres.length + (f.date !== "any" ? 1 : 0);
+export const filterCount = (f: MapFilters) => f.flags.length + f.levels.length + f.genres.length + (f.date !== "any" ? 1 : 0) + (f.region ? 1 : 0);
 
-export type SuggestionKind = "event" | "city" | "country" | "dj" | "venue" | "genre";
+export type SuggestionKind = "event" | "city" | "country" | "dj" | "venue" | "genre" | "region";
 export interface Suggestion {
   kind: SuggestionKind;
   label: string;
@@ -125,6 +129,19 @@ export function suggest(events: MapEventDto[], query: string): Suggestion[] {
   return out.sort((a, b) => starts(a) - starts(b) || order.indexOf(a.kind) - order.indexOf(b.kind)).slice(0, 8);
 }
 
+/** Region suggestions for the search box: matches the localized and the English region name. `label` is the region key. */
+export function suggestRegions(events: MapEventDto[], query: string, names: Record<string, string[]>): (Suggestion & { region: Exclude<RegionKey, "an"> })[] {
+  const q = norm(query);
+  if (q.length < 2) return [];
+  const out: (Suggestion & { region: Exclude<RegionKey, "an"> })[] = [];
+  for (const [k, list] of Object.entries(names)) {
+    if (!isRegionKey(k) || !list.some((n) => norm(n).includes(q))) continue;
+    const ids = events.filter((e) => regionOfCountry(e.country) === k).map((e) => e.id);
+    out.push({ kind: "region", label: list[0], sub: String(ids.length), eventIds: ids, region: k });
+  }
+  return out;
+}
+
 /* ---------- URL state ---------- */
 
 const GENRE_SET = new Set<string>(["Techno", "House", "Drum & Bass", "Psytrance", "Hip-Hop", "Amapiano", "Disco", "Ambient", "Hardcore", "Afro House", "Garage", "Footwork"]);
@@ -133,6 +150,8 @@ export interface WorldUrlState {
   filters: MapFilters;
   view: "map" | "list";
   event: string | null;
+  /** City preview open on the globe ("City|Country"). */
+  city?: string | null;
 }
 
 export function readWorldUrl(p: URLSearchParams): WorldUrlState {
@@ -142,9 +161,10 @@ export function readWorldUrl(p: URLSearchParams): WorldUrlState {
   const d = p.get("date");
   const date: DateRange = d === "30d" || d === "90d" || d === "2027" ? d : "any";
   return {
-    filters: { q: (p.get("q") ?? "").slice(0, 80), flags: [...new Set(flags)], levels: [...new Set(levels)], genres: [...new Set(genres)], date },
+    filters: { q: (p.get("q") ?? "").slice(0, 80), flags: [...new Set(flags)], levels: [...new Set(levels)], genres: [...new Set(genres)], date, region: isRegionKey(p.get("rg")) ? (p.get("rg") as Exclude<RegionKey, "an">) : null },
     view: p.get("view") === "list" ? "list" : "map",
     event: p.get("event")?.slice(0, 80) || null,
+    city: p.get("city")?.slice(0, 120) || null,
   };
 }
 
@@ -155,8 +175,10 @@ export function writeWorldUrl(s: WorldUrlState): string {
   if (s.filters.levels.length) p.set("lv", [...s.filters.levels].sort().join(","));
   for (const g of s.filters.genres) p.append("g", g);
   if (s.filters.date !== "any") p.set("date", s.filters.date);
+  if (s.filters.region) p.set("rg", s.filters.region);
   if (s.view === "list") p.set("view", "list");
   if (s.event) p.set("event", s.event);
+  else if (s.city) p.set("city", s.city);
   const str = p.toString();
   return str ? `?${str}` : "";
 }

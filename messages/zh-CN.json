@@ -537,7 +537,9 @@
       "eventFinished": "活动已结束",
       "soldOut": "已售罄",
       "notOnSale": "确定之前不开售",
-      "ticketsLeft": "剩余 {count} 张 · {price} 起（演示结账）"
+      "ticketsLeft": "剩余 {count} 张 · {price} 起（演示结账）",
+      "organizer": "主办方",
+      "organizerSample": "示例主办方：尚无派对世界"
     },
     "actions": {
       "enterDemoLive": "进入音乐节（演示直播）",
@@ -563,7 +565,8 @@
       "country": "国家",
       "venue": "场地",
       "dj": "DJ",
-      "genre": "风格"
+      "genre": "风格",
+      "region": "区域"
     },
     "keys": {
       "viewers": "在线观众",
@@ -634,7 +637,59 @@
     "markerTrending": "飙升",
     "markerTrendingTitle": "飙升（7 天）",
     "markerFunding": "筹资 {pct}%",
-    "signed": "已签署"
+    "signed": "已签署",
+    "cityEvents": "{count} 场活动",
+    "cityAria": "{city}，{country}：显示 {count} 场活动{live, plural, =0 {} other {，# 场演示直播}}。打开城市预览",
+    "cityClusterAria": "{cities}：附近城市共 {count} 场活动。放大",
+    "cityLiveBadge": "演示直播",
+    "regionFocus": "区域聚焦",
+    "regionAll": "整个星球",
+    "regionClear": "清除区域 {region}",
+    "legendCityNote": "世界视图中每座城市显示为一个舞台。光环表示该城市有多少场当前显示的活动（1、2、3 场及以上），不代表人气或品质。红色闪烁表示那里有演示直播中的活动。",
+    "regions": {
+      "na": "北美洲",
+      "sa": "南美洲",
+      "eu": "欧洲",
+      "as": "亚洲",
+      "me": "中东",
+      "af": "非洲",
+      "oc": "大洋洲",
+      "an": "南极洲"
+    },
+    "city": {
+      "eyebrow": "城市音乐节预览",
+      "aria": "{city} 音乐节预览",
+      "close": "关闭城市预览",
+      "total": "此城市显示 {count} 场活动",
+      "stats": {
+        "upcoming": "即将举行",
+        "live": "演示直播",
+        "djWanted": "招募 DJ",
+        "funding": "众筹中",
+        "dao": "DAO",
+        "afterParty": "After Party"
+      },
+      "countsNote": "按地图上显示的活动统计（会应用你的筛选）。",
+      "events": "活动",
+      "more": "其余 {count} 场在列表中",
+      "community": "社区派对",
+      "organizerWorld": "{name} 的派对世界",
+      "demoWorld": "演示世界",
+      "seeEvents": "查看活动",
+      "taglineRegion": "{region}的派对城市。",
+      "taglineGeneric": "FREAKTOPIA 星球上的派对城市。",
+      "tagline": {
+        "berlin": "Techno 之城：混凝土地堡、紫色激光与漫长的夜。",
+        "ibiza": "海滩俱乐部与海边日出演出之岛。",
+        "bangkok": "屋顶、金色寺庙与河畔霓虹之夜。",
+        "new_york": "仓库锐舞与街区派对的摩天之城。",
+        "dubai": "星空下的露天舞台与沙漠天际线。",
+        "rio": "山脚下的热带节拍，从海滩到街头。",
+        "sydney": "白色风帆映成蓝色的港湾派对。",
+        "tokyo": "霓虹招牌、小型俱乐部与强大音响。",
+        "london": "俱乐部、仓库与海盗电台的根源。"
+      }
+    }
   },
   "ranking": {
     "title": "世界排行榜",

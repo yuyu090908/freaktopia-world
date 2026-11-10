@@ -537,7 +537,9 @@
       "eventFinished": "Event finished",
       "soldOut": "Sold out",
       "notOnSale": "Not on sale until confirmed",
-      "ticketsLeft": "{count} left · from {price} (demo checkout)"
+      "ticketsLeft": "{count} left · from {price} (demo checkout)",
+      "organizer": "Organizer",
+      "organizerSample": "Sample organizer: no party world yet"
     },
     "actions": {
       "enterDemoLive": "Enter festival (demo live)",
@@ -563,7 +565,8 @@
       "country": "Country",
       "venue": "Venue",
       "dj": "DJ",
-      "genre": "Genre"
+      "genre": "Genre",
+      "region": "Region"
     },
     "keys": {
       "viewers": "Online viewers",
@@ -634,7 +637,59 @@
     "mapAriaApprox": "approximate location",
     "mapAriaDao": "community DAO active",
     "mapAriaNearby": "(+{n} nearby, tap to zoom)",
-    "signed": "signed"
+    "signed": "signed",
+    "cityEvents": "{count, plural, one {# event} other {# events}}",
+    "cityAria": "{city}, {country}: {count, plural, one {# event} other {# events}} shown{live, plural, =0 {} other {, # demo live}}. Open the city preview",
+    "cityClusterAria": "{cities}: {count, plural, one {# event} other {# events}} in nearby cities. Zoom in",
+    "cityLiveBadge": "DEMO LIVE",
+    "regionFocus": "Region focus",
+    "regionAll": "Whole planet",
+    "regionClear": "Clear region {region}",
+    "legendCityNote": "At world zoom each city is one stage. Its rings show how many of the shown events are there (1, 2, 3 or more), not popularity or quality. A red pulse means an event there is demo live.",
+    "regions": {
+      "na": "North America",
+      "sa": "South America",
+      "eu": "Europe",
+      "as": "Asia",
+      "me": "Middle East",
+      "af": "Africa",
+      "oc": "Oceania",
+      "an": "Antarctica"
+    },
+    "city": {
+      "eyebrow": "City festival preview",
+      "aria": "{city} festival preview",
+      "close": "Close city preview",
+      "total": "{count, plural, one {# event shown here} other {# events shown here}}",
+      "stats": {
+        "upcoming": "Upcoming",
+        "live": "Demo live",
+        "djWanted": "DJ wanted",
+        "funding": "Funding",
+        "dao": "DAO",
+        "afterParty": "After party"
+      },
+      "countsNote": "Counted from the events shown on the map (your filters apply).",
+      "events": "Events",
+      "more": "{count} more in the list",
+      "community": "Community parties",
+      "organizerWorld": "{name}'s party world",
+      "demoWorld": "demo world",
+      "seeEvents": "See events",
+      "taglineRegion": "A party city in {region}.",
+      "taglineGeneric": "A party city on the FREAKTOPIA planet.",
+      "tagline": {
+        "berlin": "Techno city: concrete bunkers, purple lasers and long nights.",
+        "ibiza": "Island of beach clubs and sunrise sets by the sea.",
+        "bangkok": "Rooftops, golden temples and neon nights by the river.",
+        "new_york": "Skyscraper city of warehouse raves and block parties.",
+        "dubai": "Desert skyline with open-air stages under the stars.",
+        "rio": "Tropical beats under the mountain, from beach to street.",
+        "sydney": "Harbour parties with the white sails lit blue.",
+        "tokyo": "Neon signs, tiny clubs and big sound systems.",
+        "london": "Clubs, warehouses and pirate-radio roots."
+      }
+    }
   },
   "ranking": {
     "title": "World Ranking",

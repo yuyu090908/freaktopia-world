@@ -537,7 +537,9 @@
       "eventFinished": "Sự kiện đã kết thúc",
       "soldOut": "Hết vé",
       "notOnSale": "Chưa mở bán cho đến khi xác nhận",
-      "ticketsLeft": "Còn {count} · từ {price} (thanh toán demo)"
+      "ticketsLeft": "Còn {count} · từ {price} (thanh toán demo)",
+      "organizer": "Ban tổ chức",
+      "organizerSample": "Ban tổ chức mẫu: chưa có thế giới tiệc"
     },
     "actions": {
       "enterDemoLive": "Vào lễ hội (trực tiếp demo)",
@@ -563,7 +565,8 @@
       "country": "Quốc gia",
       "venue": "Địa điểm",
       "dj": "DJ",
-      "genre": "Thể loại"
+      "genre": "Thể loại",
+      "region": "Khu vực"
     },
     "keys": {
       "viewers": "Người xem trực tuyến",
@@ -634,7 +637,59 @@
     "markerTrending": "THỊNH HÀNH",
     "markerTrendingTitle": "Thịnh hành (7 ngày)",
     "markerFunding": "GÂY QUỸ {pct}%",
-    "signed": "đã ký"
+    "signed": "đã ký",
+    "cityEvents": "{count} sự kiện",
+    "cityAria": "{city}, {country}: đang hiển thị {count} sự kiện{live, plural, =0 {} other {, # đang phát trực tiếp (demo)}}. Mở xem trước thành phố",
+    "cityClusterAria": "{cities}: {count} sự kiện ở các thành phố gần nhau. Phóng to",
+    "cityLiveBadge": "DEMO TRỰC TIẾP",
+    "regionFocus": "Tập trung khu vực",
+    "regionAll": "Toàn hành tinh",
+    "regionClear": "Bỏ khu vực {region}",
+    "legendCityNote": "Ở mức thế giới, mỗi thành phố là một sân khấu. Các vòng cho biết có bao nhiêu sự kiện đang hiển thị ở đó (1, 2, 3 trở lên), không phải mức độ nổi tiếng hay chất lượng. Nhấp nháy đỏ nghĩa là có sự kiện đang phát trực tiếp (demo).",
+    "regions": {
+      "na": "Bắc Mỹ",
+      "sa": "Nam Mỹ",
+      "eu": "Châu Âu",
+      "as": "Châu Á",
+      "me": "Trung Đông",
+      "af": "Châu Phi",
+      "oc": "Châu Đại Dương",
+      "an": "Châu Nam Cực"
+    },
+    "city": {
+      "eyebrow": "Xem trước lễ hội thành phố",
+      "aria": "Lễ hội tại {city}",
+      "close": "Đóng xem trước thành phố",
+      "total": "Đang hiển thị {count} sự kiện ở đây",
+      "stats": {
+        "upcoming": "Sắp diễn ra",
+        "live": "Demo trực tiếp",
+        "djWanted": "Tuyển DJ",
+        "funding": "Gây quỹ",
+        "dao": "DAO",
+        "afterParty": "After party"
+      },
+      "countsNote": "Đếm từ các sự kiện đang hiển thị trên bản đồ (áp dụng bộ lọc của bạn).",
+      "events": "Sự kiện",
+      "more": "Thêm {count} trong danh sách",
+      "community": "Tiệc cộng đồng",
+      "organizerWorld": "Thế giới tiệc của {name}",
+      "demoWorld": "thế giới demo",
+      "seeEvents": "Xem sự kiện",
+      "taglineRegion": "Một thành phố tiệc ở {region}.",
+      "taglineGeneric": "Một thành phố tiệc trên hành tinh FREAKTOPIA.",
+      "tagline": {
+        "berlin": "Thành phố techno: hầm bê tông, laser tím và những đêm dài.",
+        "ibiza": "Hòn đảo của beach club và những set bình minh bên biển.",
+        "bangkok": "Sân thượng, đền vàng và đêm neon bên sông.",
+        "new_york": "Thành phố chọc trời của rave nhà kho và tiệc đường phố.",
+        "dubai": "Đường chân trời sa mạc với sân khấu ngoài trời dưới sao.",
+        "rio": "Nhịp nhiệt đới dưới chân núi, từ bãi biển ra phố.",
+        "sydney": "Tiệc bến cảng với những cánh buồm trắng phát sáng xanh.",
+        "tokyo": "Biển neon, club nhỏ xíu và dàn âm thanh lớn.",
+        "london": "Club, nhà kho và cội nguồn radio lậu."
+      }
+    }
   },
   "ranking": {
     "title": "Xếp hạng thế giới",

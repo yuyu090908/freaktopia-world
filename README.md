@@ -30,7 +30,7 @@ Requirements: Node 20 or later.
 | Route | What it does |
 |---|---|
 | `/` | Hero, featured events, quick-start strip |
-| `/world` | WORLD MAP 7.0: a dark real-geography globe (Natural Earth + terrain relief + city lights) where every festival is a miniature landmark that grows with its level and shows its status in text and icon. Search with suggestions, URL-synced filters, Map/List, desktop side panel, mobile swipe sheet, LIVE / DAO / ranking / tickets / DJ links. See `docs/WORLD_MAP.md` |
+| `/world` | WORLD MAP 9.3: a neon party planet (real Natural Earth geography, 7 colour regions, space backdrop with aliens), party-city stages with a city festival preview, region focus and organizer links (see `docs/WORLD_MAP_GLOBE.md`). Zoomed in, every festival is a miniature landmark that grows with its level and shows its status in text and icon. Search with suggestions, URL-synced filters, Map/List, desktop side panel, mobile swipe sheet, LIVE / DAO / ranking / tickets / DJ links. See `docs/WORLD_MAP.md` |
 | `/world/levels` | Demo admin for the festival growth level thresholds, plus the landmark gallery (all types, levels and statuses) |
 | `/events`, `/events/[id]` | Browse and filter events. The detail page shows stage evolution, support, and the level simulator |
 | `/events/[id]/tickets` | Ticket selection and **demo** purchase |

@@ -67,6 +67,8 @@ export interface MapEventDto {
   afterParty: { id: string; name: string; startsAt: string; venue: string } | null;
   updatedAt: string;
   isDemo: boolean;
+  /** Who runs the event. `handle` links to their party world; sample events have fictional organizers without one. */
+  organizer?: { name: string; handle: string | null; demo: boolean };
 }
 
 export interface WorldMapResponse {

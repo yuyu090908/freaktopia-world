@@ -537,7 +537,9 @@
       "eventFinished": "イベント終了",
       "soldOut": "売り切れ",
       "notOnSale": "開催決定まで販売されません",
-      "ticketsLeft": "残り{count}枚 · {price}〜（デモ購入）"
+      "ticketsLeft": "残り{count}枚 · {price}〜（デモ購入）",
+      "organizer": "主催者",
+      "organizerSample": "サンプルの主催者:パーティーワールドはまだありません"
     },
     "actions": {
       "enterDemoLive": "フェスに入る（デモライブ）",
@@ -563,7 +565,8 @@
       "country": "国",
       "venue": "会場",
       "dj": "DJ",
-      "genre": "ジャンル"
+      "genre": "ジャンル",
+      "region": "地域"
     },
     "keys": {
       "viewers": "オンライン視聴者",
@@ -634,7 +637,59 @@
     "markerTrending": "急上昇",
     "markerTrendingTitle": "急上昇（7日間）",
     "markerFunding": "資金 {pct}%",
-    "signed": "締結済み"
+    "signed": "締結済み",
+    "cityEvents": "{count}件のイベント",
+    "cityAria": "{city}({country}):表示中のイベント{count}件{live, plural, =0 {} other {、デモライブ#件}}。都市プレビューを開く",
+    "cityClusterAria": "{cities}:近くの都市に{count}件のイベント。ズームイン",
+    "cityLiveBadge": "デモライブ",
+    "regionFocus": "地域フォーカス",
+    "regionAll": "惑星全体",
+    "regionClear": "地域「{region}」を解除",
+    "legendCityNote": "世界ズームでは1都市を1つのステージで表示します。リングは表示中のイベントがその都市に何件あるか(1・2・3件以上)を示し、人気や品質を表すものではありません。赤い点滅はデモライブ中のイベントがあることを示します。",
+    "regions": {
+      "na": "北アメリカ",
+      "sa": "南アメリカ",
+      "eu": "ヨーロッパ",
+      "as": "アジア",
+      "me": "中東",
+      "af": "アフリカ",
+      "oc": "オセアニア",
+      "an": "南極"
+    },
+    "city": {
+      "eyebrow": "都市フェスティバル・プレビュー",
+      "aria": "{city}のフェスティバル・プレビュー",
+      "close": "都市プレビューを閉じる",
+      "total": "この都市に表示中のイベント {count}件",
+      "stats": {
+        "upcoming": "開催予定",
+        "live": "デモライブ",
+        "djWanted": "DJ募集",
+        "funding": "資金募集",
+        "dao": "DAO",
+        "afterParty": "アフターパーティー"
+      },
+      "countsNote": "地図に表示中のイベントから数えています(フィルターが反映されます)。",
+      "events": "イベント",
+      "more": "ほか{count}件はリストで表示",
+      "community": "コミュニティのパーティー",
+      "organizerWorld": "{name}のパーティーワールド",
+      "demoWorld": "デモワールド",
+      "seeEvents": "イベントを見る",
+      "taglineRegion": "{region}のパーティー都市。",
+      "taglineGeneric": "FREAKTOPIAの惑星にあるパーティー都市。",
+      "tagline": {
+        "berlin": "テクノの都。コンクリートのバンカー、紫のレーザー、終わらない夜。",
+        "ibiza": "ビーチクラブと海辺のサンライズセットの島。",
+        "bangkok": "ルーフトップ、黄金の寺院、川沿いのネオンの夜。",
+        "new_york": "倉庫レイヴとブロックパーティーの摩天楼都市。",
+        "dubai": "星空の下の野外ステージと砂漠のスカイライン。",
+        "rio": "山のふもとで鳴るトロピカルビート。ビーチから街まで。",
+        "sydney": "白い帆が青く光るハーバーパーティー。",
+        "tokyo": "ネオンサイン、小さなクラブ、大きなサウンドシステム。",
+        "london": "クラブ、倉庫、海賊ラジオのルーツ。"
+      }
+    }
   },
   "ranking": {
     "title": "ワールドランキング",

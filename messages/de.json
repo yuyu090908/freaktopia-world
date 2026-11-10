@@ -537,7 +537,9 @@
       "eventFinished": "Event beendet",
       "soldOut": "Ausverkauft",
       "notOnSale": "Erst nach Bestätigung im Verkauf",
-      "ticketsLeft": "Noch {count} · ab {price} (Demo-Checkout)"
+      "ticketsLeft": "Noch {count} · ab {price} (Demo-Checkout)",
+      "organizer": "Veranstalter",
+      "organizerSample": "Beispielveranstalter: noch keine Party-Welt"
     },
     "actions": {
       "enterDemoLive": "Festival betreten (Demo-Live)",
@@ -563,7 +565,8 @@
       "country": "Land",
       "venue": "Location",
       "dj": "DJ",
-      "genre": "Genre"
+      "genre": "Genre",
+      "region": "Region"
     },
     "keys": {
       "viewers": "Zuschauer online",
@@ -634,7 +637,59 @@
     "markerTrending": "TRENDING",
     "markerTrendingTitle": "Trending (7 Tage)",
     "markerFunding": "FINANZIERUNG {pct} %",
-    "signed": "unterschrieben"
+    "signed": "unterschrieben",
+    "cityEvents": "{count, plural, one {# Event} other {# Events}}",
+    "cityAria": "{city}, {country}: {count, plural, one {# Event} other {# Events}} angezeigt{live, plural, =0 {} other {, # Demo-live}}. Stadtvorschau öffnen",
+    "cityClusterAria": "{cities}: {count, plural, one {# Event} other {# Events}} in nahen Städten. Hineinzoomen",
+    "cityLiveBadge": "DEMO LIVE",
+    "regionFocus": "Regionsfokus",
+    "regionAll": "Ganzer Planet",
+    "regionClear": "Region {region} entfernen",
+    "legendCityNote": "In der Weltansicht ist jede Stadt eine Bühne. Die Ringe zeigen, wie viele der angezeigten Events dort sind (1, 2, 3 oder mehr), nicht Beliebtheit oder Qualität. Ein rotes Pulsieren heißt: Dort läuft ein Event demo-live.",
+    "regions": {
+      "na": "Nordamerika",
+      "sa": "Südamerika",
+      "eu": "Europa",
+      "as": "Asien",
+      "me": "Naher Osten",
+      "af": "Afrika",
+      "oc": "Ozeanien",
+      "an": "Antarktis"
+    },
+    "city": {
+      "eyebrow": "Festival-Vorschau der Stadt",
+      "aria": "Festivals in {city}",
+      "close": "Stadtvorschau schließen",
+      "total": "{count, plural, one {# Event hier angezeigt} other {# Events hier angezeigt}}",
+      "stats": {
+        "upcoming": "Demnächst",
+        "live": "Demo live",
+        "djWanted": "DJ gesucht",
+        "funding": "Finanzierung",
+        "dao": "DAO",
+        "afterParty": "Afterparty"
+      },
+      "countsNote": "Gezählt aus den Events auf der Karte (deine Filter gelten).",
+      "events": "Events",
+      "more": "{count} weitere in der Liste",
+      "community": "Community-Partys",
+      "organizerWorld": "Party-Welt von {name}",
+      "demoWorld": "Demo-Welt",
+      "seeEvents": "Events ansehen",
+      "taglineRegion": "Eine Partystadt in {region}.",
+      "taglineGeneric": "Eine Partystadt auf dem Planeten FREAKTOPIA.",
+      "tagline": {
+        "berlin": "Techno-Stadt: Betonbunker, lila Laser und lange Nächte.",
+        "ibiza": "Insel der Beachclubs und Sonnenaufgangssets am Meer.",
+        "bangkok": "Rooftops, goldene Tempel und Neon-Nächte am Fluss.",
+        "new_york": "Wolkenkratzerstadt der Lagerhallen-Raves und Blockpartys.",
+        "dubai": "Wüsten-Skyline mit Open-Air-Bühnen unter Sternen.",
+        "rio": "Tropische Beats unter dem Berg, vom Strand bis auf die Straße.",
+        "sydney": "Hafenpartys mit blau beleuchteten weißen Segeln.",
+        "tokyo": "Neonschilder, winzige Clubs und große Soundsysteme.",
+        "london": "Clubs, Lagerhallen und Piratenradio-Wurzeln."
+      }
+    }
   },
   "ranking": {
     "title": "Weltranking",

@@ -8,7 +8,7 @@ import { Tx } from "@/components/i18n/Tx";
  */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CalendarDays, ChevronDown, ChevronUp, Crown, Disc3, HandHeart, Landmark, MapPin, Mic2, PartyPopper, Radio, Ticket, TrendingUp, Users, Vote, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ChevronDown, ChevronUp, Crown, Disc3, HandHeart, Landmark, MapPin, Mic2, PartyPopper, Radio, Ticket, TrendingUp, UserRound, Users, Vote, X } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
 import { LEVEL_COLORS } from "@/lib/map/growth";
 import { LANDMARK_LABEL, STATUS_META, landmarkSvg } from "@/lib/map/landmarks";
@@ -210,6 +210,20 @@ function Details({ e }: { e: WorldEvent }) {
         <Row icon={<Ticket className="size-4" />} label={t("facts.tickets")}>
           {e.status === "completed" ? t("facts.eventFinished") : e.tickets.onSale ? t("facts.ticketsLeft", { count: num(e.tickets.remaining), price: usd(e.tickets.fromUsd ?? 0) }) : e.status === "confirmed" || e.status === "live" ? t("facts.soldOut") : t("facts.notOnSale")}
         </Row>
+        {e.organizer && (
+          <Row icon={<UserRound className="size-4" />} label={t("facts.organizer")}>
+            {e.organizer.handle ? (
+              <Link href={`/u/${e.organizer.handle}/world`} className="font-bold text-acid underline-offset-2 hover:underline" data-testid="map-organizer-world">
+                {e.organizer.name}
+              </Link>
+            ) : (
+              <>
+                {e.organizer.name}
+                {e.organizer.demo && <span className="block text-[11px] text-mute">{t("facts.organizerSample")}</span>}
+              </>
+            )}
+          </Row>
+        )}
         <Row icon={<Mic2 className="size-4" />} label={t("facts.djRecruitment")}>
           {e.djRecruiting ? t("facts.djOpen") : t("facts.closed")}
         </Row>

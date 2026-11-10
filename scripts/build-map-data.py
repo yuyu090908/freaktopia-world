@@ -108,3 +108,44 @@ write("places", feats(load("ne_50m_populated_places_simple"), keep=lambda q: (q.
 write("roads", feats(load("ne_10m_roads"), keep=lambda q: q.get("type") == "Major Highway" and (q.get("scalerank") or 9) <= 6,
                      props=lambda q: {"r": q.get("scalerank")}, tol=0.02, p=2))
 write("urban", feats(load("ne_10m_urban_areas"), keep=lambda q: (q.get("area_sqkm") or 0) >= 60, tol=0.01, p=3))
+
+
+# ---- 9.3 neon globe: countries with a display region, and label points --------------------------------
+# Display regions are a design grouping (colours), kept apart from the geographic continent ("geo"):
+# the Middle East is drawn in its own colour although it is part of Asia (and Egypt stays in Africa).
+# Borders follow Natural Earth's default point of view for disputed areas.
+MIDDLE_EAST_EXTRA = {"IRN"}
+CAUCASUS = {"GEO", "ARM", "AZE"}
+CONTINENT_REGION = {"North America": "na", "South America": "sa", "Europe": "eu", "Africa": "af", "Oceania": "oc", "Antarctica": "an"}
+UN_REGION = {"Africa": "af", "Asia": "as", "Americas": "sa", "Europe": "eu", "Oceania": "oc", "Antarctica": "an"}
+
+
+def display_region(q):
+    a3, cont, sub = q.get("ADM0_A3"), q.get("CONTINENT"), q.get("SUBREGION")
+    if cont == "Asia":
+        if a3 in MIDDLE_EAST_EXTRA or (sub == "Western Asia" and a3 not in CAUCASUS):
+            return "me"
+        return "as"
+    if cont in CONTINENT_REGION:
+        return CONTINENT_REGION[cont]
+    return UN_REGION.get(q.get("REGION_UN"), "as")  # small island states ("Seven seas")
+
+
+def geo_continent(q):
+    cont = q.get("CONTINENT")
+    return cont if cont != "Seven seas (open ocean)" else q.get("REGION_UN")
+
+
+countries = load("ne_50m_admin_0_countries")
+write("countries", feats(countries, props=lambda q: {"r": display_region(q), "a3": q.get("ADM0_A3")}, tol=0.02, p=2))
+LANGS = ["en", "ja", "ko", "zh", "ru", "es", "pt", "fr", "de", "vi", "id"]
+labels = []
+for f in countries["features"]:
+    q = f["properties"]
+    if (q.get("LABELRANK") or 9) > 6 or q.get("LABEL_X") is None:
+        continue
+    props = {"r": display_region(q), "geo": geo_continent(q), "rank": q.get("LABELRANK"), "a3": q.get("ADM0_A3")}
+    for l in LANGS:
+        props["n_" + l] = q.get("NAME_" + l.upper()) or q.get("NAME_EN")
+    labels.append({"type": "Feature", "properties": props, "geometry": {"type": "Point", "coordinates": [round(q["LABEL_X"], 2), round(q["LABEL_Y"], 2)]}})
+write("country-labels", labels)

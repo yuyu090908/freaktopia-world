@@ -23,7 +23,10 @@ import { DATE_LABELS, type DateRange } from "@/lib/filters";
 import { DEFAULT_GROWTH_CONFIG, LEVEL_COLORS, normalizeConfig } from "@/lib/map/growth";
 import { STATUS_META, landmarkSvg, type MapStatus } from "@/lib/map/landmarks";
 import type { WorldMapResponse } from "@/lib/map/types";
-import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, filterCount, filterWorld, readWorldUrl, suggest, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
+import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, filterCount, filterWorld, readWorldUrl, suggest, suggestRegions, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
+import { buildCities, cityKeyOf } from "@/lib/map/cities";
+import { REGION_COLOR, REGION_KEYS, REGION_VIEW, type RegionKey } from "@/lib/map/regions";
+import { CityPreview } from "@/components/world/CityPreview";
 import { useDemo } from "@/lib/store";
 import type { EventLevel, Genre } from "@/lib/types";
 import { cn, fmtDate } from "@/lib/utils";
@@ -51,6 +54,8 @@ interface Device {
   desktop: boolean;
   renderer: "auto" | "lite" | "flat" | "rich";
   remoteTiles: boolean;
+  /** Slow idle rotation. Off with reduced motion, and for automated browsers unless ?spin=1 (tests wait for a still map). */
+  spin: boolean;
 }
 
 function detectDevice(): Device {
@@ -73,6 +78,7 @@ function detectDevice(): Device {
     desktop: matchMedia("(min-width: 1024px)").matches,
     renderer: r === "lite" || r === "flat" || r === "rich" ? r : "auto",
     remoteTiles: process.env.NEXT_PUBLIC_MAP_TILES !== "off" && p.get("tiles") !== "off",
+    spin: !reducedMotion && p.get("spin") !== "0" && (!navigator.webdriver || p.get("spin") === "1"),
   };
 }
 
@@ -83,6 +89,7 @@ const SUGGEST_ICON: Record<Suggestion["kind"], React.ReactNode> = {
   venue: <Building2 className="size-4" aria-hidden />,
   dj: <Music2 className="size-4" aria-hidden />,
   genre: <Music2 className="size-4" aria-hidden />,
+  region: <Orbit className="size-4" aria-hidden />,
 };
 
 export function WorldExplorer() {
@@ -93,6 +100,8 @@ export function WorldExplorer() {
   const [filters, setFilters] = useState<MapFilters>(EMPTY_MAP_FILTERS);
   const [view, setView] = useState<"map" | "list">("map");
   const [selected, setSelected] = useState<string | null>(null);
+  const [cityKey, setCityKey] = useState<string | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const [device, setDevice] = useState<Device | null>(null);
   const [sheetH, setSheetH] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -128,6 +137,7 @@ export function WorldExplorer() {
     setFilters(u.filters);
     setView(u.view);
     setSelected(u.event);
+    setCityKey(u.event ? null : u.city ?? null);
     setUrlReady(true);
     const mq = matchMedia("(min-width: 1024px)");
     const onMq = () => setDevice((x) => (x ? { ...x, desktop: mq.matches } : x));
@@ -145,6 +155,7 @@ export function WorldExplorer() {
       setFilters(s.filters);
       setView(s.view);
       setSelected(s.event);
+      setCityKey(s.event ? null : s.city ?? null);
     };
     addEventListener("popstate", onPop);
     return () => {
@@ -180,19 +191,21 @@ export function WorldExplorer() {
   }, [load, cfg, sim, support]);
   const results = useMemo(() => filterWorld(all, filters), [all, filters]);
   const sel = all.find((e) => e.id === selected) ?? null;
+  const cities = useMemo(() => buildCities(results), [results]);
+  const city = !sel && cityKey ? cities.find((c) => c.key === cityKey) ?? null : null;
 
   /* URL sync (replace while typing; filters are shareable) */
   const firstPush = useRef(true);
   useEffect(() => {
     if (!urlReady) return;
-    const qs = writeWorldUrl({ filters, view, event: selected });
+    const qs = writeWorldUrl({ filters, view, event: selected, city: cityKey });
     if (qs === location.search || (qs === "" && location.search === "")) return;
     const url = `${location.pathname}${qs}`;
     if (firstPush.current) {
       firstPush.current = false;
       history.replaceState(history.state, "", url);
     } else history.replaceState(history.state, "", url);
-  }, [filters, view, selected, urlReady]);
+  }, [filters, view, selected, cityKey, urlReady]);
 
   // When filters change, bring the matching festivals into view (a few results only).
   const filterKey = `${filters.flags.join()}|${filters.levels.join()}|${filters.genres.join()}|${filters.date}`;
@@ -209,22 +222,74 @@ export function WorldExplorer() {
 
   const select = useCallback((id: string | null) => {
     setSelected(id);
+    setCityKey(null);
     setExpanded(false);
     if (id) setView("map");
   }, []);
 
   const desktop = !!device?.desktop;
   const padding: CameraPadding = useMemo(
-    () => ({ top: desktop ? 140 : sel ? 210 : 112, left: desktop ? 24 : 0, right: desktop && sel ? 430 : 0, bottom: !desktop && sel ? Math.min(sheetH, 420) : desktop ? 24 : 60 }),
-    [desktop, sel, sheetH],
+    () => {
+      const panel = Boolean(sel || city);
+      return { top: desktop ? 140 : sel ? 210 : 112, left: desktop ? 24 : 0, right: desktop && panel ? 430 : 0, bottom: !desktop && panel ? Math.min(sheetH, 420) : desktop ? 24 : 60 };
+    },
+    [desktop, sel, city, sheetH],
   );
   const lite = device ? device.renderer === "lite" || !device.webgl : false;
   const rich = device ? device.renderer === "rich" || (device.renderer === "auto" && !device.lowPower) : false;
+  // The neon globe is the map on every WebGL device; low-power devices get it without relief, animation and glow extras.
+  const globe = device ? device.renderer !== "flat" : true;
+  const locale = useLocale();
+  const tReg = useTranslations("world.regions");
+  const regionNames = useMemo(() => Object.fromEntries(REGION_KEYS.map((k) => [k, [tReg(k), REGION_EN[k]]])), [tReg]);
   const ctl = () => (lite ? liteRef.current : mapRef.current);
 
   const flyTo = (ids: string[]) => ctl()?.flyToEvents(ids);
 
-  const onSuggestion = (s: Suggestion) => {
+  const onMapReady = useCallback(() => setMapReady(true), []);
+
+  /** Open a party city's preview and zoom into it. */
+  const openCity = useCallback((key: string) => {
+    setSelected(null);
+    setCityKey(key);
+    setView("map");
+  }, []);
+  const cityFlown = useRef<string | null>(null);
+  useEffect(() => {
+    if (!city) {
+      cityFlown.current = null;
+      return;
+    }
+    if (!mapReady || cityFlown.current === city.key) return;
+    cityFlown.current = city.key;
+    // Wait one frame so the map gets the panel padding first.
+    const id = setTimeout(() => mapRef.current?.flyToCity?.(city.lng, city.lat), 60);
+    return () => clearTimeout(id);
+  }, [city, mapReady]);
+
+  /** Region focus: filter to the region and turn the globe toward it. */
+  const focusRegion = (r: Exclude<RegionKey, "an"> | null) => {
+    setFilters((f) => ({ ...f, region: r }));
+    select(null);
+    if (!r) return;
+    const v = REGION_VIEW[r];
+    const wide = typeof window !== "undefined" && window.innerWidth >= 768;
+    setTimeout(() => ctl()?.flyToPoint(v.center[0], v.center[1], v.zoom + (wide ? 0.5 : 0)), 30);
+  };
+
+  const onSuggestion = (s: Suggestion & { region?: Exclude<RegionKey, "an"> }) => {
+    if (s.kind === "region" && s.region) {
+      setFilters((f) => ({ ...f, q: "" }));
+      focusRegion(s.region);
+      return;
+    }
+    if (s.kind === "city") {
+      // A searched city opens its festival preview (same as tapping it on the globe).
+      const ev = all.find((e) => e.id === s.eventIds[0]);
+      setFilters((f) => ({ ...f, q: "" }));
+      if (ev) openCity(cityKeyOf(ev));
+      return;
+    }
     if (s.kind === "event") {
       setFilters((f) => ({ ...f, q: "" }));
       select(s.eventIds[0]);
@@ -255,7 +320,7 @@ export function WorldExplorer() {
       )}
 
       {/* map */}
-      {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} me={meProp} />)}
+      {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} globe={globe} locale={locale} lowPower={!!device.lowPower} autoSpin={device.spin} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} me={meProp} selectedCity={city?.key ?? null} onSelectCity={openCity} onReady={onMapReady} />)}
       {(load.status === "loading" || !device) && (
         <div className="absolute inset-0">
           <LoadingSkeleton variant="map" />
@@ -273,7 +338,7 @@ export function WorldExplorer() {
       {/* top: search + chips */}
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5">
         <div className="pointer-events-auto mx-auto flex max-w-3xl items-center gap-2 px-3 md:px-4">
-          <SearchBox events={all} value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} onPick={onSuggestion} onSubmit={() => flyTo(results.map((r) => r.id))} />
+          <SearchBox events={all} regionNames={regionNames} value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} onPick={onSuggestion} onSubmit={() => flyTo(results.map((r) => r.id))} />
           <button type="button" onClick={() => setFiltersOpen(true)} className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-line bg-[#0D121B]/90 backdrop-blur" aria-label={`${t("filters")}${filterCount(filters) ? ` (${filterCount(filters)})` : ""}`}>
             <SlidersHorizontal className="size-5" aria-hidden />
             {filterCount(filters) > 0 && <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-acid text-[11px] font-black text-ink">{filterCount(filters)}</span>}
@@ -297,6 +362,11 @@ export function WorldExplorer() {
             {t("count", { count: results.length })}
           </span>
           <DemoBadge label={tc("sampleEvents")} className="bg-[#0D121B]/85" />
+          {filters.region && (
+            <button type="button" onClick={() => focusRegion(null)} className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-extrabold" style={{ borderColor: REGION_COLOR[filters.region], color: REGION_COLOR[filters.region], background: "rgba(13,18,27,.85)" }} data-testid="region-active" aria-label={t("regionClear", { region: tReg(filters.region) })}>
+              <Orbit className="size-3.5" aria-hidden /> {tReg(filters.region)} <X className="size-3.5" aria-hidden />
+            </button>
+          )}
           {filterCount(filters) + (filters.q ? 1 : 0) > 0 && (
             <button type="button" onClick={() => setFilters(EMPTY_MAP_FILTERS)} className="inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-bold text-mute hover:text-cream">
               <X className="size-3.5" aria-hidden /> {tc("clear")}
@@ -307,7 +377,7 @@ export function WorldExplorer() {
 
       {/* right: camera controls */}
       {view === "map" && load.status === "ok" && (
-        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel ? "right-[436px] top-[132px]" : "right-4 top-[132px]") : "right-3 top-[132px]")} role="group" aria-label={t("controls")}>
+        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel || city ? "right-[436px] top-[132px]" : "right-4 top-[132px]") : "right-3 top-[132px]")} role="group" aria-label={t("controls")}>
           <MapBtn label={t("zoomIn")} onClick={() => ctl()?.zoomIn()}>
             <Plus className="size-5" />
           </MapBtn>
@@ -347,7 +417,7 @@ export function WorldExplorer() {
       {view === "list" && load.status === "ok" && <ListView events={results} onPick={(id) => select(id)} />}
 
       {/* bottom: Map/List toggle */}
-      {!(sel && !desktop) && load.status === "ok" && (
+      {!((sel || city) && !desktop) && load.status === "ok" && (
         <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 rounded-full border-2 border-line bg-[#0D121B]/92 p-1 shadow-[0_8px_30px_rgba(0,0,0,.5)] backdrop-blur" role="group" aria-label={t("view")}>
           <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", view === "map" && "bg-acid text-ink")}>
             <MapIcon className="size-4" aria-hidden /> {t("mapView")}
@@ -367,9 +437,17 @@ export function WorldExplorer() {
       )}
 
       {/* selected */}
+      {city && view === "map" && <CityPreview key={city.key} city={city} desktop={desktop} onClose={() => {
+        setCityKey(null);
+        mapRef.current?.restoreView?.();
+      }} onPickEvent={(id) => select(id)} onSeeEvents={() => {
+        setFilters((f) => ({ ...f, q: city.city }));
+        setCityKey(null);
+        setView("list");
+      }} onHeight={desktop ? undefined : setSheetH} />}
       {sel && view === "map" && (desktop ? <EventSidePanel e={sel} onClose={() => select(null)} /> : <EventBottomSheet e={sel} onClose={() => select(null)} expanded={expanded} setExpanded={setExpanded} onHeight={setSheetH} />)}
 
-      <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} setFilters={setFilters} count={results.length} />
+      <FilterSheet open={filtersOpen} onClose={() => setFiltersOpen(false)} filters={filters} setFilters={setFilters} count={results.length} onRegion={focusRegion} />
     </div>
   );
 }
@@ -382,12 +460,12 @@ function MapBtn({ label, onClick, children, pressed }: { label: string; onClick:
   );
 }
 
-function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: WorldEvent[]; value: string; onChange: (q: string) => void; onPick: (s: Suggestion) => void; onSubmit: () => void }) {
+function SearchBox({ events, regionNames, value, onChange, onPick, onSubmit }: { events: WorldEvent[]; regionNames: Record<string, string[]>; value: string; onChange: (q: string) => void; onPick: (s: Suggestion) => void; onSubmit: () => void }) {
   const t = useTranslations("world");
   const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
-  const items = useMemo(() => suggest(events, value), [events, value]);
+  const items: Suggestion[] = useMemo(() => [...suggestRegions(events, value, regionNames), ...suggest(events, value)].slice(0, 8), [events, value, regionNames]);
   const show = open && items.length > 0;
   return (
     <form
@@ -457,7 +535,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold"><Tx>{s.label}</Tx></span>
                 <span className="block truncate text-[12px] text-mute">
-                  {t(`kinds.${s.kind}`)} · {s.sub}
+                  {t(`kinds.${s.kind}`)} · {s.kind === "region" ? t("count", { count: Number(s.sub) }) : s.sub}
                 </span>
               </span>
             </li>
@@ -500,6 +578,9 @@ function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: strin
   );
 }
 
+/** English region names, so an English search works in every language. */
+const REGION_EN: Record<Exclude<RegionKey, "an">, string> = { na: "North America", sa: "South America", eu: "Europe", as: "Asia", me: "Middle East", af: "Africa", oc: "Oceania" };
+
 const STATUS_ORDER: MapStatus[] = ["planning", "funding", "confirmed", "live", "completed", "cancelled"];
 
 function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean }) {
@@ -537,6 +618,7 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
         ))}
       </ul>
       <p className="mt-2 text-[11px] text-mute">{t("legendNote")}</p>
+      <p className="mt-1 text-[11px] text-mute" data-testid="legend-city-note">{t("legendCityNote")}</p>
       <Link href="/world/levels" className="mt-2 inline-flex min-h-10 items-center gap-1 text-[12px] font-bold text-acid">
         <Settings2 className="size-4" aria-hidden /> {t("levelRules")}
       </Link>
@@ -547,7 +629,8 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
   );
 }
 
-function FilterSheet({ open, onClose, filters, setFilters, count }: { open: boolean; onClose: () => void; filters: MapFilters; setFilters: (f: MapFilters | ((f: MapFilters) => MapFilters)) => void; count: number }) {
+function FilterSheet({ open, onClose, filters, setFilters, count, onRegion }: { open: boolean; onClose: () => void; filters: MapFilters; setFilters: (f: MapFilters | ((f: MapFilters) => MapFilters)) => void; count: number; onRegion: (r: Exclude<RegionKey, "an"> | null) => void }) {
+  const tr = useTranslations("world.regions");
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const t = useTranslations("world");
   const tc = useTranslations("common");
@@ -598,6 +681,22 @@ function FilterSheet({ open, onClose, filters, setFilters, count }: { open: bool
             {(Object.keys(DATE_LABELS) as DateRange[]).map((d) => (
               <Chip key={d} active={filters.date === d} onClick={() => setFilters((f) => ({ ...f, date: d }))}>
                 {t(`dates.${d}`)}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset data-testid="region-filter">
+          <legend className="mb-2 inline-flex items-center gap-1 text-[13px] font-extrabold uppercase">
+            <Orbit className="size-4" aria-hidden /> {t("regionFocus")}
+          </legend>
+          <div className="flex flex-wrap gap-2">
+            <Chip active={!filters.region} onClick={() => onRegion(null)}>
+              {t("regionAll")}
+            </Chip>
+            {REGION_KEYS.map((k) => (
+              <Chip key={k} active={filters.region === k} onClick={() => onRegion(filters.region === k ? null : k)}>
+                <span className="size-2.5 rounded-full" style={{ background: REGION_COLOR[k] }} aria-hidden />
+                {tr(k)}
               </Chip>
             ))}
           </div>

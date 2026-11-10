@@ -537,7 +537,9 @@
       "eventFinished": "이벤트 종료",
       "soldOut": "매진",
       "notOnSale": "개최 확정 전에는 판매하지 않습니다",
-      "ticketsLeft": "{count}장 남음 · {price}부터 (데모 결제)"
+      "ticketsLeft": "{count}장 남음 · {price}부터 (데모 결제)",
+      "organizer": "주최자",
+      "organizerSample": "샘플 주최자: 아직 파티 월드가 없습니다"
     },
     "actions": {
       "enterDemoLive": "페스티벌 입장 (데모 라이브)",
@@ -563,7 +565,8 @@
       "country": "국가",
       "venue": "공연장",
       "dj": "DJ",
-      "genre": "장르"
+      "genre": "장르",
+      "region": "지역"
     },
     "keys": {
       "viewers": "온라인 시청자",
@@ -634,7 +637,59 @@
     "markerTrending": "급상승",
     "markerTrendingTitle": "급상승 (7일)",
     "markerFunding": "펀딩 {pct}%",
-    "signed": "체결됨"
+    "signed": "체결됨",
+    "cityEvents": "이벤트 {count}개",
+    "cityAria": "{city}, {country}: 표시된 이벤트 {count}개{live, plural, =0 {} other {, 데모 라이브 #개}}. 도시 미리보기 열기",
+    "cityClusterAria": "{cities}: 가까운 도시에 이벤트 {count}개. 확대",
+    "cityLiveBadge": "데모 라이브",
+    "regionFocus": "지역 포커스",
+    "regionAll": "행성 전체",
+    "regionClear": "지역 {region} 해제",
+    "legendCityNote": "세계 줌에서는 도시마다 무대 하나로 표시합니다. 링은 표시된 이벤트가 그 도시에 몇 개 있는지(1, 2, 3개 이상)를 나타내며 인기나 품질을 뜻하지 않습니다. 빨간 깜빡임은 데모 라이브 중인 이벤트가 있다는 뜻입니다.",
+    "regions": {
+      "na": "북아메리카",
+      "sa": "남아메리카",
+      "eu": "유럽",
+      "as": "아시아",
+      "me": "중동",
+      "af": "아프리카",
+      "oc": "오세아니아",
+      "an": "남극"
+    },
+    "city": {
+      "eyebrow": "도시 페스티벌 미리보기",
+      "aria": "{city} 페스티벌 미리보기",
+      "close": "도시 미리보기 닫기",
+      "total": "이 도시에 표시된 이벤트 {count}개",
+      "stats": {
+        "upcoming": "예정",
+        "live": "데모 라이브",
+        "djWanted": "DJ 모집",
+        "funding": "펀딩",
+        "dao": "DAO",
+        "afterParty": "애프터 파티"
+      },
+      "countsNote": "지도에 표시된 이벤트 기준으로 셉니다(필터가 적용됩니다).",
+      "events": "이벤트",
+      "more": "나머지 {count}개는 목록에서",
+      "community": "커뮤니티 파티",
+      "organizerWorld": "{name}의 파티 월드",
+      "demoWorld": "데모 월드",
+      "seeEvents": "이벤트 보기",
+      "taglineRegion": "{region}의 파티 도시.",
+      "taglineGeneric": "FREAKTOPIA 행성의 파티 도시.",
+      "tagline": {
+        "berlin": "테크노의 도시: 콘크리트 벙커, 보라색 레이저, 긴 밤.",
+        "ibiza": "비치 클럽과 바닷가 선라이즈 세트의 섬.",
+        "bangkok": "루프톱, 황금 사원, 강변의 네온 나이트.",
+        "new_york": "창고 레이브와 블록 파티의 마천루 도시.",
+        "dubai": "별빛 아래 야외 무대와 사막의 스카이라인.",
+        "rio": "산 아래 울리는 트로피컬 비트, 해변에서 거리까지.",
+        "sydney": "하얀 돛이 파랗게 빛나는 하버 파티.",
+        "tokyo": "네온사인, 작은 클럽, 큰 사운드 시스템.",
+        "london": "클럽, 창고, 해적 라디오의 뿌리."
+      }
+    }
   },
   "ranking": {
     "title": "월드 랭킹",

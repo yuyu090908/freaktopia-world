@@ -263,3 +263,14 @@ The 3D mode itself was not measured by Lighthouse after the change (it is no lon
 - **Checked:** in all 12 languages, every 16 px from 1024 to 1600 px, no visible link overlaps the right-hand buttons and none is cut. Each width shows 3 to 6 links, depending on how long the language's labels are.
 - New regression test in `tests/menu.spec.ts`. **Playwright: 125 of 125 pass.**
 - Screenshot: `docs/screenshots/header-ja-1366.png`.
+
+## 9.3: World map neon party planet (2026-11-10)
+
+Spec: WORLD MAP 3D VISUAL UPGRADE. Details in docs/WORLD_MAP_GLOBE.md.
+
+- Unit (vitest): 123 passed, including the new `tests/unit/world-cities.test.ts` (regions, region filter and search, city grouping, priority order, preview counts, icon scale and rings, signature art) and the URL round trip with `rg` and `city`.
+- E2E (Playwright, production build, 390 px project): 130 passed. New: globe is a WebGL canvas with decorative backdrop; city tap → preview → festival / list; city search → preview → organizer's party world; region focus via filters, URL and search; sample organizer note and legend ring note. Changed: "clusters open into landmarks" now follows a city cluster through more than one tap. `live.spec` "10. chat" failed once under two workers (duplicate message match) and passed alone; it was not touched by this change.
+- i18n: 3994 keys in all 12 dictionaries, 0 hardcoded strings.
+- Low power check: with 4 cores the canvas is drawn at 1.5× (585 px for 390 CSS px at DPR 3) and meteors/animations are off; with 8 cores 2× and meteors on. `?renderer=lite` shows the 2D map without the space backdrop.
+- Screenshots: docs/screenshots/globe93/ (PC 1440, phone 390, city previews, lite, and a comparison with the user-supplied WORLD MAP art).
+- Not measured: Lighthouse, real devices.

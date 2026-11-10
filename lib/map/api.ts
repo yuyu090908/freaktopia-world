@@ -107,6 +107,7 @@ export async function buildWorldMap(now = Date.now()): Promise<WorldMapResponse>
       afterParty: ap ? { id: ap.id, name: ap.name, startsAt: ap.startsAt, venue: ap.venueName } : null,
       updatedAt: popular.asOf,
       isDemo: true,
+      organizer: { name: e.organizer, handle: null, demo: true },
     };
   });
 
