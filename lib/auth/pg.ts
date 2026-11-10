@@ -171,6 +171,9 @@ const PROFILE_SQL = `select p.*, coalesce(pr.locale, 'en') as locale,
     async getAlien(userId) {
       return alien((await q(`select * from user_alien_identities where user_id = $1`, [userId]))[0]);
     },
+    async findAlienByPublicId(publicId) {
+      return alien((await q(`select * from user_alien_identities where public_id = $1`, [publicId]))[0]);
+    },
     async insertAlienOnce(userId, { seed, traits: t, assetVersion }) {
       // The primary key on user_id makes concurrent first logins (two tabs, a replayed OAuth callback) safe.
       const ins = await q(

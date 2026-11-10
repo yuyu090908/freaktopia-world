@@ -85,7 +85,7 @@ function Inner() {
               <div className="min-w-0">
                 <div>{t.has(n.key) ? t(n.key, n.values as Record<string, string>) : n.key}</div>
                 <div className="text-xs text-mute">{when(n.at)}</div>
-                <Link href={href(n.eventId ? `/events/manage/${n.eventId}` : "/profile/work")} className="text-xs font-bold text-acid underline">
+                <Link href={href(typeof n.values?.link === "string" && n.values.link.startsWith("/") ? n.values.link : n.eventId ? `/events/manage/${n.eventId}` : "/profile/work")} className="text-xs font-bold text-acid underline">
                   {t("open")}
                 </Link>
               </div>

@@ -100,6 +100,8 @@ export interface AuthStore {
   updatePrivacy(userId: string, patch: Partial<Omit<PrivacyRecord, "userId">>): Promise<PrivacyRecord>;
 
   getAlien(userId: string): Promise<AlienIdentity | null>;
+  /** Public lookup by Alien ID (FREAK-00001284) for public profiles and worlds. */
+  findAlienByPublicId(publicId: string): Promise<AlienIdentity | null>;
   /** Inserts only if the user has none (unique user_id); always returns the stored alien. */
   insertAlienOnce(userId: string, alien: { seed: string; traits: AlienTraits; assetVersion: number }): Promise<{ alien: AlienIdentity; created: boolean }>;
   updateAlienCosmetics(userId: string, patch: AlienCosmeticsPatch): Promise<AlienIdentity>;

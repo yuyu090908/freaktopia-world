@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Building2, CalendarDays, Gem, Heart, LayoutDashboard, Mic2, Package, Pencil, Settings, Ticket, Trash2, Trophy, PartyPopper } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, Gem, Heart, LayoutDashboard, Mic2, Package, Pencil, Settings, Ticket, Trash2, Trophy, PartyPopper, Orbit } from "lucide-react";
 import { Alien } from "@/components/art/Alien";
 import { AlienAvatar } from "@/components/cards/Cards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
@@ -16,7 +16,7 @@ import { fmtDate } from "@/lib/utils";
 import type { Genre } from "@/lib/types";
 import { COLLECTIBLES } from "@/app/nft/collectibles";
 import { AccountCard } from "@/components/profile/AccountCard";
-import { useAuth } from "@/lib/auth/client";
+import { useAuth, useMyAvatar } from "@/lib/auth/client";
 import { useTranslations } from "next-intl";
 
 export function ProfileView() {
@@ -28,6 +28,8 @@ function Inner() {
   const tu = useTranslations("profile");
   const tp = useTranslations("profile");
   const to = useTranslations("ops");
+  const tparty = useTranslations("party");
+  const myPublicId = useMyAvatar().publicId;
   const signedIn = useAuth((x) => x.status === "signedIn");
   const s = useDemo();
   const p = s.profile;
@@ -119,6 +121,16 @@ function Inner() {
           </Link>
           <Link href="/events/manage" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-manage">
             <span className="inline-flex items-center gap-2"><CalendarDays className="size-5 text-acid" aria-hidden /> {to("manageTitle")}</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          {myPublicId && (
+            <Link href={`/u/${myPublicId}/world`} className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-party-world">
+              <span className="inline-flex items-center gap-2"><Orbit className="size-5 text-acid" aria-hidden /> {tparty("myWorld")}</span>
+              <ArrowRight className="size-4" aria-hidden />
+            </Link>
+          )}
+          <Link href="/profile/parties" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-my-parties">
+            <span className="inline-flex items-center gap-2"><Ticket className="size-5 text-acid" aria-hidden /> {tparty("myParties")}</span>
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

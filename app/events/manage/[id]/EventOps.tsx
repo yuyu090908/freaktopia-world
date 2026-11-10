@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState, type ComponentType } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, ClipboardList, Gauge, HardHat, LayoutDashboard, PiggyBank, ShieldCheck, Users } from "lucide-react";
+import { ArrowLeft, ClipboardList, DoorOpen, Gauge, HardHat, LayoutDashboard, PiggyBank, ShieldCheck, Users } from "lucide-react";
 import { useLocalHref } from "@/components/i18n/LocaleContext";
 import { EmptyState } from "@/components/ui/States";
 import { SignInGate, useOps, useWhen } from "@/components/ops/shared";
@@ -17,13 +17,15 @@ import { Resources } from "./tabs/Resources";
 import { Operations } from "./tabs/Operations";
 import { Budget } from "./tabs/Budget";
 import { Safety } from "./tabs/Safety";
+import { Door } from "./tabs/Door";
 
-type TabId = "overview" | "planning" | "resources" | "operations" | "budget" | "safety";
+type TabId = "overview" | "planning" | "resources" | "operations" | "door" | "budget" | "safety";
 const TABS: { id: TabId; icon: ComponentType<{ className?: string }>; Comp: ComponentType<TabProps>; show: (v: View) => boolean }[] = [
   { id: "overview", icon: LayoutDashboard, Comp: Overview, show: () => true },
   { id: "planning", icon: ClipboardList, Comp: Planning, show: (v) => ["owner", "manager", "lead"].includes(v.me.role) },
   { id: "resources", icon: Users, Comp: Resources, show: (v) => !!v.me.can.recruit || v.agreements.length > 0 },
   { id: "operations", icon: HardHat, Comp: Operations, show: () => true },
+  { id: "door", icon: DoorOpen, Comp: Door, show: () => true },
   { id: "budget", icon: PiggyBank, Comp: Budget, show: (v) => !!v.me.can.read_budget },
   { id: "safety", icon: ShieldCheck, Comp: Safety, show: () => true },
 ];

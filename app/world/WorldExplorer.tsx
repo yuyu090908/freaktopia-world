@@ -11,7 +11,7 @@ import { Tx } from "@/components/i18n/Tx";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Building2, CalendarDays, Disc3, Globe2, Home, Info, List, LocateFixed, Map as MapIcon, MapPin, Minus, Music2, Plus, Search, Settings2, SlidersHorizontal, X } from "lucide-react";
+import { Building2, CalendarDays, Disc3, Globe2, Home, Info, List, LocateFixed, Map as MapIcon, MapPin, Minus, Music2, Orbit, Plus, Search, Settings2, SlidersHorizontal, X } from "lucide-react";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Chip, DemoBadge } from "@/components/ui/primitives";
 import { EmptyState, LoadingSkeleton } from "@/components/ui/States";
@@ -507,6 +507,7 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
   const t = useTranslations("world");
   const ts = useTranslations("status");
   const tl = useTranslations("levels");
+  const tp = useTranslations("party");
   return (
     <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px] top-[132px]" : "right-16 top-[132px] max-w-[calc(100%-80px)]")}>
       <div className="flex items-center justify-between">
@@ -539,6 +540,9 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
       <Link href="/world/levels" className="mt-2 inline-flex min-h-10 items-center gap-1 text-[12px] font-bold text-acid">
         <Settings2 className="size-4" aria-hidden /> {t("levelRules")}
       </Link>
+      <Link href="/world/universes" className="ml-3 mt-2 inline-flex min-h-10 items-center gap-1 text-[12px] font-bold text-acid" data-testid="link-universes">
+        <Orbit className="size-4" aria-hidden /> {tp("universes")}
+      </Link>
     </section>
   );
 }
@@ -548,6 +552,7 @@ function FilterSheet({ open, onClose, filters, setFilters, count }: { open: bool
   const t = useTranslations("world");
   const tc = useTranslations("common");
   const tl = useTranslations("levels");
+  const tp = useTranslations("party");
   return (
     <BottomSheet
       open={open}

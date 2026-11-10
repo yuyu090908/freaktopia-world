@@ -13,7 +13,9 @@ import { OpsError, type Booking, type Notification } from "./types";
 export type Table =
   | "events" | "requirements" | "profiles" | "organizations" | "listings" | "openings" | "applications" | "bookings"
   | "agreements" | "members" | "tasks" | "messages" | "documents" | "schedule" | "budget" | "payments"
-  | "safety" | "incidents" | "handovers" | "reviews" | "notifications";
+  | "safety" | "incidents" | "handovers" | "reviews" | "notifications"
+  // 9.0 PERSONAL PARTY UNIVERSE (db/migrations/0008_party_universe.sql)
+  | "attendance" | "checkins" | "guests" | "event_reviews" | "media" | "follows" | "blocks" | "world_privacy" | "world_settings" | "party_audit";
 
 type Row = Record<string, unknown>;
 export type Where = Record<string, string | number | boolean | null>;
@@ -40,6 +42,13 @@ const KEY: Partial<Record<Table, (r: Row) => string>> = {
   members: (r) => `${r.eventId}:${r.userId}`,
   budget: (r) => `${r.eventId}:${r.category}`,
   safety: (r) => `${r.eventId}:${r.key}`,
+  attendance: (r) => `${r.eventId}:${r.userId}`,
+  guests: (r) => String(r.eventId),
+  event_reviews: (r) => `${r.eventId}:${r.userId}`,
+  follows: (r) => `${r.organizerId}:${r.userId}`,
+  blocks: (r) => `${r.userId}:${r.organizerId}`,
+  world_privacy: (r) => String(r.userId),
+  world_settings: (r) => String(r.ownerId),
 };
 export const keyOf = (table: Table, r: Row) => (KEY[table] ? KEY[table]!(r) : String(r.id));
 const clone = <T>(v: T): T => (v == null ? v : (JSON.parse(JSON.stringify(v)) as T));
@@ -132,12 +141,24 @@ const COLS: Record<Table, Record<string, string>> = {
   handovers: { id: "id", eventId: "event_id", bookingId: "booking_id" },
   reviews: { id: "id", eventId: "event_id", agreementId: "agreement_id", raterId: "rater_id", rateeId: "ratee_id" },
   notifications: { id: "id", userId: "user_id", eventId: "event_id" },
+  attendance: { eventId: "event_id", userId: "user_id", status: "status" },
+  checkins: { id: "id", eventId: "event_id", userId: "user_id" },
+  guests: { eventId: "event_id" },
+  event_reviews: { eventId: "event_id", userId: "user_id" },
+  media: { id: "id", eventId: "event_id", uploaderId: "uploader_id" },
+  follows: { organizerId: "organizer_id", userId: "user_id" },
+  blocks: { userId: "user_id", organizerId: "organizer_id" },
+  world_privacy: { userId: "user_id" },
+  world_settings: { ownerId: "owner_id" },
+  party_audit: { id: "id", eventId: "event_id", actorId: "actor_id" },
 };
-const PK: Record<Table, string[]> = Object.fromEntries(
-  (Object.keys(COLS) as Table[]).map((t) => [t, KEY[t] ? Object.values(COLS[t]) : ["id"]]),
-) as Record<Table, string[]>;
+/** Primary-key fields of composite-key tables when they differ from all key columns (extra indexed columns). */
+const KEY_FIELDS: Partial<Record<Table, string[]>> = { attendance: ["eventId", "userId"] };
 const PK_FIELDS: Record<Table, string[]> = Object.fromEntries(
-  (Object.keys(COLS) as Table[]).map((t) => [t, KEY[t] ? Object.keys(COLS[t]) : ["id"]]),
+  (Object.keys(COLS) as Table[]).map((t) => [t, KEY[t] ? KEY_FIELDS[t] ?? Object.keys(COLS[t]) : ["id"]]),
+) as Record<Table, string[]>;
+const PK: Record<Table, string[]> = Object.fromEntries(
+  (Object.keys(COLS) as Table[]).map((t) => [t, PK_FIELDS[t].map((f) => COLS[t][f])]),
 ) as Record<Table, string[]>;
 const name = (t: Table) => `ops_${t}`;
 

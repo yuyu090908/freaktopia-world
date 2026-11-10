@@ -145,3 +145,39 @@ Fixed during this round:
 - Candidates and alternatives now show the provider's name.
 
 Not measured this round: Lighthouse.
+
+## 9.0: Personal Party Universe (2026-11-10)
+
+### Automated
+- **vitest: 224 of 224 pass.** This includes the Postgres run on a fresh database with migrations 0005–0008. `0008_party_universe.sql` was applied twice to confirm it can be re-run.
+  - `tests/unit/party-stats.test.ts`, 6 tests:
+    - the verified-party rule;
+    - the total, unique and returning definitions;
+    - Party Impact: no score without enough data, size only 10 %, small and loved beats big and lukewarm, Bayesian satisfaction;
+    - growth stages;
+    - themes and visit tiers;
+    - all anomaly signals.
+  - `tests/integration/party-service.test.ts`: the party service on the memory store and on Postgres:
+    - an RSVP is not attendance;
+    - double scan;
+    - team exclusion;
+    - manual confirm and revoke with reasons;
+    - reviews limited to attendees;
+    - media visibility;
+    - follow, notify, block;
+    - privacy and deletion;
+    - the demo world.
+- **Playwright: 113 of 113 pass** (2 workers, production build, in-memory demo configuration). The 2 new tests are in `tests/party.spec.ts`; README › Tests lists what they cover.
+  - The first full run had 8 failures. A new "Party universes" pill on the WORLD map was smaller than 44 px and pushed the map controls down. I moved it into the map legend, and the affected specs (world, identity, dao, party: 60 tests) then passed. The other 53 tests had already passed in the full run.
+- **i18n:** 311 new keys, translated into all 11 languages. `check-i18n`: 3903/3903 keys in every locale. `find-hardcoded`: 0 hardcoded UI strings.
+- **TypeScript:** `tsc --noEmit` is clean.
+
+### Screens checked by hand
+- At 390 px and 1440 px, in English and Japanese:
+  - the demo world in 3D and Lite;
+  - a selected planet card;
+  - the memories page;
+  - the dashboard, impact, community, growth and history sections.
+- Screenshots: `docs/screenshots/party-ja-390-3d.png`, `party-ja-390-lite.png`, `party-ja-1440-3d.png`, `party-ja-390-memories.png`.
+- WebGL in this container is software-rendered (SwiftShader). Real phones have not been tested, and 3D frame rates were not measured.
+- **Lighthouse was not run for the new pages.** No performance score is claimed.

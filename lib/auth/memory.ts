@@ -139,6 +139,10 @@ export const memoryStore: AuthStore = {
     const a = db().aliens.get(userId);
     return a ? { ...a } : null;
   },
+  async findAlienByPublicId(publicId) {
+    for (const a of db().aliens.values()) if (a.publicId === publicId) return { ...a };
+    return null;
+  },
   async insertAlienOnce(userId, { seed, traits, assetVersion }) {
     // Check-and-set runs without an await in between: atomic in one Node process (like a unique index).
     const existing = db().aliens.get(userId);

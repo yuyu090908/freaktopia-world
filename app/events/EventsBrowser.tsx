@@ -14,12 +14,14 @@ import { levelFor } from "@/lib/levels";
 import { useDemo } from "@/lib/store";
 import type { FreakEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { UpcomingParties } from "@/components/party/Directory";
 
 type Sort = "popular" | "soonest" | "level";
 
 export function EventsBrowser() {
   const tu = useTranslations("events");
   const to = useTranslations("ops");
+  const tp = useTranslations("party");
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
   const support = useDemo((s) => s.support);
@@ -54,6 +56,15 @@ export function EventsBrowser() {
           </select>
         </label>
       </div>
+
+      <section className="mx-4 mt-4 rounded-3xl border border-line bg-surface/60 p-4 md:mx-0" aria-labelledby="community-parties">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="community-parties" className="text-lg uppercase">{tp("communityParties")}</h2>
+          <Link href="/world/universes" className="text-xs font-bold text-acid underline">{tp("universes")}</Link>
+        </div>
+        <p className="mb-3 text-xs text-mute">{tp("communityPartiesSub")}</p>
+        <UpcomingParties limit={4} />
+      </section>
 
       {created.length > 0 && (
         <div className="mx-4 mt-4 rounded-3xl border-2 border-acid/50 bg-acid/5 p-4 md:mx-0">

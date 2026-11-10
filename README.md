@@ -105,6 +105,22 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - **Payments (Phase 4) are not built.** "Paid" is a record only. Identity and business KYC are not connected.
 - Details are in `docs/EVENT_OPS.md`.
 
+## 9.0: Personal Party Universe
+- Every account can grow an organizer **party world** at `/u/[FREAK-…]/world`, linked from the public profile `/u/[FREAK-…]` and from `/profile`. It has a 3D view (three.js, loaded on demand) and a Lite SVG view, chosen automatically and switchable.
+- **Attendance** is RSVP → QR pass → door check-in (`/events/manage/[id]?tab=door`, camera scan or code entry).
+  - RSVPs never count, and a second scan never counts twice.
+  - Manual confirm and revoke need a reason and are audited.
+  - A party is verified only after it ends, with at least 3 QR check-ins from people outside the team.
+- **Dashboard and growth:** the dashboard (events, attendance, unique, returning, rating, guests kept separate), Party Impact (an estimate, size only 10 %, "not enough data" below the minimum) and growth stages 0–5 use verified parties only.
+- **Memories** at `/u/[FREAK-…]/world/[eventId]`: reviews from checked-in people only; official and attendee media are separate, and authors control visibility and deletion.
+- **Follow, privacy and admin:**
+  - Follow with a single new-party note, mute and block. There are no DMs.
+  - Privacy is opt-in, and a person can delete their party data at `/profile/parties`.
+  - The admin anomaly view is at `/world/audit`.
+- `db/migrations/0008_party_universe.sql` adds 10 `ops_*` tables. It is additive and re-runnable.
+- **Not built:** ticket sales or payments, LIVE archive links, AI highlights, and push or email notifications.
+- Details are in `docs/PARTY_UNIVERSE.md`.
+
 ## Backend plan (Phase 2)
 1. **Auth and DB:** Supabase (Postgres, Auth, RLS) or Postgres with Auth.js. Replace `lib/data.ts` getters with server queries. Keep the same types as in `lib/types.ts`.
 2. **Store migration:** Move the Zustand actions (`supportEvent`, `publishEvent`, `addOrder`, `addApplication`…) into Server Actions or API routes. Keep Zustand for UI state only.
@@ -122,5 +138,6 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - `tests/world.spec.ts`: 19 Playwright tests for the WORLD MAP 7.0 (search, filters + URL, Map/List, LIVE, DAO, ranking, mobile sheet, camera, clusters, lite renderer, level admin, 375–1440 px).
 - `tests/identity.spec.ts`: 27 Playwright tests for 8.0/8.1 (12-language switching, switcher keeps URL params and map camera, account language on another device, SEO alternates, missing keys, per-language page check, sign-up, Google demo, logout, reset, Reveal, Alien ID, onboarding resume, same alien after re-login, map/LIVE/DAO identity, 375–1440 px with CJK/Thai/Cyrillic/Vietnamese fonts).
 - `tests/ops.spec.ts`: 7 Playwright flows for event operations at 390 px: small event, 2,000-person festival, quote request to a sound company, DJ application + equipment rental + double booking + budget overrun, staff shortage, permissions, and phone layout + language switching. `tests/integration/ops-service.test.ts` runs the same service on the memory and the Postgres store (10 scenarios each).
+- `tests/party.spec.ts`: 2 Playwright flows for the party universe. The first is the demo world: Lite planet links aligned with the drawing, tap to select then open, memories, back to the world, 3D canvas, and Japanese. The second is a full door flow: publish, follow, RSVP and QR pass at 390 px, RSVPs not counted, scan, duplicate, unknown code, manual confirm with a required reason, review, attendee photo upload with only-me visibility and deletion, team cannot review, the follower notified of the next party, privacy switch, delete my data, and desktop world and profile. `tests/integration/party-service.test.ts` runs the party service on memory and Postgres, and `tests/unit/party-stats.test.ts` covers definitions, Party Impact, growth, tiers and anomalies.
 - `tests/unit` and `tests/integration`: i18n dictionaries and formatting, alien generation, the account service (memory and Postgres), vitest tests for the world map (growth levels, landmarks, search, URL state, `/api/map`), the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.
