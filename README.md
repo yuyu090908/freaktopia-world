@@ -21,7 +21,7 @@ Requirements: Node 20 or later.
 ## Stack
 - Next.js 15 (App Router, static generation), React 19, TypeScript, Tailwind CSS v4
 - Zustand with `persist` (localStorage key `freaktopia-demo-v1`), React Hook Form with Zod
-- MapLibre GL. The world map uses bundled Natural Earth GeoJSON (`public/`), so it needs no tile server or API key.
+- MapLibre GL 5 (globe projection). The world map uses bundled Natural Earth GeoJSON (`public/data/world`, built by `scripts/build-map-data.py`), so the geography needs no tile server or API key. Terrain relief comes from AWS Terrain Tiles and street detail from OpenFreeMap (© OpenStreetMap); both are optional and the map still renders if they are unreachable (`NEXT_PUBLIC_MAP_TILES=off` turns OpenFreeMap off).
 - Key art (logo, hero posters, illustrated maps, scene panels) is supplied by the FREAKTOPIA team. It is cropped and stored in `assets/art/*.webp`, mapped in `lib/art.ts`, and served through `next/image` (AVIF/WebP, responsive sizes).
 - Avatars, LV1–5 stage evolution, venue art and map pins are original inline SVG (`components/art/`, `components/map/markers.ts`).
 - The space backdrop (stars and purple smoke) is pure CSS (`body::before` in `app/globals.css`), and cards use the `.neon` outline style.
@@ -30,7 +30,8 @@ Requirements: Node 20 or later.
 | Route | What it does |
 |---|---|
 | `/` | Hero, featured events, quick-start strip |
-| `/world` | World map. Level pins LV1–5, filters, bottom sheet, and decluttered or grouped pins |
+| `/world` | WORLD MAP 7.0: a dark real-geography globe (Natural Earth + terrain relief + city lights) where every festival is a miniature landmark that grows with its level and shows its status in text and icon. Search with suggestions, URL-synced filters, Map/List, desktop side panel, mobile swipe sheet, LIVE / DAO / ranking / tickets / DJ links. See `docs/WORLD_MAP.md` |
+| `/world/levels` | Demo admin for the festival growth level thresholds, plus the landmark gallery (all types, levels and statuses) |
 | `/events`, `/events/[id]` | Browse and filter events. The detail page shows stage evolution, support, and the level simulator |
 | `/events/[id]/tickets` | Ticket selection and **demo** purchase |
 | `/events/create` | 7-step event wizard. The draft autosaves |
@@ -59,6 +60,7 @@ Requirements: Node 20 or later.
 - Accounts and auth, plus a server-side database
 - Live streaming and audition audio or video
 - Wallets and NFT minting (collectibles exist as UI only). The FESTIVAL DAO uses a throwaway demo wallet that only signs in; staking is a demo ledger
+- Production data for the world map (`MAP_DATA_MODE=production` returns 503 until `db/migrations/0004_world_map.sql` is wired up) and a server-side admin for the level rules
 - Production realtime transport for the live room (the demo polls an in-memory API; see `docs/LIVE_FESTIVAL.md`), real stream provider (Mux or LiveKit) and door-staff accounts
 - AI features (recommendations, matching)
 - Japanese and English locale toggle (copy is English-first, with Japanese line-breaking support)
@@ -78,5 +80,6 @@ Requirements: Node 20 or later.
 - `tests/rankings.spec.ts`: 12 Playwright tests for WORLD RANKING. All pass.
 - `tests/dao.spec.ts`: 12 Playwright tests for the FESTIVAL DAO (join, post, upload, propose, vote, double vote, compare, integrations, 375–1440 px). All pass.
 - `tests/live.spec.ts`: 21 Playwright tests for the LIVE FESTIVAL (15 flows, upcoming-event check, 375–1440 px layout and tap targets).
-- `tests/unit` and `tests/integration`: vitest tests for the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
+- `tests/world.spec.ts`: 19 Playwright tests for the WORLD MAP 7.0 (search, filters + URL, Map/List, LIVE, DAO, ranking, mobile sheet, camera, clusters, lite renderer, level admin, 375–1440 px).
+- `tests/unit` and `tests/integration`: vitest tests for the world map (growth levels, landmarks, search, URL state, `/api/map`), the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.

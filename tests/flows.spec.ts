@@ -8,34 +8,33 @@ const noHorizontalScroll = async (page: Page) => {
   expect(x).toBe(0);
 };
 
-test("home → world map → pin → bottom sheet → event", async ({ page }) => {
+test("home → world map → landmark → bottom sheet → event", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("dancefloor", { ignoreCase: true });
   await noHorizontalScroll(page);
   await page.getByRole("link", { name: /^explore$/i }).click();
   await expect(page).toHaveURL(/\/world$/);
-  const pin = page.getByRole("button", { name: /NEON SLIME SUMMIT, Berlin/ });
-  await expect(pin).toBeVisible({ timeout: 15_000 });
-  await pin.click(); // nearby pins are grouped at world zoom: first tap zooms in
+  await expect(page.getByTestId("world-map")).toHaveAttribute("data-ready", "true", { timeout: 20_000 });
+  // Search, then pick the festival: the camera flies there and the sheet opens.
+  await page.getByRole("combobox").fill("neon slime");
+  await page.getByRole("option", { name: /NEON SLIME SUMMIT/ }).click();
   const sheet = page.getByRole("region", { name: /NEON SLIME SUMMIT summary/ });
-  if (!(await sheet.isVisible())) {
-    await page.waitForTimeout(1200);
-    await page.getByRole("button", { name: /NEON SLIME SUMMIT, Berlin/ }).click();
-  }
   await expect(sheet).toBeVisible();
-  await expect(sheet.getByText("LV.5")).toBeVisible();
+  await expect(sheet.getByText("LV.5 FREAKTOPIA LEGEND").first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^NEON SLIME SUMMIT, Berlin/ })).toBeVisible();
+  await sheet.getByRole("button", { name: "Show all details" }).click();
   await sheet.getByRole("link", { name: /view event/i }).click();
   await expect(page).toHaveURL(/\/events\/neon-slime-summit$/);
 });
 
 test("world map filters reduce results", async ({ page }) => {
   await page.goto("/world");
-  await expect(page.getByText("18 events")).toBeVisible();
-  await page.getByRole("button", { name: "Live now" }).click();
-  await expect(page.getByText("1 event", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("world-count")).toHaveText("18 events");
+  await page.getByRole("button", { name: "Live now", exact: true }).click();
+  await expect(page.getByTestId("world-count")).toHaveText("1 event");
   await page.getByRole("button", { name: /clear/i }).click();
-  await page.getByRole("searchbox").fill("Tokyo");
-  await expect(page.getByText("1 event", { exact: true })).toBeVisible();
+  await page.getByRole("combobox").fill("Tokyo");
+  await expect(page.getByTestId("world-count")).toHaveText("1 event");
 });
 
 test("support event, simulator level-up", async ({ page }) => {

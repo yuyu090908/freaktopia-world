@@ -1,0 +1,212 @@
+"use client";
+
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, RotateCcw, Save } from "lucide-react";
+import { Container, DemoNotice, PageTitle } from "@/components/ui/primitives";
+import { DEFAULT_GROWTH_CONFIG, LEVEL_COLORS, computeFestivalLevel, normalizeConfig, validateConfig, type GrowthConfig, type GrowthThreshold } from "@/lib/map/growth";
+import { LANDMARK_LABEL, STATUS_META, landmarkSvg, orbSvg, type LandmarkType, type MapStatus } from "@/lib/map/landmarks";
+import type { WorldMapResponse } from "@/lib/map/types";
+import { toast, useDemo } from "@/lib/store";
+import type { EventLevel } from "@/lib/types";
+import { cn } from "@/lib/utils";
+
+const TYPES = Object.keys(LANDMARK_LABEL) as LandmarkType[];
+const STATUSES = Object.keys(STATUS_META) as MapStatus[];
+const PALETTES: Record<LandmarkType, [string, string, string]> = {
+  monster_stage: ["#FF625C", "#55BCEB", "#B6F05C"],
+  psychedelic_tent: ["#A276E9", "#FFAD5B", "#B6F05C"],
+  cosmic_portal: ["#B6F05C", "#FFAD5B", "#55BCEB"],
+  speaker_towers: ["#55BCEB", "#FF625C", "#B6F05C"],
+  alien_sculpture: ["#A276E9", "#55BCEB", "#B6F05C"],
+  neon_gate: ["#FFAD5B", "#A276E9", "#55BCEB"],
+};
+
+const NUM_FIELDS: { key: "supporters" | "fundingUsd" | "stakers" | "approvals"; label: string }[] = [
+  { key: "supporters", label: "Valid supporters" },
+  { key: "fundingUsd", label: "Secured funding (USD)" },
+  { key: "stakers", label: "Staking participants" },
+  { key: "approvals", label: "Approved prep items" },
+];
+
+export function LevelsAdmin() {
+  const saved = useDemo((s) => s.mapGrowthConfig);
+  const setSaved = useDemo((s) => s.setMapGrowthConfig);
+  const [draft, setDraft] = useState<GrowthConfig>(DEFAULT_GROWTH_CONFIG);
+  const [map, setMap] = useState<WorldMapResponse | null>(null);
+  const [type, setType] = useState<LandmarkType>("monster_stage");
+
+  useEffect(() => setDraft(saved ? normalizeConfig(saved) : DEFAULT_GROWTH_CONFIG), [saved]);
+  useEffect(() => {
+    fetch("/api/map")
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setMap)
+      .catch(() => {});
+  }, []);
+
+  const errors = validateConfig(draft);
+  const preview = useMemo(() => {
+    const counts: Record<number, string[]> = { 1: [], 2: [], 3: [], 4: [], 5: [] };
+    for (const e of map?.events ?? []) counts[computeFestivalLevel(e.growth, draft).level].push(e.name);
+    return counts;
+  }, [map, draft]);
+
+  const update = (i: number, patch: Partial<GrowthThreshold>) => setDraft((d) => ({ ...d, levels: d.levels.map((l, j) => (j === i ? { ...l, ...patch } : l)) }));
+
+  return (
+    <Container className="pb-24">
+      <Link href="/world" className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-mute hover:text-cream">
+        <ArrowLeft className="size-4" aria-hidden /> Back to the world map
+      </Link>
+      <PageTitle kicker="World map · admin (demo)" title="Festival level rules" sub="Thresholds for the landmark growth levels on the world map." />
+      <DemoNotice className="mt-4">
+        Demo admin: changes are saved in this browser only and change only how landmarks look. In production these rows live in the <code>event_growth_levels</code> table and only admins can edit them (server-checked). A level is a visual game level: it never means the venue holds more people. Staking principal is escrowed and never counted as funding.
+      </DemoNotice>
+
+      <section aria-labelledby="rules-h" className="mt-6">
+        <h2 id="rules-h" className="text-2xl uppercase">Thresholds</h2>
+        <p className="mt-1 text-sm text-mute">An event reaches a level when every requirement of that level (and the levels below) is met.</p>
+        <div className="mt-3 overflow-x-auto rounded-3xl border-2 border-line">
+          <table className="w-full min-w-[720px] text-sm">
+            <thead className="bg-surface-2 text-left text-[12px] uppercase text-mute">
+              <tr>
+                <th className="p-3">Level</th>
+                <th className="p-3">Name</th>
+                {NUM_FIELDS.map((f) => (
+                  <th key={f.key} className="p-3">
+                    {f.label}
+                  </th>
+                ))}
+                <th className="p-3">Venue contract</th>
+              </tr>
+            </thead>
+            <tbody>
+              {draft.levels.map((l, i) => (
+                <tr key={l.level} className="border-t border-line">
+                  <td className="p-3">
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-black text-ink" style={{ background: LEVEL_COLORS[l.level] }}>
+                      LV.{l.level}
+                    </span>
+                  </td>
+                  <td className="p-2">
+                    <input aria-label={`Level ${l.level} name`} value={l.name} onChange={(e) => update(i, { name: e.target.value })} className="min-h-11 w-40 rounded-xl border-2 border-line bg-ink px-2" />
+                  </td>
+                  {NUM_FIELDS.map((f) => (
+                    <td key={f.key} className="p-2">
+                      <input
+                        type="number"
+                        min={0}
+                        inputMode="numeric"
+                        aria-label={`Level ${l.level} ${f.label}`}
+                        disabled={i === 0}
+                        value={l[f.key]}
+                        onChange={(e) => update(i, { [f.key]: Number(e.target.value) } as Partial<GrowthThreshold>)}
+                        className="min-h-11 w-28 rounded-xl border-2 border-line bg-ink px-2 disabled:opacity-40"
+                      />
+                    </td>
+                  ))}
+                  <td className="p-2">
+                    <label className="inline-flex min-h-11 items-center gap-2">
+                      <input type="checkbox" disabled={i === 0} checked={l.venueContract} onChange={(e) => update(i, { venueContract: e.target.checked })} className="size-5 accent-[#B6F05C]" />
+                      <span className="sr-only">Level {l.level} needs a venue contract</span>
+                      Required
+                    </label>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {errors.length > 0 && (
+          <ul className="mt-3 space-y-1 text-sm text-coral" role="alert">
+            {errors.map((e) => (
+              <li key={e}>{e}</li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={errors.length > 0}
+            onClick={() => {
+              setSaved(normalizeConfig({ ...draft, version: (saved?.version ?? 1) + 1 }));
+              toast({ title: "Level rules saved (this browser)", body: "The world map now uses these thresholds." });
+            }}
+            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-acid px-5 font-extrabold uppercase text-ink disabled:opacity-40"
+          >
+            <Save className="size-4" aria-hidden /> Save rules
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setSaved(null);
+              setDraft(DEFAULT_GROWTH_CONFIG);
+              toast({ title: "Defaults restored" });
+            }}
+            className="inline-flex min-h-12 items-center gap-2 rounded-full border-2 border-line px-5 font-extrabold uppercase"
+          >
+            <RotateCcw className="size-4" aria-hidden /> Reset to defaults
+          </button>
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-5" aria-label="Preview with these rules">
+          {([1, 2, 3, 4, 5] as EventLevel[]).map((lv) => (
+            <div key={lv} className="rounded-2xl bg-surface p-3" data-testid={`preview-lv${lv}`}>
+              <div className="text-[12px] font-extrabold uppercase" style={{ color: LEVEL_COLORS[lv] }}>
+                LV.{lv} {draft.levels[lv - 1].name}
+              </div>
+              <div className="font-display text-2xl">{preview[lv].length}</div>
+              <div className="line-clamp-3 text-[11px] text-mute">{preview[lv].join(", ") || "–"}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="gal-h" className="mt-10">
+        <h2 id="gal-h" className="text-2xl uppercase">Landmark gallery</h2>
+        <p className="mt-1 text-sm text-mute">Original FREAKTOPIA landmarks. Genre picks the landmark, level adds structures, status adds an overlay with its own text and icon.</p>
+        <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label="Landmark type">
+          {TYPES.map((t) => (
+            <button key={t} type="button" role="tab" aria-selected={type === t} onClick={() => setType(t)} className={cn("min-h-11 shrink-0 rounded-full border-2 px-4 text-sm font-bold", type === t ? "border-acid bg-acid text-ink" : "border-line")}>
+              {LANDMARK_LABEL[t]}
+            </button>
+          ))}
+        </div>
+        <h3 className="mt-4 text-[13px] font-extrabold uppercase text-mute">Levels (confirmed)</h3>
+        <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-5" data-testid="gallery-levels">
+          {([1, 2, 3, 4, 5] as EventLevel[]).map((lv) => (
+            <li key={lv} className="rounded-3xl bg-[#0A1727] p-2 text-center">
+              <span className="mx-auto block aspect-square w-full max-w-[180px]" dangerouslySetInnerHTML={{ __html: landmarkSvg({ type, level: lv, status: "confirmed", palette: PALETTES[type], daoTier: lv >= 4 ? 2 : 0, animate: true }) }} />
+              <span className="text-[12px] font-extrabold" style={{ color: LEVEL_COLORS[lv] }}>
+                LV.{lv} {draft.levels[lv - 1].name}
+              </span>
+              <span className="block text-[11px] text-mute">{draft.levels[lv - 1].visual}</span>
+            </li>
+          ))}
+        </ul>
+        <h3 className="mt-6 text-[13px] font-extrabold uppercase text-mute">Status (level 3)</h3>
+        <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-6" data-testid="gallery-status">
+          {STATUSES.map((s) => (
+            <li key={s} className="rounded-3xl bg-[#0A1727] p-2 text-center">
+              <span className="mx-auto block aspect-square w-full max-w-[160px]" dangerouslySetInnerHTML={{ __html: landmarkSvg({ type, level: 3, status: s, palette: PALETTES[type], fundingPct: 0.55, animate: true }) }} />
+              <span className="inline-flex items-center gap-1 text-[12px] font-extrabold" style={{ color: STATUS_META[s].color }}>
+                <span aria-hidden>{STATUS_META[s].glyph}</span>
+                {STATUS_META[s].label}
+              </span>
+              <span className="block text-[11px] text-mute">{STATUS_META[s].hint}</span>
+            </li>
+          ))}
+        </ul>
+        <h3 className="mt-6 text-[13px] font-extrabold uppercase text-mute">World zoom tokens</h3>
+        <ul className="mt-2 flex flex-wrap gap-3">
+          {STATUSES.map((s) => (
+            <li key={s} className="flex items-center gap-2 rounded-2xl bg-[#0A1727] px-3 py-2 text-[12px]">
+              <span className="size-9" aria-hidden dangerouslySetInnerHTML={{ __html: orbSvg(3, s, LEVEL_COLORS[3]) }} />
+              {STATUS_META[s].label}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-4 text-[12px] text-mute">Cancelled is supported by the map and the database (`event_map_status`); no sample event is cancelled.</p>
+      </section>
+    </Container>
+  );
+}

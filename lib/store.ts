@@ -8,6 +8,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useEffect, useSyncExternalStore } from "react";
+import type { GrowthConfig } from "./map/growth";
 import type {
   AfterParty,
   AlienLook,
@@ -95,6 +96,8 @@ interface DemoState {
   liveTz: "venue" | "local";
   liveLikes: string[]; // event ids
   liveBadges: string[];
+  /** Admin-edited festival growth thresholds (demo: this browser only). null = defaults. */
+  mapGrowthConfig: GrowthConfig | null;
   ownedItems: string[];
   club: { name: string; tier: number };
   inquiriesAnswered: string[];
@@ -126,6 +129,7 @@ interface DemoState {
   like: (djId: string) => void;
   vote: (djId: string, stars: number) => void;
   setLive: (p: Partial<Pick<DemoState, "liveShowAvatar" | "liveZone" | "liveCheckedIn" | "liveVisibility" | "liveDance" | "liveEmote" | "liveTz">>) => void;
+  setMapGrowthConfig: (c: GrowthConfig | null) => void;
   setLiveQuests: (eventId: string, p: QuestProgress, badges?: string[]) => void;
   toggleReminder: (setId: string) => boolean;
   toggleLiveLike: (eventId: string) => boolean;
@@ -170,6 +174,7 @@ const initial = {
   liveTz: "venue" as "venue" | "local",
   liveLikes: [] as string[],
   liveBadges: [] as string[],
+  mapGrowthConfig: null as GrowthConfig | null,
   ownedItems: ["headphones", "hoodie", "cap"],
   club: { name: "MY FIRST CLUB", tier: 1 },
   inquiriesAnswered: [],
@@ -253,6 +258,7 @@ const useDemoRaw = create<DemoState>()(
       like: (djId) => set((s) => ({ likes: { ...s.likes, [djId]: (s.likes[djId] ?? 0) + 1 } })),
       vote: (djId, stars) => set((s) => ({ votes: { ...s.votes, [djId]: stars } })),
       setLive: (p) => set(p),
+      setMapGrowthConfig: (c) => set({ mapGrowthConfig: c }),
       setLiveQuests: (eventId, p, badges = []) =>
         set((s) => ({ liveQuests: { ...s.liveQuests, [eventId]: p }, liveBadges: Array.from(new Set([...s.liveBadges, ...badges])) })),
       toggleReminder: (setId) => {

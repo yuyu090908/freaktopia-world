@@ -375,6 +375,20 @@ function roomView(room: RoomState, me: string, zone: ZoneId, since: number, now:
 }
 
 async function discovery(now: number) {
+  const events = await discoveryEvents(now);
+  const order = (s: LiveStatus) => ({ live: 0, demo_live: 1, upcoming: 2, ended: 3 })[s];
+  events.sort((x, y) => order(x.status) - order(y.status) || Date.parse(x.startsAt) - Date.parse(y.startsAt));
+  const realLive = events.filter((x) => x.status === "live");
+  const nextUp = events.filter((x) => x.status === "upcoming").slice(0, 3).map((x) => x.id);
+  return ok(
+    { mode: liveMode(), asOf: now, realLiveCount: realLive.length, featured: realLive[0]?.id ?? null, demoLive: events.filter((x) => x.status === "demo_live").map((x) => x.id), nextUp, events },
+    200,
+    { "Cache-Control": "public, s-maxage=15" },
+  );
+}
+
+/** Per-event live status, current DJ and the separate attendance numbers. Also used by the world map API. */
+export async function discoveryEvents(now: number) {
   const metrics = await metricsByEvent();
   const db = getLiveDb(now);
   const daos = new Map(allDaoSummaries(now).map((d) => [d.eventId, d]));
@@ -414,15 +428,7 @@ async function discovery(now: number) {
       dao: daos.has(e.id),
     };
   });
-  const order = (s: LiveStatus) => ({ live: 0, demo_live: 1, upcoming: 2, ended: 3 })[s];
-  events.sort((x, y) => order(x.status) - order(y.status) || Date.parse(x.startsAt) - Date.parse(y.startsAt));
-  const realLive = events.filter((x) => x.status === "live");
-  const nextUp = events.filter((x) => x.status === "upcoming").slice(0, 3).map((x) => x.id);
-  return ok(
-    { mode: liveMode(), asOf: now, realLiveCount: realLive.length, featured: realLive[0]?.id ?? null, demoLive: events.filter((x) => x.status === "demo_live").map((x) => x.id), nextUp, events },
-    200,
-    { "Cache-Control": "public, s-maxage=15" },
-  );
+  return events;
 }
 
 async function detail(e: FreakEvent, now: number) {

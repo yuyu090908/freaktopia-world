@@ -277,6 +277,7 @@ export function daoSummary(eventId: string, now = Date.now()) {
     status: dao.status,
     members: members.length,
     staked: db.positions.filter((p) => p.daoId === dao.id && p.status === "locked").reduce((a, p) => a + p.amount, 0),
+    stakers: new Set(db.positions.filter((p) => p.daoId === dao.id && p.status === "locked").map((p) => p.uid)).size,
     tokenSymbol: dao.config.tokenSymbol,
     minimumStake: dao.config.minimumStake,
     activeProposals: proposals.filter((p) => ["DISCUSSION", "REVIEW", "VOTING", "FEASIBILITY_CHECK", "ORGANIZER_CONFIRMATION", "EXECUTION"].includes(p.state)).length,
@@ -1156,6 +1157,28 @@ function executePayment(db: DaoDb, dao: EventDao, p: Principal, id: string, now:
 }
 
 /* ---------------- roadmap / members / settings ---------------- */
+
+/** Stage design the DAO approved (vote won and the proposal moved on), or null. Used by the world map landmark. */
+export function approvedStageDesign(eventId: string) {
+  const db = getDb();
+  const dao = db.daos.get(eventId);
+  if (!dao) return null;
+  const c = winningConcept(db, dao);
+  if (!c) return null;
+  const spec = c.versions.at(-1)!.spec;
+  return { conceptId: c.id, name: c.name, theme: c.theme, palette: spec.palette, booth: spec.booth, installation: spec.installation, lasers: spec.lasers };
+}
+
+function winningConcept(db: DaoDb, dao: EventDao) {
+  return db.proposals
+    .filter((x) => x.daoId === dao.id && x.conceptIds.length && ["APPROVED", "FEASIBILITY_CHECK", "ORGANIZER_CONFIRMATION", "EXECUTION", "COMPLETED"].includes(x.state))
+    .map((x) => {
+      const v = x.voteId ? db.votes.find((y) => y.id === x.voteId) : undefined;
+      const cid = v?.result?.winner ? v.options.find((o) => o.id === v.result!.winner)?.conceptId : undefined;
+      return cid ? db.concepts.find((c) => c.id === cid) : undefined;
+    })
+    .find(Boolean);
+}
 
 function roadmap(db: DaoDb, dao: EventDao, p: Principal) {
   const ev = getEvent(dao.eventId)!;
