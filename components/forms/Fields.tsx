@@ -1,17 +1,19 @@
 "use client";
 
 import { forwardRef, type ComponentProps, type ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 const base =
   "w-full rounded-2xl border-2 border-line bg-ink px-4 text-base text-cream outline-none placeholder:text-mute/70 focus:border-acid aria-[invalid=true]:border-coral";
 
 export function Field({ label, hint, error, children, id, optional }: { label: string; hint?: string; error?: string; children: ReactNode; id: string; optional?: boolean }) {
+  const t = useTranslations("common");
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="flex items-baseline justify-between gap-2 text-sm font-bold">
         <span>{label}</span>
-        {optional && <span className="text-xs font-semibold text-mute">Optional</span>}
+        {optional && <span className="text-xs font-semibold text-mute">{t("optional")}</span>}
       </label>
       {children}
       {hint && !error && <p id={`${id}-hint`} className="ja text-xs text-mute">{hint}</p>}

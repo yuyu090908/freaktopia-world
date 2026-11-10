@@ -192,8 +192,17 @@ describe("proposals and voting", () => {
     expect(open.json.proposal.state).toBe("VOTING");
     const vote = open.json.proposal.vote;
     expect(vote.snapshot.eligible).toBeGreaterThan(400);
+    // 8.0: a signed-in account whose email isn't confirmed cannot vote, even with stake
+    const { memoryStore } = await import("@/lib/auth/memory");
+    const { createSession } = await import("@/lib/auth/service");
+    const unverified = await memoryStore.createUser({ email: `unv-${Date.now()}@example.test`, passwordHash: null, emailVerified: false, locale: "en" });
+    author.jar.set("fk_session", (await createSession(unverified.id)).token);
+    const b0 = await author.call("POST", `neon-slime-summit/votes/${vote.id}/ballot`, { choice: ["yes"], proposalVersion: 1 });
+    expect(b0.status).toBe(403);
+    expect(b0.json.error.code).toBe("EMAIL_NOT_VERIFIED");
+    author.jar.delete("fk_session");
     // author is in the snapshot and votes once
-    const b1 = await author.call("POST", `neon-slime-summit/votes/${vote.id}/ballot`, { choice: ["yes"], proposalVersion: 1 });
+    const b1 =await author.call("POST", `neon-slime-summit/votes/${vote.id}/ballot`, { choice: ["yes"], proposalVersion: 1 });
     expect(b1.status).toBe(201);
     expect(b1.json.receipt.hash).toMatch(/^[0-9a-f]{64}$/);
     const b2 = await author.call("POST", `neon-slime-summit/votes/${vote.id}/ballot`, { choice: ["no"], proposalVersion: 1 });

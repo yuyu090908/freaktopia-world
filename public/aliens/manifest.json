@@ -1,0 +1,170 @@
+{
+  "assetVersion": 1,
+  "licence": "Original artwork, FREAKTOPIA WORLD",
+  "frame": {
+    "width": 200,
+    "height": 250,
+    "anchor": {
+      "x": 100,
+      "y": 204
+    },
+    "note": "anchor = feet centre, for placing on a 2D map tile"
+  },
+  "poses": [
+    "portrait",
+    "full",
+    "idle",
+    "walk",
+    "dance",
+    "emote"
+  ],
+  "families": {
+    "slime": {
+      "files": {
+        "portrait": "/aliens/slime/portrait.svg",
+        "full": "/aliens/slime/full.svg",
+        "idle": "/aliens/slime/idle.svg",
+        "walk": "/aliens/slime/walk.svg",
+        "dance": "/aliens/slime/dance.svg",
+        "emote": "/aliens/slime/emote.svg"
+      },
+      "base": {
+        "bodyColor": "lime",
+        "accentColor": "coral",
+        "eyes": "duo",
+        "mouth": "grin",
+        "pattern": "none",
+        "accessory": "none",
+        "outfit": "none",
+        "outfitColor": "violet",
+        "special": "none"
+      }
+    },
+    "fuzz": {
+      "files": {
+        "portrait": "/aliens/fuzz/portrait.svg",
+        "full": "/aliens/fuzz/full.svg",
+        "idle": "/aliens/fuzz/idle.svg",
+        "walk": "/aliens/fuzz/walk.svg",
+        "dance": "/aliens/fuzz/dance.svg",
+        "emote": "/aliens/fuzz/emote.svg"
+      },
+      "base": {
+        "bodyColor": "violet",
+        "accentColor": "tangerine",
+        "eyes": "trio",
+        "mouth": "zigzag",
+        "pattern": "none",
+        "accessory": "none",
+        "outfit": "none",
+        "outfitColor": "sky",
+        "special": "none"
+      }
+    },
+    "mutant": {
+      "files": {
+        "portrait": "/aliens/mutant/portrait.svg",
+        "full": "/aliens/mutant/full.svg",
+        "idle": "/aliens/mutant/idle.svg",
+        "walk": "/aliens/mutant/walk.svg",
+        "dance": "/aliens/mutant/dance.svg",
+        "emote": "/aliens/mutant/emote.svg"
+      },
+      "base": {
+        "bodyColor": "coral",
+        "accentColor": "lemon",
+        "eyes": "stalks",
+        "mouth": "fangs",
+        "pattern": "spots",
+        "accessory": "none",
+        "outfit": "none",
+        "outfitColor": "lime",
+        "special": "none"
+      }
+    },
+    "jelly": {
+      "files": {
+        "portrait": "/aliens/jelly/portrait.svg",
+        "full": "/aliens/jelly/full.svg",
+        "idle": "/aliens/jelly/idle.svg",
+        "walk": "/aliens/jelly/walk.svg",
+        "dance": "/aliens/jelly/dance.svg",
+        "emote": "/aliens/jelly/emote.svg"
+      },
+      "base": {
+        "bodyColor": "sky",
+        "accentColor": "lime",
+        "eyes": "duo",
+        "mouth": "o",
+        "pattern": "none",
+        "accessory": "none",
+        "outfit": "none",
+        "outfitColor": "tangerine",
+        "special": "none"
+      }
+    }
+  },
+  "parts": {
+    "bodyColors": {
+      "lime": "#B6F05C",
+      "violet": "#A276E9",
+      "coral": "#FF625C",
+      "sky": "#55BCEB",
+      "tangerine": "#FFAD5B",
+      "bubblegum": "#FF8FD1",
+      "mint": "#5CF0C8",
+      "lemon": "#F5E15C",
+      "cream": "#F5F2EA",
+      "ruby": "#E0475B"
+    },
+    "eyes": [
+      "duo",
+      "cyclops",
+      "trio",
+      "stalks",
+      "sleepy",
+      "star"
+    ],
+    "mouths": [
+      "grin",
+      "fangs",
+      "tongue",
+      "zigzag",
+      "o",
+      "smirk"
+    ],
+    "patterns": [
+      "none",
+      "spots",
+      "stripes",
+      "stars",
+      "glitter",
+      "swirl"
+    ],
+    "accessories": [
+      "none",
+      "headphones",
+      "shades",
+      "antenna",
+      "cap",
+      "horns",
+      "halo",
+      "flower"
+    ],
+    "outfits": [
+      "none",
+      "hoodie",
+      "jacket",
+      "vest",
+      "kimono"
+    ],
+    "specials": [
+      "none",
+      "blush",
+      "freckles",
+      "bandage",
+      "glow",
+      "drip"
+    ]
+  }
+}

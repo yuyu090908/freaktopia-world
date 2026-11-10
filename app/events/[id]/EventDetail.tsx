@@ -1,5 +1,7 @@
 "use client";
 
+import { UserContent } from "@/components/i18n/UserContent";
+
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -117,7 +119,7 @@ export function EventDetail({ event }: { event: FreakEvent }) {
             {event.djRecruiting && <Tag color="#A276E9" dark>DJs wanted</Tag>}
             <Tag color="#2a2a2a">By {event.organizer}</Tag>
           </div>
-          <p className="ja mt-4 leading-relaxed text-cream/85">{event.description}</p>
+          <UserContent text={event.description} className="mt-4 leading-relaxed text-cream/85" />
 
           {/* ACTIONS */}
           {ended && (

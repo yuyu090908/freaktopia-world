@@ -1,5 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { useAuth } from "@/lib/auth/client";
+import { useLocalHref } from "@/components/i18n/LocaleContext";
+
 import { useEffect, useState } from "react";
 import { Lock, RotateCcw, Save } from "lucide-react";
 import { Alien, STARTERS } from "@/components/art/Alien";
@@ -70,6 +75,7 @@ function Studio() {
   return (
     <div className="mx-auto max-w-5xl md:px-6">
       <PageTitle kicker="Alien World" title="Make your alien" sub="キャラクターを選んで、名前・衣装・アクセサリーをカスタマイズ。" />
+      <IdentityNotice />
       <div className="md:grid md:grid-cols-[1fr_1.1fr] md:gap-8">
         {/* Preview */}
         <div className="px-4 md:sticky md:top-24 md:self-start md:px-0">
@@ -163,5 +169,26 @@ function Swatches({ label, value, onChange }: { label: string; value: string; on
         ))}
       </div>
     </fieldset>
+  );
+}
+
+/** Signed in: the account alien (one per account, no reroll) is the avatar everywhere; this studio is the demo playground. */
+function IdentityNotice() {
+  const me = useAuth((s) => s.me);
+  const t = useTranslations("avatarStudio");
+  const href = useLocalHref();
+  if (!me?.alien) {
+    return (
+      <p className="mx-4 mb-4 rounded-2xl border border-line bg-surface p-3 text-sm md:mx-0">
+        {t("guest")}{" "}
+        <Link href={href("/auth/signup")} className="font-bold text-acid underline">{t("guestCta")}</Link>
+      </p>
+    );
+  }
+  return (
+    <p className="mx-4 mb-4 rounded-2xl border-2 border-acid/50 bg-acid/10 p-3 text-sm md:mx-0" data-testid="avatar-identity-note">
+      {t("signedIn", { name: me.alien.name })}{" "}
+      <Link href={href("/profile/alien")} className="font-bold text-acid underline">{t("signedInCta")}</Link>
+    </p>
   );
 }

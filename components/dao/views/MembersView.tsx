@@ -1,5 +1,7 @@
 "use client";
 
+import { DaoAvatar } from "@/components/dao/DaoAvatar";
+
 import { useEffect, useState } from "react";
 import { Search, ShieldAlert, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/primitives";
@@ -56,6 +58,7 @@ export function MembersView() {
             {state.data.members.map((m) => (
               <li key={m.uid ?? m.handle} className={`p-3 ${m.isMe ? "bg-acid/10" : ""}`}>
                 <div className="flex flex-wrap items-center gap-2">
+                  <DaoAvatar handle={m.handle} mine={m.isMe} size={32} />
                   <span className="min-w-0 truncate font-bold">@{m.handle}{m.isMe && <span className="ml-1 text-acid">(you)</span>}</span>
                   {m.roles.filter((r) => r !== "member").map((r) => <span key={r} className="rounded-full bg-purple px-2 py-0.5 text-[11px] font-extrabold uppercase text-ink">{ROLE_LABEL[r]}</span>)}
                   <span className="ml-auto text-sm text-mute">{m.xp} XP</span>

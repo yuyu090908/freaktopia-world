@@ -43,6 +43,8 @@ interface Props {
   remoteTiles: boolean;
   onReady?: () => void;
   onZoom?: (z: number) => void;
+  /** The signed-in user's alien, drawn beside events they joined. Only passed when they opted in (privacy: map presence). */
+  me?: { svg: string; label: string; ids: Set<string> } | null;
 }
 
 /* ---------------- style ---------------- */
@@ -207,12 +209,12 @@ interface Group {
 
 /* ---------------- component ---------------- */
 
-const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function FestivalWorldMap({ events, selectedId, onSelect, rich, animate, reducedMotion, padding, remoteTiles, onReady, onZoom }, ref) {
+const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function FestivalWorldMap({ events, selectedId, onSelect, rich, animate, reducedMotion, padding, remoteTiles, onReady, onZoom, me = null }, ref) {
   const box = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markers = useRef(new Map<string, { m: maplibregl.Marker; box: HTMLDivElement; el: HTMLButtonElement; sig: string }>());
-  const latest = useRef({ events, selectedId, onSelect, padding, rich, animate, reducedMotion });
-  latest.current = { events, selectedId, onSelect, padding, rich, animate, reducedMotion };
+  const latest = useRef({ events, selectedId, onSelect, padding, rich, animate, reducedMotion, me });
+  latest.current = { events, selectedId, onSelect, padding, rich, animate, reducedMotion, me };
   const prevCam = useRef<{ center: maplibregl.LngLat; zoom: number; pitch: number; bearing: number } | null>(null);
   const home = useRef<{ center: [number, number]; zoom: number }>({ center: [20, 22], zoom: 1.4 });
   const loaded = useRef(false);
@@ -238,7 +240,7 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
   const render = useCallback(() => {
     const map = mapRef.current;
     if (!map) return;
-    const { events: evs, selectedId: sel, animate: anim } = latest.current;
+    const { events: evs, selectedId: sel, animate: anim, me: mine } = latest.current;
     const z = map.getZoom();
     const tier = tierFor(z);
     const w = map.getContainer().clientWidth;
@@ -283,7 +285,8 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
       const key = single ? `e:${g.lead.id}` : `c:${g.members.map((m) => m.id).sort().join("|")}`;
       seen.add(key);
       const selected = g.lead.id === sel;
-      const sig = single ? `${tier}|${selected}|${g.lead.level}|${g.lead.status}|${g.lead.dao?.tier}|${g.lead.ranking.rank}|${anim}|${g.lead.palette.join()}|${Math.round((g.lead.growth.fundingUsd / g.lead.goalUsd) * 50)}` : `${tier}|${g.members.length}|${g.lead.id}`;
+      const here = single && tier !== "far" && Boolean(mine?.ids.has(g.lead.id));
+      const sig = single ? `${here}|${tier}|${selected}|${g.lead.level}|${g.lead.status}|${g.lead.dao?.tier}|${g.lead.ranking.rank}|${anim}|${g.lead.palette.join()}|${Math.round((g.lead.growth.fundingUsd / g.lead.goalUsd) * 50)}` : `${tier}|${g.members.length}|${g.lead.id}`;
       let rec = markers.current.get(key);
       if (!rec) {
         // maplibre owns the wrapper's classes and transform; our button lives inside it.
@@ -312,7 +315,8 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
           el.setAttribute("aria-label", ariaFor(g.lead));
           el.setAttribute("aria-pressed", String(selected));
           el.title = `${g.lead.name} · ${LANDMARK_LABEL[g.lead.landmark.type]}`;
-          el.innerHTML = eventHtml(g.lead, tier, selected, anim);
+          el.innerHTML = eventHtml(g.lead, tier, selected, anim) + (here && mine ? `<span class="wm-me" data-testid="map-my-alien" title="${mine.label}">${mine.svg}</span>` : "");
+          if (here && mine) el.setAttribute("aria-label", `${ariaFor(g.lead)}. ${mine.label}`);
         } else {
           const live = g.members.some((m) => m.live);
           const dao = g.members.some((m) => m.dao);
@@ -460,7 +464,7 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
   useEffect(() => {
     const map = mapRef.current;
     if (map?.loaded() || map?.isStyleLoaded()) render();
-  }, [events, selectedId, render]);
+  }, [events, selectedId, me, render]);
 
   /* camera on select / close */
   const lastSel = useRef<string | null>(null);

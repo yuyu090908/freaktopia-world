@@ -40,3 +40,39 @@ These were measured in a cloud container with **software GPU rendering (SwiftSha
 /world stays below 90. Its Total Blocking Time comes from WebGL running on the software GPU.
 
 Screenshots are in `docs/screenshots/` at 390px, plus 1440px for home and world.
+
+## 8.0: languages, accounts, alien identity (2026-11-10)
+
+Production build (`npm run build && npm run start`), demo configuration (no `DATABASE_URL`, Google, email or DeepL keys).
+
+| Suite | Result |
+|---|---|
+| `node scripts/check-i18n.mjs` | 11 translations × 506 keys: 0 missing, 0 extra, 0 empty, 0 placeholder mismatches |
+| vitest (unit + integration, with `TEST_DATABASE_URL` on local PostgreSQL 16 + migration 0005) | 177 / 177 passed (the account service runs on both the memory and the Postgres store) |
+| `tsc --noEmit` | clean |
+| Playwright, full suite (95 tests, 2 workers) | 93 passed, 2 failed. Fixed: `identity.spec` picked the accessory the alien already wore (test bug); `rankings.spec` typed before hydration now that pages render per request (test waits for hydration). Re-run of both specs: 30 / 30 passed |
+
+Required 8.0 checks (`tests/identity.spec.ts` unless noted):
+
+| # | Check | Where |
+|---|---|---|
+| 1 | Switching through all 12 languages in place, URL prefix swapped | `languages › 1` |
+| 2 | Language kept across navigation (prefixed and unprefixed), canonical + hreflang | `languages › 2` |
+| 3 | Language kept after login (restored from the profile) | `3/11/12` |
+| 4 | Missing keys | `check-i18n.mjs`, `tests/unit/i18n.test.ts`, `languages › 4` |
+| 5 | Date and currency formatting, venue time zone | `tests/unit/i18n.test.ts` |
+| 6 | Email sign-up | `6/10/13/14` |
+| 7 | Google login (demo simulator, labelled) | `7/8` |
+| 8 | Logout | `7/8` |
+| 9 | Password reset | `9` |
+| 10 | First alien generation | `6/10/13/14` |
+| 11 | Re-login keeps the same alien | `3/11/12`, `auth-service.test.ts` |
+| 12 | No duplicate alien (incl. concurrent calls) | `3/11/12`, `auth-service.test.ts` |
+| 13 | Reveal (and reduced motion) | `6/10/13/14`, `reveal respects reduced motion` |
+| 14 | Profile | `6/10/13/14` |
+| 15 | Map (opt-in, joined events only) | `15` |
+| 16 | LIVE | `16` |
+| 17 | DAO (avatar, voter badge, no extra power; unverified → 403) | `17`, `dao-api.test.ts` |
+| 18 | 375 / 390 / 430 / 768 / 1440 px, CJK / Thai / Cyrillic / Vietnamese fonts loaded, no horizontal scroll | `18.` |
+
+Not measured this round: Lighthouse.

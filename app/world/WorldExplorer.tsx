@@ -26,6 +26,11 @@ import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, filterCount, filterWorld, rea
 import { useDemo } from "@/lib/store";
 import type { EventLevel, Genre } from "@/lib/types";
 import { cn, fmtDate } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/config";
+import { formatEventDate } from "@/lib/i18n/format";
+import { Alien } from "@/components/art/Alien";
+import { useAuth } from "@/lib/auth/client";
 
 const FestivalWorldMap = dynamic(() => import("@/components/world/FestivalWorldMap"), {
   ssr: false,
@@ -80,6 +85,8 @@ const SUGGEST_ICON: Record<Suggestion["kind"], React.ReactNode> = {
 };
 
 export function WorldExplorer() {
+  const t = useTranslations("world");
+  const tc = useTranslations("common");
   const [load, setLoad] = useState<Load>({ status: "loading" });
   const [filters, setFilters] = useState<MapFilters>(EMPTY_MAP_FILTERS);
   const [view, setView] = useState<"map" | "list">("map");
@@ -98,6 +105,18 @@ export function WorldExplorer() {
   const support = useDemo((s) => s.support);
   const sim = useDemo((s) => s.sim);
   const growthCfg = useDemo((s) => s.mapGrowthConfig);
+  const orders = useDemo((s) => s.orders);
+
+  /* The signed-in user's alien at events they joined (tickets or support), only with map presence turned on. */
+  const me = useAuth((s) => s.me);
+  const meBox = useRef<HTMLDivElement>(null);
+  const [meSvg, setMeSvg] = useState<string | null>(null);
+  const showMe = Boolean(me?.alien && me.privacy.mapPresence);
+  useEffect(() => {
+    setMeSvg(showMe ? meBox.current?.innerHTML ?? null : null);
+  }, [showMe, me?.alien?.look]);
+  const joinedIds = useMemo(() => new Set([...orders.map((o) => o.eventId), ...Object.keys(support)]), [orders, support]);
+  const meProp = useMemo(() => (meSvg && me?.alien ? { svg: meSvg, label: t("myAlienHere"), ids: joinedIds } : null), [meSvg, me?.alien, joinedIds, t]);
 
   /* device + URL (client only) */
   useEffect(() => {
@@ -226,10 +245,15 @@ export function WorldExplorer() {
   return (
     <div className="fixed inset-x-0 bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom))] top-[calc(60px+env(safe-area-inset-top))] overflow-hidden bg-[#070A12] lg:bottom-0" data-testid="world-explorer">
       <style>{`body{overflow:hidden}`}</style>
-      <h1 className="sr-only">World map: the planet is one giant festival</h1>
+      <h1 className="sr-only">{t("title")}: {t("lead")}</h1>
+      {showMe && me?.alien && (
+        <div ref={meBox} hidden aria-hidden>
+          <Alien look={me.alien.look} />
+        </div>
+      )}
 
       {/* map */}
-      {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} />)}
+      {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} me={meProp} />)}
       {(load.status === "loading" || !device) && (
         <div className="absolute inset-0">
           <LoadingSkeleton variant="map" />
@@ -237,9 +261,9 @@ export function WorldExplorer() {
       )}
       {load.status === "error" && (
         <div className="absolute inset-x-4 top-1/2 z-10 mx-auto max-w-sm -translate-y-1/2">
-          <EmptyState title="Map data didn’t load" body={load.message} className="bg-ink/90" />
+          <EmptyState title={t("loadFailed")} body={load.message} className="bg-ink/90" />
           <button type="button" onClick={() => setRetry((n) => n + 1)} className="mx-auto mt-3 flex min-h-11 items-center rounded-full bg-acid px-5 font-extrabold uppercase text-ink">
-            Try again
+            {tc("retry")}
           </button>
         </div>
       )}
@@ -248,19 +272,19 @@ export function WorldExplorer() {
       <div className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5">
         <div className="pointer-events-auto mx-auto flex max-w-3xl items-center gap-2 px-3 md:px-4">
           <SearchBox events={all} value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} onPick={onSuggestion} onSubmit={() => flyTo(results.map((r) => r.id))} />
-          <button type="button" onClick={() => setFiltersOpen(true)} className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-line bg-[#0D121B]/90 backdrop-blur" aria-label={`Filters${filterCount(filters) ? ` (${filterCount(filters)} active)` : ""}`}>
+          <button type="button" onClick={() => setFiltersOpen(true)} className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-line bg-[#0D121B]/90 backdrop-blur" aria-label={`${t("filters")}${filterCount(filters) ? ` (${filterCount(filters)})` : ""}`}>
             <SlidersHorizontal className="size-5" aria-hidden />
             {filterCount(filters) > 0 && <span className="absolute -right-1 -top-1 grid size-5 place-items-center rounded-full bg-acid text-[11px] font-black text-ink">{filterCount(filters)}</span>}
           </button>
         </div>
         <div className="pointer-events-auto mx-auto mt-2 max-w-3xl">
-          <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pb-1 md:px-4" role="group" aria-label="Quick filters">
+          <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pb-1 md:px-4" role="group" aria-label={t("quickFilters")}>
             {FLAG_KEYS.map((k) => {
               const on = filters.flags.includes(k);
               return (
                 <Chip key={k} active={on} onClick={() => setFilters((f) => ({ ...f, flags: on ? f.flags.filter((x) => x !== k) : [...f.flags, k] }))} className="min-h-10 bg-[#0D121B]/85 px-3.5 text-[13px] backdrop-blur">
                   {k === "live" && <span className={cn("size-2 rounded-full", on ? "bg-ink" : "bg-coral")} aria-hidden />}
-                  {FLAG_LABEL[k]}
+                  {t(`chips.${k}`)}
                 </Chip>
               );
             })}
@@ -268,12 +292,12 @@ export function WorldExplorer() {
         </div>
         <div className="pointer-events-auto mx-auto mt-1.5 flex max-w-3xl items-center gap-2 px-3 md:px-4">
           <span className="rounded-full bg-[#0D121B]/85 px-3 py-1 text-xs font-bold" aria-live="polite" data-testid="world-count">
-            {results.length} event{results.length === 1 ? "" : "s"}
+            {t("count", { count: results.length })}
           </span>
-          <DemoBadge label="Sample events" className="bg-[#0D121B]/85" />
+          <DemoBadge label={tc("sampleEvents")} className="bg-[#0D121B]/85" />
           {filterCount(filters) + (filters.q ? 1 : 0) > 0 && (
             <button type="button" onClick={() => setFilters(EMPTY_MAP_FILTERS)} className="inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-bold text-mute hover:text-cream">
-              <X className="size-3.5" aria-hidden /> Clear
+              <X className="size-3.5" aria-hidden /> {tc("clear")}
             </button>
           )}
         </div>
@@ -281,15 +305,15 @@ export function WorldExplorer() {
 
       {/* right: camera controls */}
       {view === "map" && load.status === "ok" && (
-        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel ? "right-[436px] top-[132px]" : "right-4 top-[132px]") : "right-3 top-[132px]")} role="group" aria-label="Map controls">
-          <MapBtn label="Zoom in" onClick={() => ctl()?.zoomIn()}>
+        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel ? "right-[436px] top-[132px]" : "right-4 top-[132px]") : "right-3 top-[132px]")} role="group" aria-label={t("controls")}>
+          <MapBtn label={t("zoomIn")} onClick={() => ctl()?.zoomIn()}>
             <Plus className="size-5" />
           </MapBtn>
-          <MapBtn label="Zoom out" onClick={() => ctl()?.zoomOut()}>
+          <MapBtn label={t("zoomOut")} onClick={() => ctl()?.zoomOut()}>
             <Minus className="size-5" />
           </MapBtn>
           <MapBtn
-            label="Reset view to the whole world"
+            label={t("resetView")}
             onClick={() => {
               select(null);
               ctl()?.reset();
@@ -298,11 +322,11 @@ export function WorldExplorer() {
             <Home className="size-5" />
           </MapBtn>
           {canLocate && !lite && (
-            <MapBtn label="My location (not shared, not attendance)" onClick={locate}>
+            <MapBtn label={t("myLocation")} onClick={locate}>
               <LocateFixed className="size-5" />
             </MapBtn>
           )}
-          <MapBtn label="Map legend" onClick={() => setLegendOpen((v) => !v)} pressed={legendOpen}>
+          <MapBtn label={t("legend")} onClick={() => setLegendOpen((v) => !v)} pressed={legendOpen}>
             <Info className="size-5" />
           </MapBtn>
         </div>
@@ -313,7 +337,7 @@ export function WorldExplorer() {
       {/* empty */}
       {load.status === "ok" && results.length === 0 && (
         <div className="absolute inset-x-4 top-1/2 z-10 mx-auto max-w-sm -translate-y-1/2">
-          <EmptyState title="No festivals here" body="Try another filter or search: other planets are partying." className="bg-ink/90" />
+          <EmptyState title={t("emptyTitle")} body={t("emptyBody")} className="bg-ink/90" />
         </div>
       )}
 
@@ -322,9 +346,9 @@ export function WorldExplorer() {
 
       {/* bottom: Map/List toggle */}
       {!(sel && !desktop) && load.status === "ok" && (
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 rounded-full border-2 border-line bg-[#0D121B]/92 p-1 shadow-[0_8px_30px_rgba(0,0,0,.5)] backdrop-blur" role="group" aria-label="View">
+        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 rounded-full border-2 border-line bg-[#0D121B]/92 p-1 shadow-[0_8px_30px_rgba(0,0,0,.5)] backdrop-blur" role="group" aria-label={t("view")}>
           <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", view === "map" && "bg-acid text-ink")}>
-            <MapIcon className="size-4" aria-hidden /> Map
+            <MapIcon className="size-4" aria-hidden /> {t("mapView")}
           </button>
           <button
             type="button"
@@ -335,7 +359,7 @@ export function WorldExplorer() {
             }}
             className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", view === "list" && "bg-acid text-ink")}
           >
-            <List className="size-4" aria-hidden /> List
+            <List className="size-4" aria-hidden /> {t("listView")}
           </button>
         </div>
       )}
@@ -357,6 +381,8 @@ function MapBtn({ label, onClick, children, pressed }: { label: string; onClick:
 }
 
 function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: WorldEvent[]; value: string; onChange: (q: string) => void; onPick: (s: Suggestion) => void; onSubmit: () => void }) {
+  const t = useTranslations("world");
+  const tc = useTranslations("common");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(-1);
   const items = useMemo(() => suggest(events, value), [events, value]);
@@ -375,7 +401,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
     >
       <label className="flex h-12 items-center gap-2 rounded-full border-2 border-line bg-[#0D121B]/90 px-4 backdrop-blur focus-within:border-acid">
         <Search className="size-5 shrink-0 text-mute" aria-hidden />
-        <span className="sr-only">Search the world map</span>
+        <span className="sr-only">{t("searchLabel")}</span>
         <input
           type="search"
           value={value}
@@ -395,7 +421,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
               setActive((a) => Math.max(-1, a - 1));
             } else if (e.key === "Escape") setOpen(false);
           }}
-          placeholder="City, country, festival, DJ, genre, venue"
+          placeholder={t("searchPlaceholder")}
           className="wm-search min-w-0 flex-1 bg-transparent text-[15px] outline-none placeholder:text-mute focus-visible:outline-none"
           role="combobox"
           aria-expanded={show}
@@ -405,13 +431,13 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
           enterKeyHint="search"
         />
         {value && (
-          <button type="button" onClick={() => onChange("")} aria-label="Clear search" className="-mr-2 inline-flex size-9 items-center justify-center rounded-full text-mute hover:text-cream">
+          <button type="button" onClick={() => onChange("")} aria-label={tc("clear")} className="-mr-2 inline-flex size-9 items-center justify-center rounded-full text-mute hover:text-cream">
             <X className="size-4" />
           </button>
         )}
       </label>
       {show && (
-        <ul id="world-suggest" role="listbox" aria-label="Suggestions" className="absolute inset-x-0 top-[calc(100%+6px)] z-40 overflow-hidden rounded-2xl border-2 border-line bg-[#0D121B] shadow-[0_16px_40px_rgba(0,0,0,.6)]">
+        <ul id="world-suggest" role="listbox" aria-label={t("suggestions")} className="absolute inset-x-0 top-[calc(100%+6px)] z-40 overflow-hidden rounded-2xl border-2 border-line bg-[#0D121B] shadow-[0_16px_40px_rgba(0,0,0,.6)]">
           {items.map((s, i) => (
             <li
               key={`${s.kind}:${s.label}`}
@@ -429,7 +455,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-bold">{s.label}</span>
                 <span className="block truncate text-[12px] text-mute">
-                  {s.kind.toUpperCase()} · {s.sub}
+                  {t(`kinds.${s.kind}`)} · {s.sub}
                 </span>
               </span>
             </li>
@@ -441,6 +467,8 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
 }
 
 function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: string) => void }) {
+  const t = useTranslations("world");
+  const locale = useLocale() as Locale;
   const sorted = [...events].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0) || Date.parse(a.startsAt) - Date.parse(b.startsAt));
   return (
     <div className="absolute inset-0 z-10 overflow-y-auto bg-[#070A12]/96 px-3 pb-28 pt-[150px] md:px-4" data-testid="world-list">
@@ -457,10 +485,10 @@ function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: strin
                 </span>
                 <span className="mt-1 block truncate font-display text-lg uppercase leading-tight">{e.name}</span>
                 <span className="block truncate text-[12px] text-mute">
-                  {e.city}, {e.country} · {fmtDate(e.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {e.genres.join(" / ")}
+                  {e.city}, {e.country} · {formatEventDate(locale, e.startsAt, "UTC", { month: "short", day: "numeric", year: "numeric" })} · {e.genres.join(" / ")}
                 </span>
               </span>
-              <MapPin className="size-5 shrink-0 text-acid" aria-label="Show on map" />
+              <MapPin className="size-5 shrink-0 text-acid" aria-label={t("showOnMap")} />
             </button>
           </li>
         ))}
@@ -473,11 +501,14 @@ const STATUS_ORDER: MapStatus[] = ["planning", "funding", "confirmed", "live", "
 
 function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean }) {
   const cfg = DEFAULT_GROWTH_CONFIG;
+  const t = useTranslations("world");
+  const ts = useTranslations("status");
+  const tl = useTranslations("levels");
   return (
-    <section aria-label="Map legend" className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px] top-[132px]" : "right-16 top-[132px] max-w-[calc(100%-80px)]")}>
+    <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px] top-[132px]" : "right-16 top-[132px] max-w-[calc(100%-80px)]")}>
       <div className="flex items-center justify-between">
-        <h2 className="text-[14px] font-extrabold uppercase">Legend</h2>
-        <button type="button" onClick={onClose} aria-label="Close legend" className="inline-flex size-9 items-center justify-center rounded-full bg-surface-2">
+        <h2 className="text-[14px] font-extrabold uppercase">{t("legendTitle")}</h2>
+        <button type="button" onClick={onClose} aria-label={t("closeLegend")} className="inline-flex size-9 items-center justify-center rounded-full bg-surface-2">
           <X className="size-4" />
         </button>
       </div>
@@ -487,7 +518,7 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
             <span className="grid size-5 place-items-center rounded-full text-[10px] font-black text-ink" style={{ background: STATUS_META[s].color }} aria-hidden>
               {STATUS_META[s].glyph}
             </span>
-            <b>{STATUS_META[s].label}</b> <span className="truncate text-mute">{STATUS_META[s].hint}</span>
+            <b className="uppercase">{s === "live" ? ts("demoLive") : ts(s)}</b> <span className="truncate text-mute">{ts(`hint.${s}`)}</span>
           </li>
         ))}
       </ul>
@@ -497,13 +528,13 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
             <span className="rounded-full px-1.5 text-[10px] font-black text-ink" style={{ background: LEVEL_COLORS[l.level] }}>
               LV.{l.level}
             </span>
-            <b>{l.name}</b>
+            <b>{tl(String(l.level))}</b>
           </li>
         ))}
       </ul>
-      <p className="mt-2 text-[11px] text-mute">Levels are a map game level, not venue capacity. TOP 1–3 = most popular (all time). Purple DAO tags mark community DAOs.</p>
+      <p className="mt-2 text-[11px] text-mute">{t("legendNote")}</p>
       <Link href="/world/levels" className="mt-2 inline-flex min-h-10 items-center gap-1 text-[12px] font-bold text-acid">
-        <Settings2 className="size-4" aria-hidden /> Level rules & landmark gallery
+        <Settings2 className="size-4" aria-hidden /> {t("levelRules")}
       </Link>
     </section>
   );
@@ -511,57 +542,60 @@ function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean })
 
 function FilterSheet({ open, onClose, filters, setFilters, count }: { open: boolean; onClose: () => void; filters: MapFilters; setFilters: (f: MapFilters | ((f: MapFilters) => MapFilters)) => void; count: number }) {
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+  const t = useTranslations("world");
+  const tc = useTranslations("common");
+  const tl = useTranslations("levels");
   return (
     <BottomSheet
       open={open}
       onClose={onClose}
-      title="Filters"
+      title={t("filters")}
       footer={
         <div className="flex gap-2">
           <button type="button" onClick={() => setFilters(EMPTY_MAP_FILTERS)} className="min-h-12 flex-1 rounded-full border-2 border-line font-extrabold uppercase">
-            Clear
+            {tc("clear")}
           </button>
           <button type="button" onClick={onClose} className="min-h-12 flex-[2] rounded-full bg-acid font-extrabold uppercase text-ink">
-            Show {count} event{count === 1 ? "" : "s"}
+            {t("showResults", { count })}
           </button>
         </div>
       }
     >
       <div className="space-y-5">
         <fieldset>
-          <legend className="mb-2 text-[13px] font-extrabold uppercase">Status & features</legend>
+          <legend className="mb-2 text-[13px] font-extrabold uppercase">{t("statusFeatures")}</legend>
           <div className="flex flex-wrap gap-2">
             {FLAG_KEYS.map((k) => (
               <Chip key={k} active={filters.flags.includes(k)} onClick={() => setFilters((f) => ({ ...f, flags: toggle(f.flags, k) }))}>
-                {FLAG_LABEL[k]}
+                {t(`chips.${k}`)}
               </Chip>
             ))}
           </div>
         </fieldset>
         <fieldset>
-          <legend className="mb-2 text-[13px] font-extrabold uppercase">Festival level</legend>
+          <legend className="mb-2 text-[13px] font-extrabold uppercase">{tl("festivalLevel")}</legend>
           <div className="flex flex-wrap gap-2">
             {DEFAULT_GROWTH_CONFIG.levels.map((l) => (
               <Chip key={l.level} active={filters.levels.includes(l.level)} onClick={() => setFilters((f) => ({ ...f, levels: toggle(f.levels, l.level as EventLevel) }))}>
-                LV.{l.level} {l.name}
+                LV.{l.level} {tl(String(l.level))}
               </Chip>
             ))}
           </div>
         </fieldset>
         <fieldset>
           <legend className="mb-2 inline-flex items-center gap-1 text-[13px] font-extrabold uppercase">
-            <CalendarDays className="size-4" aria-hidden /> Date
+            <CalendarDays className="size-4" aria-hidden /> {t("date")}
           </legend>
           <div className="flex flex-wrap gap-2">
             {(Object.keys(DATE_LABELS) as DateRange[]).map((d) => (
               <Chip key={d} active={filters.date === d} onClick={() => setFilters((f) => ({ ...f, date: d }))}>
-                {DATE_LABELS[d]}
+                {t(`dates.${d}`)}
               </Chip>
             ))}
           </div>
         </fieldset>
         <fieldset>
-          <legend className="mb-2 text-[13px] font-extrabold uppercase">Genre</legend>
+          <legend className="mb-2 text-[13px] font-extrabold uppercase">{t("genre")}</legend>
           <div className="flex flex-wrap gap-2">
             {GENRES.map((g: Genre) => (
               <Chip key={g} active={filters.genres.includes(g)} onClick={() => setFilters((f) => ({ ...f, genres: toggle(f.genres, g) }))}>

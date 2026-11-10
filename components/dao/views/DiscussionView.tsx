@@ -1,5 +1,8 @@
 "use client";
 
+import { DaoAvatar } from "@/components/dao/DaoAvatar";
+import { UserContent } from "@/components/i18n/UserContent";
+
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -233,7 +236,8 @@ interface CommentDto {
 }
 
 function Thread({ id, onBack }: { id: string; onBack: () => void }) {
-  const { eventId, setJoinOpen } = useDao();
+  const { eventId, setJoinOpen, home } = useDao();
+  const meUid = home?.me?.uid;
   const { state, reload } = useDaoQuery<{ discussion: DiscussionDto; comments: CommentDto[]; proposals: { id: string; title: string; state: string }[]; concept: ConceptDto | null; dj: DJ | null; canComment: boolean; canModerate: boolean; deny: { code: string; message: string } | null }>(`${eventId}/discussions/${id}`);
   const [text, setText] = useState("");
   const [replyTo, setReplyTo] = useState<CommentDto | null>(null);
@@ -284,11 +288,11 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
   const CommentItem = ({ c, depth }: { c: CommentDto; depth: number }) => (
     <li className={cn("rounded-2xl border border-line bg-surface/80 p-3", depth && "ml-4 border-l-4 border-l-purple/60 sm:ml-8", c.hidden && "opacity-60")}>
       <div className="flex flex-wrap items-center gap-2 text-[12px] text-mute">
-        <b className="text-cream">@{c.authorHandle}</b> · {ago(c.createdAt)}
+        <DaoAvatar handle={c.authorHandle} mine={c.authorUid === meUid} size={22} className="mr-1 align-middle" /><b className="text-cream">@{c.authorHandle}</b> · {ago(c.createdAt)}
         {c.hidden && <HiddenTag />}
         {c.reportCount ? <span className="text-coral">{c.reportCount} reports</span> : null}
       </div>
-      <p className="mt-1.5 whitespace-pre-wrap break-words text-[15px]">{c.body}</p>
+      <UserContent text={c.body} className="mt-1.5 text-[15px]" />
       {c.attachments.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{c.attachments.map((a) => <img key={a.id} src={a.url} alt="Comment attachment" className="max-h-48 rounded-xl" />)}</div>}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <ReactionBar reactions={c.reactions} mine={c.myReactions} onToggle={(k) => react("comment", c.id, k)} disabled={!state.data.canComment} />
@@ -323,7 +327,7 @@ function Thread({ id, onBack }: { id: string; onBack: () => void }) {
         </div>
         <h1 id="thread-h" className="mt-2 text-2xl font-extrabold normal-case leading-tight [font-family:var(--font-sans)] sm:text-3xl">{d.title}</h1>
         <p className="mt-1 text-[12px] text-mute">@{d.authorHandle} · {ago(d.createdAt)}</p>
-        <p className="mt-3 whitespace-pre-wrap break-words">{d.body}</p>
+        <UserContent text={d.body} className="mt-3" />
         {d.attachments.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{d.attachments.map((a) => <img key={a.id} src={a.url} alt="Thread attachment" className="max-h-64 rounded-xl" />)}</div>}
         {state.data.concept?.photo && (
           <Link href={`/dao/${eventId}/gallery#${state.data.concept.id}`} className="mt-3 block overflow-hidden rounded-2xl border border-line">

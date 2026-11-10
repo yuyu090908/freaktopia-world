@@ -15,6 +15,9 @@ import { toast, useDemo } from "@/lib/store";
 import { fmtDate } from "@/lib/utils";
 import type { Genre } from "@/lib/types";
 import { COLLECTIBLES } from "@/app/nft/collectibles";
+import { AccountCard } from "@/components/profile/AccountCard";
+import { useAuth } from "@/lib/auth/client";
+import { useTranslations } from "next-intl";
 
 export function ProfileView() {
   // Renders immediately from default demo state, then updates once saved data loads.
@@ -22,6 +25,8 @@ export function ProfileView() {
 }
 
 function Inner() {
+  const tp = useTranslations("profile");
+  const signedIn = useAuth((x) => x.status === "signedIn");
   const s = useDemo();
   const p = s.profile;
   const lv = userLevel(p.xp);
@@ -48,8 +53,13 @@ function Inner() {
 
   return (
     <div className="mx-auto max-w-5xl md:px-6">
-      {/* Header card */}
-      <section className="px-4 pt-5 md:px-0 md:pt-8" aria-labelledby="pf-name">
+      <div className="px-4 pt-5 md:px-0 md:pt-8">
+        <h1 className="sr-only">{tp("title")}</h1>
+        <AccountCard />
+      </div>
+      {/* Header card: demo progress kept in this browser (tickets, XP, favourites) */}
+      <section className="px-4 pt-5 md:px-0" aria-labelledby="pf-name">
+        {!signedIn && <p className="mb-2 text-xs font-bold uppercase tracking-wider text-orange">{tp("demoProfile")}</p>}
         <div className="relative overflow-hidden rounded-[32px] border-[3px] border-ink bg-purple p-5 text-ink">
           <div className="halftone absolute inset-0" aria-hidden />
           <div className="relative flex items-center gap-4">
@@ -58,7 +68,7 @@ function Inner() {
               <span className="absolute -bottom-2 -right-2 flex size-9 items-center justify-center rounded-full border-[3px] border-ink bg-acid"><Pencil className="size-4" aria-hidden /></span>
             </Link>
             <div className="min-w-0">
-              <h1 id="pf-name" className="truncate text-2xl sm:text-3xl">@{p.username}</h1>
+              <h2 id="pf-name" className="truncate text-2xl sm:text-3xl">@{p.username}</h2>
               <div className="truncate text-sm font-bold">{p.avatarName} · {p.city}</div>
               <div className="mt-2 inline-flex rounded-full bg-ink px-3 py-1 font-display text-sm text-cream">LV.{lv.level}</div>
             </div>

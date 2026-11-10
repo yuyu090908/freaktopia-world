@@ -20,9 +20,14 @@ export type Genre =
 
 export type EventLevel = 1 | 2 | 3 | 4 | 5;
 
-export type Species = "slime" | "fuzz" | "vinyl" | "jelly";
+/** "vinyl" is the legacy record-head used by DJs and starters; identity aliens use slime | fuzz | mutant | jelly. */
+export type Species = "slime" | "fuzz" | "vinyl" | "jelly" | "mutant";
 export type Outfit = "none" | "hoodie" | "jacket" | "vest" | "kimono";
-export type Accessory = "none" | "headphones" | "shades" | "crown" | "antenna" | "cap" | "dao_antenna";
+export type Accessory = "none" | "headphones" | "shades" | "crown" | "antenna" | "cap" | "dao_antenna" | "horns" | "halo" | "flower";
+export type EyeVariant = "duo" | "cyclops" | "trio" | "stalks" | "sleepy" | "star";
+export type MouthVariant = "grin" | "fangs" | "tongue" | "zigzag" | "o" | "smirk";
+export type PatternVariant = "none" | "spots" | "stripes" | "stars" | "glitter" | "swirl";
+export type SpecialVariant = "none" | "blush" | "freckles" | "bandage" | "glow" | "drip";
 
 export interface AlienLook {
   species: Species;
@@ -31,6 +36,11 @@ export interface AlienLook {
   outfit: Outfit;
   outfitColor: string;
   accessory: Accessory;
+  /** Identity parts (8.0). When absent the species' classic face is drawn. */
+  eyes?: EyeVariant;
+  mouth?: MouthVariant;
+  pattern?: PatternVariant;
+  special?: SpecialVariant;
 }
 
 export type EventStatus = "funding" | "confirmed" | "live" | "ended";

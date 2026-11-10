@@ -1,5 +1,7 @@
 "use client";
 
+import { DaoAvatar } from "@/components/dao/DaoAvatar";
+
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -58,7 +60,7 @@ export function ProposalDetail() {
           <span className="text-[12px] font-bold uppercase text-mute">{METHOD_LABEL[p.method]} · v{p.current.version}</span>
         </div>
         <h1 id="prop-h" className="text-[30px] uppercase leading-[0.95] sm:text-5xl">{p.current.title}</h1>
-        <p className="text-[13px] text-mute">by @{p.authorHandle} · {ago(p.createdAt)} · discussion {p.discussionDays}d · voting {p.votingDays}d</p>
+        <p className="flex flex-wrap items-center gap-1 text-[13px] text-mute"><DaoAvatar handle={p.authorHandle} mine={p.authorUid === home?.me?.uid} size={22} />by @{p.authorHandle} · {ago(p.createdAt)} · discussion {p.discussionDays}d · voting {p.votingDays}d</p>
         <LifecycleTracker state={p.state} />
       </header>
 

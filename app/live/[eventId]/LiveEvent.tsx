@@ -1,5 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useAuth } from "@/lib/auth/client";
+import { useLocalHref } from "@/components/i18n/LocaleContext";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, CalendarClock, LayoutGrid, Map as MapIcon, MessageCircle, MoreHorizontal, Pencil, Radio, Tv, Wifi, WifiOff } from "lucide-react";
@@ -108,11 +112,19 @@ function Festival({ detail }: { detail: LiveDetail }) {
   const showAvatar = useDemo((s) => s.liveShowAvatar);
   const storedZone = useDemo((s) => s.liveZone);
   const zone: ZoneId = isZone(storedZone) ? storedZone : "entrance";
-  const visibility = useDemo((s) => s.liveVisibility);
+  const chosenVisibility = useDemo((s) => s.liveVisibility);
+  const demoLook = useDemo((s) => s.profile.look);
+  const demoName = useDemo((s) => s.profile.avatarName);
+  // Signed in: the account alien is the LIVE avatar everywhere, and the privacy setting can hide it.
+  const account = useAuth((s) => s.me);
+  const accountAlien = account?.alien ?? null;
+  const visibility = accountAlien && !account?.privacy.liveAvatar ? "hidden" : chosenVisibility;
+  const look = accountAlien?.look ?? demoLook;
+  const avatarName = accountAlien ? account?.profile.displayName ?? accountAlien.name : demoName;
+  const tlive = useTranslations("live");
+  const localHref = useLocalHref();
   const dance = useDemo((s) => s.liveDance);
   const emote = useDemo((s) => s.liveEmote);
-  const look = useDemo((s) => s.profile.look);
-  const avatarName = useDemo((s) => s.profile.avatarName);
   const setLive = useDemo((s) => s.setLive);
   const [avatarOpen, setAvatarOpen] = useState(false);
   const [sheetZone, setSheetZone] = useState<ZoneId | null>(null);
@@ -332,8 +344,18 @@ function Festival({ detail }: { detail: LiveDetail }) {
                   <b className="block truncate">{avatarName}</b>
                   <span className="text-[12px] text-mute">{visibility === "public" ? "Public" : visibility === "friends" ? "Friends only" : "Hidden"} · {dance} · {zoneById(zone).name}</span>
                 </div>
-                <button type="button" onClick={() => setAvatarOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />Customize</button>
+                {accountAlien ? (
+                  <Link href={localHref("/profile/alien")} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />Customize</Link>
+                ) : (
+                  <button type="button" onClick={() => setAvatarOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />Customize</button>
+                )}
               </div>
+              {accountAlien && (
+                <p className="text-[12px] text-mute" data-testid="live-identity-note">
+                  {tlive("identityAvatar")}
+                  {!account?.privacy.liveAvatar && <> · <Link href={localHref("/profile/settings")} className="font-bold text-orange underline">{tlive("hiddenAvatar")}</Link></>}
+                </p>
+              )}
               <VisibilityPicker value={visibility} onChange={(v) => { setLive({ liveVisibility: v }); toast({ title: `Avatar visibility: ${v}` }); }} />
             </div>
           </div>

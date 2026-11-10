@@ -145,7 +145,7 @@ test.describe("world map 7.0", () => {
     const sheet = panel(page, /NEON SLIME SUMMIT summary/);
     await sheet.getByRole("button", { name: "Show all details" }).click();
     await expect(sheet.getByTestId("map-dao")).toContainText("members");
-    await expect(sheet.getByTestId("map-rank")).toContainText("#1 Most popular · all time");
+    await expect(sheet.getByTestId("map-rank")).toContainText(/#1 Most popular · all time/i);
     await expect(page.locator(".fk-dao").first()).toBeAttached();
     await sheet.getByTestId("map-rank").click();
     await expect(page).toHaveURL(/\/rankings\?category=popular/, { timeout: 20_000 });

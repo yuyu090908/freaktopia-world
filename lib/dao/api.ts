@@ -4,6 +4,8 @@
  * Demo mode uses the in-memory store; DAO_DATA_MODE=production answers 503 until a
  * Postgres repository, auth provider and audited staking contract are connected.
  */
+import { userFromRequest } from "@/lib/auth/http";
+import { authConfig } from "@/lib/auth/config";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getEvent, getDJ } from "@/lib/data";
@@ -906,6 +908,12 @@ async function executionReport(req: Request, db: DaoDb, dao: EventDao, p: Princi
 
 async function ballot(req: Request, db: DaoDb, dao: EventDao, p: Principal, vote: DaoVote, now: number) {
   if (!can(p, "vote")) return deny(p, "vote");
+  // 8.0 accounts: an account whose email isn't confirmed never votes. With a real database (production
+  // mode) a confirmed account is required. Voting weight still comes only from the staking snapshot:
+  // the alien, its cosmetics and the profile never change it.
+  const account = await userFromRequest(req);
+  if (account && !account.emailVerified) return fail(403, "EMAIL_NOT_VERIFIED", "Confirm your email to vote.");
+  if (!account && authConfig().mode === "production") return fail(401, "SIGN_IN_REQUIRED", "Sign in with a confirmed account to vote.");
   const limited = limitWrite(req, `ballot:${p.uid}`, 20);
   if (limited) return limited;
   const r = await body(req, z.object({ choice: z.array(z.string().max(40)).min(1).max(8), proposalVersion: z.number().int().positive() }));

@@ -99,13 +99,18 @@ function moderate(text: string) {
   return null;
 }
 
+// The same look everywhere: legacy LIVE avatars and 8.0 identity aliens (mutant family + face/pattern parts).
 const zLook = z.object({
-  species: z.enum(["slime", "fuzz", "vinyl", "jelly"]),
+  species: z.enum(["slime", "fuzz", "vinyl", "jelly", "mutant"]),
   body: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   accent: z.string().regex(/^#[0-9a-fA-F]{6}$/),
   outfit: z.enum(["none", "hoodie", "jacket", "vest", "kimono"]),
   outfitColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-  accessory: z.enum(["none", "headphones", "shades", "crown", "antenna", "cap", "dao_antenna"]),
+  accessory: z.enum(["none", "headphones", "shades", "crown", "antenna", "cap", "dao_antenna", "horns", "halo", "flower"]),
+  eyes: z.enum(["duo", "cyclops", "trio", "stalks", "sleepy", "star"]).optional(),
+  mouth: z.enum(["grin", "fangs", "tongue", "zigzag", "o", "smirk"]).optional(),
+  pattern: z.enum(["none", "spots", "stripes", "stars", "glitter", "swirl"]).optional(),
+  special: z.enum(["none", "blush", "freckles", "bandage", "glow", "drip"]).optional(),
 });
 
 /* ---------------- status & attendance ---------------- */

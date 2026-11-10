@@ -1,5 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+import { useAuth } from "@/lib/auth/client";
+import { DaoAvatar } from "./DaoAvatar";
+
 import Link from "next/link";
 import { useState } from "react";
 import { BadgeCheck, CheckCircle2, Clock, Hash, ShieldAlert, Users, Vote } from "lucide-react";
@@ -28,6 +32,8 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
   const [receipt, setReceipt] = useState<{ hash: string; held: boolean } | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const me = vote.me;
+  const account = useAuth((s) => s.me);
+  const td = useTranslations("dao");
   const open = vote.status === "open";
   const voted = !!me?.ballot || !!receipt;
   const canPick = open && !!me?.eligible && !voted && !!home?.me?.can.vote;
@@ -146,9 +152,19 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
         {open && me && !me.eligible && home?.me?.staked && (
           <Gate reason="You’re not in this vote’s snapshot.">You joined after voting opened. Eligibility is frozen when a vote starts, so staking later never changes an open vote. You can vote in the next one.</Gate>
         )}
+        {open && account && !account.user.emailVerified && (
+          <Gate reason={td("verifiedRequired")} />
+        )}
         {(voted || receipt) && (
           <p role="status" className="flex items-start gap-2 rounded-2xl border border-acid/50 bg-acid/10 p-3 text-sm">
-            <BadgeCheck className="mt-0.5 size-4 shrink-0 text-acid" aria-hidden />
+            {account?.alien ? (
+              <span className="relative shrink-0" data-testid="dao-voter-badge">
+                <DaoAvatar handle={account.alien.name} mine size={36} />
+                <span className="absolute -bottom-1 -right-1 rounded-full bg-acid px-1 text-[8px] font-black uppercase text-ink">{td("votingBadge")}</span>
+              </span>
+            ) : (
+              <BadgeCheck className="mt-0.5 size-4 shrink-0 text-acid" aria-hidden />
+            )}
             <span>
               Vote recorded: <b>{(receipt ? choice : me?.ballot?.choice ?? []).map(label).join(" → ")}</b>. Ballots are final (one per account).
               <span className="mt-1 block break-all font-mono text-[10px] text-mute">receipt {receipt?.hash ?? me?.ballot?.hash}</span>
@@ -157,10 +173,11 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
           </p>
         )}
         {canPick && (
-          <Button className="w-full sm:w-auto" disabled={!choice.length} onClick={() => setConfirm(true)}>
+          <Button className="w-full sm:w-auto" disabled={!choice.length || (account ? !account.user.emailVerified : false)} onClick={() => setConfirm(true)}>
             <Vote className="size-5" aria-hidden /> Review vote
           </Button>
         )}
+        {open && <p className="text-[11px] text-mute">{td("avatarNoPower")}</p>}
         <Link href={`/dao/${eventId}/proposals/${vote.proposalId}#audit`} className="inline-flex min-h-11 items-center text-[13px] font-bold text-mute underline-offset-4 hover:underline">
           Audit trail & proposal
         </Link>

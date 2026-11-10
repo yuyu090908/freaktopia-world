@@ -39,8 +39,11 @@ test.describe("world ranking flows", () => {
 
   test("search and filters", async ({ page }) => {
     await page.goto("/rankings");
-    await page.getByRole("searchbox", { name: /search rankings/i }).fill("tokyo");
-    await expect(page).toHaveURL(/q=tokyo/);
+    // Pages render per request since 8.0 (language): retry the first input until the page has hydrated.
+    await expect(async () => {
+      await page.getByRole("searchbox", { name: /search rankings/i }).fill("tokyo");
+      await expect(page).toHaveURL(/q=tokyo/, { timeout: 1_500 });
+    }).toPass({ timeout: 15_000 });
     await expect(page.locator("#rk-bassmutant-tokyo")).toBeVisible();
     await expect(page.locator("#rk-neon-slime-summit")).toHaveCount(0);
     await page.getByRole("searchbox", { name: /search rankings/i }).fill("");

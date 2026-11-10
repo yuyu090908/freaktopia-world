@@ -1,48 +1,49 @@
 import { Home, Globe2, CalendarDays, Radio, UserRound } from "lucide-react";
 
+/** Labels are message keys under "nav" (messages/<locale>.json). */
 export const MAIN_NAV = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/world", label: "World", icon: Globe2 },
-  { href: "/events", label: "Events", icon: CalendarDays },
-  { href: "/live", label: "Live", icon: Radio },
-  { href: "/profile", label: "Profile", icon: UserRound },
+  { href: "/", key: "home", icon: Home },
+  { href: "/world", key: "world", icon: Globe2 },
+  { href: "/events", key: "events", icon: CalendarDays },
+  { href: "/live", key: "live", icon: Radio },
+  { href: "/profile", key: "profile", icon: UserRound },
 ] as const;
 
 export const ALL_PAGES = [
-  { group: "Explore", items: [
-    { href: "/world", label: "World Map" },
-    { href: "/rankings", label: "World Ranking" },
-    { href: "/dao", label: "Festival DAO" },
-    { href: "/events", label: "Events" },
-    { href: "/djs", label: "DJ Arena" },
-    { href: "/venues", label: "Venue Market" },
-    { href: "/live", label: "Live Festival" },
-    { href: "/after-party", label: "After Party" },
+  { group: "explore", items: [
+    { href: "/world", key: "worldMap" },
+    { href: "/rankings", key: "worldRanking" },
+    { href: "/dao", key: "festivalDao" },
+    { href: "/events", key: "events" },
+    { href: "/djs", key: "djArena" },
+    { href: "/venues", key: "venueMarket" },
+    { href: "/live", key: "liveFestival" },
+    { href: "/after-party", key: "afterParty" },
   ]},
-  { group: "Play", items: [
-    { href: "/avatar", label: "Alien Avatar" },
-    { href: "/quests", label: "Quests & Rankings" },
-    { href: "/nft", label: "NFT Market (preview)" },
-    { href: "/tickets", label: "My Tickets" },
-    { href: "/alerts", label: "Alerts" },
+  { group: "play", items: [
+    { href: "/avatar", key: "alienAvatar" },
+    { href: "/quests", key: "quests" },
+    { href: "/nft", key: "nft" },
+    { href: "/tickets", key: "tickets" },
+    { href: "/alerts", key: "alerts" },
   ]},
-  { group: "Create", items: [
-    { href: "/events/create", label: "Create Event" },
-    { href: "/djs/apply", label: "Apply as DJ" },
-    { href: "/venues/new", label: "List Your Venue" },
-    { href: "/after-party/new", label: "Create After Party" },
-    { href: "/venues/planner", label: "AI Event Planner (demo)" },
-    { href: "/dashboard", label: "Dashboard" },
+  { group: "create", items: [
+    { href: "/events/create", key: "createEvent" },
+    { href: "/djs/apply", key: "applyDj" },
+    { href: "/venues/new", key: "listVenue" },
+    { href: "/after-party/new", key: "createAfterParty" },
+    { href: "/venues/planner", key: "planner" },
+    { href: "/dashboard", key: "dashboard" },
   ]},
-  { group: "Info", items: [
-    { href: "/about", label: "About" },
-    { href: "/how-it-works", label: "How It Works" },
-    { href: "/help", label: "Help" },
-    { href: "/contact", label: "Contact" },
-    { href: "/terms", label: "Terms" },
-    { href: "/privacy", label: "Privacy" },
+  { group: "info", items: [
+    { href: "/about", key: "about" },
+    { href: "/how-it-works", key: "howItWorks" },
+    { href: "/help", key: "help" },
+    { href: "/contact", key: "contact" },
+    { href: "/terms", key: "terms" },
+    { href: "/privacy", key: "privacy" },
   ]},
-];
+] as const;
 
 export const isTopLevel = (path: string) => MAIN_NAV.some((n) => n.href === path);
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { DaoAvatar } from "@/components/dao/DaoAvatar";
+
 import Link from "next/link";
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -54,7 +56,8 @@ export function ProposalsView() {
 }
 
 function Inner() {
-  const { eventId, setJoinOpen } = useDao();
+  const { eventId, setJoinOpen, home } = useDao();
+  const meUid = home?.me?.uid;
   const params = useSearchParams();
   const router = useRouter();
   const [group, setGroup] = useState("Active");
@@ -101,7 +104,7 @@ function Inner() {
                 <h2 className="mt-2 text-lg font-extrabold normal-case leading-snug [font-family:var(--font-sans)]">{p.current.title}</h2>
                 <p className="mt-1 line-clamp-2 text-sm text-mute">{p.current.description}</p>
                 <div className="mt-auto flex flex-wrap gap-x-3 pt-3 text-[12px] text-mute">
-                  <span>@{p.authorHandle}</span>
+                  <span className="inline-flex items-center gap-1"><DaoAvatar handle={p.authorHandle} mine={p.authorUid === meUid} size={20} />@{p.authorHandle}</span>
                   <span>{ago(p.createdAt)}</span>
                   <span>{METHOD_LABEL[p.method]}</span>
                   {p.current.estimatedCost > 0 && <span>{usd(p.current.estimatedCost)}</span>}

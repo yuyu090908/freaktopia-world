@@ -12,48 +12,64 @@ import { EventCover } from "@/components/cards/Cards";
 import { LEVEL_COLORS } from "@/lib/map/growth";
 import { LANDMARK_LABEL, STATUS_META, landmarkSvg } from "@/lib/map/landmarks";
 import type { WorldEvent } from "@/lib/map/view";
-import { cn, fmtDate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { useLocale, useTranslations } from "next-intl";
+import type { Locale } from "@/i18n/config";
+import { formatEventDate, formatMoney, formatNumber } from "@/lib/i18n/format";
+import { Alien } from "@/components/art/Alien";
+import { useAuth } from "@/lib/auth/client";
+import { useDemo } from "@/lib/store";
+import { useLocalHref } from "@/components/i18n/LocaleContext";
 
-const usd = (n: number) => `$${Math.round(n).toLocaleString("en-US")}`;
-const num = (n: number) => n.toLocaleString("en-US");
+/** Numbers and money in the visitor's locale (USD stays USD: it is the event's currency). */
+function useFmt() {
+  const locale = useLocale() as Locale;
+  return { locale, usd: (n: number) => formatMoney(locale, Math.round(n)), num: (n: number) => formatNumber(locale, n) };
+}
 
 export function StatusPill({ status, className }: { status: WorldEvent["status"]; className?: string }) {
   const s = STATUS_META[status];
+  const t = useTranslations("status");
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide", className)} style={{ borderColor: s.color, color: s.color }} title={s.hint}>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border-2 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wide", className)} style={{ borderColor: s.color, color: s.color }} title={t(`hint.${status}`)}>
       <span aria-hidden>{s.glyph}</span>
-      {s.label}
+      {status === "live" ? t("demoLive") : t(status)}
     </span>
   );
 }
 
 export function LevelPill({ e }: { e: WorldEvent }) {
   const c = LEVEL_COLORS[e.level];
+  const t = useTranslations("levels");
   return (
     <span className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold uppercase text-ink" style={{ background: c }}>
-      LV.{e.level} {e.growthResult.name}
+      LV.{e.level} {t(String(e.level))}
     </span>
   );
 }
 
 type Action = { key: string; label: string; href: string; icon: React.ReactNode; tone: "primary" | "live" | "ghost"; testId?: string };
 
-export function actionsFor(e: WorldEvent): Action[] {
+const ACTION_EN: Record<string, string> = { enterDemoLive: "Enter festival (demo live)", watchLive: "Watch live", support: "Support event", buyTicket: "Buy ticket", viewDao: "View DAO", applyDj: "Apply as DJ", viewEvent: "View event" };
+
+/** Actions by status. `label` translates a key under world.actions (English by default). */
+export function actionsFor(e: WorldEvent, label: (k: string) => string = (k) => ACTION_EN[k]): Action[] {
   const a: Action[] = [];
   const ev = `/events/${e.id}`;
-  if (e.live) a.push({ key: "live", label: e.live.demo ? "Enter festival (demo live)" : "Watch live", href: `/live/${e.id}`, icon: <Radio className="size-4" aria-hidden />, tone: "live", testId: "map-enter-live" });
-  if (e.status === "funding" || e.status === "planning") a.push({ key: "support", label: "Support event", href: ev, icon: <HandHeart className="size-4" aria-hidden />, tone: "primary" });
-  if ((e.status === "confirmed" || e.status === "live") && e.tickets.onSale) a.push({ key: "tickets", label: "Buy ticket", href: `${ev}/tickets`, icon: <Ticket className="size-4" aria-hidden />, tone: a.length ? "ghost" : "primary" });
-  if (e.dao) a.push({ key: "dao", label: "View DAO", href: `/dao/${e.id}`, icon: <Vote className="size-4" aria-hidden />, tone: "ghost" });
-  if (e.djRecruiting && e.status !== "cancelled") a.push({ key: "dj", label: "Apply as DJ", href: `/djs/apply?event=${e.id}`, icon: <Mic2 className="size-4" aria-hidden />, tone: "ghost" });
-  a.push({ key: "view", label: "View event", href: ev, icon: <ArrowRight className="size-4" aria-hidden />, tone: a.length ? "ghost" : "primary" });
+  if (e.live) a.push({ key: "live", label: e.live.demo ? label("enterDemoLive") : label("watchLive"), href: `/live/${e.id}`, icon: <Radio className="size-4" aria-hidden />, tone: "live", testId: "map-enter-live" });
+  if (e.status === "funding" || e.status === "planning") a.push({ key: "support", label: label("support"), href: ev, icon: <HandHeart className="size-4" aria-hidden />, tone: "primary" });
+  if ((e.status === "confirmed" || e.status === "live") && e.tickets.onSale) a.push({ key: "tickets", label: label("buyTicket"), href: `${ev}/tickets`, icon: <Ticket className="size-4" aria-hidden />, tone: a.length ? "ghost" : "primary" });
+  if (e.dao) a.push({ key: "dao", label: label("viewDao"), href: `/dao/${e.id}`, icon: <Vote className="size-4" aria-hidden />, tone: "ghost" });
+  if (e.djRecruiting && e.status !== "cancelled") a.push({ key: "dj", label: label("applyDj"), href: `/djs/apply?event=${e.id}`, icon: <Mic2 className="size-4" aria-hidden />, tone: "ghost" });
+  a.push({ key: "view", label: label("viewEvent"), href: ev, icon: <ArrowRight className="size-4" aria-hidden />, tone: a.length ? "ghost" : "primary" });
   return a;
 }
 
 function ActionButton({ a, compact }: { a: Action; compact?: boolean }) {
+  const href = useLocalHref();
   return (
     <Link
-      href={a.href}
+      href={href(a.href)}
       data-testid={a.testId}
       className={cn(
         "flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-[13px] font-extrabold uppercase",
@@ -83,47 +99,72 @@ function Row({ icon, label, children }: { icon: React.ReactNode; label: string; 
   );
 }
 
+/** "Your alien is here": only for events the user joined, and only with World Map presence turned on. */
+function MyAlienHere({ e }: { e: WorldEvent }) {
+  const t = useTranslations("world");
+  const me = useAuth((s) => s.me);
+  const joined = useDemo((s) => s.orders.some((o) => o.eventId === e.id) || Boolean(s.support[e.id]));
+  if (!me?.alien || !joined) return null;
+  if (!me.privacy.mapPresence) return <p className="rounded-2xl border border-dashed border-line p-3 text-[12px] text-mute">{t("myAlienOff")}</p>;
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border-2 border-acid/50 bg-acid/10 p-2.5" data-testid="panel-my-alien">
+      <Alien look={me.alien.look} className="size-12 shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[13px] font-extrabold uppercase text-acid">{t("myAlienHere")}</div>
+        <div className="text-[11px] text-mute">{t("myAlienHint")}</div>
+      </div>
+    </div>
+  );
+}
+
 function Details({ e }: { e: WorldEvent }) {
   const g = e.growthResult;
+  const t = useTranslations("world");
+  const tl = useTranslations("levels");
+  const tlive = useTranslations("live");
+  const tr = useTranslations("ranking");
+  const tc = useTranslations("common");
+  const { usd, num, locale } = useFmt();
   return (
     <div className="space-y-4">
+      <MyAlienHere e={e} />
       {e.live && (
         <section aria-label="Live now" className="rounded-2xl border-2 border-coral/60 bg-coral/10 p-3" data-testid="map-live-info">
           <div className="flex items-center gap-2 text-[12px] font-extrabold uppercase text-coral">
-            <span className="size-2 rounded-full bg-coral" aria-hidden /> {e.live.demo ? "Demo live · simulation" : "Live now"}
+            <span className="size-2 rounded-full bg-coral" aria-hidden /> {e.live.demo ? tlive("demoLive") : tlive("liveNow")}
           </div>
           <p className="mt-1 text-[14px]">
-            Now playing: <b>{e.live.currentDj?.name ?? "Between sets"}</b>
+            {tlive("nowPlaying")}: <b>{e.live.currentDj?.name ?? tlive("betweenSets")}</b>
           </p>
-          <p className="text-[12px] text-mute">{e.live.demo ? "Stream: demo visualizer. No licensed stream is connected." : "Licensed stream"}</p>
+          <p className="text-[12px] text-mute">{e.live.demo ? tlive("streamDemo") : "Licensed stream"}</p>
           <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl bg-ink/60 p-2">
-              <dt className="text-[10px] uppercase text-mute">Online viewers</dt>
+              <dt className="text-[10px] uppercase text-mute">{t("facts.onlineViewers")}</dt>
               <dd className="font-display text-lg">{num(e.live.onlineViewers)}</dd>
             </div>
             <div className="rounded-xl bg-ink/60 p-2">
-              <dt className="text-[10px] uppercase text-mute">Checked in on site</dt>
+              <dt className="text-[10px] uppercase text-mute">{t("facts.checkedIn")}</dt>
               <dd className="font-display text-lg">{num(e.live.checkedIn)}</dd>
             </div>
             <div className="rounded-xl bg-ink/60 p-2">
-              <dt className="text-[10px] uppercase text-mute">Public avatars</dt>
+              <dt className="text-[10px] uppercase text-mute">{t("facts.publicAvatars")}</dt>
               <dd className="font-display text-lg">{num(e.live.publicAvatars)}</dd>
             </div>
           </dl>
-          <p className="mt-1.5 text-[11px] text-mute">Viewers watch online; checked-in guests are verified at the door. They are never added together.</p>
+          <p className="mt-1.5 text-[11px] text-mute">{tlive("notSummed")}</p>
         </section>
       )}
 
-      <section aria-label="Festival level">
+      <section aria-label={tl("festivalLevel")}>
         <div className="flex items-center justify-between">
-          <h3 className="text-[13px] font-extrabold uppercase">Festival level</h3>
+          <h3 className="text-[13px] font-extrabold uppercase">{tl("festivalLevel")}</h3>
           <LevelPill e={e} />
         </div>
         <p className="mt-1 text-[12px] text-mute">
-          {g.visual}. A map game level, not venue capacity.
+          {tl("notCapacity")}
         </p>
         {g.next ? (
-          <ul className="mt-2 space-y-1.5" aria-label={`Requirements for level ${g.next.level} ${g.next.name}`}>
+          <ul className="mt-2 space-y-1.5" aria-label={`LV.${g.next.level} ${tl(String(g.next.level))}`}>
             {g.requirements.map((r) => (
               <li key={r.key} className="text-[12px]">
                 <div className="flex justify-between gap-2">
@@ -140,46 +181,46 @@ function Details({ e }: { e: WorldEvent }) {
                 </div>
               </li>
             ))}
-            <li className="pt-0.5 text-[11px] text-mute">Next: LV.{g.next.level} {g.next.name}</li>
+            <li className="pt-0.5 text-[11px] text-mute">→ LV.{g.next.level} {tl(String(g.next.level))}</li>
           </ul>
         ) : (
-          <p className="mt-2 text-[12px] text-acid">Top level reached.</p>
+          <p className="mt-2 text-[12px] text-acid">{tl("topReached")}</p>
         )}
       </section>
 
-      <section aria-label="Key facts">
-        <Row icon={<Users className="size-4" />} label="Supporters">
+      <section aria-label={t("facts.supporters")}>
+        <Row icon={<Users className="size-4" />} label={t("facts.supporters")}>
           {num(e.growth.supporters)}
         </Row>
-        <Row icon={<Landmark className="size-4" />} label="Confirmed funding">
-          {usd(e.growth.fundingUsd)} of {usd(e.goalUsd)} goal
+        <Row icon={<Landmark className="size-4" />} label={t("facts.funding")}>
+          {usd(e.growth.fundingUsd)} / {usd(e.goalUsd)}
         </Row>
-        <Row icon={<Vote className="size-4" />} label="Staking participants">
+        <Row icon={<Vote className="size-4" />} label={t("facts.stakers")}>
           {e.dao ? (
             <>
               {num(e.dao.stakers)} people · {num(e.dao.staked)} {e.dao.tokenSymbol} escrowed
-              <span className="block text-[11px] text-mute">Staking is held separately and is not event budget.</span>
+              <span className="block text-[11px] text-mute">{t("facts.stakingNote")}</span>
             </>
           ) : (
-            "No DAO for this event"
+            t("facts.noDao")
           )}
         </Row>
-        <Row icon={<Ticket className="size-4" />} label="Tickets">
-          {e.status === "completed" ? "Event finished" : e.tickets.onSale ? `${num(e.tickets.remaining)} left · from ${usd(e.tickets.fromUsd ?? 0)} (demo checkout)` : e.status === "confirmed" || e.status === "live" ? "Sold out" : "Not on sale until confirmed"}
+        <Row icon={<Ticket className="size-4" />} label={t("facts.tickets")}>
+          {e.status === "completed" ? t("facts.eventFinished") : e.tickets.onSale ? t("facts.ticketsLeft", { count: num(e.tickets.remaining), price: usd(e.tickets.fromUsd ?? 0) }) : e.status === "confirmed" || e.status === "live" ? t("facts.soldOut") : t("facts.notOnSale")}
         </Row>
-        <Row icon={<Mic2 className="size-4" />} label="DJ recruitment">
-          {e.djRecruiting ? "Open: DJs can apply" : "Closed"}
+        <Row icon={<Mic2 className="size-4" />} label={t("facts.djRecruitment")}>
+          {e.djRecruiting ? t("facts.djOpen") : t("facts.closed")}
         </Row>
-        <Row icon={<PartyPopper className="size-4" />} label="After party">
+        <Row icon={<PartyPopper className="size-4" />} label={t("facts.afterParty")}>
           {e.afterParty ? (
             <Link href={`/after-party/${e.afterParty.id}`} className="font-bold text-acid underline-offset-2 hover:underline">
               {e.afterParty.name} · {e.afterParty.venue}
             </Link>
           ) : (
-            "Not announced"
+            t("facts.notAnnounced")
           )}
         </Row>
-        <Row icon={<Disc3 className="size-4" />} label="Landmark">
+        <Row icon={<Disc3 className="size-4" />} label={t("facts.landmark")}>
           {LANDMARK_LABEL[e.landmark.type]}
           {e.landmark.approvedDesign ? <span className="block text-[11px] text-mute">Colours from the DAO-approved stage design “{e.landmark.approvedDesign.name}”.</span> : e.dao ? <span className="block text-[11px] text-mute">No approved DAO stage design yet: default look.</span> : null}
         </Row>
@@ -203,9 +244,9 @@ function Details({ e }: { e: WorldEvent }) {
         <Link href={`/rankings?category=${e.ranking.trendingRank && !e.ranking.badge ? "trending&period=7d" : "popular&period=all"}`} className="flex items-center gap-2 rounded-2xl bg-surface-2 p-3 text-[13px]" data-testid="map-rank">
           {e.ranking.badge ? <Crown className="size-4 text-[#E8C66A]" aria-hidden /> : <TrendingUp className="size-4 text-acid" aria-hidden />}
           <span className="min-w-0 flex-1">
-            {e.ranking.rank && <span className="block">#{e.ranking.rank} Most popular · all time</span>}
-            {e.ranking.trendingRank && <span className="block">#{e.ranking.trendingRank} Trending · last 7 days</span>}
-            <span className="block text-[11px] text-mute">Updated {fmtDate(e.ranking.asOf, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })} · demo data</span>
+            {e.ranking.rank && <span className="block">#{e.ranking.rank} {tr("popular")} · {tr("allTime")}</span>}
+            {e.ranking.trendingRank && <span className="block">#{e.ranking.trendingRank} {tr("trending")} · {tr("days7")}</span>}
+            <span className="block text-[11px] text-mute">{tr("updated", { time: formatEventDate(locale, e.ranking.asOf, "UTC", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) })} · {tc("demoData")}</span>
           </span>
           <ArrowRight className="size-4 text-acid" aria-hidden />
         </Link>
@@ -215,6 +256,9 @@ function Details({ e }: { e: WorldEvent }) {
 }
 
 function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?: boolean }) {
+  const t = useTranslations("world");
+  const ts = useTranslations("status");
+  const { locale } = useFmt();
   return (
     <div className="flex gap-3">
       <div className={cn("relative shrink-0 overflow-hidden rounded-2xl border-2 border-line", big ? "size-24" : "size-[72px]")}>
@@ -231,16 +275,16 @@ function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?:
           <span className="inline-flex items-center gap-1">
             <MapPin className="size-3.5" aria-hidden />
             {e.city}, {e.country}
-            {e.location.precision === "city" && " (approx.)"}
+            {e.location.precision === "city" && ` (${ts("approx")})`}
           </span>
           <span className="inline-flex items-center gap-1">
             <CalendarDays className="size-3.5" aria-hidden />
-            {fmtDate(e.startsAt, { month: "short", day: "numeric", year: "numeric" })}
+            {formatEventDate(locale, e.startsAt, "UTC", { month: "short", day: "numeric", year: "numeric" })}
           </span>
         </div>
         <div className="mt-1 truncate text-[12px] text-mute">{e.genres.join(" / ")}</div>
       </div>
-      <button type="button" onClick={onClose} aria-label="Close festival details" className="-mr-1 -mt-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2">
+      <button type="button" onClick={onClose} aria-label={t("closeDetails")} className="-mr-1 -mt-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2">
         <X className="size-5" />
       </button>
     </div>
@@ -248,16 +292,19 @@ function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?:
 }
 
 function KeyNumbers({ e }: { e: WorldEvent }) {
+  const t = useTranslations("world.facts");
+  const tk = useTranslations("world.keys");
+  const { num } = useFmt();
   const items = e.live
     ? [
-        ["Online viewers", num(e.live.onlineViewers)],
-        ["Checked in", num(e.live.checkedIn)],
-        ["Supporters", num(e.growth.supporters)],
+        [tk("viewers"), num(e.live.onlineViewers)],
+        [tk("checkedIn"), num(e.live.checkedIn)],
+        [t("supporters"), num(e.growth.supporters)],
       ]
     : [
-        ["Supporters", num(e.growth.supporters)],
-        ["Funding", e.goalUsd ? `${Math.round((e.growth.fundingUsd / e.goalUsd) * 100)}%` : "–"],
-        [e.dao ? "Stakers" : "Tickets", e.dao ? num(e.dao.stakers) : e.tickets.onSale ? num(e.tickets.remaining) : "–"],
+        [t("supporters"), num(e.growth.supporters)],
+        [tk("funding"), e.goalUsd ? `${Math.round((e.growth.fundingUsd / e.goalUsd) * 100)}%` : "–"],
+        [e.dao ? tk("stakers") : t("tickets"), e.dao ? num(e.dao.stakers) : e.tickets.onSale ? num(e.tickets.remaining) : "–"],
       ];
   return (
     <dl className="mt-3 grid grid-cols-3 gap-2">
@@ -273,7 +320,8 @@ function KeyNumbers({ e }: { e: WorldEvent }) {
 
 /** Desktop: right panel. */
 export function EventSidePanel({ e, onClose }: { e: WorldEvent; onClose: () => void }) {
-  const actions = actionsFor(e);
+  const ta = useTranslations("world.actions");
+  const actions = actionsFor(e, (k) => ta(k));
   return (
     <section aria-label={`${e.name} summary`} className="wm-panel absolute bottom-4 right-4 top-[124px] z-20 flex w-[400px] flex-col overflow-hidden rounded-[28px] border-2 border-line bg-[#0D121B]/95 shadow-[0_20px_60px_rgba(0,0,0,.55)] backdrop-blur" data-testid="event-panel">
       <div className="border-b border-line p-4">
@@ -299,7 +347,9 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
   const ref = useRef<HTMLElement>(null);
   const start = useRef<{ y: number; t: number } | null>(null);
   const [dy, setDy] = useState(0);
-  const actions = actionsFor(e);
+  const ta = useTranslations("world.actions");
+  const tw = useTranslations("world");
+  const actions = actionsFor(e, (k) => ta(k));
   const primary = actions[0];
 
   useEffect(() => {
@@ -342,7 +392,7 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
       style={{ transform: dy ? `translateY(${Math.max(-60, dy)}px)` : undefined, transition: dy ? "none" : "transform 200ms ease-out" }}
     >
       <div className="touch-none px-4 pb-1 pt-2" onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
-        <button type="button" onClick={() => setExpanded(!expanded)} className="-mt-2 mb-0 flex h-11 w-full items-center justify-center" aria-label={expanded ? "Show less" : "Show all details"} aria-expanded={expanded}>
+        <button type="button" onClick={() => setExpanded(!expanded)} className="-mt-2 mb-0 flex h-11 w-full items-center justify-center" aria-label={expanded ? tw("showLess") : tw("showAll")} aria-expanded={expanded}>
           <span className="h-1.5 w-12 rounded-full bg-cream/30" aria-hidden />
         </button>
         <Header e={e} onClose={onClose} />
@@ -354,7 +404,7 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
         </div>
         {!expanded && (
           <button type="button" onClick={() => setExpanded(true)} className="mx-auto my-1 flex min-h-11 items-center gap-1 text-[13px] font-bold text-mute">
-            <ChevronUp className="size-4" aria-hidden /> More: level, DAO, tickets, actions
+            <ChevronUp className="size-4" aria-hidden /> {tw("moreDetails")}
           </button>
         )}
         {expanded && (
