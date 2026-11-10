@@ -1,31 +1,37 @@
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/layout/InfoPage";
 import { ButtonLink } from "@/components/ui/primitives";
 
-export const metadata: Metadata = { title: "About", description: "What FREAKTOPIA WORLD is and who it’s for." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("aboutTitle"), description: tu("aboutDescription") };
+}
 
 export default function Page() {
+  const tu = useTranslations("pages");
   return (
-    <InfoPage kicker="About" title="A living world of nights out" sub="世界中のDJ・音楽ファン・主催者・会場オーナーがつながり、現実のイベントをゲーム感覚で育てるプラットフォーム。">
+    <InfoPage kicker={tu("about")} title={tu("aLivingWorldOfNights")} sub={tu("dj")}>
       <section>
-        <h2>The idea</h2>
-        <p>FREAKTOPIA WORLD turns the planning of real events into a shared game. Fans discover nights on a world map, support the ones they want to happen, and watch the stage evolve from a tiny DJ booth into a mega festival as supporters and funding grow.</p>
-        <p>On the night, everyone can join the illustrated venue map with their own alien avatar, and the fun continues into after parties, collectibles and, later, running your own in-game club.</p>
+        <h2>{tu("theIdea")}</h2>
+        <p>{tu("freaktopiaWorldTurnsThePlanning")}</p>
+        <p>{tu("onTheNightEveryoneCan")}</p>
       </section>
       <section>
-        <h2>Who it’s for</h2>
+        <h2>{tu("whoItsFor")}</h2>
         <ul>
-          <li><strong>Fans</strong> discover, support, attend and play.</li>
-          <li><strong>DJs</strong> apply, audition live for 30 minutes and climb the rankings.</li>
-          <li><strong>Organizers</strong> create events in seven steps and grow them with their community.</li>
-          <li><strong>Venue owners</strong> list spaces and get matched with events.</li>
+          <li><strong>{tu("fans")}</strong> {tu("discoverSupportAttendAndPlay")}</li>
+          <li><strong>DJs</strong> {tu("applyAuditionLiveFor30")}</li>
+          <li><strong>{tu("organizers")}</strong> {tu("createEventsInSevenSteps")}</li>
+          <li><strong>{tu("venueOwners")}</strong> {tu("listSpacesAndGetMatched")}</li>
         </ul>
       </section>
       <section>
-        <h2>Phase 1</h2>
-        <p>This is an interactive prototype. All content is fictional demo data, and payments, live streaming, wallets and NFT minting are not connected yet.</p>
+        <h2>{tu("phase1")}</h2>
+        <p>{tu("thisIsAnInteractivePrototype")}</p>
       </section>
-      <ButtonLink href="/world" size="lg">Explore the world</ButtonLink>
+      <ButtonLink href="/world" size="lg">{tu("exploreTheWorld")}</ButtonLink>
     </InfoPage>
   );
 }

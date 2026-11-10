@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowRight, Award, BadgeCheck, CheckCircle2, Clock, DoorOpen, Eye, Lock, MapPin, PartyPopper, QrCode, ScanLine, ShieldX, Ticket, Trophy, Users, Vote, XCircle } from "lucide-react";
@@ -19,14 +21,16 @@ import { cn, money } from "@/lib/utils";
 /* ---------------- quests ---------------- */
 
 export function QuestsPanel({ progress }: { progress: QuestProgress }) {
+  const tx = useTx();
+  const tu = useTranslations("live");
   const badges = useDemo((s) => s.liveBadges);
   return (
     <section aria-labelledby="q-h" className="space-y-3">
       <div className="flex items-end justify-between gap-2">
-        <h2 id="q-h" className="text-[28px] uppercase">Quests</h2>
-        <span className="text-[12px] text-mute">{progress.completed.length}/{LIVE_QUESTS.length} done</span>
+        <h2 id="q-h" className="text-[28px] uppercase">{tu("quests")}</h2>
+        <span className="text-[12px] text-mute">{tu("lengthLength2Done", { length: progress.completed.length, length2: LIVE_QUESTS.length })}</span>
       </div>
-      <p className="text-[12px] text-mute">Online quests are done from anywhere. On-site quests need a verified check-in at the venue; watching a stream never counts as attending.</p>
+      <p className="text-[12px] text-mute">{tu("onlineQuestsAreDoneFrom")}</p>
       <ul className="space-y-2" data-testid="quests">
         {LIVE_QUESTS.map((q) => {
           const done = progress.completed.includes(q.id);
@@ -38,17 +42,17 @@ export function QuestsPanel({ progress }: { progress: QuestProgress }) {
                 {done ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-acid" aria-hidden /> : locked ? <Lock className="mt-0.5 size-5 shrink-0 text-mute" aria-hidden /> : <Trophy className="mt-0.5 size-5 shrink-0 text-orange" aria-hidden />}
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <b>{q.title}</b>
-                    <Tag color={q.kind === "online" ? "#2a2a2a" : "#FF625C"} dark={q.kind !== "online"}>{q.kind === "online" ? "Online" : "On-site"}</Tag>
+                    <b><Tx>{q.title}</Tx></b>
+                    <Tag color={q.kind === "online" ? "#2a2a2a" : "#FF625C"} dark={q.kind !== "online"}>{q.kind === "online" ? tu("online") : tu("onSite")}</Tag>
                   </div>
-                  <p className="text-[13px] text-mute">{q.desc}</p>
+                  <p className="text-[13px] text-mute"><Tx>{q.desc}</Tx></p>
                   <p className="mt-1 text-[12px]">
                     <span className="text-acid">+{q.xp} XP</span>
-                    {q.badge && <span> · badge “{q.badge}”</span>}
+                    {q.badge && <span> {tu("badgeBadge", { badge: q.badge })}</span>}
                     {q.reward && <span> · {q.reward}</span>}
                   </p>
-                  {!done && q.kind === "online" && <Progress value={cur / q.target} className="mt-2 h-2" label={`${q.title} progress`} />}
-                  {locked && <p className="mt-1 text-[12px] text-orange">Needs a verified on-site check-in. Demo check-ins don&apos;t count.</p>}
+                  {!done && q.kind === "online" && <Progress value={cur / q.target} className="mt-2 h-2" label={tu("questProgress", { title: tx(q.title) })} />}
+                  {locked && <p className="mt-1 text-[12px] text-orange">{tu("needsAVerifiedOnSite")}</p>}
                 </div>
                 {!done && q.kind === "online" && <span className="shrink-0 font-display text-sm">{q.id === "watch-set" ? `${Math.floor(cur / 60)}/${q.target / 60}m` : `${cur}/${q.target}`}</span>}
               </div>
@@ -58,7 +62,7 @@ export function QuestsPanel({ progress }: { progress: QuestProgress }) {
       </ul>
       {badges.length > 0 && (
         <div className="flex flex-wrap items-center gap-1.5 text-[13px]">
-          <Award className="size-4 text-purple" aria-hidden /> Badges:
+          <Award className="size-4 text-purple" aria-hidden /> {tu("badges")}
           {badges.map((b) => <Tag key={b} color="#A276E9" dark>{b}</Tag>)}
         </div>
       )}
@@ -69,30 +73,31 @@ export function QuestsPanel({ progress }: { progress: QuestProgress }) {
 /* ---------------- attendance ---------------- */
 
 export function AttendancePanel({ detail, onlineViewers, publicAvatars }: { detail: LiveDetail; onlineViewers: number; publicAvatars: number }) {
+  const tu = useTranslations("live");
   const a = detail.attendance;
   const rows: { label: string; value: string; note: string; icon: typeof Users; color: string }[] = [
-    { label: "Tickets sold", value: fmtCount(a.ticketsSold), note: "Paid/issued tickets (demo ranking data).", icon: Ticket, color: "#FFAD5B" },
-    { label: "Unique checked-in", value: fmtCount(a.checkedIn), note: "Unique tickets scanned at the door (demo).", icon: DoorOpen, color: "#B6F05C" },
-    { label: "Verified currently present", value: a.currentlyPresent === null ? "Not tracked" : fmtCount(a.currentlyPresent), note: "Checked-in minus verified exits. Never inferred from GPS.", icon: BadgeCheck, color: "#55BCEB" },
-    { label: "Online viewers", value: fmtCount(onlineViewers), note: "People with the room open (demo base + real visitors).", icon: Eye, color: "#A276E9" },
-    { label: "Public avatars", value: fmtCount(publicAvatars), note: "Avatars set to public on the map. Not attendance.", icon: Users, color: "#FF625C" },
+    { label: tu("ticketsSold"), value: fmtCount(a.ticketsSold), note: tu("paidIssuedTicketsDemoRanking"), icon: Ticket, color: "#FFAD5B" },
+    { label: tu("uniqueCheckedIn"), value: fmtCount(a.checkedIn), note: tu("uniqueTicketsScannedAtThe"), icon: DoorOpen, color: "#B6F05C" },
+    { label: tu("verifiedCurrentlyPresent"), value: a.currentlyPresent === null ? "Not tracked" : fmtCount(a.currentlyPresent), note: tu("checkedInMinusVerifiedExits"), icon: BadgeCheck, color: "#55BCEB" },
+    { label: tu("viewers"), value: fmtCount(onlineViewers), note: tu("peopleWithTheRoomOpen"), icon: Eye, color: "#A276E9" },
+    { label: tu("avatars"), value: fmtCount(publicAvatars), note: tu("avatarsSetToPublicOn"), icon: Users, color: "#FF625C" },
   ];
   return (
     <section aria-labelledby="att-h" className="space-y-3">
-      <h2 id="att-h" className="text-[28px] uppercase">Who&apos;s here</h2>
+      <h2 id="att-h" className="text-[28px] uppercase">{tu("whosHere")}</h2>
       <ul className="grid gap-2 sm:grid-cols-2" data-testid="attendance">
         {rows.map((r) => (
           <li key={r.label} className="flex items-start gap-3 rounded-2xl bg-surface-2 p-3">
             <r.icon className="mt-0.5 size-5 shrink-0" style={{ color: r.color }} aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-extrabold uppercase tracking-wider text-mute">{r.label}</div>
+              <div className="text-[11px] font-extrabold uppercase tracking-wider text-mute"><Tx>{r.label}</Tx></div>
               <div className="font-display text-xl">{r.value}</div>
               <div className="text-[12px] text-mute">{r.note}</div>
             </div>
           </li>
         ))}
       </ul>
-      <p className="text-[12px] text-mute">Door demo this session: {a.doorDemo.checkedIn} demo check-ins. Demo check-ins are never added to the figures above.</p>
+      <p className="text-[12px] text-mute">{tu("doorDemoThisSessionCheckedin", { checkedIn: a.doorDemo.checkedIn })}</p>
     </section>
   );
 }
@@ -100,6 +105,7 @@ export function AttendancePanel({ detail, onlineViewers, publicAvatars }: { deta
 /* ---------------- check-in ---------------- */
 
 function FakeQr({ value }: { value: string }) {
+  const tu = useTranslations("live");
   // Decorative pattern derived from the code. It is not a scannable QR code.
   let h = 2166136261;
   const cells: boolean[] = [];
@@ -110,7 +116,7 @@ function FakeQr({ value }: { value: string }) {
   }
   const finder = (x: number, y: number) => (x < 7 && y < 7) || (x > 13 && y < 7) || (x < 7 && y > 13);
   return (
-    <svg viewBox="0 0 21 21" className="size-32 rounded-lg bg-cream p-1.5" role="img" aria-label="Demo ticket code pattern (not scannable)">
+    <svg viewBox="0 0 21 21" className="size-32 rounded-lg bg-cream p-1.5" role="img" aria-label={tu("demoTicketCodePatternNot")}>
       {cells.map((on, i) => {
         const x = i % 21;
         const y = Math.floor(i / 21);
@@ -129,6 +135,7 @@ function FakeQr({ value }: { value: string }) {
 }
 
 export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: string; isDemoLive: boolean; onVerified: () => void }) {
+  const tu = useTranslations("live");
   const [ticket, setTicket] = useState<{ ticketId: string; qr: string; cancelled?: boolean } | null>(null);
   const [result, setResult] = useState<{ ok: boolean; title: string; body: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -140,7 +147,7 @@ export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: str
     setResult(null);
     const r = await liveApi<{ ticketId: string; qr: string; cancelled?: boolean }>(`${eventId}/demo-ticket${sample ? "?sample=cancelled" : ""}`, { method: "POST" });
     setBusy(false);
-    if (!r.ok) return setResult({ ok: false, title: "Couldn't issue a demo ticket", body: r.error.message });
+    if (!r.ok) return setResult({ ok: false, title: tu("couldntIssueADemoTicket"), body: r.error.message });
     setTicket(r.data);
   };
   const scan = async (method: "ticket_qr" | "organizer_scan" | "manual") => {
@@ -149,8 +156,8 @@ export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: str
     const r = await liveApi<{ ticketId: string; kind: string }>(`${eventId}/checkin`, { method: "POST", json: { qr: ticket.qr, method } });
     setBusy(false);
     if (!r.ok) return setResult({ ok: false, title: r.error.code.replaceAll("_", " "), body: r.error.message });
-    setResult({ ok: true, title: "Checked in (demo)", body: `Ticket ${r.data.ticketId} accepted. This is a demo check-in: it is not recorded as real attendance and doesn't unlock on-site quests.` });
-    if (!checkedIn) grantXp(20, "Door check-in practice (demo)");
+    setResult({ ok: true, title: tu("checkedInDemo"), body: tu("ticketTicketidAcceptedThisIs", { ticketId: r.data.ticketId }) });
+    if (!checkedIn) grantXp(20, tu("xpDoorCheckInPracticeDemo"));
     setLive({ liveCheckedIn: true });
     onVerified();
   };
@@ -158,8 +165,8 @@ export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: str
   if (!isDemoLive) {
     return (
       <section aria-labelledby="ci-h" className="space-y-2">
-        <h2 id="ci-h" className="text-[28px] uppercase">Check-in</h2>
-        <p className="text-sm text-mute">Door check-in opens two hours before the festival starts. Bring your ticket QR from My Tickets.</p>
+        <h2 id="ci-h" className="text-[28px] uppercase">{tu("checkIn")}</h2>
+        <p className="text-sm text-mute">{tu("doorCheckInOpensTwo")}</p>
       </section>
     );
   }
@@ -167,27 +174,27 @@ export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: str
   return (
     <section aria-labelledby="ci-h" className="space-y-3" data-testid="checkin">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="ci-h" className="text-[28px] uppercase">Check-in</h2>
-        <DemoBadge label="Door demo" />
+        <h2 id="ci-h" className="text-[28px] uppercase">{tu("checkIn")}</h2>
+        <DemoBadge label={tu("doorDemo")} />
       </div>
-      <p className="text-[13px] text-mute">Three ways in: your ticket QR, a scan by door staff, or manual lookup by staff. Each ticket works once, only for this event, only while doors are open, and cancelled tickets are refused.</p>
-      {checkedIn && <p className="flex items-center gap-1.5 text-sm text-acid"><CheckCircle2 className="size-4" aria-hidden />You’re checked in (demo). Not counted as real attendance.</p>}
+      <p className="text-[13px] text-mute">{tu("threeWaysInYourTicket")}</p>
+      {checkedIn && <p className="flex items-center gap-1.5 text-sm text-acid"><CheckCircle2 className="size-4" aria-hidden />{tu("youreCheckedInDemoNot")}</p>}
       <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => issue()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-acid px-4 font-bold text-ink disabled:opacity-50"><Ticket className="size-4" aria-hidden />Get a demo ticket</button>
-        <button type="button" disabled={busy} onClick={() => issue("cancelled")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 font-bold disabled:opacity-50"><XCircle className="size-4" aria-hidden />Try a cancelled ticket</button>
+        <button type="button" disabled={busy} onClick={() => issue()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-acid px-4 font-bold text-ink disabled:opacity-50"><Ticket className="size-4" aria-hidden />{tu("getADemoTicket")}</button>
+        <button type="button" disabled={busy} onClick={() => issue("cancelled")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 font-bold disabled:opacity-50"><XCircle className="size-4" aria-hidden />{tu("tryACancelledTicket")}</button>
       </div>
       {ticket && (
         <div className="flex flex-wrap items-center gap-4 rounded-3xl border border-line bg-surface p-3">
           <FakeQr value={ticket.qr} />
           <div className="min-w-0 flex-1 space-y-2">
-            <p className="text-[12px] font-extrabold uppercase text-orange">Demo ticket · not valid for real entry</p>
+            <p className="text-[12px] font-extrabold uppercase text-orange">{tu("demoTicketNotValidFor")}</p>
             <p className="break-all font-mono text-[11px] text-mute">{ticket.qr}</p>
             <div className="flex flex-wrap gap-2">
-              <button type="button" disabled={busy} onClick={() => scan("ticket_qr")} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-coral px-4 font-bold text-ink disabled:opacity-50"><QrCode className="size-4" aria-hidden />Scan my QR at the door</button>
-              <button type="button" disabled={busy} onClick={() => scan("organizer_scan")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 text-sm font-bold disabled:opacity-50"><ScanLine className="size-4" aria-hidden />Organizer scan</button>
-              <button type="button" disabled={busy} onClick={() => scan("manual")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 text-sm font-bold disabled:opacity-50">Manual</button>
+              <button type="button" disabled={busy} onClick={() => scan("ticket_qr")} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-coral px-4 font-bold text-ink disabled:opacity-50"><QrCode className="size-4" aria-hidden />{tu("scanMyQrAtThe")}</button>
+              <button type="button" disabled={busy} onClick={() => scan("organizer_scan")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 text-sm font-bold disabled:opacity-50"><ScanLine className="size-4" aria-hidden />{tu("organizerScan")}</button>
+              <button type="button" disabled={busy} onClick={() => scan("manual")} className="inline-flex min-h-11 items-center gap-2 rounded-full border-2 border-line px-4 text-sm font-bold disabled:opacity-50">{tu("manual")}</button>
             </div>
-            <p className="text-[11px] text-mute">Organizer scan and manual check-in need a door-staff session, which the demo doesn&apos;t issue, so they are refused.</p>
+            <p className="text-[11px] text-mute">{tu("organizerScanAndManualCheck")}</p>
           </div>
         </div>
       )}
@@ -207,14 +214,15 @@ export function CheckinPanel({ eventId, isDemoLive, onVerified }: { eventId: str
 /* ---------------- after party portal ---------------- */
 
 export function AfterPartyPortal({ detail, tz, onOpenPortal }: { detail: LiveDetail; tz: string; onOpenPortal?: () => void }) {
+  const tu = useTranslations("live");
   const ap = detail.afterParty;
   if (!ap) {
     return (
       <section aria-labelledby="ap-h" className="space-y-2 rounded-3xl border border-dashed border-line p-4" data-testid="after-party">
-        <h2 id="ap-h" className="text-[24px] uppercase">After party portal</h2>
-        <Tag color="#2a2a2a">Not confirmed</Tag>
-        <p className="text-sm text-mute">No after party has been confirmed for this festival yet. Venue, time and tickets appear here once the organizer confirms them.</p>
-        <Link href="/after-party/new" className="inline-flex min-h-11 items-center font-bold text-acid">Host an after party →</Link>
+        <h2 id="ap-h" className="text-[24px] uppercase">{tu("afterPartyPortal")}</h2>
+        <Tag color="#2a2a2a">{tu("notConfirmed")}</Tag>
+        <p className="text-sm text-mute">{tu("noAfterPartyHasBeen")}</p>
+        <Link href="/after-party/new" className="inline-flex min-h-11 items-center font-bold text-acid">{tu("hostAnAfterParty")}</Link>
       </section>
     );
   }
@@ -224,15 +232,15 @@ export function AfterPartyPortal({ detail, tz, onOpenPortal }: { detail: LiveDet
     <section aria-labelledby="ap-h" className="neon space-y-3 overflow-hidden rounded-3xl border-2 bg-surface p-4" data-testid="after-party">
       <div className="flex flex-wrap items-center gap-2">
         <PartyPopper className="size-5 text-purple" aria-hidden />
-        <h2 id="ap-h" className="text-[24px] uppercase">After party portal</h2>
-        <Tag color={ap.confirmed ? "#B6F05C" : "#2a2a2a"} dark={ap.confirmed}>{ap.confirmed ? "Confirmed" : "Not confirmed"}</Tag>
+        <h2 id="ap-h" className="text-[24px] uppercase">{tu("afterPartyPortal")}</h2>
+        <Tag color={ap.confirmed ? "#B6F05C" : "#2a2a2a"} dark={ap.confirmed}>{ap.confirmed ? tu("confirmed") : tu("notConfirmed")}</Tag>
         <DemoBadge />
       </div>
       <h3 className="font-display text-2xl uppercase">{ap.name}</h3>
       <ul className="space-y-1.5 text-[14px]">
         <li className="flex items-center gap-2"><MapPin className="size-4 shrink-0 text-mute" aria-hidden />{ap.venueName}, {ap.city}</li>
         <li className="flex items-center gap-2"><Clock className="size-4 shrink-0 text-mute" aria-hidden />{fmtInTz(start, tz, { weekday: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })}–{fmtInTz(Date.parse(ap.endsAt), tz)} {tzLabel(start, tz)}</li>
-        <li className="flex items-center gap-2"><Ticket className="size-4 shrink-0 text-mute" aria-hidden />{money(ap.price)} · {soldOut ? "Sold out" : `${ap.seatsLeft} of ${ap.capacity} left`}</li>
+        <li className="flex items-center gap-2"><Ticket className="size-4 shrink-0 text-mute" aria-hidden />{money(ap.price)} · {soldOut ? tu("soldOut") : tu("seatsleftOfCapacityLeft", { seatsLeft: ap.seatsLeft, capacity: ap.capacity })}</li>
       </ul>
       <div className="flex flex-wrap gap-2">
         {ap.dj.map((d) => (
@@ -242,18 +250,18 @@ export function AfterPartyPortal({ detail, tz, onOpenPortal }: { detail: LiveDet
         ))}
       </div>
       <p className="text-[13px] text-mute">{ap.description}</p>
-      <p className="rounded-2xl bg-surface-2 p-3 text-[12px] text-mute">Entry: after-party ticket or main-event wristband plus photo ID; local age rules apply (sample conditions for the demo). The online portal opens in the virtual venue for everyone.</p>
+      <p className="rounded-2xl bg-surface-2 p-3 text-[12px] text-mute">{tu("entryAfterPartyTicketOr")}</p>
       <div className="grid gap-2 sm:grid-cols-2">
         <Link href={`/after-party/${ap.id}`} className={cn("flex min-h-12 items-center justify-center gap-2 rounded-full font-extrabold uppercase", soldOut ? "border-2 border-line" : "bg-purple text-ink")}>
-          {soldOut ? "Details" : "Join / buy (demo)"} <ArrowRight className="size-4" aria-hidden />
+          {soldOut ? tu("details") : tu("joinBuyDemo")} <ArrowRight className="size-4" aria-hidden />
         </Link>
         {onOpenPortal && (
           <button type="button" onClick={onOpenPortal} className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-purple font-extrabold uppercase text-purple">
-            Go to portal zone
+            {tu("goToPortalZone")}
           </button>
         )}
       </div>
-      <p className="text-[11px] text-mute">Payments are not connected in this build. “Buy” creates a demo order in this browser only.</p>
+      <p className="text-[11px] text-mute">{tu("paymentsAreNotConnectedIn")}</p>
     </section>
   );
 }
@@ -282,6 +290,7 @@ interface ActivityDto {
 const CLOSED = ["APPROVED", "REJECTED", "COMPLETED", "EXECUTION", "FEASIBILITY_CHECK", "ORGANIZER_CONFIRMATION", "CANCELLED"];
 
 export function DaoPanel({ eventId }: { eventId: string }) {
+  const tu = useTranslations("live");
   const home = useDaoQuery<DaoHomeDto>(eventId);
   const road = useDaoQuery<RoadmapDto>(`${eventId}/roadmap`);
   const props = useDaoQuery<ProposalsDto>(`${eventId}/proposals`);
@@ -290,9 +299,9 @@ export function DaoPanel({ eventId }: { eventId: string }) {
   if (home.state.status === "error") {
     return (
       <section aria-labelledby="dao-h" className="space-y-2 rounded-3xl border border-dashed border-line p-4" data-testid="live-dao">
-        <h2 id="dao-h" className="text-[24px] uppercase">Festival DAO</h2>
-        <p className="text-sm text-mute">{home.state.httpStatus === 404 ? "This festival has no community DAO yet." : home.state.error.message}</p>
-        <Link href={`/dao/${eventId}`} className="inline-flex min-h-11 items-center font-bold text-acid">Open DAO page →</Link>
+        <h2 id="dao-h" className="text-[24px] uppercase">{tu("festivalDao")}</h2>
+        <p className="text-sm text-mute">{home.state.httpStatus === 404 ? tu("thisFestivalHasNoCommunity") : home.state.error.message}</p>
+        <Link href={`/dao/${eventId}`} className="inline-flex min-h-11 items-center font-bold text-acid">{tu("openDaoPage")}</Link>
       </section>
     );
   }
@@ -309,35 +318,35 @@ export function DaoPanel({ eventId }: { eventId: string }) {
     <section aria-labelledby="dao-h" className="space-y-3 rounded-3xl border border-line bg-surface p-4" data-testid="live-dao">
       <div className="flex flex-wrap items-center gap-2">
         <Vote className="size-5 text-acid" aria-hidden />
-        <h2 id="dao-h" className="text-[24px] uppercase">Festival DAO</h2>
-        <span className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: st.color }}>{st.label}</span>
+        <h2 id="dao-h" className="text-[24px] uppercase">{tu("festivalDao")}</h2>
+        <span className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: st.color }}><Tx>{st.label}</Tx></span>
         <DemoBadge />
       </div>
       <div className="grid grid-cols-3 gap-2 text-center">
-        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">Members</div><div className="font-display text-lg">{fmtCount(h.summary.members)}</div></div>
-        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">Dev level</div><div className="font-display text-lg">LV.{r?.level ?? h.summary.gameLevel}</div></div>
-        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">Roadmap</div><div className="font-display text-lg">{h.progress.done}/{h.progress.total}</div></div>
+        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">{tu("members")}</div><div className="font-display text-lg">{fmtCount(h.summary.members)}</div></div>
+        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">{tu("devLevel")}</div><div className="font-display text-lg">LV.{r?.level ?? h.summary.gameLevel}</div></div>
+        <div className="rounded-2xl bg-surface-2 p-2"><div className="text-[10px] font-bold uppercase text-mute">{tu("roadmap")}</div><div className="font-display text-lg">{h.progress.done}/{h.progress.total}</div></div>
       </div>
-      <p className="text-[13px]">{h.me?.member ? <span className="text-acid">You&apos;re a member of this DAO.</span> : <span className="text-mute">You&apos;re not a member. Anyone can read; joining, proposing and voting are checked on the server on the DAO page.</span>}</p>
+      <p className="text-[13px]">{h.me?.member ? <span className="text-acid">{tu("youreAMemberOfThis")}</span> : <span className="text-mute">{tu("youreNotAMemberAnyone")}</span>}</p>
 
       <div>
-        <h3 className="text-sm font-extrabold uppercase text-mute">Stage design</h3>
+        <h3 className="text-sm font-extrabold uppercase text-mute">{tu("stageDesign")}</h3>
         {approved ? (
-          <p className="text-[13px]"><BadgeCheck className="mr-1 inline size-4 text-acid" aria-hidden />Approved by vote: <b>{approved.name}</b></p>
+          <p className="text-[13px]"><BadgeCheck className="mr-1 inline size-4 text-acid" aria-hidden />{tu("approvedByVote")} <b>{approved.name}</b></p>
         ) : (
-          <p className="text-[13px] text-mute">No stage design has been approved by vote yet{candidate ? `. Showing the community concept “${candidate.name}” (not approved).` : "."}</p>
+          <p className="text-[13px] text-mute">{tu("noStageDesignHasBeen", { value: candidate ? tu("showingTheCommunityConceptName", { name: candidate.name }) : "." })}</p>
         )}
         {candidate?.photo && (
           <div className="mt-2">
             <BeforeAfter c={candidate} />
-            <p className="mt-1 text-[11px] text-mute">Left: the registered venue photo before the build. Right: the concept render. No photo of the finished stage has been uploaded, so this is design vs. venue, not design vs. result.</p>
+            <p className="mt-1 text-[11px] text-mute">{tu("leftTheRegisteredVenuePhoto")}</p>
           </div>
         )}
       </div>
 
       {current.length > 0 && (
         <div>
-          <h3 className="text-sm font-extrabold uppercase text-mute">Current proposals</h3>
+          <h3 className="text-sm font-extrabold uppercase text-mute">{tu("currentProposals")}</h3>
           <ul className="mt-1 space-y-1">
             {current.slice(0, 3).map((p) => (
               <li key={p.id}><Link href={`/dao/${eventId}/proposals/${p.id}`} className="flex min-h-11 items-center gap-2 rounded-xl bg-surface-2 px-3 text-[13px]"><Tag color="#2a2a2a">{p.state.replaceAll("_", " ")}</Tag><span className="min-w-0 flex-1 truncate">{p.current.title}</span></Link></li>
@@ -347,7 +356,7 @@ export function DaoPanel({ eventId }: { eventId: string }) {
       )}
       {decisions.length > 0 && (
         <div>
-          <h3 className="text-sm font-extrabold uppercase text-mute">Decisions</h3>
+          <h3 className="text-sm font-extrabold uppercase text-mute">{tu("decisions")}</h3>
           <ul className="mt-1 space-y-1 text-[13px]">
             {decisions.slice(0, 3).map((p) => <li key={p.id} className="flex items-center gap-2"><Tag color={p.state === "REJECTED" ? "#FF625C" : "#B6F05C"} dark>{p.state.replaceAll("_", " ")}</Tag><span className="truncate">{p.current.title}</span></li>)}
           </ul>
@@ -355,13 +364,13 @@ export function DaoPanel({ eventId }: { eventId: string }) {
       )}
       {updates.length > 0 && (
         <div>
-          <h3 className="text-sm font-extrabold uppercase text-mute">DAO updates</h3>
+          <h3 className="text-sm font-extrabold uppercase text-mute">{tu("daoUpdates")}</h3>
           <ul className="mt-1 space-y-0.5 text-[12px] text-mute">
             {updates.map((u) => <li key={u.id}>{new Date(u.at).toISOString().slice(0, 10)} · {u.action.replace(".", " · ").replaceAll("_", " ")}</li>)}
           </ul>
         </div>
       )}
-      <Link href={`/dao/${eventId}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-acid font-extrabold uppercase text-ink">Open festival DAO <ArrowRight className="size-4" aria-hidden /></Link>
+      <Link href={`/dao/${eventId}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-acid font-extrabold uppercase text-ink">{tu("openFestivalDao")} <ArrowRight className="size-4" aria-hidden /></Link>
     </section>
   );
 }
@@ -371,14 +380,15 @@ export function DaoPanel({ eventId }: { eventId: string }) {
 interface RankRow { rank: number | null; of: number; period: string; asOf: string; label: string; calculationVersion?: string }
 
 export function RankingsPanel({ eventId }: { eventId: string }) {
+  const tu = useTranslations("live");
   const q = useLiveQuery<Record<"event" | "checkedIn" | "community" | "trending" | "liveViewers", RankRow> & { demo: boolean }>(`${eventId}/rankings`);
   if (q.state.status !== "ok") return <div className="h-40 animate-pulse rounded-3xl bg-surface" aria-hidden />;
   const d = q.state.data;
-  const rows: [keyof typeof d, string][] = [["event", "Event"], ["checkedIn", "Checked-in"], ["community", "Community"], ["trending", "Trending"], ["liveViewers", "Live viewer"]];
+  const rows: [keyof typeof d, string][] = [["event", tu("event")], ["checkedIn", tu("checkedIn2")], ["community", tu("tabCommunity")], ["trending", tu("trending")], ["liveViewers", tu("liveViewer")]];
   return (
     <section aria-labelledby="rk-h" className="space-y-3" data-testid="live-rankings">
       <div className="flex flex-wrap items-center gap-2">
-        <h2 id="rk-h" className="text-[24px] uppercase">World ranking</h2>
+        <h2 id="rk-h" className="text-[24px] uppercase">{tu("worldRanking")}</h2>
         <DemoBadge />
       </div>
       <ul className="space-y-2">
@@ -388,16 +398,16 @@ export function RankingsPanel({ eventId }: { eventId: string }) {
             <li key={k} className="flex items-center gap-3 rounded-2xl bg-surface-2 p-3">
               <span className="w-14 shrink-0 text-center font-display text-2xl">{r.rank ? `#${r.rank}` : "—"}</span>
               <div className="min-w-0 flex-1">
-                <div className="font-bold">{name} rank <span className="text-[12px] font-normal text-mute">of {r.of}</span></div>
-                <div className="text-[12px] text-mute">{r.label}</div>
-                <div className="text-[11px] text-mute">Period: {r.period} · updated {r.asOf.slice(0, 16).replace("T", " ")} UTC{r.calculationVersion ? ` · ${r.calculationVersion}` : ""}</div>
+                <div className="font-bold">{tu("nameRank", { name })} <span className="text-[12px] font-normal text-mute">{tu("ofOf", { of: r.of })}</span></div>
+                <div className="text-[12px] text-mute"><Tx>{r.label}</Tx></div>
+                <div className="text-[11px] text-mute">{tu("periodPeriodUpdatedReplaceUtc", { period: r.period, replace: r.asOf.slice(0, 16).replace("T", " "), value: r.calculationVersion ? ` · ${r.calculationVersion}` : "" })}</div>
               </div>
             </li>
           );
         })}
       </ul>
-      <p className="text-[12px] text-mute">Online viewers and on-site attendance are ranked separately and never added together.</p>
-      <Link href="/rankings" className="inline-flex min-h-11 items-center font-bold text-acid">Full WORLD RANKING →</Link>
+      <p className="text-[12px] text-mute">{tu("onlineViewersAndOnSite")}</p>
+      <Link href="/rankings" className="inline-flex min-h-11 items-center font-bold text-acid">{tu("fullWorldRanking")}</Link>
     </section>
   );
 }

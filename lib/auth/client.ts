@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { useDemo } from "@/lib/store";
 import type { AlienIdentity } from "@/lib/alien/catalog";
 import type { AlienLook } from "@/lib/types";
 import type { AuthConfig } from "./config";
@@ -57,4 +58,17 @@ export async function api<T = Record<string, unknown>>(url: string, method: "POS
   } catch {
     return { ok: false, code: "generic", status: 0, data: {} };
   }
+}
+
+/**
+ * The avatar to draw for "me" anywhere in the app (LIVE chat, festival floor, tickets, DAO…).
+ * Signed in: always the account alien and display name, never a second random alien.
+ * Signed out: the browser-local demo avatar.
+ */
+export function useMyAvatar(): { look: AlienLook; name: string; alienName: string; account: boolean; publicId: string | null } {
+  const me = useAuth((s) => s.me);
+  const demoLook = useDemo((s) => s.profile.look);
+  const demoName = useDemo((s) => s.profile.avatarName);
+  if (me?.alien) return { look: me.alien.look, name: me.profile.displayName ?? me.alien.name, alienName: me.alien.name, account: true, publicId: me.alien.publicId };
+  return { look: demoLook, name: demoName, alienName: demoName, account: false, publicId: null };
 }

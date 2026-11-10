@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ARCHIVE_EVENTS, EVENTS, getEvent } from "@/lib/data";
@@ -10,8 +11,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const e = getEvent(id);
-  if (!e) return { title: "Event not found" };
-  return { title: `${e.name} · ${e.city}`, description: `${e.tagline} ${e.description} (Demo event)` };
+  const tu = await getTranslations("seo");
+  if (!e) return { title: tu("eventNotFound") };
+  // Event names, taglines and descriptions are organizer content and stay in their original language.
+  return { title: `${e.name} · ${e.city}`, description: `${e.tagline} ${e.description} ${tu("eventDemoSuffix")}` };
 }
 
 export default async function EventPage({ params }: { params: Promise<{ id: string }> }) {

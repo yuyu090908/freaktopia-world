@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 /**
- * FREAKTOPIA WORLD 8.0: languages × accounts × alien identity.
+ * FREAKTOPIA WORLD 8.0/8.1: languages × accounts × alien identity × resumable onboarding.
  * Runs against the demo configuration (no DATABASE_URL, no email/Google keys): the in-memory store,
  * the demo mailbox and the Google simulator. Each test uses a fresh browser context.
  */
@@ -32,20 +32,20 @@ async function switchLanguage(page: Page, l: string) {
 
 async function openLatestMailLink(page: Page, kind: "verify" | "reset") {
   await page.goto("/auth/mailbox");
-  const link = page.getByTestId("mail-link").filter({ has: page.locator(`xpath=self::*[contains(@href, "/auth/${kind}")]`) }).first();
+  const link = page.getByTestId("mail-link").filter({ has: page.locator(`xpath=self::*[contains(@href, "${kind === "verify" ? "/verify-email" : "/forgot-password"}?token")]`) }).first();
   await expect(link).toBeVisible();
   await link.click();
 }
 
 /** Email sign-up through the real UI, confirmed through the demo mailbox. Ends on the Reveal. */
 async function signUpAndVerify(page: Page, email = newEmail()) {
-  await page.goto("/auth/signup");
+  await page.goto("/signup");
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(PW);
   await page.getByTestId("signup-submit").click();
   await expect(page.getByTestId("check-email")).toBeVisible();
   await openLatestMailLink(page, "verify");
-  await expect(page).toHaveURL(/\/welcome$/, { timeout: 20_000 });
+  await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
   await expect(page.getByTestId("alien-reveal")).toBeVisible();
   return email;
 }
@@ -57,6 +57,9 @@ async function finishReveal(page: Page, name = "Space Raver") {
   await page.getByTestId("reveal-continue").click();
   await page.locator("#displayName").fill(name);
   await page.getByTestId("name-submit").click();
+  await expect(page.getByTestId("alien-reveal")).toHaveAttribute("data-step", "genres");
+  await page.getByTestId("genre-chip").first().click();
+  await page.getByTestId("genres-submit").click();
   await expect(page).toHaveURL(/\/world$/, { timeout: 20_000 });
   return alienName;
 }
@@ -67,13 +70,13 @@ const meJson = async (page: Page) => {
 };
 
 async function signOut(page: Page) {
-  await page.goto("/profile/settings");
+  await page.goto("/settings");
   await page.getByTestId("signout").click();
   await expect.poll(async () => (await meJson(page)).me ?? null).toBeNull();
 }
 
 async function signIn(page: Page, email: string, password = PW) {
-  await page.goto("/auth/signin");
+  await page.goto("/login");
   await page.locator("#email").fill(email);
   await page.locator("#password").fill(password);
   await page.getByTestId("signin-submit").click();
@@ -113,6 +116,37 @@ test.describe("languages", () => {
     await expect(page.locator('link[rel="alternate"][hreflang="x-default"]')).toHaveCount(1);
   });
 
+  test("8.1 switching keeps the page, URL filters, search text and the map camera", async ({ page }) => {
+    await page.goto("/en/world?f=djWanted&q=tokyo");
+    await expect(page.getByTestId("world-map")).toHaveAttribute("data-ready", "true", { timeout: 25_000 });
+    const cam = page.getByTestId("world-map");
+    const c0 = await cam.getAttribute("data-camera");
+    await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+    await expect.poll(() => cam.getAttribute("data-camera")).not.toBe(c0);
+    let before = await cam.getAttribute("data-camera");
+    // wait until the zoom animation has settled
+    await expect.poll(async () => { await page.waitForTimeout(400); const c = await cam.getAttribute("data-camera"); const settled = c === before; before = c; return settled; }, { timeout: 8_000 }).toBe(true);
+    await switchLanguage(page, "ja");
+    await expect(page).toHaveURL(/\/ja\/world\?(.*&)?f=djWanted/);
+    expect(new URL(page.url()).searchParams.get("q")).toBe("tokyo");
+    expect(await cam.getAttribute("data-camera")).toBe(before); // the map was not remounted
+  });
+
+  test("8.1 a signed-in account's language wins on another device", async ({ page, browser }) => {
+    await page.goto("/");
+    await switchLanguage(page, "de");
+    const email = await signUpAndVerify(page);
+    await finishReveal(page);
+    const other = await browser.newContext({ locale: "ko-KR", extraHTTPHeaders: { "accept-language": "ko-KR,ko;q=0.9", "x-forwarded-for": fakeIp() } });
+    const p2 = await other.newPage();
+    await p2.goto("/");
+    expect(await htmlLang(p2)).toBe("ko");
+    await signIn(p2, email);
+    await p2.goto("/events");
+    expect(await htmlLang(p2)).toBe("de");
+    await other.close();
+  });
+
   test("first visit follows the browser language", async ({ browser }) => {
     const ctx = await browser.newContext({ locale: "th-TH", extraHTTPHeaders: { "accept-language": "th-TH,th;q=0.9", "x-forwarded-for": fakeIp() } });
     const page = await ctx.newPage();
@@ -123,7 +157,7 @@ test.describe("languages", () => {
 
   test("4. no untranslated message keys leak into pages (ja, ru, th)", async ({ page }) => {
     for (const l of ["ja", "ru", "th"]) {
-      for (const p of ["", "/auth/signup", "/auth/signin", "/world/levels", "/profile"]) {
+      for (const p of ["", "/signup", "/login", "/world/levels", "/profile"]) {
         await page.goto(`/${l.toLowerCase()}${p}`);
         const text = await page.locator("body").innerText();
         expect(text, `${l}${p}`).not.toMatch(/\b(common|nav|auth|alien|world|profile|live|dao|status|levels|language|footer|states|translation)\.[a-zA-Z]+(\.[a-zA-Z0-9]+)*\b/);
@@ -132,11 +166,27 @@ test.describe("languages", () => {
   });
 });
 
+test.describe("8.1 per-language pages", () => {
+  // Pages without demo content: any Latin word here (other than names kept in English on purpose) is untranslated UI.
+  const KEEP = /^(FREAKTOPIA|WORLD|Google|GOOGLE|NFT|DEMO|DAO|DJ|LIVE|MAP|XP|LV|ID|FREAK|OK|ENTER|English|Español|Português|Brasil|Français|Deutsch|Tiếng|Việt|Bahasa|Indonesia|Demo|simulator|e|mail)$/;
+  for (const l of ["ja", "ko", "zh-CN", "ru", "th"]) {
+    test(`${l}: auth and onboarding pages are fully translated`, async ({ page }) => {
+      for (const p of ["/signup", "/login", "/forgot-password", "/verify-email", "/onboarding"]) {
+        await page.goto(`/${l.toLowerCase()}${p}`);
+        await expect.poll(() => htmlLang(page)).toBe(HREFLANG[l] ?? l);
+        const text = await page.locator("main").innerText();
+        const latin = [...new Set(text.match(/[A-Za-z]{2,}/g) ?? [])].filter((w) => !KEEP.test(w));
+        expect(latin, `${l}${p}`).toEqual([]);
+      }
+    });
+  }
+});
+
 test.describe("accounts and alien identity", () => {
   test("6/10/13/14. email sign-up → verify → reveal → name → profile shows the same alien", async ({ page }) => {
     await signUpAndVerify(page);
     const reveal = page.getByTestId("alien-reveal");
-    await expect(reveal).toHaveAttribute("data-phase", /egg|hatch/);
+    await expect(reveal).toHaveAttribute("data-phase", /capsule|open/);
     const alienName = await finishReveal(page, "Disco Comet");
     await page.goto("/profile");
     await expect(page.getByTestId("profile-display-name")).toHaveText("Disco Comet");
@@ -152,6 +202,45 @@ test.describe("accounts and alien identity", () => {
     const r = await page.request.patch("/api/me/alien", { data: { family: "jelly" }, headers: { origin: "http://localhost:3000" } });
     expect(r.status()).toBe(400);
     expect((await r.json()).error.code).toBe("ALIEN_BASE_IS_PERMANENT");
+  });
+
+  test("8.1 Alien ID: FREAK-00001284 format on the Reveal, the same in /api/me and on the profile", async ({ page }) => {
+    await signUpAndVerify(page);
+    await page.getByTestId("reveal-skip").click();
+    const shown = (await page.getByTestId("alien-public-id").textContent())!.trim();
+    expect(shown).toMatch(/^FREAK-\d{8}$/);
+    expect((await meJson(page)).me.alien.publicId).toBe(shown);
+    // parallel requests right after sign-up still see one alien
+    const ids = await Promise.all(Array.from({ length: 6 }, async () => (await (await page.request.get("/api/me")).json()).alien.publicId));
+    expect(new Set(ids)).toEqual(new Set([shown]));
+    await finishReveal(page);
+    await page.goto("/profile");
+    await expect(page.getByText(shown).first()).toBeVisible();
+  });
+
+  test("8.1 onboarding resumes at the saved step; the Reveal never plays again", async ({ page }) => {
+    await signUpAndVerify(page);
+    const reveal = page.getByTestId("alien-reveal");
+    await page.getByTestId("reveal-skip").click();
+    await expect(reveal).toHaveAttribute("data-phase", "born");
+    await expect.poll(async () => (await meJson(page)).me.profile.onboardingStep).toBe("name");
+    // closing the tab after the Reveal: back on the name step, no capsule
+    await page.goto("/onboarding");
+    await expect(reveal).toHaveAttribute("data-step", "name");
+    await expect(page.getByTestId("reveal-skip")).toHaveCount(0);
+    await page.locator("#displayName").fill("Night Shift");
+    await page.getByTestId("name-submit").click();
+    await expect(reveal).toHaveAttribute("data-step", "genres");
+    await page.reload();
+    await expect(reveal).toHaveAttribute("data-step", "genres");
+    await expect(page.getByTestId("onboarding-progress")).toHaveAttribute("data-step", "genres");
+    await page.getByTestId("genres-skip").click();
+    await expect(page).toHaveURL(/\/world$/, { timeout: 20_000 });
+    const me = (await meJson(page)).me;
+    expect(me.profile).toMatchObject({ onboardingStep: "done", displayName: "Night Shift" });
+    await page.goto("/onboarding");
+    await expect(page.getByTestId("onboarding-done")).toBeVisible();
+    await expect(page.getByTestId("reveal-skip")).toHaveCount(0);
   });
 
   test("reveal respects reduced motion", async ({ browser }) => {
@@ -180,19 +269,19 @@ test.describe("accounts and alien identity", () => {
     expect(again.alien.name).toBe(alienName);
     expect(again.alien).not.toHaveProperty("seed");
     // revisiting the welcome page never hatches another one
-    await page.goto("/welcome");
+    await page.goto("/onboarding");
     expect((await meJson(page)).me.alien.createdAt).toBe(first.alien.createdAt);
   });
 
   test("7/8. Google sign-in (demo simulator, labelled) and logout", async ({ page }) => {
-    await page.goto("/auth/signin");
+    await page.goto("/login");
     await expect(page.getByTestId("auth-status")).toContainText(/Demo simulator/);
     await page.getByTestId("google-button").click();
     await expect(page.getByText(/DEMO: Google sign-in is not connected/)).toBeVisible();
     const email = newEmail();
     await page.locator("#gemail").fill(email);
     await page.getByTestId("google-demo-submit").click();
-    await expect(page).toHaveURL(/\/welcome$/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/\/onboarding$/, { timeout: 20_000 });
     await expect(page.getByTestId("alien-reveal")).toBeVisible();
     const me = (await meJson(page)).me;
     expect(me.providers).toEqual(["google"]);
@@ -211,7 +300,7 @@ test.describe("accounts and alien identity", () => {
     const email = await signUpAndVerify(page);
     await finishReveal(page);
     await signOut(page);
-    await page.goto("/auth/reset");
+    await page.goto("/forgot-password");
     await page.locator("#email").fill(email);
     await page.getByTestId("reset-request").click();
     await expect(page.getByTestId("reset-sent")).toBeVisible();
@@ -219,7 +308,7 @@ test.describe("accounts and alien identity", () => {
     await page.locator("#password").fill("a fresh new passphrase");
     await page.getByTestId("reset-confirm").click();
     await expect(page.getByTestId("reset-done")).toBeVisible();
-    await page.goto("/auth/signin");
+    await page.goto("/login");
     await page.locator("#email").fill(email);
     await page.locator("#password").fill(PW);
     await page.getByTestId("signin-submit").click();
@@ -318,7 +407,7 @@ test.describe("18. mobile and desktop widths with non-Latin scripts", () => {
       const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
       const page = await ctx.newPage();
       for (const l of Object.keys(FONT)) {
-        for (const p of ["", "/auth/signup", "/profile"]) {
+        for (const p of ["", "/signup", "/login", "/forgot-password", "/onboarding", "/profile", "/settings"]) {
           await page.goto(`/${l.toLowerCase()}${p}`);
           await noHorizontalScroll(page);
         }

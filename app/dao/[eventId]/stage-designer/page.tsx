@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { StageDesigner } from "@/components/dao/views/StageDesigner";
 
-export const metadata: Metadata = { title: "AI Stage Designer", description: "Generate AI stage concepts from real venue photos (demo compositor)." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("daoEventIdStageDesignerTitle"), description: tu("daoEventIdStageDesignerDescription") };
+}
 
 export default function Page() {
   return <StageDesigner />;

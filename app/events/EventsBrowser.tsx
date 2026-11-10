@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 type Sort = "popular" | "soonest" | "level";
 
 export function EventsBrowser() {
+  const tu = useTranslations("events");
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
   const support = useDemo((s) => s.support);
@@ -39,21 +41,21 @@ export function EventsBrowser() {
     <div>
       <FilterBar filters={filters} setFilters={setFilters} />
       <div className="mt-4 flex flex-wrap items-center gap-2 px-4 md:px-0">
-        <span className="text-sm font-bold" aria-live="polite">{list.length} events</span>
-        <DemoBadge label="Sample data" />
+        <span className="text-sm font-bold" aria-live="polite">{tu("lengthEvents", { length: list.length })}</span>
+        <DemoBadge label={tu("sampleData")} />
         <label className="ml-auto flex items-center gap-2 text-sm">
-          <span className="text-mute">Sort</span>
+          <span className="text-mute">{tu("sort")}</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-full border-2 border-line bg-surface px-3 font-bold">
-            <option value="soonest">Soonest</option>
-            <option value="popular">Most supported</option>
-            <option value="level">Highest level</option>
+            <option value="soonest">{tu("soonest")}</option>
+            <option value="popular">{tu("mostSupported")}</option>
+            <option value="level">{tu("highestLevel")}</option>
           </select>
         </label>
       </div>
 
       {created.length > 0 && (
         <div className="mx-4 mt-4 rounded-3xl border-2 border-acid/50 bg-acid/5 p-4 md:mx-0">
-          <div className="text-xs font-extrabold uppercase tracking-widest text-acid">Your events (saved in this browser)</div>
+          <div className="text-xs font-extrabold uppercase tracking-widest text-acid">{tu("yourEventsSavedInThis")}</div>
           <ul className="mt-2 space-y-1">
             {created.map((c) => (
               <li key={c.id}>
@@ -70,13 +72,13 @@ export function EventsBrowser() {
       {list.length === 0 ? (
         <EmptyState
           className="mx-4 mt-6 md:mx-0"
-          title="No events found"
-          body="条件に合うイベントがありません。フィルターを外すか、自分で作ってみよう。"
-          action={<Button onClick={() => setFilters(EMPTY_FILTERS)}>Clear filters</Button>}
+          title={tu("noEventsFound")}
+          body={tu("text")}
+          action={<Button onClick={() => setFilters(EMPTY_FILTERS)}>{tu("clearFilters")}</Button>}
         />
       ) : (
         <>
-          <h2 className="sr-only">Event results</h2>
+          <h2 className="sr-only">{tu("eventResults")}</h2>
           <ul className="mt-4 space-y-3 px-4 md:hidden">
             {list.map((e) => (
               <li key={e.id} className="cv-auto [contain-intrinsic-size:auto_130px]">
@@ -98,7 +100,7 @@ export function EventsBrowser() {
         href="/events/create"
         className="hide-on-kb fixed bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom)+16px)] right-4 z-40 inline-flex min-h-14 items-center gap-2 rounded-full border-[3px] border-ink bg-acid px-5 font-extrabold uppercase text-ink shadow-[0_6px_0_#000] lg:bottom-8"
       >
-        <Plus className="size-5" aria-hidden /> Create
+        <Plus className="size-5" aria-hidden /> {tu("create")}
       </Link>
     </div>
   );

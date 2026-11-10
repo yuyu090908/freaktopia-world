@@ -1,10 +1,14 @@
 "use client";
 
+import { useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import { useToast } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Sparkles, X, AlertTriangle, Bell } from "lucide-react";
 
 export function Toaster() {
+  const tx = useTx();
+  const tu = useTranslations("ui");
   const { toasts, dismiss } = useToast();
   return (
     <div
@@ -25,10 +29,10 @@ export function Toaster() {
           >
             <Icon className="mt-0.5 size-5 shrink-0" aria-hidden />
             <div className="min-w-0 flex-1">
-              <div className="font-display text-base uppercase leading-tight">{t.title}</div>
-              {t.body && <div className="mt-0.5 text-sm font-medium leading-snug">{t.body}</div>}
+              <div className="font-display text-base uppercase leading-tight">{tx(t.title)}</div>
+              {t.body && <div className="mt-0.5 text-sm font-medium leading-snug">{tx(t.body)}</div>}
             </div>
-            <button type="button" aria-label="Dismiss notification" onClick={() => dismiss(t.id)} className="-m-2 inline-flex size-11 items-center justify-center rounded-full">
+            <button type="button" aria-label={tu("dismissNotification")} onClick={() => dismiss(t.id)} className="-m-2 inline-flex size-11 items-center justify-center rounded-full">
               <X className="size-4" />
             </button>
           </div>

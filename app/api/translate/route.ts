@@ -3,13 +3,15 @@ import { LOCALES, LOCALE_META } from "@/i18n/config";
 import { authConfig } from "@/lib/auth/config";
 import { fail, limit, ok, readJson, sameOrigin } from "@/lib/auth/http";
 import { clientKey } from "@/lib/ranking/guard";
+import { getCachedTranslation, putCachedTranslation } from "@/lib/i18n/translation-cache";
 
 export const dynamic = "force-dynamic";
 
 /**
  * Machine translation of user content (event descriptions, DAO posts) on request.
  * Without DEEPL_API_KEY it answers 503 TRANSLATION_NOT_CONFIGURED and the UI keeps showing the original:
- * nothing is ever presented as translated unless a real API translated it.
+ * nothing is ever presented as translated unless a real API translated it. Results are cached (translation_cache)
+ * and always come back labelled as machine translation with the provider's name.
  */
 export async function POST(req: Request) {
   if (!sameOrigin(req)) return fail(403, "CSRF");
@@ -19,6 +21,9 @@ export async function POST(req: Request) {
   const body = await readJson(req, 12_000);
   const p = z.object({ text: z.string().min(1).max(5000), target: z.enum(LOCALES) }).safeParse(body);
   if (!p.success) return fail(400, "INVALID_BODY");
+  const label = { target: p.data.target, targetName: LOCALE_META[p.data.target].native, machine: true };
+  const cached = await getCachedTranslation("DeepL", p.data.target, p.data.text);
+  if (cached) return ok({ text: cached.text, source: cached.source, provider: cached.provider, cached: true, ...label });
   const target = p.data.target === "zh-CN" ? "ZH-HANS" : p.data.target === "pt" ? "PT-BR" : p.data.target.toUpperCase();
   const host = process.env.DEEPL_API_KEY!.endsWith(":fx") ? "api-free.deepl.com" : "api.deepl.com";
   const res = await fetch(`https://${host}/v2/translate`, {
@@ -30,5 +35,6 @@ export async function POST(req: Request) {
   const j = (await res.json()) as { translations?: { text: string; detected_source_language: string }[] };
   const t = j.translations?.[0];
   if (!t) return fail(502, "TRANSLATION_FAILED");
-  return ok({ text: t.text, source: t.detected_source_language, target: p.data.target, provider: "DeepL", targetName: LOCALE_META[p.data.target].native });
+  await putCachedTranslation("DeepL", p.data.target, p.data.text, { text: t.text, source: t.detected_source_language, provider: "DeepL" });
+  return ok({ text: t.text, source: t.detected_source_language, provider: "DeepL", cached: false, ...label });
 }

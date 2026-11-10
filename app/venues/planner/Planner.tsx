@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Sparkles, Wand2, ArrowRight } from "lucide-react";
@@ -12,6 +13,7 @@ import { money } from "@/lib/utils";
 import type { Genre } from "@/lib/types";
 
 export function Planner() {
+  const tu = useTranslations("venues");
   const params = useSearchParams();
   const router = useRouter();
   const setDraft = useDemo((s) => s.setEventDraft);
@@ -43,46 +45,46 @@ export function Planner() {
 
   return (
     <div className="mx-auto max-w-2xl md:px-6">
-      <PageTitle kicker="Beginner friendly" title="AI event planner" sub="都市・ジャンル・人数・予算を入れるだけで、会場・DJ・チケット価格の企画案を作成します。" />
-      <DemoNotice className="mx-4 md:mx-0"><strong>Demo:</strong> suggestions come from simple rules over sample data. No AI model is connected in Phase 1.</DemoNotice>
+      <PageTitle kicker={tu("beginnerFriendly")} title={tu("aiEventPlanner")} sub={tu("dj")} />
+      <DemoNotice className="mx-4 md:mx-0"><strong>{tu("demo")}</strong> {tu("suggestionsComeFromSimpleRules")}</DemoNotice>
       <form className="mt-5 space-y-4 px-4 md:px-0" onSubmit={(e) => { e.preventDefault(); setPlan(makePlan()); }}>
         <div className="grid grid-cols-2 gap-3">
-          <Field id="pc" label="City"><Input id="pc" value={city} onChange={(e) => setCity(e.target.value)} list="pl-cities" /></Field>
-          <Field id="pg" label="Genre"><Select id="pg" value={genre} onChange={(e) => setGenre(e.target.value as Genre)}>{GENRES.map((g) => <option key={g}>{g}</option>)}</Select></Field>
-          <Field id="pp" label="Expected people"><Input id="pp" type="number" inputMode="numeric" value={people} onChange={(e) => setPeople(Math.max(20, +e.target.value || 20))} /></Field>
-          <Field id="pb" label="Budget (USD)"><Input id="pb" type="number" inputMode="numeric" value={budget} onChange={(e) => setBudget(Math.max(0, +e.target.value || 0))} /></Field>
+          <Field id="pc" label={tu("city")}><Input id="pc" value={city} onChange={(e) => setCity(e.target.value)} list="pl-cities" /></Field>
+          <Field id="pg" label={tu("genre")}><Select id="pg" value={genre} onChange={(e) => setGenre(e.target.value as Genre)}>{GENRES.map((g) => <option key={g}>{g}</option>)}</Select></Field>
+          <Field id="pp" label={tu("expectedPeople")}><Input id="pp" type="number" inputMode="numeric" value={people} onChange={(e) => setPeople(Math.max(20, +e.target.value || 20))} /></Field>
+          <Field id="pb" label={tu("budgetUsd")}><Input id="pb" type="number" inputMode="numeric" value={budget} onChange={(e) => setBudget(Math.max(0, +e.target.value || 0))} /></Field>
         </div>
         <datalist id="pl-cities">{Array.from(new Set(VENUES.map((v) => v.city))).map((c) => <option key={c} value={c} />)}</datalist>
-        <Button type="submit" size="lg" className="w-full" variant="purple"><Wand2 className="size-5" aria-hidden /> Generate plan</Button>
+        <Button type="submit" size="lg" className="w-full" variant="purple"><Wand2 className="size-5" aria-hidden /> {tu("generatePlan")}</Button>
       </form>
 
       {plan && (
         <section aria-labelledby="plan-h" className="mt-6 space-y-3 px-4 md:px-0" aria-live="polite">
-          <h2 id="plan-h" className="flex items-center gap-2 text-3xl uppercase"><Sparkles className="size-6 text-purple" aria-hidden /> Your plan</h2>
+          <h2 id="plan-h" className="flex items-center gap-2 text-3xl uppercase"><Sparkles className="size-6 text-purple" aria-hidden /> {tu("yourPlan")}</h2>
           <Card className="p-4">
-            <div className="text-xs font-bold uppercase text-mute">Venue</div>
+            <div className="text-xs font-bold uppercase text-mute">{tu("venue")}</div>
             <div className="mt-1 text-lg font-extrabold">{plan.venue.name}</div>
-            <div className="text-sm text-mute">{plan.venue.city} · cap {plan.venue.capacity} · {money(plan.venue.hourlyRate)}/h × {plan.hours}h</div>
+            <div className="text-sm text-mute">{tu("cityCapCapacityMoneyH", { city: plan.venue.city, capacity: plan.venue.capacity, money: money(plan.venue.hourlyRate), hours: plan.hours })}</div>
           </Card>
           <Card className="p-4">
-            <div className="text-xs font-bold uppercase text-mute">Suggested lineup</div>
+            <div className="text-xs font-bold uppercase text-mute">{tu("suggestedLineup")}</div>
             <ul className="mt-2 space-y-2">
               {plan.djs.map((d) => <li key={d.id} className="flex items-center gap-2"><AlienAvatar look={d.look} size={36} /><span className="font-bold">{d.name}</span><span className="text-xs text-mute">{d.city}</span></li>)}
-              {!plan.djs.length && <li className="text-sm text-mute">No sample DJs for this genre. Open a DJ call instead.</li>}
+              {!plan.djs.length && <li className="text-sm text-mute">{tu("noSampleDjsForThis")}</li>}
             </ul>
           </Card>
           <Card className="p-4">
-            <div className="text-xs font-bold uppercase text-mute">Budget</div>
+            <div className="text-xs font-bold uppercase text-mute">{tu("budget")}</div>
             <ul className="mt-2 space-y-1 text-sm">
-              <li className="flex justify-between"><span>Venue</span><span>{money(plan.venueCost)}</span></li>
+              <li className="flex justify-between"><span>{tu("venue")}</span><span>{money(plan.venueCost)}</span></li>
               <li className="flex justify-between"><span>DJs</span><span>{money(plan.djCost)}</span></li>
-              <li className="flex justify-between"><span>Production & staff</span><span>{money(plan.production)}</span></li>
-              <li className="flex justify-between border-t border-line pt-1 font-bold"><span>Total</span><span>{money(plan.total)}</span></li>
+              <li className="flex justify-between"><span>{tu("productionStaff")}</span><span>{money(plan.production)}</span></li>
+              <li className="flex justify-between border-t border-line pt-1 font-bold"><span>{tu("total")}</span><span>{money(plan.total)}</span></li>
             </ul>
-            {plan.over ? <Tag color="#FF625C" dark className="mt-2">Over budget · try fewer DJs or a smaller venue</Tag> : <Tag color="#B6F05C" dark className="mt-2">Within budget</Tag>}
-            <p className="mt-3 text-sm">Suggested main ticket: <strong className="font-display text-lg">{money(plan.price)}</strong></p>
+            {plan.over ? <Tag color="#FF625C" dark className="mt-2">{tu("overBudgetTryFewerDjs")}</Tag> : <Tag color="#B6F05C" dark className="mt-2">{tu("withinBudget")}</Tag>}
+            <p className="mt-3 text-sm">{tu("suggestedMainTicket")} <strong className="font-display text-lg">{money(plan.price)}</strong></p>
           </Card>
-          <Button size="lg" className="w-full" onClick={use}>Use this plan <ArrowRight className="size-5" aria-hidden /></Button>
+          <Button size="lg" className="w-full" onClick={use}>{tu("useThisPlan")} <ArrowRight className="size-5" aria-hidden /></Button>
         </section>
       )}
     </div>

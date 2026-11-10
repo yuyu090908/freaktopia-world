@@ -10,15 +10,40 @@ import { btnClass } from "@/components/ui/primitives";
 import { useLocalHref } from "@/components/i18n/LocaleContext";
 import { api, useAuth } from "@/lib/auth/client";
 import { cn } from "@/lib/utils";
+import { Alien } from "@/components/art/Alien";
+import { DJS } from "@/lib/data";
 
+/**
+ * Psychedelic FREAKTOPIA frame for the sign-up / login / reset / verify screens: swirling acid-coral-purple backdrop,
+ * dancing aliens and a sticker title. The form itself sits on a solid surface card so it stays easy to read.
+ */
 export function AuthShell({ title, lead, children, footer }: { title: string; lead?: string; children: React.ReactNode; footer?: React.ReactNode }) {
+  const crew = DJS.slice(0, 3).map((d) => d.look);
   return (
-    <div className="mx-auto w-full max-w-md px-4 pb-16 pt-8 md:pt-14">
-      <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{title}</h1>
-      {lead && <p className="mt-3 text-[15px] text-mute">{lead}</p>}
-      <div className="mt-6">{children}</div>
-      {footer && <div className="mt-6 text-sm text-mute">{footer}</div>}
-      <ConnectionStatus />
+    <div className="fk-auth relative isolate overflow-hidden">
+      <div className="fk-auth-swirl pointer-events-none absolute inset-0 -z-10" aria-hidden />
+      <div className="mx-auto grid w-full max-w-5xl gap-6 px-4 pb-16 pt-6 md:grid-cols-[1fr_minmax(0,440px)] md:items-start md:gap-10 md:px-6 md:pt-12">
+        <div className="relative md:sticky md:top-24" aria-hidden>
+          <div className="flex items-end justify-center gap-1 md:justify-start">
+            {crew.map((l, i) => (
+              <div key={i} className={cn("fk-auth-alien", i === 1 ? "w-28 md:w-40" : "w-20 md:w-28")} style={{ animationDelay: `${i * 0.18}s` }}>
+                <Alien look={l} className="h-auto w-full drop-shadow-[0_6px_0_#080808]" />
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 hidden text-center md:block md:text-left">
+            <span className="inline-block -rotate-2 rounded-xl border-[3px] border-ink bg-acid px-3 py-1 font-display text-2xl uppercase text-ink shadow-[4px_4px_0_#080808]">FREAKTOPIA</span>
+            <span className="ml-2 inline-block rotate-2 rounded-xl border-[3px] border-ink bg-coral px-3 py-1 font-display text-2xl uppercase text-ink shadow-[4px_4px_0_#080808]">WORLD</span>
+          </div>
+        </div>
+        <div className="rounded-[32px] border-[3px] border-ink bg-surface p-5 shadow-[6px_6px_0_#A276E9] sm:p-7">
+          <h1 className="text-[clamp(28px,8vw,44px)] uppercase leading-[1.02] [overflow-wrap:anywhere]">{title}</h1>
+          {lead && <p className="mt-3 text-[15px] text-cream/80">{lead}</p>}
+          <div className="mt-6">{children}</div>
+          {footer && <div className="mt-6 text-sm text-mute">{footer}</div>}
+          <ConnectionStatus />
+        </div>
+      </div>
     </div>
   );
 }
@@ -26,6 +51,7 @@ export function AuthShell({ title, lead, children, footer }: { title: string; le
 /** Shows which auth pieces are real and which are demo stand-ins. Never claims a connection that isn't there. */
 export function ConnectionStatus() {
   const t = useTranslations("auth.status");
+  const ta = useTranslations("auth");
   const cfg = useAuth((s) => s.config);
   if (!cfg) return null;
   const row = (label: string, value: string, demo: boolean) => (
@@ -39,8 +65,8 @@ export function ConnectionStatus() {
       <h2 className="mb-1 flex items-center gap-1.5 font-sans text-xs font-extrabold uppercase tracking-wider text-mute"><FlaskConical className="size-3.5 text-orange" aria-hidden />{t("title")}</h2>
       <dl className="divide-y divide-line">
         {row(t("store"), cfg.store === "postgres" ? t("storePostgres") : t("storeMemory"), cfg.store !== "postgres")}
-        {row("Email", cfg.email === "connected" ? t("connected") : cfg.email === "demo-mailbox" ? t("emailDemo") : t("notConfigured"), cfg.email !== "connected")}
-        {row("Google", cfg.google === "connected" ? t("connected") : cfg.google === "demo-simulator" ? t("googleDemo") : t("notConfigured"), cfg.google !== "connected")}
+        {row(ta("email"), cfg.email === "connected" ? t("connected") : cfg.email === "demo-mailbox" ? t("emailDemo") : t("notConfigured"), cfg.email !== "connected")}
+        {row(ta("google"), cfg.google === "connected" ? t("connected") : cfg.google === "demo-simulator" ? t("googleDemo") : t("notConfigured"), cfg.google !== "connected")}
       </dl>
     </section>
   );
@@ -146,7 +172,7 @@ export function SignUpForm() {
 
   return (
     <>
-      <GoogleButton returnTo="/welcome" />
+      <GoogleButton returnTo="/onboarding" />
       <Divider label={t("orEmail")} />
       <form
         noValidate
@@ -177,7 +203,7 @@ export function SignUpForm() {
         <p className="text-xs text-mute">{t("agree")}</p>
       </form>
       <p className="mt-6 text-sm text-mute">
-        {t("haveAccount")} <Link href={href("/auth/signin")} className="font-bold text-acid underline underline-offset-4">{t("signIn")}</Link>
+        {t("haveAccount")} <Link href={href("/login")} className="font-bold text-acid underline underline-offset-4">{t("signIn")}</Link>
       </p>
     </>
   );
@@ -233,10 +259,10 @@ export function SignInForm() {
         <button type="submit" disabled={busy} className={btnClass("primary", "lg", "w-full")} data-testid="signin-submit">
           {busy ? "…" : t("signIn")}
         </button>
-        <Link href={href("/auth/reset")} className="inline-flex min-h-11 items-center text-sm font-bold text-acid underline underline-offset-4">{t("forgot")}</Link>
+        <Link href={href("/forgot-password")} className="inline-flex min-h-11 items-center text-sm font-bold text-acid underline underline-offset-4">{t("forgot")}</Link>
       </form>
       <p className="mt-4 text-sm text-mute">
-        {t("noAccount")} <Link href={href("/auth/signup")} className="font-bold text-acid underline underline-offset-4">{t("signUp")}</Link>
+        {t("noAccount")} <Link href={href("/signup")} className="font-bold text-acid underline underline-offset-4">{t("signUp")}</Link>
       </p>
     </>
   );
@@ -272,7 +298,7 @@ export function VerifyEmail() {
       {state === "failed" && (
         <div>
           <p className="text-lg font-bold text-coral">{t("verifyFailed")}</p>
-          <Link href={href("/auth/signin")} className={btnClass("primary", "md", "mt-4")}>{t("verifyAgain")}</Link>
+          <Link href={href("/login")} className={btnClass("primary", "md", "mt-4")}>{t("verifyAgain")}</Link>
         </div>
       )}
     </div>
@@ -296,7 +322,7 @@ export function ResetForms() {
       return (
         <div role="status" className="rounded-3xl border-2 border-acid/60 bg-acid/10 p-5" data-testid="reset-done">
           <p className="text-[15px] font-bold">{t("resetDone")}</p>
-          <Link href={href("/auth/signin")} className={btnClass("primary", "md", "mt-4")}>{t("signIn")}</Link>
+          <Link href={href("/login")} className={btnClass("primary", "md", "mt-4")}>{t("signIn")}</Link>
         </div>
       );
     return (

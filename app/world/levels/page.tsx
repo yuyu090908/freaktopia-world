@@ -1,10 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { LevelsAdmin } from "./LevelsAdmin";
 
-export const metadata: Metadata = {
-  title: "Festival level rules",
-  description: "Edit the festival growth level thresholds (demo admin) and see every world map landmark.",
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return {
+  title: tu("worldLevelsTitle"),
+  description: tu("worldLevelsDescription"),
 };
+}
 
 export default function LevelsPage() {
   return <LevelsAdmin />;

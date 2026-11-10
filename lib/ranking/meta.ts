@@ -1,16 +1,16 @@
 /** UI labels and helpers for rankings (client-safe). */
 import type { EventMetrics, RankedEntry, RankingCategory, RankingPeriod } from "./types";
 
-export const CATEGORY_META: Record<RankingCategory, { label: string; ja: string; color: string; metric: string }> = {
-  popular: { label: "Most popular", ja: "有効なユニーク応援者数", color: "#B6F05C", metric: "Supporters" },
-  trending: { label: "Trending", ja: "応援者の増加数と増加率（平滑化）", color: "#FF625C", metric: "Growth" },
-  tickets: { label: "Tickets sold", ja: "有効な販売済みチケット枚数", color: "#55BCEB", metric: "Tickets sold" },
-  funded: { label: "Most funded", ja: "確保済みの開催資金（USD換算）", color: "#FFAD5B", metric: "Secured" },
-  attended: { label: "Most attended", ja: "確認済みユニーク来場者数（開催後）", color: "#A276E9", metric: "Checked in" },
-  live: { label: "Live now", ja: "LIVE状態と在場確認があるイベント", color: "#FF625C", metric: "Present now" },
-  dj_wanted: { label: "DJ wanted", ja: "DJ応募を受付中のイベント", color: "#A276E9", metric: "Supporters" },
-  after_party: { label: "After party", ja: "アフターパーティーの販売数", color: "#55BCEB", metric: "AP tickets" },
-  for_you: { label: "For you", ja: "あなたの好みに合うイベント（非公開）", color: "#B6F05C", metric: "Match" },
+export const CATEGORY_META: Record<RankingCategory, { label: string; desc: string; color: string; metric: string }> = {
+  popular: { label: "Most popular", desc: "Valid unique supporters", color: "#B6F05C", metric: "Supporters" },
+  trending: { label: "Trending", desc: "Growth in supporters, by count and rate (smoothed)", color: "#FF625C", metric: "Growth" },
+  tickets: { label: "Tickets sold", desc: "Valid tickets sold", color: "#55BCEB", metric: "Tickets sold" },
+  funded: { label: "Most funded", desc: "Secured funding (USD equivalent)", color: "#FFAD5B", metric: "Secured" },
+  attended: { label: "Most attended", desc: "Verified unique check-ins (after the event)", color: "#A276E9", metric: "Checked in" },
+  live: { label: "Live now", desc: "Events that are LIVE with presence check-ins", color: "#FF625C", metric: "Present now" },
+  dj_wanted: { label: "DJ wanted", desc: "Events accepting DJ applications", color: "#A276E9", metric: "Supporters" },
+  after_party: { label: "After party", desc: "After-party tickets sold", color: "#55BCEB", metric: "AP tickets" },
+  for_you: { label: "For you", desc: "Events that match your taste (private)", color: "#B6F05C", metric: "Match" },
 };
 
 export const PUBLIC_CATEGORIES: RankingCategory[] = ["popular", "trending", "tickets", "funded", "attended", "live", "dj_wanted", "after_party"];

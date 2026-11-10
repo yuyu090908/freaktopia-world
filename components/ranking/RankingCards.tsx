@@ -1,5 +1,8 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+import { type Tu } from "@/lib/i18n/tu";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowDown, ArrowUp, CalendarDays, Check, GitCompareArrows, HandHeart, Landmark, MapPin, Mic2, Minus, Ticket, Trophy } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
@@ -11,35 +14,37 @@ import { CATEGORY_META, primaryLabel, secondaryMetrics } from "@/lib/ranking/met
 import type { RankedEntry, RankingCategory } from "@/lib/ranking/types";
 import { cn, fmtDate } from "@/lib/utils";
 
-const STATUS: Record<string, { label: string; color: string }> = {
-  funding: { label: "Funding", color: "#FFAD5B" },
-  confirmed: { label: "Confirmed", color: "#55BCEB" },
-  live: { label: "● Live", color: "#FF625C" },
-  ended: { label: "Completed", color: "#b9b5ab" },
-};
+const STATUS = (tu: Tu): Record<string, { label: string; color: string }> => ({
+  funding: { label: tu("funding"), color: "#FFAD5B" },
+  confirmed: { label: tu("confirmed"), color: "#55BCEB" },
+  live: { label: tu("live"), color: "#FF625C" },
+  ended: { label: tu("completed"), color: "#b9b5ab" },
+});
 
 export function RankMove({ e }: { e: RankedEntry }) {
-  if (e.previousRank === null) return <span className="text-[11px] font-extrabold uppercase text-blue">New</span>;
+  const tu = useTranslations("ranking");
+  if (e.previousRank === null) return <span className="text-[11px] font-extrabold uppercase text-blue">{tu("new")}</span>;
   const d = e.previousRank - e.rank;
-  if (d === 0) return <span className="inline-flex items-center text-mute"><Minus className="size-3.5" aria-hidden /><span className="sr-only">No change</span></span>;
+  if (d === 0) return <span className="inline-flex items-center text-mute"><Minus className="size-3.5" aria-hidden /><span className="sr-only">{tu("noChange")}</span></span>;
   return d > 0 ? (
-    <span className="inline-flex items-center text-[12px] font-extrabold text-acid"><ArrowUp className="size-3.5" aria-hidden /><span className="sr-only">Up</span>{d}</span>
+    <span className="inline-flex items-center text-[12px] font-extrabold text-acid"><ArrowUp className="size-3.5" aria-hidden /><span className="sr-only">{tu("up")}</span>{d}</span>
   ) : (
-    <span className="inline-flex items-center text-[12px] font-extrabold text-coral"><ArrowDown className="size-3.5" aria-hidden /><span className="sr-only">Down</span>{-d}</span>
+    <span className="inline-flex items-center text-[12px] font-extrabold text-coral"><ArrowDown className="size-3.5" aria-hidden /><span className="sr-only">{tu("down")}</span>{-d}</span>
   );
 }
 
 function CompareToggle({ id, name }: { id: string; name: string }) {
+  const tu = useTranslations("ranking");
   const on = useDemo((s) => s.compareIds.includes(id));
   const toggle = useDemo((s) => s.toggleCompare);
   return (
     <button
       type="button"
       aria-pressed={on}
-      aria-label={`${on ? "Remove" : "Add"} ${name} ${on ? "from" : "to"} compare`}
+      aria-label={on ? tu("compareRemove", { name }) : tu("compareAdd", { name })}
       onClick={() => {
         const r = toggle(id);
-        if (r === "full") toast({ title: "Compare is full", body: "最大3イベントまで比較できます。", tone: "error" });
+        if (r === "full") toast({ title: tu("compareIsFull"), body: "最大3イベントまで比較できます。", tone: "error" });
       }}
       className={cn(
         "inline-flex size-11 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
@@ -53,27 +58,28 @@ function CompareToggle({ id, name }: { id: string; name: string }) {
 
 /** Action row shared by all ranking cards (wired to existing features). */
 export function RankActions({ e }: { e: RankedEntry }) {
+  const tu = useTranslations("ranking");
   const ev = e.event;
   const open = ev.status !== "ended";
   const pill = "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-[13px] font-extrabold uppercase";
   return (
     <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
       <Link href={`/events/${ev.id}`} className={cn(pill, "bg-cream text-ink hover:bg-white")}>
-        View event
+        {tu("viewEvent")}
       </Link>
       {open && (
         <Link href={`/events/${ev.id}?action=support`} className={cn(pill, "bg-acid text-ink")}>
-          <HandHeart className="size-4" aria-hidden /> Support
+          <HandHeart className="size-4" aria-hidden /> {tu("support")}
         </Link>
       )}
       {open && ev.minPrice >= 0 && (
         <Link href={`/events/${ev.id}/tickets`} className={cn(pill, "bg-coral text-ink")}>
-          <Ticket className="size-4" aria-hidden /> Buy ticket
+          <Ticket className="size-4" aria-hidden /> {tu("buyTicket")}
         </Link>
       )}
       {open && ev.djRecruiting && (
         <Link href={`/djs/apply?event=${ev.id}`} className={cn(pill, "bg-purple text-ink")}>
-          <Mic2 className="size-4" aria-hidden /> Apply as DJ
+          <Mic2 className="size-4" aria-hidden /> {tu("applyAsDj")}
         </Link>
       )}
       <FollowButton eventId={ev.id} eventName={ev.name} compact />
@@ -83,8 +89,9 @@ export function RankActions({ e }: { e: RankedEntry }) {
 }
 
 function Meta({ e }: { e: RankedEntry }) {
+  const tu = useTranslations("ranking");
   const ev = e.event;
-  const st = STATUS[ev.status];
+  const st = STATUS(tu)[ev.status];
   return (
     <>
       <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-mute">
@@ -93,14 +100,14 @@ function Meta({ e }: { e: RankedEntry }) {
       </div>
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <EventLevelBadge level={ev.level} />
-        <Tag color={st.color} dark>{st.label}</Tag>
+        <Tag color={st.color} dark><Tx>{st.label}</Tx></Tag>
         <Tag>{ev.genres[0]}</Tag>
         {ev.isDemo && <DemoBadge />}
       </div>
       {ev.dao && (
         <Link href={`/dao/${ev.id}`} className="relative z-[1] mt-2 inline-flex min-h-11 max-w-full items-center gap-1.5 rounded-full border border-acid/50 px-3 text-[11px] font-extrabold uppercase text-acid hover:bg-acid/10" data-testid="rank-dao">
           <Landmark className="size-3.5 shrink-0" aria-hidden />
-          <span className="truncate">DAO · {ev.dao.members} members · {ev.dao.activeProposals} proposals · {Math.round(ev.dao.participationRate * 100)}% voted</span>
+          <span className="truncate">{tu("daoMembersMembersActiveproposalsProp", { members: ev.dao.members, activeProposals: ev.dao.activeProposals, round: Math.round(ev.dao.participationRate * 100) })}</span>
         </Link>
       )}
     </>
@@ -108,6 +115,7 @@ function Meta({ e }: { e: RankedEntry }) {
 }
 
 function Metrics({ e, category }: { e: RankedEntry; category: RankingCategory }) {
+  const tu = useTranslations("ranking");
   const p = primaryLabel(e, category);
   const sec = secondaryMetrics(category, e.metrics);
   const pct = Math.min(1, e.metrics.funding_usd / Math.max(1, e.event.goal));
@@ -116,20 +124,20 @@ function Metrics({ e, category }: { e: RankedEntry; category: RankingCategory })
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <div className="font-display text-[26px] leading-none" style={{ color: CATEGORY_META[category].color }}>{p.value}</div>
-          <div className="mt-1 text-[12px] font-bold uppercase tracking-wider text-mute">{p.label}</div>
+          <div className="mt-1 text-[12px] font-bold uppercase tracking-wider text-mute"><Tx>{p.label}</Tx></div>
         </div>
         <dl className="flex min-w-0 shrink-0 gap-3 text-right">
           {sec.map((s) => (
             <div key={s.key}>
-              <dt className="text-[10px] font-bold uppercase tracking-wider text-mute">{s.label}</dt>
+              <dt className="text-[10px] font-bold uppercase tracking-wider text-mute"><Tx>{s.label}</Tx></dt>
               <dd className="text-sm font-extrabold">{s.value}</dd>
             </div>
           ))}
         </dl>
       </div>
       <div className="mt-2.5 flex items-center gap-2">
-        <Progress value={pct} className="h-2.5 border" label={`${Math.round(pct * 100)}% of funding goal`} />
-        <span className="shrink-0 text-[11px] font-bold text-mute">{Math.round(pct * 100)}% funded</span>
+        <Progress value={pct} className="h-2.5 border" label={tu("roundOfFundingGoal", { round: Math.round(pct * 100) })} />
+        <span className="shrink-0 text-[11px] font-bold text-mute">{tu("roundFunded", { round: Math.round(pct * 100) })}</span>
       </div>
     </div>
   );
@@ -213,7 +221,7 @@ export function TopSmallCard({ e, category }: { e: RankedEntry; category: Rankin
         <Meta e={e} />
         <div className="mt-2 flex items-baseline gap-2">
           <span className="font-display text-2xl" style={{ color: CATEGORY_META[category].color }}>{p.value}</span>
-          <span className="text-[12px] font-bold uppercase text-mute">{p.label}</span>
+          <span className="text-[12px] font-bold uppercase text-mute"><Tx>{p.label}</Tx></span>
         </div>
         <div className="mt-2">
           <RankActions e={e} />

@@ -29,7 +29,7 @@ export function AccountButton() {
   }
   return (
     <Link
-      href={href("/auth/signin")}
+      href={href("/login")}
       data-testid="signin-link"
       aria-label={t("signIn")}
       className="inline-flex h-11 items-center gap-1.5 rounded-full px-2.5 text-sm font-extrabold uppercase hover:bg-surface min-[480px]:border-2 min-[480px]:border-line min-[480px]:px-3.5"

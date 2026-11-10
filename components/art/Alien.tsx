@@ -551,10 +551,10 @@ export function Alien({
   );
 }
 
-/** The four starter characters for the Avatar page. */
+/** The four starter characters for the Avatar page. Names are character names (kept as is); blurb is a translation key (avatarStudio). */
 export const STARTERS: { id: string; name: string; look: AlienLook; blurb: string }[] = [
-  { id: "slime-beat", name: "SLIME BEAT", look: { species: "slime", body: "#B6F05C", accent: "#FF625C", outfit: "none", outfitColor: "#A276E9", accessory: "headphones" }, blurb: "Sticky grooves. Leaves a trail on every dancefloor." },
-  { id: "cosmic-fuzz", name: "COSMIC FUZZ", look: { species: "fuzz", body: "#A276E9", accent: "#FFAD5B", outfit: "none", outfitColor: "#55BCEB", accessory: "antenna" }, blurb: "Three eyes, zero chill. Static electricity on contact." },
-  { id: "vinyl-mutant", name: "VINYL MUTANT", look: { species: "vinyl", body: "#FFAD5B", accent: "#55BCEB", outfit: "jacket", outfitColor: "#FF625C", accessory: "none" }, blurb: "A 12-inch head full of rare grooves. Spins when happy." },
-  { id: "jelly-raver", name: "JELLY RAVER", look: { species: "jelly", body: "#55BCEB", accent: "#B6F05C", outfit: "none", outfitColor: "#FFAD5B", accessory: "shades" }, blurb: "Wobbles at 128 BPM. Glows brighter as the night goes on." },
+  { id: "slime-beat", name: "SLIME BEAT", look: { species: "slime", body: "#B6F05C", accent: "#FF625C", outfit: "none", outfitColor: "#A276E9", accessory: "headphones" }, blurb: "starterSlimeBeat" }, // i18n-ignore: character name
+  { id: "cosmic-fuzz", name: "COSMIC FUZZ", look: { species: "fuzz", body: "#A276E9", accent: "#FFAD5B", outfit: "none", outfitColor: "#55BCEB", accessory: "antenna" }, blurb: "starterCosmicFuzz" }, // i18n-ignore: character name
+  { id: "vinyl-mutant", name: "VINYL MUTANT", look: { species: "vinyl", body: "#FFAD5B", accent: "#55BCEB", outfit: "jacket", outfitColor: "#FF625C", accessory: "none" }, blurb: "starterVinylMutant" }, // i18n-ignore: character name
+  { id: "jelly-raver", name: "JELLY RAVER", look: { species: "jelly", body: "#55BCEB", accent: "#B6F05C", outfit: "none", outfitColor: "#FFAD5B", accessory: "shades" }, blurb: "starterJellyRaver" }, // i18n-ignore: character name
 ];

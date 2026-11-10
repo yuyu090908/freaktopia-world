@@ -7,6 +7,7 @@ import { useLocalHref } from "@/components/i18n/LocaleContext";
 import { useAuth, type Me, type MeAlien } from "@/lib/auth/client";
 import { AlienReveal } from "./AlienReveal";
 
+/** /onboarding: resumes at the saved step (see AlienReveal). */
 export function WelcomeGate() {
   const t = useTranslations("auth");
   const ta = useTranslations("alien");
@@ -18,7 +19,7 @@ export function WelcomeGate() {
     return (
       <div className="mx-auto max-w-md px-4 py-16 text-center">
         <h1 className="text-4xl uppercase">{ta("signInToHatch")}</h1>
-        <Link href={href("/auth/signup")} className={btnClass("primary", "lg", "mt-6")}>{t("signUp")}</Link>
+        <Link href={href("/signup")} className={btnClass("primary", "lg", "mt-6")}>{t("signUp")}</Link>
       </div>
     );
   }

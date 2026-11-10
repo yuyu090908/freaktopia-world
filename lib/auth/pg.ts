@@ -1,7 +1,7 @@
 import { Pool, type PoolClient } from "pg";
 import type { AlienIdentity } from "@/lib/alien/catalog";
 import type { Locale } from "@/i18n/config";
-import { AuthError, DEFAULT_PRIVACY, type AuthStore, type PrivacyRecord, type ProfileRecord, type UserRecord } from "./types";
+import { AuthError, DEFAULT_PRIVACY, laterStep, type AuthStore, type OnboardingStep, type PrivacyRecord, type ProfileRecord, type UserRecord } from "./types";
 
 /** PostgreSQL store (db/migrations/0005_identity_i18n.sql). Selected when DATABASE_URL is set. */
 export function createPgStore(connectionString: string): AuthStore {
@@ -26,16 +26,20 @@ export function createPgStore(connectionString: string): AuthStore {
   const alien = (r: Record<string, unknown> | undefined): AlienIdentity | null =>
     r
       ? ({
-          userId: String(r.user_id), name: r.alien_name, family: r.alien_family, bodyColor: r.body_color, accentColor: r.accent_color,
+          userId: String(r.user_id), publicId: String(r.public_id), name: r.alien_name, family: r.alien_family, bodyColor: r.body_color, accentColor: r.accent_color,
           eyes: r.eye_variant, mouth: r.mouth_variant, pattern: r.pattern_variant, accessory: r.accessory_variant, outfit: r.outfit_variant,
           outfitColor: r.outfit_color, special: r.special_variant, seed: String(r.generation_seed), assetVersion: Number(r.asset_version),
           createdAt: new Date(r.created_at as string).toISOString(),
         } as AlienIdentity)
       : null;
   const isUnique = (e: unknown) => (e as { code?: string })?.code === "23505";
-  const PROFILE_SQL = `select p.*, coalesce(pr.locale, 'en') as locale from user_profiles p left join user_preferences pr using (user_id) where p.user_id = $1`;
+  // Onboarding lives in user_onboarding_progress (0006). A profile without a row (created before 0006 by an old
+// deploy) falls back to the 8.0 reveal_seen flag, so nobody is sent back to the Reveal.
+const PROFILE_SQL = `select p.*, coalesce(pr.locale, 'en') as locale,
+    coalesce(o.step, case when p.reveal_seen then 'name' else 'reveal' end) as onboarding_step
+  from user_profiles p left join user_preferences pr using (user_id) left join user_onboarding_progress o using (user_id) where p.user_id = $1`;
   const profile = (r: Record<string, unknown> | undefined): ProfileRecord | null =>
-    r ? { userId: String(r.user_id), displayName: (r.display_name as string) ?? null, username: (r.username as string) ?? null, country: (r.country_code as string) ?? null, locale: r.locale as Locale, favoriteGenres: (r.favorite_genres as string[]) ?? [], xp: Number(r.xp), revealSeen: Boolean(r.reveal_seen) } : null;
+    r ? { userId: String(r.user_id), displayName: (r.display_name as string) ?? null, username: (r.username as string) ?? null, country: (r.country_code as string) ?? null, locale: r.locale as Locale, favoriteGenres: (r.favorite_genres as string[]) ?? [], xp: Number(r.xp), revealSeen: r.onboarding_step !== "reveal", onboardingStep: r.onboarding_step as OnboardingStep } : null;
   const privacy = (r: Record<string, unknown> | undefined, userId: string): PrivacyRecord =>
     r ? { userId, profile: r.profile as PrivacyRecord["profile"], avatar: r.avatar as PrivacyRecord["avatar"], activity: r.activity as PrivacyRecord["activity"], showCountry: Boolean(r.show_country), mapPresence: Boolean(r.map_presence), liveAvatar: Boolean(r.live_avatar) } : { userId, ...DEFAULT_PRIVACY };
 
@@ -54,6 +58,7 @@ export function createPgStore(connectionString: string): AuthStore {
           await c.query(`insert into user_profiles (user_id) values ($1)`, [u.id]);
           await c.query(`insert into user_preferences (user_id, locale) values ($1, $2)`, [u.id, locale]);
           await c.query(`insert into user_privacy_settings (user_id) values ($1)`, [u.id]);
+          await c.query(`insert into user_onboarding_progress (user_id) values ($1)`, [u.id]);
           return user(u)!;
         });
       } catch (e) {
@@ -111,7 +116,7 @@ export function createPgStore(connectionString: string): AuthStore {
       return profile((await q(PROFILE_SQL, [userId]))[0]);
     },
     async updateProfile(userId, patch) {
-      const map: Record<string, string> = { displayName: "display_name", username: "username", country: "country_code", favoriteGenres: "favorite_genres", xp: "xp", revealSeen: "reveal_seen" };
+      const map: Record<string, string> = { displayName: "display_name", username: "username", country: "country_code", favoriteGenres: "favorite_genres", xp: "xp" };
       const sets: string[] = [];
       const args: unknown[] = [userId];
       for (const [k, col] of Object.entries(map)) {
@@ -125,6 +130,26 @@ export function createPgStore(connectionString: string): AuthStore {
       } catch (e) {
         if (isUnique(e)) throw new AuthError("USERNAME_TAKEN");
         throw e;
+      }
+      let step: OnboardingStep | undefined = patch.onboardingStep;
+      if (patch.revealSeen) step = step ? laterStep(step, "name") : "name";
+      if (step) {
+        // Forward-only, in SQL so two tabs cannot move each other backwards.
+        await q(
+          `insert into user_onboarding_progress (user_id, step) values ($1, $2)
+           on conflict (user_id) do update set step = case
+             when array_position(array['reveal','name','genres','done'], excluded.step) > array_position(array['reveal','name','genres','done'], user_onboarding_progress.step)
+             then excluded.step else user_onboarding_progress.step end, updated_at = now()`,
+          [userId, step],
+        );
+        await q(
+          `update user_onboarding_progress set revealed_at = coalesce(revealed_at, case when step <> 'reveal' then now() end),
+             named_at = coalesce(named_at, case when step in ('genres','done') then now() end),
+             genres_at = coalesce(genres_at, case when step = 'done' then now() end),
+             completed_at = coalesce(completed_at, case when step = 'done' then now() end) where user_id = $1`,
+          [userId],
+        );
+        if (step !== "reveal") await q(`update user_profiles set reveal_seen = true where user_id = $1 and not reveal_seen`, [userId]);
       }
       if (patch.locale) await q(`insert into user_preferences (user_id, locale) values ($1, $2) on conflict (user_id) do update set locale = excluded.locale, updated_at = now()`, [userId, patch.locale]);
       const p = await this.getProfile(userId);

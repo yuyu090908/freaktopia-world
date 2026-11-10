@@ -9,20 +9,23 @@ import { getAfterParty } from "./data";
 export const ALERT_TYPES = ["top10", "tickets_on_sale", "tickets_low", "dj_open", "after_party", "confirmed", "cancelled"] as const;
 export type AlertType = (typeof ALERT_TYPES)[number];
 
-export const ALERT_LABELS: Record<AlertType, { en: string; ja: string }> = {
-  top10: { en: "Enters the TOP 10", ja: "フォロー中のイベントがTOP10入り" },
-  tickets_on_sale: { en: "Tickets on sale", ja: "チケット販売開始" },
-  tickets_low: { en: "Tickets running low", ja: "チケット残りわずか" },
-  dj_open: { en: "DJ applications open", ja: "DJ募集開始" },
-  after_party: { en: "After party announced", ja: "アフターパーティー公開" },
-  confirmed: { en: "Event confirmed", ja: "開催確定" },
-  cancelled: { en: "Event cancelled", ja: "イベント中止" },
+export const ALERT_LABELS: Record<AlertType, { en: string }> = {
+  top10: { en: "Enters the TOP 10" },
+  tickets_on_sale: { en: "Tickets on sale" },
+  tickets_low: { en: "Tickets running low" },
+  dj_open: { en: "DJ applications open" },
+  after_party: { en: "After party announced" },
+  confirmed: { en: "Event confirmed" },
+  cancelled: { en: "Event cancelled" },
 };
 
 export interface AppAlert {
   id: string;
   type: AlertType;
   eventId: string;
+  eventName: string;
+  /** English; shown through the "labels" namespace (see lib/i18n/labels.ts). */
+  label: string;
   title: string;
   body: string;
 }
@@ -30,17 +33,17 @@ export interface AppAlert {
 export function deriveAlerts(events: FreakEvent[], top10: Set<string>, prefs: Record<AlertType, boolean>): AppAlert[] {
   const out: AppAlert[] = [];
   const add = (type: AlertType, e: FreakEvent, body: string) => {
-    if (prefs[type]) out.push({ id: `${type}:${e.id}`, type, eventId: e.id, title: `${e.name}: ${ALERT_LABELS[type].en}`, body });
+    if (prefs[type]) out.push({ id: `${type}:${e.id}`, type, eventId: e.id, eventName: e.name, label: ALERT_LABELS[type].en, title: `${e.name}: ${ALERT_LABELS[type].en}`, body });
   };
   for (const e of events) {
-    if (top10.has(e.id)) add("top10", e, "フォロー中のイベントがWORLD RANKINGのTOP10に入りました。");
-    if (e.status === "confirmed" || e.status === "live") add("tickets_on_sale", e, "チケットを購入できます（デモ）。");
+    if (top10.has(e.id)) add("top10", e, "An event you follow entered the WORLD RANKING TOP 10.");
+    if (e.status === "confirmed" || e.status === "live") add("tickets_on_sale", e, "Tickets are on sale (demo).");
     const apLow = e.afterPartyId ? (getAfterParty(e.afterPartyId)?.seatsLeft ?? 99) <= 15 : false;
     const low = e.tickets.some((t) => t.remaining > 0 && t.remaining <= 30) || apLow;
-    if (low && e.status !== "ended") add("tickets_low", e, "残りわずかのチケットがあります。");
-    if (e.djRecruiting) add("dj_open", e, "DJの応募を受け付けています。");
-    if (e.afterPartyId) add("after_party", e, "公式アフターパーティーが公開されています。");
-    if (e.status === "confirmed") add("confirmed", e, "開催が確定しました。");
+    if (low && e.status !== "ended") add("tickets_low", e, "Some tickets are running low.");
+    if (e.djRecruiting) add("dj_open", e, "DJ applications are open.");
+    if (e.afterPartyId) add("after_party", e, "The official after party has been announced.");
+    if (e.status === "confirmed") add("confirmed", e, "The event is confirmed.");
   }
   return out;
 }

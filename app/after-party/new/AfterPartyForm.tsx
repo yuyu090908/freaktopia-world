@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,20 +12,23 @@ import { DJS, EVENTS, getEvent } from "@/lib/data";
 import { grantXp, toast, uid, useDemo } from "@/lib/store";
 
 const schema = z.object({
-  eventId: z.string().min(1, "Link it to a main event"),
-  name: z.string().trim().min(3, "Name your after party"),
-  venueName: z.string().trim().min(2, "Where is it?"),
-  date: z.string().min(1, "Choose a date"),
-  start: z.string().min(1, "Start time"),
-  end: z.string().min(1, "End time"),
-  price: z.coerce.number().min(0, "Price can’t be negative"),
-  capacity: z.coerce.number().int().min(10, "At least 10"),
+  eventId: z.string().min(1, "errLinkItToAMain"),
+  name: z.string().trim().min(3, "errNameYourAfterParty"),
+  venueName: z.string().trim().min(2, "errWhereIsIt"),
+  date: z.string().min(1, "errChooseADate"),
+  start: z.string().min(1, "errStartTime"),
+  end: z.string().min(1, "errEndTime"),
+  price: z.coerce.number().min(0, "errPriceCantBeNegative"),
+  capacity: z.coerce.number().int().min(10, "errAtLeast10"),
   djIds: z.array(z.string()),
   description: z.string().max(300).optional(),
 });
 type V = z.input<typeof schema>;
 
 export function AfterPartyForm() {
+  const tu = useTranslations("afterParty");
+  /** Form errors are translation keys (see the schema above); anything else is shown as is. */
+  const msg = (m?: string) => (m ? (tu.has(m) ? tu(m) : m) : undefined);
   const router = useRouter();
   const params = useSearchParams();
   const add = useDemo((s) => s.addAfterParty);
@@ -56,29 +60,29 @@ export function AfterPartyForm() {
       isDemo: false,
       createdByUser: true,
     });
-    grantXp(60, "Created an after party");
-    toast({ title: "After party created (demo)", body: `Linked to ${ev.name}.`, tone: "success" });
+    grantXp(60, tu("xpCreatedAnAfterParty"));
+    toast({ title: tu("afterPartyCreatedDemo"), body: tu("linkedToName", { name: ev.name }), tone: "success" });
     router.push(`/after-party/${id}`);
   });
 
   return (
     <div className="mx-auto max-w-2xl md:px-6">
-      <PageTitle kicker="Organizer" title="Create after party" sub="メインイベントに紐づけて、アフターパーティーを作成します。" />
+      <PageTitle kicker={tu("organizer")} title={tu("createAfterParty")} sub={tu("text2")} />
       <form onSubmit={submit} noValidate className="space-y-5 px-4 md:px-0">
-        <Field id="eventId" label="Main event" error={errors.eventId?.message}>
+        <Field id="eventId" label={tu("mainEvent")} error={msg(errors.eventId?.message)}>
           <Select id="eventId" {...register("eventId")} aria-invalid={!!errors.eventId}>
-            <option value="">Choose the main event…</option>
+            <option value="">{tu("chooseTheMainEvent")}</option>
             {EVENTS.map((e) => <option key={e.id} value={e.id}>{e.name} · {e.city}</option>)}
           </Select>
         </Field>
-        <Field id="name" label="After party name" error={errors.name?.message}><Input id="name" {...register("name")} aria-invalid={!!errors.name} /></Field>
-        <Field id="venueName" label="Venue" error={errors.venueName?.message}><Input id="venueName" {...register("venueName")} aria-invalid={!!errors.venueName} /></Field>
-        <Field id="date" label="Date" error={errors.date?.message}><Input id="date" type="date" {...register("date")} aria-invalid={!!errors.date} /></Field>
+        <Field id="name" label={tu("afterPartyName")} error={msg(errors.name?.message)}><Input id="name" {...register("name")} aria-invalid={!!errors.name} /></Field>
+        <Field id="venueName" label={tu("venue")} error={msg(errors.venueName?.message)}><Input id="venueName" {...register("venueName")} aria-invalid={!!errors.venueName} /></Field>
+        <Field id="date" label={tu("date")} error={msg(errors.date?.message)}><Input id="date" type="date" {...register("date")} aria-invalid={!!errors.date} /></Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field id="start" label="Starts"><Input id="start" type="time" {...register("start")} /></Field>
-          <Field id="end" label="Ends"><Input id="end" type="time" {...register("end")} /></Field>
-          <Field id="price" label="Ticket price (USD)" error={errors.price?.message}><Input id="price" type="number" inputMode="decimal" {...register("price")} /></Field>
-          <Field id="capacity" label="Capacity" error={errors.capacity?.message}><Input id="capacity" type="number" inputMode="numeric" {...register("capacity")} /></Field>
+          <Field id="start" label={tu("starts")}><Input id="start" type="time" {...register("start")} /></Field>
+          <Field id="end" label={tu("ends")}><Input id="end" type="time" {...register("end")} /></Field>
+          <Field id="price" label={tu("ticketPriceUsd")} error={msg(errors.price?.message)}><Input id="price" type="number" inputMode="decimal" {...register("price")} /></Field>
+          <Field id="capacity" label={tu("capacity")} error={msg(errors.capacity?.message)}><Input id="capacity" type="number" inputMode="numeric" {...register("capacity")} /></Field>
         </div>
         <fieldset>
           <legend className="text-sm font-bold">DJs</legend>
@@ -86,9 +90,9 @@ export function AfterPartyForm() {
             <div className="mt-2 flex flex-wrap gap-2">{DJS.map((d) => <Chip key={d.id} active={field.value.includes(d.id)} onClick={() => field.onChange(field.value.includes(d.id) ? field.value.filter((x) => x !== d.id) : [...field.value, d.id])}>{d.name}</Chip>)}</div>
           )} />
         </fieldset>
-        <Field id="description" label="Description" optional><Textarea id="description" {...register("description")} /></Field>
-        <DemoNotice>Saved in your browser only. Ticket sales for after parties are simulated.</DemoNotice>
-        <Button type="submit" size="lg" className="w-full"><Check className="size-5" aria-hidden /> Create after party</Button>
+        <Field id="description" label={tu("description")} optional><Textarea id="description" {...register("description")} /></Field>
+        <DemoNotice>{tu("savedInYourBrowserOnly")}</DemoNotice>
+        <Button type="submit" size="lg" className="w-full"><Check className="size-5" aria-hidden /> {tu("createAfterParty")}</Button>
       </form>
     </div>
   );

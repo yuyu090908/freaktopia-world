@@ -76,3 +76,34 @@ Required 8.0 checks (`tests/identity.spec.ts` unless noted):
 | 18 | 375 / 390 / 430 / 768 / 1440 px, CJK / Thai / Cyrillic / Vietnamese fonts loaded, no horizontal scroll | `18.` |
 
 Not measured this round: Lighthouse.
+
+## 8.1: every screen translated, resumable onboarding, Alien ID (2026-11-10)
+
+Production build (`npm run build && npm run start`), demo configuration (no `DATABASE_URL`, Google, email or DeepL keys). Postgres checks run against a local PostgreSQL 16 with migrations 0005 and 0006 applied twice (both are re-runnable).
+
+| Suite | Result |
+|---|---|
+| `node scripts/find-hardcoded.mjs` | 165 files scanned, **0 hardcoded UI strings**, 2,679 translated call sites, **coverage 100.0 %** |
+| `node scripts/check-i18n.mjs` | 11 translations × 2,962 keys: 0 missing, 0 extra, 0 empty, 0 placeholder mismatches |
+| vitest (unit + integration, memory and Postgres store) | 187 / 187 passed |
+| `tsc --noEmit` | clean |
+| Playwright, full suite (104 tests, 2 workers, mobile-390 project with per-test viewports) | 102 / 102 passed on the full run, then the 2 tests added afterwards (switcher keeps URL and camera; account language on another device) and the full `identity.spec` (27 / 27) passed on re-runs |
+
+Fixed during this round: the page rename had also rewritten four API paths in the sign-up/sign-in/reset forms (`/api/auth/…`), which broke sign-up; the connection-status box showed a hardcoded "Email" label (found by the new per-language page test); two English labels changed case through the shared label dictionary ("CANCELLED", "Live Now"), now English always shows the source label.
+
+8.1 checks:
+
+| Check | Where |
+|---|---|
+| Hardcoded / missing translation detection | `scripts/find-hardcoded.mjs`, `scripts/check-i18n.mjs`, `tests/unit/i18n.test.ts` (ICU with every placeholder and rich tag), `identity.spec › 8.1 per-language pages` (ja, ko, zh-CN, ru, th) |
+| Switcher keeps page, URL params, search text, map camera | `identity.spec › 8.1 switching keeps…` |
+| Account language wins on another device | `identity.spec › 8.1 a signed-in account's language wins…` |
+| Alien ID format `FREAK-00001284`, unique | `tests/unit/identity-8-1.test.ts`, `auth-service.test.ts`, `identity.spec › 8.1 Alien ID` |
+| Concurrent first-time generation creates one alien | `auth-service.test.ts` (10 parallel calls, memory and Postgres), `identity.spec › 8.1 Alien ID` (parallel `/api/me`) |
+| Onboarding resume, Reveal never shown again | `auth-service.test.ts`, `tests/unit/identity-8-1.test.ts` (`laterStep`), `identity.spec › 8.1 onboarding resumes…` |
+| Reveal: capsule, skip, reduced motion | `identity.spec › 6/10/13/14`, `reveal respects reduced motion` |
+| Translation cache, labelled results | `tests/unit/identity-8-1.test.ts` |
+| LIVE / MAP / DAO use the account alien; no GPS; no extra voting power | `identity.spec › 15`, `16`, `17`, `dao-api.test.ts` |
+| 375 / 390 / 430 / 768 / 1440 px, incl. `/login`, `/forgot-password`, `/onboarding`, `/settings` | `identity.spec › 18.` |
+
+Not measured this round: Lighthouse.

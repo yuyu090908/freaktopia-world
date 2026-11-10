@@ -25,6 +25,7 @@ export function ProfileView() {
 }
 
 function Inner() {
+  const tu = useTranslations("profile");
   const tp = useTranslations("profile");
   const signedIn = useAuth((x) => x.status === "signedIn");
   const s = useDemo();
@@ -43,12 +44,12 @@ function Inner() {
   const saveProfile = () => {
     const name = draft.username.trim().replace(/\s+/g, "_").slice(0, 24);
     if (name.length < 3) {
-      toast({ title: "Username needs 3+ characters", tone: "error" });
+      toast({ title: tu("usernameNeeds3Characters"), tone: "error" });
       return;
     }
     s.updateProfile({ ...draft, username: name });
     setEdit(false);
-    toast({ title: "Profile updated", tone: "success" });
+    toast({ title: tu("profileUpdated"), tone: "success" });
   };
 
   return (
@@ -63,7 +64,7 @@ function Inner() {
         <div className="relative overflow-hidden rounded-[32px] border-[3px] border-ink bg-purple p-5 text-ink">
           <div className="halftone absolute inset-0" aria-hidden />
           <div className="relative flex items-center gap-4">
-            <Link href="/avatar" className="relative size-28 shrink-0 rounded-3xl border-[3px] border-ink bg-cream" aria-label="Edit avatar">
+            <Link href="/avatar" className="relative size-28 shrink-0 rounded-3xl border-[3px] border-ink bg-cream" aria-label={tu("editAvatar")}>
               <Alien look={p.look} className="h-full w-full p-1" title={p.avatarName} />
               <span className="absolute -bottom-2 -right-2 flex size-9 items-center justify-center rounded-full border-[3px] border-ink bg-acid"><Pencil className="size-4" aria-hidden /></span>
             </Link>
@@ -75,31 +76,31 @@ function Inner() {
           </div>
           <p className="relative mt-3 text-sm font-medium">{p.bio}</p>
           <div className="relative mt-3">
-            <div className="mb-1 flex justify-between text-xs font-bold"><span>XP {p.xp}</span><span>{lv.need - lv.intoLevel} to LV.{lv.level + 1}</span></div>
-            <Progress value={lv.pct} color="#080808" className="!border-ink !bg-cream/60" label="XP progress" />
+            <div className="mb-1 flex justify-between text-xs font-bold"><span>XP {p.xp}</span><span>{tu("valueToLvValue2", { value: lv.need - lv.intoLevel, value2: lv.level + 1 })}</span></div>
+            <Progress value={lv.pct} color="#080808" className="!border-ink !bg-cream/60" label={tu("xpProgress")} />
           </div>
           <div className="relative mt-4 flex gap-2">
-            <Button variant="secondary" size="sm" onClick={openEdit}><Pencil className="size-4" aria-hidden /> Edit profile</Button>
-            <ButtonLink href="/quests" size="sm" className="!bg-ink !text-cream !shadow-none"><Trophy className="size-4" aria-hidden /> Quests</ButtonLink>
+            <Button variant="secondary" size="sm" onClick={openEdit}><Pencil className="size-4" aria-hidden /> {tu("editProfile")}</Button>
+            <ButtonLink href="/quests" size="sm" className="!bg-ink !text-cream !shadow-none"><Trophy className="size-4" aria-hidden /> {tu("quests")}</ButtonLink>
           </div>
         </div>
       </section>
 
       <div className="mt-4 grid grid-cols-3 gap-2 px-4 md:px-0">
-        <Stat label="Tickets" value={s.orders.length} accent="#B6F05C" />
-        <Stat label="Supported" value={Object.keys(s.support).length} accent="#FFAD5B" />
-        <Stat label="Following" value={s.favorites.length} accent="#FF625C" />
+        <Stat label={tu("tickets")} value={s.orders.length} accent="#B6F05C" />
+        <Stat label={tu("supported")} value={Object.keys(s.support).length} accent="#FFAD5B" />
+        <Stat label={tu("following")} value={s.favorites.length} accent="#FF625C" />
       </div>
 
       {/* Dashboards */}
       <section aria-labelledby="dash-h" className="mt-8 px-4 md:px-0">
-        <h2 id="dash-h" className="text-2xl uppercase">Dashboards</h2>
+        <h2 id="dash-h" className="text-2xl uppercase">{tu("dashboards")}</h2>
         <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {[
-            ["organizer", "Organizer", CalendarDays, "#B6F05C"],
+            ["organizer", tu("organizer"), CalendarDays, "#B6F05C"],
             ["dj", "DJ", Mic2, "#A276E9"],
-            ["venue", "Venue owner", Building2, "#55BCEB"],
-            ["fan", "Fan", Heart, "#FF625C"],
+            ["venue", tu("venueOwner"), Building2, "#55BCEB"],
+            ["fan", tu("fan"), Heart, "#FF625C"],
           ].map(([role, label, Icon, color]) => {
             const I = Icon as typeof Mic2;
             return (
@@ -113,7 +114,7 @@ function Inner() {
       </section>
 
       <div className="mt-8 grid gap-8 px-4 md:grid-cols-2 md:px-0">
-        <Section icon={Ticket} title="Tickets" action={<Link href="/tickets" className="text-sm font-bold text-acid">All</Link>}>
+        <Section icon={Ticket} title={tu("tickets")} action={<Link href="/tickets" className="text-sm font-bold text-acid">{tu("all")}</Link>}>
           {s.orders.length ? (
             <ul className="space-y-2">
               {s.orders.slice(0, 3).map((o) => (
@@ -121,11 +122,11 @@ function Inner() {
               ))}
             </ul>
           ) : (
-            <EmptyState title="No tickets" body="デモ購入でサンプルチケットを作成できます。" action={<ButtonLink href={`/events/${EVENTS[0].id}/tickets`} size="sm">Get a demo ticket</ButtonLink>} />
+            <EmptyState title={tu("noTickets")} body={tu("text")} action={<ButtonLink href={`/events/${EVENTS[0].id}/tickets`} size="sm">{tu("getADemoTicket")}</ButtonLink>} />
           )}
         </Section>
 
-        <Section icon={CalendarDays} title="Upcoming">
+        <Section icon={CalendarDays} title={tu("upcoming")}>
           {upcoming.length ? (
             <ul className="space-y-2">
               {upcoming.map((e) => (
@@ -133,20 +134,20 @@ function Inner() {
               ))}
             </ul>
           ) : (
-            <p className="text-sm text-mute">Support an event or get a ticket and it will show up here.</p>
+            <p className="text-sm text-mute">{tu("supportAnEventOrGet")}</p>
           )}
         </Section>
 
-        <Section icon={PartyPopper} title="History">
+        <Section icon={PartyPopper} title={tu("history")}>
           <ul className="space-y-2">
             {PAST_EVENTS.map((e) => (
               <li key={e.name} className="flex min-h-12 items-center justify-between rounded-2xl bg-surface-2 px-4 text-sm"><span className="font-bold">{e.name}</span><span className="text-mute">{e.city} · {fmtDate(e.date + "T00:00:00Z", { month: "short", year: "numeric" })}</span></li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-mute">Sample history for the demo profile.</p>
+          <p className="mt-2 text-xs text-mute">{tu("sampleHistoryForTheDemo")}</p>
         </Section>
 
-        <Section icon={Heart} title="Favorite DJs">
+        <Section icon={Heart} title={tu("favoriteDjs")}>
           {s.favorites.length ? (
             <ul className="flex flex-wrap gap-3">
               {s.favorites.map((id) => {
@@ -154,17 +155,17 @@ function Inner() {
                 return d ? <li key={id}><Link href={`/djs/${id}`} className="flex w-20 flex-col items-center gap-1 text-center"><AlienAvatar look={d.look} size={64} ring={d.look.accent} /><span className="line-clamp-2 text-xs font-bold">{d.name}</span></Link></li> : null;
               })}
             </ul>
-          ) : <p className="text-sm text-mute">Follow DJs in the DJ Arena.</p>}
+          ) : <p className="text-sm text-mute">{tu("followDjsInTheDj")}</p>}
         </Section>
 
-        <Section icon={Package} title="Items">
+        <Section icon={Package} title={tu("items")}>
           <ul className="flex flex-wrap gap-2">
             {s.ownedItems.map((i) => <li key={i} className="rounded-full bg-surface-2 px-3 py-2 text-sm font-bold capitalize">{i}</li>)}
           </ul>
-          <Link href="/avatar" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-acid">Use in avatar studio →</Link>
+          <Link href="/avatar" className="mt-2 inline-flex min-h-11 items-center text-sm font-bold text-acid">{tu("useInAvatarStudio")}</Link>
         </Section>
 
-        <Section icon={Gem} title="NFT collection" action={<DemoBadge label="Preview" />}>
+        <Section icon={Gem} title={tu("nftCollection")} action={<DemoBadge label={tu("preview")} />}>
           <ul className="grid grid-cols-3 gap-2">
             {COLLECTIBLES.slice(0, 3).map((c) => (
               <li key={c.id} className="overflow-hidden rounded-2xl border border-line">
@@ -173,30 +174,30 @@ function Inner() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 text-xs text-mute">Not minted. No wallet connected. Collectible previews only.</p>
+          <p className="mt-2 text-xs text-mute">{tu("notMintedNoWalletConnected")}</p>
         </Section>
       </div>
 
       {/* Settings */}
       <section aria-labelledby="set-h" className="mt-8 px-4 md:px-0">
-        <h2 id="set-h" className="flex items-center gap-2 text-2xl uppercase"><Settings className="size-5" aria-hidden /> Settings</h2>
+        <h2 id="set-h" className="flex items-center gap-2 text-2xl uppercase"><Settings className="size-5" aria-hidden /> {tu("settings2")}</h2>
         <Card className="mt-3 divide-y divide-line">
-          <button type="button" onClick={openEdit} className="flex min-h-14 w-full items-center justify-between px-4 text-left font-bold">Edit profile <ArrowRight className="size-4" aria-hidden /></button>
-          <Link href="/avatar" className="flex min-h-14 items-center justify-between px-4 font-bold">Avatar <ArrowRight className="size-4" aria-hidden /></Link>
-          <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">Wallet</span><span className="text-sm text-mute">Not connected (Phase 3)</span></div>
-          <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">Notifications</span><span className="text-sm text-mute">Coming soon</span></div>
-          <button type="button" onClick={() => setConfirmReset(true)} className="flex min-h-14 w-full items-center gap-2 px-4 text-left font-bold text-coral"><Trash2 className="size-4" aria-hidden /> Reset all demo data</button>
+          <button type="button" onClick={openEdit} className="flex min-h-14 w-full items-center justify-between px-4 text-left font-bold">{tu("editProfile")} <ArrowRight className="size-4" aria-hidden /></button>
+          <Link href="/avatar" className="flex min-h-14 items-center justify-between px-4 font-bold">{tu("avatar")} <ArrowRight className="size-4" aria-hidden /></Link>
+          <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">{tu("wallet")}</span><span className="text-sm text-mute">{tu("notConnectedPhase3")}</span></div>
+          <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">{tu("notifications")}</span><span className="text-sm text-mute">{tu("comingSoon")}</span></div>
+          <button type="button" onClick={() => setConfirmReset(true)} className="flex min-h-14 w-full items-center gap-2 px-4 text-left font-bold text-coral"><Trash2 className="size-4" aria-hidden /> {tu("resetAllDemoData")}</button>
         </Card>
-        <DemoNotice className="mt-3">This profile and everything you do on the site is stored only in this browser (localStorage).</DemoNotice>
+        <DemoNotice className="mt-3">{tu("thisProfileAndEverythingYou")}</DemoNotice>
       </section>
 
-      <BottomSheet open={edit} onClose={() => setEdit(false)} title="Edit profile" footer={<Button className="mb-1 w-full" onClick={saveProfile}>Save</Button>}>
+      <BottomSheet open={edit} onClose={() => setEdit(false)} title={tu("editProfile")} footer={<Button className="mb-1 w-full" onClick={saveProfile}>{tu("save")}</Button>}>
         <div className="space-y-4">
-          <Field id="pf-u" label="Username"><Input id="pf-u" autoComplete="username" value={draft.username} onChange={(e) => setDraft({ ...draft, username: e.target.value })} /></Field>
-          <Field id="pf-c" label="City"><Input id="pf-c" autoComplete="address-level2" value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} /></Field>
-          <Field id="pf-b" label="Bio"><Textarea id="pf-b" maxLength={160} value={draft.bio} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} /></Field>
+          <Field id="pf-u" label={tu("username")}><Input id="pf-u" autoComplete="username" value={draft.username} onChange={(e) => setDraft({ ...draft, username: e.target.value })} /></Field>
+          <Field id="pf-c" label={tu("city")}><Input id="pf-c" autoComplete="address-level2" value={draft.city} onChange={(e) => setDraft({ ...draft, city: e.target.value })} /></Field>
+          <Field id="pf-b" label={tu("bio")}><Textarea id="pf-b" maxLength={160} value={draft.bio} onChange={(e) => setDraft({ ...draft, bio: e.target.value })} /></Field>
           <fieldset>
-            <legend className="text-sm font-bold">Favorite genres</legend>
+            <legend className="text-sm font-bold">{tu("favoriteGenres")}</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {GENRES.map((g) => <Chip key={g} active={draft.favoriteGenres.includes(g)} onClick={() => setDraft({ ...draft, favoriteGenres: draft.favoriteGenres.includes(g) ? draft.favoriteGenres.filter((x) => x !== g) : [...draft.favoriteGenres, g as Genre] })}>{g}</Chip>)}
             </div>
@@ -204,13 +205,13 @@ function Inner() {
         </div>
       </BottomSheet>
 
-      <BottomSheet open={confirmReset} onClose={() => setConfirmReset(false)} title="Reset demo data?" footer={
+      <BottomSheet open={confirmReset} onClose={() => setConfirmReset(false)} title={tu("resetDemoData")} footer={
         <div className="mb-1 grid grid-cols-2 gap-2">
-          <Button variant="ghost" onClick={() => setConfirmReset(false)}>Cancel</Button>
-          <Button variant="coral" onClick={() => { s.resetAll(); setConfirmReset(false); toast({ title: "Demo data reset" }); }}>Reset</Button>
+          <Button variant="ghost" onClick={() => setConfirmReset(false)}>{tu("cancel")}</Button>
+          <Button variant="coral" onClick={() => { s.resetAll(); setConfirmReset(false); toast({ title: tu("demoDataReset") }); }}>{tu("reset")}</Button>
         </div>
       }>
-        <p className="text-sm">This clears your demo tickets, created events, venues, avatar and XP from this browser. It can’t be undone.</p>
+        <p className="text-sm">{tu("thisClearsYourDemoTickets")}</p>
       </BottomSheet>
     </div>
   );

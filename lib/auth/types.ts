@@ -19,8 +19,17 @@ export interface ProfileRecord {
   locale: Locale;
   favoriteGenres: string[];
   xp: number;
+  /** Derived from onboardingStep: true once the Reveal has been shown. Kept for 8.0 clients. */
   revealSeen: boolean;
+  /** Resumable onboarding: reveal → name → genres → done. Stored in user_onboarding_progress. */
+  onboardingStep: OnboardingStep;
 }
+
+export const ONBOARDING_STEPS = ["reveal", "name", "genres", "done"] as const;
+export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
+/** Steps only move forward: a stale tab can never send someone back to the Reveal. */
+export const laterStep = (a: OnboardingStep, b: OnboardingStep): OnboardingStep =>
+  ONBOARDING_STEPS.indexOf(a) >= ONBOARDING_STEPS.indexOf(b) ? a : b;
 
 export interface PrivacyRecord {
   userId: string;

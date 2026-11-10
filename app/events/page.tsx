@@ -1,17 +1,23 @@
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { ART } from "@/lib/art";
 import type { Metadata } from "next";
 import { EventsBrowser } from "./EventsBrowser";
 import { PageTitle } from "@/components/ui/primitives";
 
-export const metadata: Metadata = {
-  title: "Events",
-  description: "Browse demo events, support the ones you want to happen, and watch them evolve from DJ booth to mega fest.",
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return {
+  title: tu("eventsTitle"),
+  description: tu("eventsDescription"),
 };
+}
 
 export default function EventsPage() {
+  const tu = useTranslations("pages");
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle art={{ src: ART.mapCities, pos: "50% 40%" }} kicker="Events" title="Find your night" sub="応援して、育てて、参加する。気になるイベントを探そう。" />
+      <PageTitle art={{ src: ART.mapCities, pos: "50% 40%" }} kicker={tu("events")} title={tu("findYourNight")} sub={tu("text4")} />
       <EventsBrowser />
     </div>
   );

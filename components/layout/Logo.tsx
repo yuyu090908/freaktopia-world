@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 import { ART } from "@/lib/art";
@@ -16,8 +17,9 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
 }
 
 export function Logo({ className = "h-[42px] w-auto sm:h-[48px]" }: { className?: string }) {
+  const tu = useTranslations("ui");
   return (
-    <Link href="/" className="flex min-h-11 shrink-0 items-center rounded-xl" aria-label="FREAKTOPIA WORLD home">
+    <Link href="/" className="flex min-h-11 shrink-0 items-center rounded-xl" aria-label={tu("freaktopiaWorldHome")}>
       <Image src={ART.logo} alt="" priority sizes="130px" className={className} />
     </Link>
   );

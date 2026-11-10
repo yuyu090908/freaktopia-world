@@ -1,5 +1,8 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+import { type Tu } from "@/lib/i18n/tu";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { Check, CircleDashed, Hammer, OctagonAlert, Trophy } from "lucide-react";
@@ -23,14 +26,15 @@ interface RoadmapDto {
   canEdit: boolean;
 }
 
-const MS_STYLE: Record<Milestone["status"], { label: string; color: string; Icon: typeof Check }> = {
-  todo: { label: "To do", color: "#8a8a8a", Icon: CircleDashed },
-  doing: { label: "In progress", color: "#55BCEB", Icon: Hammer },
-  done: { label: "Done", color: "#B6F05C", Icon: Check },
-  blocked: { label: "Blocked", color: "#FF625C", Icon: OctagonAlert },
-};
+const MS_STYLE = (tu: Tu): Record<Milestone["status"], { label: string; color: string; Icon: typeof Check }> => ({
+  todo: { label: tu("toDo"), color: "#8a8a8a", Icon: CircleDashed },
+  doing: { label: tu("inProgress"), color: "#55BCEB", Icon: Hammer },
+  done: { label: tu("done"), color: "#B6F05C", Icon: Check },
+  blocked: { label: tu("blocked"), color: "#FF625C", Icon: OctagonAlert },
+});
 
 export function RoadmapView() {
+  const tu = useTranslations("dao");
   const { eventId } = useDao();
   const { state, reload } = useDaoQuery<RoadmapDto>(`${eventId}/roadmap`);
   const [busy, setBusy] = useState<string | null>(null);
@@ -43,20 +47,20 @@ export function RoadmapView() {
     setBusy(id);
     const res = await daoApi(`${eventId}/roadmap/${id}`, { method: "PATCH", json: { status } });
     setBusy(null);
-    if (!res.ok) return toast({ title: "Not saved", body: res.error.message, tone: "error" });
+    if (!res.ok) return toast({ title: tu("notSaved"), body: res.error.message, tone: "error" });
     void reload(true);
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">Roadmap</h1>
-        <p className="mt-2 max-w-2xl text-sm text-mute">The Festival Build Game grows as the DAO makes decisions. It is a game view of community progress, not a record of real construction.</p>
+        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{tu("roadmap")}</h1>
+        <p className="mt-2 max-w-2xl text-sm text-mute">{tu("theFestivalBuildGameGrows")}</p>
       </div>
 
       <section aria-labelledby="game-h" className="neon rounded-[24px] border bg-surface p-4">
-        <h2 id="game-h" className="flex items-center gap-2 text-xl uppercase"><Trophy className="size-5 text-acid" aria-hidden />Festival build game · LV.{r.level}</h2>
-        <ol className="mt-4 grid grid-cols-5 gap-1.5" aria-label="Game levels">
+        <h2 id="game-h" className="flex items-center gap-2 text-xl uppercase"><Trophy className="size-5 text-acid" aria-hidden />{tu("festivalBuildGameLvLevel", { level: r.level })}</h2>
+        <ol className="mt-4 grid grid-cols-5 gap-1.5" aria-label={tu("gameLevels")}>
           {GAME_LEVELS.map((g) => {
             const reached = g.level <= r.level;
             return (
@@ -67,28 +71,28 @@ export function RoadmapView() {
             );
           })}
         </ol>
-        <p className="mt-3 text-sm"><b>{GAME_LEVELS[r.level - 1].label}:</b> {GAME_LEVELS[r.level - 1].desc}</p>
-        {r.level < 5 && <p className="text-sm text-mute">Next: {GAME_LEVELS[Math.min(4, r.level) as 0 | 1 | 2 | 3 | 4].desc}</p>}
+        <p className="mt-3 text-sm"><b><Tx>{GAME_LEVELS[r.level - 1].label}</Tx>:</b> <Tx>{GAME_LEVELS[r.level - 1].desc}</Tx></p>
+        {r.level < 5 && <p className="text-sm text-mute">{tu("nextDesc", { desc: GAME_LEVELS[Math.min(4, r.level) as 0 | 1 | 2 | 3 | 4].desc })}</p>}
 
         <div className="mt-4">
           {concept?.photo ? (
             <figure>
-              <ConceptRender photoUrl={concept.photo.url} zone={concept.photo.stageZone} ceilingY={concept.photo.ceilingY} spec={r.level >= 3 || r.leadingConcept ? concept.current.spec : null} title={`${concept.name} on the build game stage`} showLabel className={r.level < 3 ? "opacity-80" : undefined} />
+              <ConceptRender photoUrl={concept.photo.url} zone={concept.photo.stageZone} ceilingY={concept.photo.ceilingY} spec={r.level >= 3 || r.leadingConcept ? concept.current.spec : null} title={tu("nameOnTheBuildGame", { name: concept.name })} showLabel className={r.level < 3 ? "opacity-80" : undefined} />
               <figcaption className="mt-2 text-[12px] text-mute">
-                {r.stageConcept ? <>Winning design: <Link className="font-bold text-cream underline" href={`/dao/${eventId}/gallery#${concept.id}`}>{concept.name}</Link></> : <>Currently leading the vote: <Link className="font-bold text-cream underline" href={`/dao/${eventId}/gallery#${concept.id}`}>{concept.name}</Link> (not final)</>}
+                {r.stageConcept ? <>{tu("winningDesign")} <Link className="font-bold text-cream underline" href={`/dao/${eventId}/gallery#${concept.id}`}>{concept.name}</Link></> : <>{tu("currentlyLeadingTheVote")} <Link className="font-bold text-cream underline" href={`/dao/${eventId}/gallery#${concept.id}`}>{concept.name}</Link> {tu("notFinal")}</>}
               </figcaption>
             </figure>
           ) : (
-            <p className="rounded-2xl border border-dashed border-line p-4 text-sm text-mute">No stage design has won a vote yet. The game stage stays empty until the community decides.</p>
+            <p className="rounded-2xl border border-dashed border-line p-4 text-sm text-mute">{tu("noStageDesignHasWon")}</p>
           )}
         </div>
       </section>
 
       <section aria-labelledby="ms-h">
-        <SubHead id="ms-h" title="Production milestones" sub={r.canEdit ? "Organizer view: update status as work moves." : undefined} />
+        <SubHead id="ms-h" title={tu("productionMilestones")} sub={r.canEdit ? tu("organizerViewUpdateStatusAs") : undefined} />
         <ol className="relative space-y-3 border-l-2 border-line pl-4">
           {r.milestones.map((m) => {
-            const s = MS_STYLE[m.status];
+            const s = MS_STYLE(tu)[m.status];
             return (
               <li key={m.id} className="relative rounded-2xl border border-line bg-surface p-3">
                 <span className="absolute -left-[27px] top-4 grid size-5 place-items-center rounded-full" style={{ background: s.color }} aria-hidden><s.Icon className="size-3 text-ink" /></span>
@@ -96,13 +100,13 @@ export function RoadmapView() {
                   <span className="font-bold">{m.title}</span>
                   <span className="text-[12px] text-mute">{fmtDate(new Date(m.due).toISOString())}</span>
                 </div>
-                <span className="text-[12px] font-extrabold uppercase" style={{ color: s.color }}>{s.label}</span>
+                <span className="text-[12px] font-extrabold uppercase" style={{ color: s.color }}><Tx>{s.label}</Tx></span>
                 {m.note && <p className="mt-1 text-sm text-mute">{m.note}</p>}
                 {r.canEdit && (
                   <label className="mt-2 flex items-center gap-2 text-sm">
-                    <span className="text-mute">Status</span>
+                    <span className="text-mute">{tu("status2")}</span>
                     <select value={m.status} disabled={busy === m.id} onChange={(e) => setStatus(m.id, e.target.value as Milestone["status"])} className="min-h-11 rounded-xl border border-line bg-ink px-3">
-                      {Object.entries(MS_STYLE).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+                      {Object.entries(MS_STYLE(tu)).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
                     </select>
                   </label>
                 )}
@@ -113,7 +117,7 @@ export function RoadmapView() {
       </section>
 
       <section aria-labelledby="lb-h">
-        <SubHead id="lb-h" title="Top contributors (XP)" sub="XP comes from quality posts, votes and published designs. Daily caps and duplicate checks stop farming." />
+        <SubHead id="lb-h" title={tu("topContributorsXp")} sub={tu("xpComesFromQualityPosts")} />
         <ol className="divide-y divide-line overflow-hidden rounded-[22px] border border-line bg-surface">
           {r.leaderboard.map((m, i) => (
             <li key={m.handle} className="flex items-center gap-3 p-3">

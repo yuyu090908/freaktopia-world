@@ -1,15 +1,21 @@
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PageTitle } from "@/components/ui/primitives";
 import { LoadingSkeleton } from "@/components/ui/States";
 import { CompareView } from "./CompareView";
 
-export const metadata: Metadata = { title: "Festival Compare", description: "Compare 2–3 festivals side by side (demo data)." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("rankingsCompareTitle"), description: tu("rankingsCompareDescription") };
+}
 
 export default function ComparePage() {
+  const tu = useTranslations("pages");
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle kicker="World ranking" title="Festival compare" sub="2〜3イベントを並べて比較。リンクを共有すると同じ比較を開けます。" />
+      <PageTitle kicker={tu("worldRanking")} title={tu("festivalCompare")} sub={tu("n23")} />
       <Suspense fallback={<LoadingSkeleton variant="list" />}>
         <CompareView />
       </Suspense>

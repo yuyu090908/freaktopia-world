@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, Trophy } from "lucide-react";
@@ -13,6 +15,7 @@ interface History {
 
 /** Current WORLD RANKING positions + 14-day rank sparkline for one event. */
 export function EventRankingPanel({ eventId }: { eventId: string }) {
+  const tu = useTranslations("ranking");
   const [data, setData] = useState<History | null>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -26,8 +29,8 @@ export function EventRankingPanel({ eventId }: { eventId: string }) {
     return () => ctl.abort();
   }, [eventId]);
 
-  if (error) return <p className="text-sm text-mute">Ranking history is unavailable right now.</p>;
-  if (!data) return <div className="skeleton h-40 rounded-3xl" aria-label="Loading ranking" />;
+  if (error) return <p className="text-sm text-mute">{tu("rankingHistoryIsUnavailableRight")}</p>;
+  if (!data) return <div className="skeleton h-40 rounded-3xl" aria-label={tu("loadingRanking")} />;
   const last = data.points[data.points.length - 1];
   const series = data.points.map((p) => p.ranks.popular ?? null);
   const max = Math.max(...series.map((v) => v ?? 0), 5);
@@ -40,30 +43,30 @@ export function EventRankingPanel({ eventId }: { eventId: string }) {
     <div className="neon rounded-3xl border bg-surface/90 p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 font-display text-lg uppercase">
-          <Trophy className="size-5 text-orange" aria-hidden /> World ranking
+          <Trophy className="size-5 text-orange" aria-hidden /> {tu("worldRanking")}
         </div>
-        {data.mode === "demo" && <span className="text-[11px] font-bold uppercase tracking-wider text-orange">Demo data</span>}
+        {data.mode === "demo" && <span className="text-[11px] font-bold uppercase tracking-wider text-orange">{tu("demoData")}</span>}
       </div>
       <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {cats.map((c) => (
           <div key={c} className="rounded-2xl bg-surface-2 p-2.5">
-            <dt className="text-[11px] font-bold uppercase tracking-wider text-mute">{CATEGORY_META[c].label}</dt>
+            <dt className="text-[11px] font-bold uppercase tracking-wider text-mute"><Tx>{CATEGORY_META[c].label}</Tx></dt>
             <dd className="font-display text-2xl" style={{ color: CATEGORY_META[c].color }}>{last.ranks[c] ? `#${last.ranks[c]}` : "—"}</dd>
           </div>
         ))}
       </dl>
       <figure className="mt-3">
-        <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-14 w-full" role="img" aria-label={`Most popular rank over the last ${data.points.length} days`}>
+        <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="h-14 w-full" role="img" aria-label={tu("mostPopularRankOverThe", { length: data.points.length })}>
           <polyline points={pts} fill="none" stroke="#B6F05C" strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
         </svg>
         <figcaption className="flex justify-between text-[11px] text-mute">
-          <span>{data.points.length} days ago</span>
-          <span>Most popular rank (higher line = better)</span>
-          <span>today</span>
+          <span>{tu("lengthDaysAgo", { length: data.points.length })}</span>
+          <span>{tu("mostPopularRankHigherLine")}</span>
+          <span>{tu("today")}</span>
         </figcaption>
       </figure>
       <Link href="/rankings" className="mt-2 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-acid">
-        Open WORLD RANKING <ArrowRight className="size-4" aria-hidden />
+        {tu("openWorldRanking")} <ArrowRight className="size-4" aria-hidden />
       </Link>
     </div>
   );

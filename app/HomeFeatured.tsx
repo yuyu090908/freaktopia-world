@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, MapPin, Music2, Users } from "lucide-react";
 import type { FreakEvent } from "@/lib/types";
@@ -10,6 +11,7 @@ import { fmtDate, money } from "@/lib/utils";
 
 /** Big "EVENT OPEN" spotlight card, after the FREAKTOPIA mobile mockups. */
 export function HomeFeatured({ event }: { event: FreakEvent }) {
+  const tu = useTranslations("home");
   const s = useEventStats(event);
   const pct = Math.round((s.raised / event.goal) * 100);
   return (
@@ -17,7 +19,7 @@ export function HomeFeatured({ event }: { event: FreakEvent }) {
       <Link href={`/events/${event.id}`} className="relative block aspect-[16/10] md:aspect-auto md:min-h-[320px]" tabIndex={-1} aria-hidden="true">
         <EventCover id={event.id} sizes="(min-width:768px) 560px, 100vw" />
         <span className="absolute left-3 top-3 -rotate-6 rounded-2xl border-[3px] border-ink bg-coral px-3 py-1.5 font-display text-lg uppercase text-ink shadow-[0_4px_0_#080808]">
-          Event open
+          {tu("eventOpen")}
         </span>
         <DemoBadge className="absolute right-3 top-3 bg-ink" />
       </Link>
@@ -34,15 +36,15 @@ export function HomeFeatured({ event }: { event: FreakEvent }) {
           <li className="flex items-center gap-2"><Music2 className="size-4 text-acid" aria-hidden />{event.genres.join(" / ")}</li>
         </ul>
         <div className="mt-1 flex items-center justify-between text-sm font-bold">
-          <span className="inline-flex items-center gap-1.5"><Users className="size-4" aria-hidden />{s.supporters.toLocaleString("en-US")} supporters</span>
+          <span className="inline-flex items-center gap-1.5"><Users className="size-4" aria-hidden />{tu("tolocalestringSupporters", { toLocaleString: s.supporters.toLocaleString("en-US") })}</span>
           <span>{money(s.raised)} / {money(event.goal)}</span>
         </div>
         <div className="flex items-center gap-3">
-          <Progress value={s.raised / event.goal} label={`${pct}% of funding goal`} />
+          <Progress value={s.raised / event.goal} label={tu("pctOfFundingGoal", { pct })} />
           <span className="shrink-0 whitespace-nowrap text-sm font-bold">{pct}%</span>
         </div>
         <Link href={`/events/${event.id}`} className="mt-auto inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-coral px-6 font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b] hover:bg-[#ff7a75]">
-          Support &amp; join <ArrowRight className="size-5" aria-hidden />
+          {tu("supportJoin")} <ArrowRight className="size-5" aria-hidden />
         </Link>
       </div>
     </article>

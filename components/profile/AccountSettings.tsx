@@ -48,7 +48,7 @@ export function AccountSettings() {
     return (
       <div>
         <p className="text-mute">{t("notSignedIn")}</p>
-        <Link href={href("/auth/signin?returnTo=/profile/settings")} className={btnClass("primary", "md", "mt-4")}>{tauth("signIn")}</Link>
+        <Link href={href("/login?returnTo=/settings")} className={btnClass("primary", "md", "mt-4")}>{tauth("signIn")}</Link>
       </div>
     );
   }

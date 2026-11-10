@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { EVENTS, getEvent } from "@/lib/data";
@@ -10,7 +11,8 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const e = getEvent(id);
-  return { title: e ? `Tickets · ${e.name}` : "Tickets" };
+  const tu = await getTranslations("seo");
+  return { title: e ? tu("ticketsWithName", { name: e.name }) : tu("tickets") };
 }
 
 export default async function TicketsPage({ params }: { params: Promise<{ id: string }> }) {

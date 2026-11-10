@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
@@ -29,6 +30,7 @@ export function BottomSheet({
   /** false = no dimmed backdrop (used on the map so it stays visible). */
   modal?: boolean;
 }) {
+  const tu = useTranslations("ui");
   const id = useId();
   const panel = useRef<HTMLDivElement>(null);
   const opener = useRef<Element | null>(null);
@@ -75,7 +77,7 @@ export function BottomSheet({
 
   return createPortal(
     <div className="fixed inset-0 z-[70] flex items-end justify-center md:items-center" role="presentation">
-      {modal && <button aria-label="Close" tabIndex={-1} className="absolute inset-0 bg-black/70" onClick={onClose} />}
+      {modal && <button aria-label={tu("close")} tabIndex={-1} className="absolute inset-0 bg-black/70" onClick={onClose} />}
       <div
         ref={panel}
         role="dialog"
@@ -111,7 +113,7 @@ export function BottomSheet({
           <h2 id={id} className="min-w-0 text-2xl uppercase">
             {title}
           </h2>
-          <button type="button" onClick={onClose} aria-label="Close" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2 hover:bg-line">
+          <button type="button" onClick={onClose} aria-label={tu("close")} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2 hover:bg-line">
             <X className="size-5" />
           </button>
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 /**
  * Lightweight fallback without WebGL (or with ?renderer=lite): an equirectangular SVG of the real
  * Natural Earth coastlines with the same festival landmarks as plain buttons. No GPU needed.
@@ -29,6 +31,8 @@ function toPath(g: Geo) {
 }
 
 export function LiteWorldMap({ events, selectedId, onSelect, zoomRef }: { events: WorldEvent[]; selectedId: string | null; onSelect: (id: string | null) => void; zoomRef?: React.MutableRefObject<{ zoomIn: () => void; zoomOut: () => void; reset: () => void; flyToEvents: (ids: string[]) => void } | null> }) {
+  const tu = useTranslations("world");
+  const tx = useTx();
   const [land, setLand] = useState("");
   const [cam, setCam] = useState({ x: 0.5, y: 0.42, k: 1 });
   const drag = useRef<{ x: number; y: number; cx: number; cy: number } | null>(null);
@@ -104,7 +108,7 @@ export function LiteWorldMap({ events, selectedId, onSelect, zoomRef }: { events
               key={e.id}
               type="button"
               data-testid="landmark"
-              aria-label={ariaFor(e)}
+              aria-label={ariaFor(e, tu, tx)}
               aria-pressed={sel}
               onPointerDown={(ev) => ev.stopPropagation()}
               onClick={() => onSelect(e.id)}
@@ -121,12 +125,12 @@ export function LiteWorldMap({ events, selectedId, onSelect, zoomRef }: { events
                 }}
               />
               {e.dao && <span className="fk-dao sr-only">DAO</span>}
-              <span className="sr-only">{STATUS_META[e.status].label}</span>
+              <span className="sr-only"><Tx>{STATUS_META[e.status].label}</Tx></span>
             </button>
           );
         })}
       </div>
-      <p className="pointer-events-none absolute bottom-1 left-2 text-[10px] text-mute">Lite map (no WebGL) · Natural Earth</p>
+      <p className="pointer-events-none absolute bottom-1 left-2 text-[10px] text-mute">{tu("liteMapNoWebglNatural")}</p>
     </div>
   );
 }

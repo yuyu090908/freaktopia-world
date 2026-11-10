@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { AlienG } from "./Alien";
 import { cn, rng } from "@/lib/utils";
 
@@ -55,6 +56,7 @@ function Skyline({ seed, y, w, color, windowColor, count = 9 }: { seed: string; 
 /* Event cover art: deterministic per event id                         */
 /* ------------------------------------------------------------------ */
 export function EventArt({ id, palette, className, label }: { id: string; palette: [string, string, string]; className?: string; label?: string }) {
+  const tu = useTranslations("ui");
   const [p1, p2, p3] = palette;
   const r = rng(id);
   const sunX = 220 + r() * 140;
@@ -63,7 +65,7 @@ export function EventArt({ id, palette, className, label }: { id: string; palett
   const ty = 110 + r() * 30;
   const tent = `M${tx - 30} 240 C${tx - 60} 200 ${tx + 20} 180 ${tx - 4} ${ty + 30} C${tx - 14} ${ty + 10} ${tx - 6} ${ty} ${tx} ${ty}`;
   return (
-    <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className={cn("block", className)} role="img" aria-label={label ?? "Illustrated event cover"}>
+    <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className={cn("block", className)} role="img" aria-label={label ?? tu("illustratedEventCover")}>
       <rect width="400" height="240" fill={p1} />
       <g opacity="0.9">
         {[150, 118, 88, 60].map((rad, i) => (
@@ -90,9 +92,10 @@ export function EventArt({ id, palette, className, label }: { id: string; palett
 /* Home hero: alien DJ above a psychedelic music city                  */
 /* ------------------------------------------------------------------ */
 export function HeroArt({ className }: { className?: string }) {
+  const tu = useTranslations("ui");
   const rays = 18;
   return (
-    <svg viewBox="0 0 400 400" className={cn("block", className)} role="img" aria-label="An original alien DJ performing above a psychedelic music city">
+    <svg viewBox="0 0 400 400" className={cn("block", className)} role="img" aria-label={tu("anOriginalAlienDjPerforming")}>
       <defs>
         <clipPath id="hero-clip">
           <circle cx="200" cy="200" r="196" />
@@ -143,7 +146,7 @@ export function HeroArt({ className }: { className?: string }) {
         <circle cx="136" cy="246" r="4" fill={C.cream} />
         <circle cx="264" cy="246" r="4" fill={C.cream} />
         <path d="M124 290 L140 290 M150 290 L166 290 M234 290 L250 290 M260 290 L276 290" stroke={INK} strokeWidth={6} strokeLinecap="round" />
-        <text x="200" y="302" textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize="18" fill={INK}>FREAK</text>
+        <text x="200" y="302" textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize="18" fill={INK}>FREAK</text>{/* i18n-ignore: logo lettering in the artwork */}
         {/* city */}
         <Skyline seed="hero-city" y={400} w={400} color="#1b1b1f" windowColor={C.acid} count={9} />
         <rect x="0" y="384" width="400" height="20" fill={INK} />
@@ -191,7 +194,7 @@ export function ExploreArt({ kind, className }: { kind: ExploreKind; className?:
         <g transform="rotate(-8 100 75)">
           <path d="M28 44 h144 v24 a10 10 0 0 0 0 20 v24 h-144 v-24 a10 10 0 0 0 0 -20 Z" fill={C.acid} stroke={INK} strokeWidth={6} strokeLinejoin="round" />
           <path d="M128 48 v64" stroke={INK} strokeWidth={4} strokeDasharray="6 6" />
-          <text x="78" y="86" textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize="20" fill={INK}>RAVE</text>
+          <text x="78" y="86" textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize="20" fill={INK}>RAVE</text>{/* i18n-ignore: logo lettering in the artwork */}
           <circle cx="150" cy="78" r="9" fill={C.coral} stroke={INK} strokeWidth={4} />
         </g>
       )}
@@ -249,11 +252,12 @@ export function ExploreArt({ kind, className }: { kind: ExploreKind; className?:
 /* Venue art                                                            */
 /* ------------------------------------------------------------------ */
 export function VenueArt({ id, palette, className, label }: { id: string; palette: [string, string, string]; className?: string; label?: string }) {
+  const tu = useTranslations("ui");
   const [p1, p2] = palette;
   const r = rng(id);
   const roof = r();
   return (
-    <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className={cn("block", className)} role="img" aria-label={label ?? "Venue illustration"}>
+    <svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" className={cn("block", className)} role="img" aria-label={label ?? tu("venueIllustration")}>
       <rect width="400" height="240" fill={p1} />
       <rect width="400" height="240" fill={p2} opacity="0.25" />
       {Array.from({ length: 6 }).map((_, i) => (

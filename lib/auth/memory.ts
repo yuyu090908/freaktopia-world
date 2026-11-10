@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import type { AlienIdentity } from "@/lib/alien/catalog";
-import { AuthError, DEFAULT_PRIVACY, type AuditEntry, type AuthProvider, type AuthStore, type PrivacyRecord, type ProfileRecord, type TokenKind, type UserRecord, type WalletLink } from "./types";
+import { formatAlienPublicId, type AlienIdentity } from "@/lib/alien/catalog";
+import { AuthError, DEFAULT_PRIVACY, type AuditEntry, type AuthProvider, laterStep, type AuthStore, type PrivacyRecord, type ProfileRecord, type TokenKind, type UserRecord, type WalletLink } from "./types";
 
 interface Db {
   users: Map<string, UserRecord>;
@@ -13,6 +13,7 @@ interface Db {
   aliens: Map<string, AlienIdentity>;
   wallets: Map<string, WalletLink>;
   audit: AuditEntry[];
+  publicSeq: number;
 }
 
 const g = globalThis as unknown as { __fkAuthDb?: Db };
@@ -20,7 +21,7 @@ const g = globalThis as unknown as { __fkAuthDb?: Db };
 function db(): Db {
   g.__fkAuthDb ??= {
     users: new Map(), byEmail: new Map(), profiles: new Map(), privacy: new Map(), providers: new Map(),
-    sessions: new Map(), tokens: new Map(), aliens: new Map(), wallets: new Map(), audit: [],
+    sessions: new Map(), tokens: new Map(), aliens: new Map(), wallets: new Map(), audit: [], publicSeq: 1000,
   };
   return g.__fkAuthDb;
 }
@@ -50,7 +51,7 @@ export const memoryStore: AuthStore = {
     const u: UserRecord = { id: randomUUID(), email: e, emailVerified, passwordHash, createdAt: new Date().toISOString() };
     d.users.set(u.id, u);
     d.byEmail.set(e, u.id);
-    d.profiles.set(u.id, { userId: u.id, displayName: null, username: null, country: null, locale, favoriteGenres: [], xp: 0, revealSeen: false });
+    d.profiles.set(u.id, { userId: u.id, displayName: null, username: null, country: null, locale, favoriteGenres: [], xp: 0, revealSeen: false, onboardingStep: "reveal" });
     d.privacy.set(u.id, { userId: u.id, ...DEFAULT_PRIVACY });
     return { ...u };
   },
@@ -116,7 +117,13 @@ export const memoryStore: AuthStore = {
       const taken = [...db().profiles.values()].some((x) => x.userId !== userId && x.username?.toLowerCase() === patch.username!.toLowerCase());
       if (taken) throw new AuthError("USERNAME_TAKEN");
     }
-    Object.assign(p, patch);
+    const { onboardingStep, revealSeen, ...rest } = patch;
+    Object.assign(p, rest);
+    let step = p.onboardingStep;
+    if (revealSeen) step = laterStep(step, "name");
+    if (onboardingStep) step = laterStep(step, onboardingStep);
+    p.onboardingStep = step;
+    p.revealSeen = step !== "reveal";
     return { ...p };
   },
   async getPrivacy(userId) {
@@ -136,7 +143,7 @@ export const memoryStore: AuthStore = {
     // Check-and-set runs without an await in between: atomic in one Node process (like a unique index).
     const existing = db().aliens.get(userId);
     if (existing) return { alien: { ...existing }, created: false };
-    const a: AlienIdentity = { ...traits, userId, seed, assetVersion, createdAt: new Date().toISOString() };
+    const a: AlienIdentity = { ...traits, userId, publicId: formatAlienPublicId(++db().publicSeq), seed, assetVersion, createdAt: new Date().toISOString() };
     db().aliens.set(userId, a);
     return { alien: { ...a }, created: true };
   },

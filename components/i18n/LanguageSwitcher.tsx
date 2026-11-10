@@ -141,7 +141,7 @@ export function LanguageSwitcher() {
         className="inline-flex h-11 items-center gap-1 rounded-full px-2.5 text-xs font-extrabold uppercase hover:bg-surface"
       >
         <Globe className="size-5" aria-hidden />
-        <span className="hidden min-[360px]:inline">{toLocale(locale) === "zh-CN" ? "中文" : locale}</span>
+        <span className="hidden min-[360px]:inline">{toLocale(locale) === "zh-CN" ? "中文" : locale}</span>{/* i18n-ignore: language names are always shown in their own script */}
       </button>
       {desktop && open && (
         <div ref={pop} className="absolute right-0 top-[calc(100%+8px)] z-[70] w-72 rounded-2xl border-2 border-line bg-[#0D121B] shadow-[0_16px_40px_rgba(0,0,0,.6)]">

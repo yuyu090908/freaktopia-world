@@ -5,7 +5,7 @@ import { DEFAULT_LOCALE, LOCALES, LOCALE_META, urlCode } from "@/i18n/config";
 
 /** One entry per page and language (/en/world, /ja/world…), each listing every language version (hreflang). */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = ["", "/world", "/events", "/djs", "/venues", "/live", "/rankings", "/dao", "/after-party", "/avatar", "/quests", "/nft", "/about", "/how-it-works", "/help", "/contact", "/terms", "/privacy", "/auth/signup"];
+  const pages = ["", "/world", "/events", "/djs", "/venues", "/live", "/rankings", "/dao", "/after-party", "/avatar", "/quests", "/nft", "/about", "/how-it-works", "/help", "/contact", "/terms", "/privacy", "/signup"];
   const paths = [
     ...pages,
     ...EVENTS.map((e) => `/events/${e.id}`),

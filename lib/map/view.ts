@@ -162,8 +162,22 @@ export function writeWorldUrl(s: WorldUrlState): string {
 }
 
 /** Accessible name for a landmark: name and city first, then level and status in words. */
-export function ariaFor(e: WorldEvent) {
+type Translate = (key: string, values?: Record<string, string | number>) => string;
+
+/**
+ * Screen-reader label for a festival marker. With `t` (next-intl, world namespace) and `tx` (fixed labels, see
+ * lib/i18n/labels.ts) it is written in the visitor's language; without them (server code, tests) in English.
+ */
+export function ariaFor(e: WorldEvent, t?: Translate, tx?: (english: string) => string) {
   const s = STATUS_META[e.status];
+  if (t && tx) {
+    return [
+      t("markerAria", { name: e.name, city: e.city, level: e.level, levelName: tx(e.growthResult.name), status: tx(s.label) }),
+      e.ranking.badge ? t("markerAriaRank", { rank: e.ranking.rank ?? 0 }) : "",
+      e.dao ? t("markerAriaDao") : "",
+      e.location.precision === "city" ? t("markerAriaApprox") : "",
+    ].join("");
+  }
   const rank = e.ranking.badge ? `, rank ${e.ranking.rank} (popular, all time)` : "";
   return `${e.name}, ${e.city} · Level ${e.level} ${e.growthResult.name}, ${s.label}${rank}${e.dao ? ", DAO active" : ""}${e.location.precision === "city" ? ", approximate city location" : ""}`;
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import { DaoAvatar } from "@/components/dao/DaoAvatar";
 
 import Link from "next/link";
@@ -40,11 +42,12 @@ export interface ProposalDto {
   isDemo: boolean;
 }
 
-const GROUPS: [string, ProposalState[]][] = [
-  ["Active", ["DISCUSSION", "REVIEW", "RE_REVIEW", "VOTING"]],
-  ["Delivery", ["APPROVED", "FEASIBILITY_CHECK", "ORGANIZER_CONFIRMATION", "EXECUTION"]],
-  ["Done", ["COMPLETED", "REJECTED", "EXPIRED", "CANCELLED"]],
-  ["Drafts", ["DRAFT"]],
+const GROUP_KEY: Record<string, string> = { Active: "groupActive", Delivery: "groupDelivery", Done: "groupDone", Drafts: "groupDrafts" };
+const GROUPS: [string, ProposalState[]][] = [ // i18n-ignore — ids; labels via GROUP_KEY
+  ["Active", ["DISCUSSION", "REVIEW", "RE_REVIEW", "VOTING"]], // i18n-ignore
+  ["Delivery", ["APPROVED", "FEASIBILITY_CHECK", "ORGANIZER_CONFIRMATION", "EXECUTION"]], // i18n-ignore
+  ["Done", ["COMPLETED", "REJECTED", "EXPIRED", "CANCELLED"]], // i18n-ignore
+  ["Drafts", ["DRAFT"]], // i18n-ignore
 ];
 
 export function ProposalsView() {
@@ -56,6 +59,7 @@ export function ProposalsView() {
 }
 
 function Inner() {
+  const tu = useTranslations("dao");
   const { eventId, setJoinOpen, home } = useDao();
   const meUid = home?.me?.uid;
   const params = useSearchParams();
@@ -75,23 +79,23 @@ function Inner() {
     <div className="space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-[34px] uppercase leading-none sm:text-5xl">Proposals</h1>
-          <p className="mt-2 max-w-2xl text-sm text-mute">Draft → Discussion → Review → Voting → Approved/Rejected → Feasibility check → Organizer confirmation → Execution → Completed.</p>
+          <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{tu("proposals")}</h1>
+          <p className="mt-2 max-w-2xl text-sm text-mute">{tu("draftDiscussionReviewVotingApproved")}</p>
         </div>
         {state.data.canCreate ? (
-          <Button onClick={() => setForm(true)}><Plus className="size-5" aria-hidden /> New proposal</Button>
+          <Button onClick={() => setForm(true)}><Plus className="size-5" aria-hidden /> {tu("newProposal")}</Button>
         ) : null}
       </div>
-      {!state.data.canCreate && <Gate reason="Only staked members can create proposals." action={<Button size="sm" onClick={() => setJoinOpen(true)}>Join DAO</Button>} />}
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label="Proposal groups">
+      {!state.data.canCreate && <Gate reason={tu("onlyStakedMembersCanCreate")} action={<Button size="sm" onClick={() => setJoinOpen(true)}>{tu("joinDao")}</Button>} />}
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0" role="group" aria-label={tu("proposalGroups")}>
         {GROUPS.map(([g, states]) => (
           <Chip key={g} active={group === g} onClick={() => setGroup(g)}>
-            {g} ({state.data.proposals.filter((p) => states.includes(p.state)).length})
+            {tu(GROUP_KEY[g])} ({state.data.proposals.filter((p) => states.includes(p.state)).length})
           </Chip>
         ))}
       </div>
       {list.length === 0 ? (
-        <EmptyState title="Nothing here" body="No proposals in this stage." />
+        <EmptyState title={tu("nothingHere")} body={tu("noProposalsInThisStage")} />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {list.map((p) => (
@@ -106,9 +110,9 @@ function Inner() {
                 <div className="mt-auto flex flex-wrap gap-x-3 pt-3 text-[12px] text-mute">
                   <span className="inline-flex items-center gap-1"><DaoAvatar handle={p.authorHandle} mine={p.authorUid === meUid} size={20} />@{p.authorHandle}</span>
                   <span>{ago(p.createdAt)}</span>
-                  <span>{METHOD_LABEL[p.method]}</span>
+                  <span><Tx>{METHOD_LABEL[p.method]}</Tx></span>
                   {p.current.estimatedCost > 0 && <span>{usd(p.current.estimatedCost)}</span>}
-                  {p.vote?.status === "open" && <span className="font-extrabold text-acid">{Math.round(p.vote.participation * 100)}% voted</span>}
+                  {p.vote?.status === "open" && <span className="font-extrabold text-acid">{tu("roundVoted", { round: Math.round(p.vote.participation * 100) })}</span>}
                   {p.versionCount > 1 && <span>v{p.current.version}</span>}
                 </div>
               </Link>
@@ -122,6 +126,8 @@ function Inner() {
 }
 
 function ProposalForm({ open, onClose, onCreated }: { open: boolean; onClose: () => void; onCreated: (id: string) => void }) {
+  const tx = useTx();
+  const tu = useTranslations("dao");
   const { eventId, home } = useDao();
   const gallery = useDaoQuery<{ concepts: ConceptDto[] }>(open ? `${eventId}/gallery` : null);
   // Prefill from links elsewhere on the site (DJ Arena "Nominate", After party "Propose", Venue "Stage designer").
@@ -154,38 +160,38 @@ function ProposalForm({ open, onClose, onCreated }: { open: boolean; onClose: ()
     });
     setBusy(false);
     if (!r.ok) return setErr(r.error.issues?.map((i) => `${i.path}: ${i.message}`).join(" · ") || r.error.message);
-    toast({ title: submitNow ? "Proposal opened for discussion" : "Draft saved", body: r.data.xp ? `+${r.data.xp} DAO XP` : undefined, tone: "success" });
+    toast({ title: submitNow ? tu("proposalOpenedForDiscussion") : tu("draftSaved"), body: r.data.xp ? tu("xpDaoXp", { xp: r.data.xp }) : undefined, tone: "success" });
     onCreated(r.data.proposal.id);
   };
   const concepts = gallery.state.status === "ok" ? gallery.state.data.concepts : [];
   return (
-    <BottomSheet open={open} onClose={onClose} title="New proposal" className="md:max-w-2xl">
+    <BottomSheet open={open} onClose={onClose} title={tu("newProposal")} className="md:max-w-2xl">
       <div className="space-y-4">
-        <Field id="p-title" label="Title"><Input id="p-title" value={f.title} onChange={(e) => set("title", e.target.value)} maxLength={120} /></Field>
+        <Field id="p-title" label={tu("title2")}><Input id="p-title" value={f.title} onChange={(e) => set("title", e.target.value)} maxLength={120} /></Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field id="p-cat" label="Category">
+          <Field id="p-cat" label={tu("category")}>
             <Select id="p-cat" value={f.category} onChange={(e) => set("category", e.target.value as DiscussionCategory)}>
-              {DISCUSSION_CATEGORIES.map((c) => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
+              {DISCUSSION_CATEGORIES.map((c) => <option key={c} value={c}>{tx(CATEGORY_LABEL[c])}</option>)}
             </Select>
           </Field>
-          <Field id="p-event" label="Event"><Input id="p-event" value={home?.event.name ?? ""} readOnly /></Field>
+          <Field id="p-event" label={tu("event")}><Input id="p-event" value={home?.event.name ?? ""} readOnly /></Field>
         </div>
-        <Field id="p-desc" label="Description" hint="Why this matters (20+ characters)"><Textarea id="p-desc" rows={4} value={f.description} onChange={(e) => set("description", e.target.value)} /></Field>
-        <Field id="p-change" label="Proposed change" hint="Exactly what should change if approved"><Textarea id="p-change" rows={2} value={f.proposedChange} onChange={(e) => set("proposedChange", e.target.value)} /></Field>
-        <Field id="p-cost" label="Estimated cost (USD)" hint="Your estimate; the treasury and feasibility check verify it later">
+        <Field id="p-desc" label={tu("description")} hint={tu("whyThisMatters20Characters")}><Textarea id="p-desc" rows={4} value={f.description} onChange={(e) => set("description", e.target.value)} /></Field>
+        <Field id="p-change" label={tu("proposedChange")} hint={tu("exactlyWhatShouldChangeIf")}><Textarea id="p-change" rows={2} value={f.proposedChange} onChange={(e) => set("proposedChange", e.target.value)} /></Field>
+        <Field id="p-cost" label={tu("estimatedCostUsd")} hint={tu("yourEstimateTheTreasuryAnd")}>
           <Input id="p-cost" type="number" min={0} value={f.estimatedCost} onChange={(e) => set("estimatedCost", Number(e.target.value))} />
         </Field>
-        <Field id="p-method" label="Voting method">
+        <Field id="p-method" label={tu("votingMethod")}>
           <Select id="p-method" value={f.method} onChange={(e) => set("method", e.target.value as VotingMethod)}>
-            {(["yes_no_abstain", "single", "multiple", "ranked"] as VotingMethod[]).map((m) => <option key={m} value={m}>{METHOD_LABEL[m]}{m === "multiple" || m === "ranked" ? " (beta)" : ""}</option>)}
+            {(["yes_no_abstain", "single", "multiple", "ranked"] as VotingMethod[]).map((m) => <option key={m} value={m}>{tx(METHOD_LABEL[m])}{m === "multiple" || m === "ranked" ? tu("beta") : ""}</option>)}
           </Select>
         </Field>
         {f.method !== "yes_no_abstain" && (
           <fieldset className="space-y-2">
-            <legend className="text-sm font-bold">Voting options</legend>
+            <legend className="text-sm font-bold">{tu("votingOptions")}</legend>
             {concepts.length > 0 && (
               <div className="space-y-1">
-                <p className="text-[12px] text-mute">Add stage concepts from the gallery as options:</p>
+                <p className="text-[12px] text-mute">{tu("addStageConceptsFromThe")}</p>
                 <div className="flex flex-wrap gap-2">
                   {concepts.slice(0, 8).map((c) => {
                     const on = conceptIds.includes(c.id);
@@ -209,37 +215,37 @@ function ProposalForm({ open, onClose, onCreated }: { open: boolean; onClose: ()
             )}
             {options.map((o, i) => (
               <div key={i} className="flex gap-2">
-                <label className="sr-only" htmlFor={`opt-${i}`}>Option {i + 1}</label>
+                <label className="sr-only" htmlFor={`opt-${i}`}>{tu("optionValue", { value: i + 1 })}</label>
                 <Input id={`opt-${i}`} value={o.label} onChange={(e) => setOptions((x) => x.map((y, j) => (j === i ? { ...y, label: e.target.value } : y)))} />
-                <button type="button" aria-label={`Remove option ${i + 1}`} className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-2xl border-2 border-line" onClick={() => setOptions((x) => x.filter((_, j) => j !== i))}><Trash2 className="size-4" aria-hidden /></button>
+                <button type="button" aria-label={tu("removeOptionValue", { value: i + 1 })} className="inline-flex size-[52px] shrink-0 items-center justify-center rounded-2xl border-2 border-line" onClick={() => setOptions((x) => x.filter((_, j) => j !== i))}><Trash2 className="size-4" aria-hidden /></button>
               </div>
             ))}
-            <Button size="sm" variant="ghost" onClick={() => setOptions((x) => [...x, { label: "" }])}><Plus className="size-4" aria-hidden /> Add option</Button>
+            <Button size="sm" variant="ghost" onClick={() => setOptions((x) => [...x, { label: "" }])}><Plus className="size-4" aria-hidden /> {tu("addOption")}</Button>
           </fieldset>
         )}
         <div className="grid grid-cols-2 gap-3">
-          <Field id="p-dd" label="Discussion (days)"><Input id="p-dd" type="number" min={1} max={14} value={f.discussionDays} onChange={(e) => set("discussionDays", Number(e.target.value))} /></Field>
-          <Field id="p-vd" label="Voting (days)"><Input id="p-vd" type="number" min={1} max={14} value={f.votingDays} onChange={(e) => set("votingDays", Number(e.target.value))} /></Field>
+          <Field id="p-dd" label={tu("discussionDays")}><Input id="p-dd" type="number" min={1} max={14} value={f.discussionDays} onChange={(e) => set("discussionDays", Number(e.target.value))} /></Field>
+          <Field id="p-vd" label={tu("votingDays")}><Input id="p-vd" type="number" min={1} max={14} value={f.votingDays} onChange={(e) => set("votingDays", Number(e.target.value))} /></Field>
         </div>
         <fieldset className="space-y-2">
-          <legend className="text-sm font-bold">Supporting documents (links)</legend>
+          <legend className="text-sm font-bold">{tu("supportingDocumentsLinks")}</legend>
           {docs.map((d, i) => (
             <div key={i} className="grid grid-cols-2 gap-2">
-              <Input aria-label={`Document ${i + 1} name`} placeholder="Name" value={d.name} onChange={(e) => setDocs((x) => x.map((y, j) => (j === i ? { ...y, name: e.target.value } : y)))} />
-              <Input aria-label={`Document ${i + 1} URL`} placeholder="https://" value={d.url} onChange={(e) => setDocs((x) => x.map((y, j) => (j === i ? { ...y, url: e.target.value } : y)))} />
+              <Input aria-label={tu("documentValueName", { value: i + 1 })} placeholder={tu("name")} value={d.name} onChange={(e) => setDocs((x) => x.map((y, j) => (j === i ? { ...y, name: e.target.value } : y)))} />
+              <Input aria-label={tu("documentValueUrl", { value: i + 1 })} placeholder="https://" value={d.url} onChange={(e) => setDocs((x) => x.map((y, j) => (j === i ? { ...y, url: e.target.value } : y)))} />
             </div>
           ))}
-          <Button size="sm" variant="ghost" onClick={() => setDocs((x) => [...x, { name: "", url: "" }])}><FileText className="size-4" aria-hidden /> Add document</Button>
+          <Button size="sm" variant="ghost" onClick={() => setDocs((x) => [...x, { name: "", url: "" }])}><FileText className="size-4" aria-hidden /> {tu("addDocument")}</Button>
         </fieldset>
-        <ImagePicker onUploaded={(f2) => setImages((x) => [...x, ...f2].slice(0, 6))} label="Add images" />
-        {images.length > 0 && <div className="flex flex-wrap gap-2">{images.map((i) => <img key={i.id} src={i.url} alt="Proposal image preview" className="size-16 rounded-lg object-cover" />)}</div>}
-        <DemoNotice>Proposals are public. The organizer moves them to voting after review; vote results are set by the engine, not by people.</DemoNotice>
+        <ImagePicker onUploaded={(f2) => setImages((x) => [...x, ...f2].slice(0, 6))} label={tu("addImages")} />
+        {images.length > 0 && <div className="flex flex-wrap gap-2">{images.map((i) => <img key={i.id} src={i.url} alt={tu("proposalImagePreview")} className="size-16 rounded-lg object-cover" />)}</div>}
+        <DemoNotice>{tu("proposalsArePublicTheOrganizer")}</DemoNotice>
         {err && <p role="alert" className="text-sm text-coral">{err}</p>}
         <div className="flex gap-2">
-          <Button variant="ghost" className="flex-1" onClick={() => submit(false)} disabled={busy}>Save draft</Button>
-          <Button className="flex-1" onClick={() => submit(true)} disabled={busy}>{busy ? "Saving…" : "Open for discussion"}</Button>
+          <Button variant="ghost" className="flex-1" onClick={() => submit(false)} disabled={busy}>{tu("saveDraft")}</Button>
+          <Button className="flex-1" onClick={() => submit(true)} disabled={busy}>{busy ? tu("saving") : tu("openForDiscussion")}</Button>
         </div>
-        <p className="text-[12px] text-mute">States: {Object.keys(STATE_META).length} lifecycle states incl. cancelled, expired and re-review.</p>
+        <p className="text-[12px] text-mute">{tu("statesLengthLifecycleStatesIncl", { length: Object.keys(STATE_META).length })}</p>
       </div>
     </BottomSheet>
   );

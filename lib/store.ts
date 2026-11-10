@@ -374,5 +374,5 @@ export const toast = (t: Omit<ToastMsg, "id">) => useToast.getState().push(t);
 export function grantXp(n: number, reason: string) {
   const r = useDemo.getState().addXp(n);
   toast({ title: `+${n} XP`, body: reason, tone: "success" });
-  if (r.leveledUp) setTimeout(() => toast({ title: `LEVEL UP! LV.${r.level}`, body: "Your alien grew a little weirder.", tone: "level" }), 400);
+  if (r.leveledUp) setTimeout(() => toast({ title: "LEVEL UP!", body: "Your alien grew a little weirder.", tone: "level" }), 400);
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import maplibregl, { type StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -61,6 +62,9 @@ export default function WorldMap({
   /** Bump to fit the map to the current points. */
   focus: number;
 }) {
+  const tu = useTranslations("world");
+  const tuRef = useRef(tu);
+  tuRef.current = tu;
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<maplibregl.Map | null>(null);
   const markers = useRef(new Map<string, { marker: maplibregl.Marker; node: HTMLButtonElement; level: number; group: string[] }>());
@@ -122,7 +126,14 @@ export default function WorldMap({
       node.dataset.label = label ?? "";
       node.dataset.dao = dao ? "1" : "";
       node.className = "fk-marker";
-      node.setAttribute("aria-label", `${label ? (labelKind === "rank" ? `Rank ${label.replace("#", "")}: ` : `${label}: `) : ""}${event.name}, ${event.city}, level ${level}${event.status === "live" ? ", demo live simulation" : ""}${approximate ? ", approximate location" : ""}${dao ? ", community DAO active" : ""}`);
+      const t = tuRef.current;
+      const prefix = label ? `${labelKind === "rank" ? t("mapAriaRank", { n: label.replace("#", "") }) : label}: ` : "";
+      const parts = [t("mapAriaBase", { name: event.name, city: event.city, level })];
+      if (event.status === "live") parts.push(t("mapAriaDemoLive"));
+      if (approximate) parts.push(t("mapAriaApprox"));
+      if (dao) parts.push(t("mapAriaDao"));
+      node.dataset.aria = prefix + parts.join(", ");
+      node.setAttribute("aria-label", node.dataset.aria);
       node.style.width = `${Math.max(44, size)}px`;
       node.style.height = `${Math.max(44, size * 1.16)}px`;
       node.innerHTML = `${event.status === "live" ? '<span class="fk-live"></span>' : ""}<span class="fk-pin" style="width:${size}px;height:${size * 1.16}px">${markerSvg(level)}</span>${label ? `<span class="fk-rank">${label}</span>` : ""}${dao ? '<span class="fk-dao" aria-hidden="true">DAO</span>' : ""}`;
@@ -172,10 +183,10 @@ export default function WorldMap({
           node.appendChild(badge);
         }
         badge.textContent = `+${group.length - 1}`;
-        node.setAttribute("aria-label", node.getAttribute("aria-label")!.replace(/ \(\+\d+ nearby, tap to zoom\)$/, "") + ` (+${group.length - 1} nearby, tap to zoom)`);
+        node.setAttribute("aria-label", `${node.dataset.aria ?? ""} ${tuRef.current("mapAriaNearby", { n: group.length - 1 })}`);
       } else if (badge) {
         badge.remove();
-        node.setAttribute("aria-label", node.getAttribute("aria-label")!.replace(/ \(\+\d+ nearby, tap to zoom\)$/, ""));
+        node.setAttribute("aria-label", node.dataset.aria ?? "");
       }
     });
   };
@@ -218,7 +229,7 @@ export default function WorldMap({
   return (
     <>
       <div className="absolute inset-0">
-        <div ref={el} className="h-full w-full" role="region" aria-label="World map of demo events" />
+        <div ref={el} className="h-full w-full" role="region" aria-label={tu("worldMapOfDemoEvents")} />
       </div>
       <style>{`
         .fk-marker{display:flex;align-items:flex-end;justify-content:center;background:none;border:0;padding:0;cursor:pointer;}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
 /**
  * Selected festival: a right-hand panel on desktop (map stays visible) and a swipeable bottom
  * sheet on phones (peek → expanded; swipe down or Close to see the whole map again).
@@ -80,7 +81,7 @@ function ActionButton({ a, compact }: { a: Action; compact?: boolean }) {
       )}
     >
       {a.icon}
-      {a.label}
+      <Tx>{a.label}</Tx>
     </Link>
   );
 }
@@ -118,6 +119,7 @@ function MyAlienHere({ e }: { e: WorldEvent }) {
 }
 
 function Details({ e }: { e: WorldEvent }) {
+  const tu = useTranslations("world");
   const g = e.growthResult;
   const t = useTranslations("world");
   const tl = useTranslations("levels");
@@ -129,14 +131,14 @@ function Details({ e }: { e: WorldEvent }) {
     <div className="space-y-4">
       <MyAlienHere e={e} />
       {e.live && (
-        <section aria-label="Live now" className="rounded-2xl border-2 border-coral/60 bg-coral/10 p-3" data-testid="map-live-info">
+        <section aria-label={tu("liveNow")} className="rounded-2xl border-2 border-coral/60 bg-coral/10 p-3" data-testid="map-live-info">
           <div className="flex items-center gap-2 text-[12px] font-extrabold uppercase text-coral">
             <span className="size-2 rounded-full bg-coral" aria-hidden /> {e.live.demo ? tlive("demoLive") : tlive("liveNow")}
           </div>
           <p className="mt-1 text-[14px]">
             {tlive("nowPlaying")}: <b>{e.live.currentDj?.name ?? tlive("betweenSets")}</b>
           </p>
-          <p className="text-[12px] text-mute">{e.live.demo ? tlive("streamDemo") : "Licensed stream"}</p>
+          <p className="text-[12px] text-mute">{e.live.demo ? tlive("streamDemo") : tu("licensedStream")}</p>
           <dl className="mt-2 grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl bg-ink/60 p-2">
               <dt className="text-[10px] uppercase text-mute">{t("facts.onlineViewers")}</dt>
@@ -170,10 +172,10 @@ function Details({ e }: { e: WorldEvent }) {
                 <div className="flex justify-between gap-2">
                   <span>
                     <span aria-hidden>{r.met ? "✓ " : "○ "}</span>
-                    {r.label}
+                    <Tx>{r.label}</Tx>
                   </span>
                   <span className="text-mute">
-                    {r.key === "venueContract" ? (r.met ? "signed" : "not yet") : r.key === "fundingUsd" ? `${usd(r.have)} / ${usd(r.need)}` : `${num(r.have)} / ${num(r.need)}`}
+                    {r.key === "venueContract" ? (r.met ? tu("signed") : tu("notYet")) : r.key === "fundingUsd" ? `${usd(r.have)} / ${usd(r.need)}` : `${num(r.have)} / ${num(r.need)}`}
                   </span>
                 </div>
                 <div className="mt-0.5 h-1.5 overflow-hidden rounded-full bg-surface-2" role="presentation">
@@ -181,7 +183,7 @@ function Details({ e }: { e: WorldEvent }) {
                 </div>
               </li>
             ))}
-            <li className="pt-0.5 text-[11px] text-mute">→ LV.{g.next.level} {tl(String(g.next.level))}</li>
+            <li className="pt-0.5 text-[11px] text-mute">{tu("lvLevelTl", { level: g.next.level, tl: tl(String(g.next.level)) })}</li>
           </ul>
         ) : (
           <p className="mt-2 text-[12px] text-acid">{tl("topReached")}</p>
@@ -198,7 +200,7 @@ function Details({ e }: { e: WorldEvent }) {
         <Row icon={<Vote className="size-4" />} label={t("facts.stakers")}>
           {e.dao ? (
             <>
-              {num(e.dao.stakers)} people · {num(e.dao.staked)} {e.dao.tokenSymbol} escrowed
+              {tu("numPeopleNum2TokensymbolEscrowed", { num: num(e.dao.stakers), num2: num(e.dao.staked), tokenSymbol: e.dao.tokenSymbol })}
               <span className="block text-[11px] text-mute">{t("facts.stakingNote")}</span>
             </>
           ) : (
@@ -221,22 +223,22 @@ function Details({ e }: { e: WorldEvent }) {
           )}
         </Row>
         <Row icon={<Disc3 className="size-4" />} label={t("facts.landmark")}>
-          {LANDMARK_LABEL[e.landmark.type]}
-          {e.landmark.approvedDesign ? <span className="block text-[11px] text-mute">Colours from the DAO-approved stage design “{e.landmark.approvedDesign.name}”.</span> : e.dao ? <span className="block text-[11px] text-mute">No approved DAO stage design yet: default look.</span> : null}
+          <Tx>{LANDMARK_LABEL[e.landmark.type]}</Tx>
+          {e.landmark.approvedDesign ? <span className="block text-[11px] text-mute">{tu("coloursFromTheDaoApproved", { name: e.landmark.approvedDesign.name })}</span> : e.dao ? <span className="block text-[11px] text-mute">{tu("noApprovedDaoStageDesign")}</span> : null}
         </Row>
       </section>
 
       {e.dao && (
         <Link href={`/dao/${e.id}`} className="block rounded-2xl border-2 border-purple/50 bg-purple/10 p-3" data-testid="map-dao">
           <div className="flex items-center justify-between text-[12px] font-extrabold uppercase text-purple">
-            <span>Community DAO · {e.dao.status}</span>
+            <span>{tu("communityDaoStatus", { status: e.dao.status })}</span>
             <ArrowRight className="size-4" aria-hidden />
           </div>
           <p className="mt-1 text-[13px]">
-            {num(e.dao.members)} members · {e.dao.activeProposals} active proposals · {e.dao.openVotes} open votes
+            {tu("numMembersActiveproposalsActivePropo", { num: num(e.dao.members), activeProposals: e.dao.activeProposals, openVotes: e.dao.openVotes })}
           </p>
-          {e.dao.activeVote && <p className="truncate text-[12px] text-mute">Voting now: {e.dao.activeVote}</p>}
-          <p className="text-[11px] text-mute">Banners on the landmark grow with members. They are decoration, not funding progress.</p>
+          {e.dao.activeVote && <p className="truncate text-[12px] text-mute">{tu("votingNowActivevote", { activeVote: e.dao.activeVote })}</p>}
+          <p className="text-[11px] text-mute">{tu("bannersOnTheLandmarkGrow")}</p>
         </Link>
       )}
 
@@ -321,9 +323,10 @@ function KeyNumbers({ e }: { e: WorldEvent }) {
 /** Desktop: right panel. */
 export function EventSidePanel({ e, onClose }: { e: WorldEvent; onClose: () => void }) {
   const ta = useTranslations("world.actions");
+  const tw = useTranslations("world");
   const actions = actionsFor(e, (k) => ta(k));
   return (
-    <section aria-label={`${e.name} summary`} className="wm-panel absolute bottom-4 right-4 top-[124px] z-20 flex w-[400px] flex-col overflow-hidden rounded-[28px] border-2 border-line bg-[#0D121B]/95 shadow-[0_20px_60px_rgba(0,0,0,.55)] backdrop-blur" data-testid="event-panel">
+    <section aria-label={tw("summaryOf", { name: e.name })} className="wm-panel absolute bottom-4 right-4 top-[124px] z-20 flex w-[400px] flex-col overflow-hidden rounded-[28px] border-2 border-line bg-[#0D121B]/95 shadow-[0_20px_60px_rgba(0,0,0,.55)] backdrop-blur" data-testid="event-panel">
       <div className="border-b border-line p-4">
         <Header e={e} onClose={onClose} big />
         <KeyNumbers e={e} />
@@ -344,6 +347,7 @@ export function EventSidePanel({ e, onClose }: { e: WorldEvent; onClose: () => v
 
 /** Phone: bottom sheet with a peek and an expanded state. */
 export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }: { e: WorldEvent; onClose: () => void; expanded: boolean; setExpanded: (v: boolean) => void; onHeight: (h: number) => void }) {
+  const tu = useTranslations("world");
   const ref = useRef<HTMLElement>(null);
   const start = useRef<{ y: number; t: number } | null>(null);
   const [dy, setDy] = useState(0);
@@ -385,7 +389,7 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
   return (
     <section
       ref={ref}
-      aria-label={`${e.name} summary`}
+      aria-label={tw("summaryOf", { name: e.name })}
       data-testid="event-sheet"
       data-expanded={expanded}
       className={cn("wm-sheet absolute inset-x-0 bottom-0 flex flex-col rounded-t-[28px] border-2 border-b-0 border-line bg-[#0D121B]/97 shadow-[0_-12px_40px_rgba(0,0,0,.5)] backdrop-blur", expanded ? "z-40 max-h-[calc(100%-8px)]" : "z-20 max-h-[62%]")}
@@ -418,7 +422,7 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
               <Details e={e} />
             </div>
             <button type="button" onClick={() => setExpanded(false)} className="mx-auto mt-2 flex min-h-11 items-center gap-1 text-[13px] font-bold text-mute">
-              <ChevronDown className="size-4" aria-hidden /> Show less
+              <ChevronDown className="size-4" aria-hidden /> {tu("showLess")}
             </button>
           </div>
         )}

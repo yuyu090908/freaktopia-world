@@ -8,16 +8,16 @@ export interface RewardDef {
   id: string;
   kind: RewardKind;
   name: string;
-  ja: string;
+  desc: string;
   who: "event" | "user";
 }
 
 export const REWARDS: RewardDef[] = [
-  { id: "badge_top1", kind: "ranking_badge", name: "World #1 Badge", ja: "いずれかのランキングで1位になったイベント", who: "event" },
-  { id: "featured_top3", kind: "featured_placement", name: "Featured Placement", ja: "TOP3イベントはトップページで特集枠に表示", who: "event" },
-  { id: "early_backer", kind: "festival_achievement", name: "Early Backer", ja: "応援したイベントがTOP10に入った", who: "user" },
-  { id: "trend_spotter", kind: "community_trophy", name: "Trend Spotter", ja: "フォローしたイベントがTRENDING TOP10に入った", who: "user" },
-  { id: "podium_crown", kind: "avatar_cosmetic", name: "Podium Crown (avatar)", ja: "応援したイベントがMOST POPULAR TOP3に入った", who: "user" },
+  { id: "badge_top1", kind: "ranking_badge", name: "World #1 Badge", desc: "Events that reached #1 in any ranking", who: "event" },
+  { id: "featured_top3", kind: "featured_placement", name: "Featured Placement", desc: "TOP 3 events are featured on the home page", who: "event" },
+  { id: "early_backer", kind: "festival_achievement", name: "Early Backer", desc: "An event you supported entered the TOP 10", who: "user" },
+  { id: "trend_spotter", kind: "community_trophy", name: "Trend Spotter", desc: "An event you follow entered the TRENDING TOP 10", who: "user" },
+  { id: "podium_crown", kind: "avatar_cosmetic", name: "Podium Crown (avatar)", desc: "An event you supported entered the MOST POPULAR TOP 3", who: "user" },
 ];
 
 /** User rewards earned from this browser's demo activity. */

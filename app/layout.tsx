@@ -22,7 +22,7 @@ const bowlby = localFont({
   variable: "--font-bowlby",
   display: "swap",
   weight: "400",
-  fallback: ["Arial Black", "Impact", "sans-serif"],
+  fallback: ["Arial Black", "Impact", "sans-serif"], // i18n-ignore — font names
   adjustFontFallback: "Arial",
 });
 

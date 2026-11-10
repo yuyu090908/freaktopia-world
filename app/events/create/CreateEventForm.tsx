@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,14 +20,14 @@ const genreEnum = z.enum(GENRES as [Genre, ...Genre[]]);
 
 const schema = z
   .object({
-    name: z.string().trim().min(3, "Give your event a name (3+ characters)").max(40, "Keep it under 40 characters"),
-    genres: z.array(genreEnum).min(1, "Pick at least one genre").max(3, "Pick up to 3 genres"),
-    city: z.string().trim().min(2, "Where is it happening?"),
-    date: z.string().min(1, "Choose a date"),
-    startTime: z.string().min(1, "Start time"),
-    endTime: z.string().min(1, "End time"),
-    capacity: z.coerce.number().int().min(20, "At least 20 people").max(100000, "That’s a whole planet"),
-    budget: z.coerce.number().min(0, "Budget can’t be negative"),
+    name: z.string().trim().min(3, "errGiveYourEventAName").max(40, "errKeepItUnder40Characters"),
+    genres: z.array(genreEnum).min(1, "errPickAtLeastOneGenre").max(3, "errPickUpTo3Genres"),
+    city: z.string().trim().min(2, "errWhereIsItHappening"),
+    date: z.string().min(1, "errChooseADate"),
+    startTime: z.string().min(1, "errStartTime"),
+    endTime: z.string().min(1, "errEndTime"),
+    capacity: z.coerce.number().int().min(20, "errAtLeast20People").max(100000, "errThatsAWholePlanet"),
+    budget: z.coerce.number().min(0, "errBudgetCantBeNegative"),
     venueMode: z.enum(["select", "recruit"]),
     venueId: z.string().optional(),
     venueWish: z.string().optional(),
@@ -44,16 +45,16 @@ const schema = z
     afterPartyPrice: z.coerce.number().min(0).optional(),
   })
   .superRefine((v, ctx) => {
-    if (v.venueMode === "select" && !v.venueId) ctx.addIssue({ code: "custom", path: ["venueId"], message: "Choose a venue or switch to recruiting" });
-    if (v.venueMode === "recruit" && !(v.venueWish ?? "").trim()) ctx.addIssue({ code: "custom", path: ["venueWish"], message: "Describe the venue you’re looking for" });
-    if (v.djMaxBpm < v.djMinBpm) ctx.addIssue({ code: "custom", path: ["djMaxBpm"], message: "Max BPM must be above min BPM" });
-    if (!v.tickets.some((t) => t.enabled)) ctx.addIssue({ code: "custom", path: ["tickets"], message: "Enable at least one ticket type" });
-    if (v.afterParty && !(v.afterPartyName ?? "").trim()) ctx.addIssue({ code: "custom", path: ["afterPartyName"], message: "Name your after party" });
+    if (v.venueMode === "select" && !v.venueId) ctx.addIssue({ code: "custom", path: ["venueId"], message: "errChooseAVenueOrSwitch" });
+    if (v.venueMode === "recruit" && !(v.venueWish ?? "").trim()) ctx.addIssue({ code: "custom", path: ["venueWish"], message: "errDescribeTheVenueYoureLooking" });
+    if (v.djMaxBpm < v.djMinBpm) ctx.addIssue({ code: "custom", path: ["djMaxBpm"], message: "errMaxBpmMustBeAbove" });
+    if (!v.tickets.some((t) => t.enabled)) ctx.addIssue({ code: "custom", path: ["tickets"], message: "errEnableAtLeastOneTicket" });
+    if (v.afterParty && !(v.afterPartyName ?? "").trim()) ctx.addIssue({ code: "custom", path: ["afterPartyName"], message: "errNameYourAfterParty" });
   });
 
 type FormValues = z.input<typeof schema>;
 
-const STEPS = ["Basics", "Date & size", "Venue", "DJ call", "Tickets", "After party", "Review"];
+const STEPS = ["stepBasics", "stepDateSize", "stepVenue", "stepDjCall", "stepTickets", "stepAfterParty", "stepReview"] as const;
 const STEP_FIELDS: (keyof FormValues)[][] = [
   ["name", "genres", "city"],
   ["date", "startTime", "endTime", "capacity", "budget"],
@@ -104,6 +105,9 @@ export function CreateEventForm() {
 }
 
 function Inner() {
+  const tu = useTranslations("events");
+  /** Form errors are translation keys (see the schema above); anything else is shown as is. */
+  const msg = (m?: string) => (m ? (tu.has(m) ? tu(m) : m) : undefined);
   const router = useRouter();
   const draft = useDemo((s) => s.eventDraft);
   const savedStep = useDemo((s) => s.eventDraftStep);
@@ -142,10 +146,10 @@ function Inner() {
     setDraft(v as unknown as Partial<EventDraft>);
     const ev = publish();
     if (ev) {
-      grantXp(120, "Published your first event");
+      grantXp(120, tu("xpPublishedYourFirstEvent"));
       setDone(ev.name);
     }
-  }, () => toast({ title: "Some steps need attention", body: "Check the highlighted fields.", tone: "error" }));
+  }, () => toast({ title: tu("someStepsNeedAttention"), body: tu("checkTheHighlightedFields"), tone: "error" }));
 
   const v = watch();
 
@@ -153,11 +157,11 @@ function Inner() {
     return (
       <div className="mx-auto max-w-lg px-4 py-10 text-center">
         <PartyPopper className="mx-auto size-14 text-acid" aria-hidden />
-        <h1 className="mt-4 text-4xl uppercase">{done} is live (demo)</h1>
-        <p className="ja mt-3 text-mute">イベントはこのブラウザ内に保存されました。主催者ダッシュボードで管理できます。実際には公開されていません。</p>
+        <h1 className="mt-4 text-4xl uppercase">{tu("doneIsLiveDemo", { done })}</h1>
+        <p className="mt-3 text-mute">{tu("text4")}</p>
         <div className="mt-6 grid gap-3">
-          <Button onClick={() => router.push("/dashboard?role=organizer")} size="lg">Open organizer dashboard</Button>
-          <Button variant="ghost" onClick={() => { setDone(null); setStep(0); form.reset(DEFAULTS); }}>Create another</Button>
+          <Button onClick={() => router.push("/dashboard?role=organizer")} size="lg">{tu("openOrganizerDashboard")}</Button>
+          <Button variant="ghost" onClick={() => { setDone(null); setStep(0); form.reset(DEFAULTS); }}>{tu("createAnother")}</Button>
         </div>
       </div>
     );
@@ -165,17 +169,17 @@ function Inner() {
 
   return (
     <div className="mx-auto max-w-2xl md:px-6">
-      <PageTitle kicker="Create event" title="Start a rave" sub="7ステップでイベントを作成。入力内容は自動で保存されます。" />
-      <StepProgress step={step} total={STEPS.length} labels={STEPS} />
+      <PageTitle kicker={tu("createEvent")} title={tu("startARave")} sub={tu("n7")} />
+      <StepProgress step={step} total={STEPS.length} labels={STEPS.map((s) => tu(s))} />
 
       <form onSubmit={onSubmit} noValidate className="mt-6 space-y-5 px-4 md:px-0">
         {step === 0 && (
           <>
-            <Field id="name" label="Event name" error={errors.name?.message} hint="例: NEON SLIME SUMMIT">
-              <Input id="name" autoComplete="off" placeholder="e.g. GALACTIC GOO GATHERING" aria-invalid={!!errors.name} {...register("name")} />
+            <Field id="name" label={tu("eventName")} error={msg(errors.name?.message)} hint={tu("neonSlimeSummit")}>
+              <Input id="name" autoComplete="off" placeholder={tu("eGGalacticGooGathering")} aria-invalid={!!errors.name} {...register("name")} />
             </Field>
             <fieldset className="space-y-2">
-              <legend className="text-sm font-bold">Genres <span className="font-semibold text-mute">(up to 3)</span></legend>
+              <legend className="text-sm font-bold">{tu("genres")} <span className="font-semibold text-mute">{tu("upTo3")}</span></legend>
               <Controller
                 control={control}
                 name="genres"
@@ -189,10 +193,10 @@ function Inner() {
                   </div>
                 )}
               />
-              {errors.genres && <p role="alert" className="text-sm font-semibold text-coral">{errors.genres.message}</p>}
+              {errors.genres && <p role="alert" className="text-sm font-semibold text-coral">{msg(errors.genres.message)}</p>}
             </fieldset>
-            <Field id="city" label="City" error={errors.city?.message}>
-              <Input id="city" autoComplete="address-level2" placeholder="Tokyo" list="city-list" aria-invalid={!!errors.city} {...register("city")} />
+            <Field id="city" label={tu("city")} error={msg(errors.city?.message)}>
+              <Input id="city" autoComplete="address-level2" placeholder={tu("tokyo")} list="city-list" aria-invalid={!!errors.city} {...register("city")} />
             </Field>
             <datalist id="city-list">{Array.from(new Set(VENUES.map((x) => x.city))).map((c) => <option key={c} value={c} />)}</datalist>
           </>
@@ -200,21 +204,21 @@ function Inner() {
 
         {step === 1 && (
           <>
-            <Field id="date" label="Date" error={errors.date?.message}>
+            <Field id="date" label={tu("date")} error={msg(errors.date?.message)}>
               <Input id="date" type="date" min="2026-11-10" aria-invalid={!!errors.date} {...register("date")} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field id="startTime" label="Starts" error={errors.startTime?.message}>
+              <Field id="startTime" label={tu("starts")} error={msg(errors.startTime?.message)}>
                 <Input id="startTime" type="time" {...register("startTime")} />
               </Field>
-              <Field id="endTime" label="Ends" error={errors.endTime?.message}>
+              <Field id="endTime" label={tu("ends")} error={msg(errors.endTime?.message)}>
                 <Input id="endTime" type="time" {...register("endTime")} />
               </Field>
             </div>
-            <Field id="capacity" label="Expected attendance" error={errors.capacity?.message}>
+            <Field id="capacity" label={tu("expectedAttendance")} error={msg(errors.capacity?.message)}>
               <Input id="capacity" type="number" inputMode="numeric" {...register("capacity")} />
             </Field>
-            <Field id="budget" label="Budget (USD)" hint="会場費・DJ費・機材費などの合計目安" error={errors.budget?.message}>
+            <Field id="budget" label={tu("budgetUsd")} hint={tu("dj")} error={msg(errors.budget?.message)}>
               <Input id="budget" type="number" inputMode="numeric" {...register("budget")} />
             </Field>
           </>
@@ -222,43 +226,43 @@ function Inner() {
 
         {step === 2 && (
           <>
-            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Venue option">
+            <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={tu("venueOption")}>
               {(["select", "recruit"] as const).map((m) => (
                 <button key={m} type="button" role="radio" aria-checked={v.venueMode === m} onClick={() => setValue("venueMode", m)} className={cn("min-h-14 rounded-2xl border-2 px-3 font-bold", v.venueMode === m ? "border-acid bg-acid/10" : "border-line")}>
-                  {m === "select" ? "Choose a venue" : "Recruit a venue"}
+                  {m === "select" ? tu("chooseAVenue") : tu("recruitAVenue")}
                 </button>
               ))}
             </div>
             {v.venueMode === "select" ? (
               <fieldset className="space-y-2">
-                <legend className="text-sm font-bold">Available venues (demo)</legend>
+                <legend className="text-sm font-bold">{tu("availableVenuesDemo")}</legend>
                 {[...VENUES].sort((a, b) => Number(b.city.toLowerCase() === (v.city ?? "").trim().toLowerCase()) - Number(a.city.toLowerCase() === (v.city ?? "").trim().toLowerCase())).map((x) => (
                   <label key={x.id} className={cn("flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 p-3", v.venueId === x.id ? "border-acid bg-acid/10" : "border-line")}>
                     <input type="radio" value={x.id} {...register("venueId")} className="size-5 accent-[#B6F05C]" />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{x.name}</span>
-                      <span className="block text-xs text-mute">{x.city} · cap {x.capacity} · {money(x.hourlyRate)}/h</span>
+                      <span className="block text-xs text-mute">{tu("cityCapCapacityMoneyH", { city: x.city, capacity: x.capacity, money: money(x.hourlyRate) })}</span>
                     </span>
                   </label>
                 ))}
-                {errors.venueId && <p role="alert" className="text-sm font-semibold text-coral">{errors.venueId.message}</p>}
+                {errors.venueId && <p role="alert" className="text-sm font-semibold text-coral">{msg(errors.venueId.message)}</p>}
               </fieldset>
             ) : (
-              <Field id="venueWish" label="What kind of venue do you need?" error={errors.venueWish?.message} hint="会場オーナーに募集が公開されます（デモ）">
-                <Textarea id="venueWish" placeholder="Warehouse for ~500 people, late licence, good sound system…" {...register("venueWish")} />
+              <Field id="venueWish" label={tu("whatKindOfVenueDo")} error={msg(errors.venueWish?.message)} hint={tu("text5")}>
+                <Textarea id="venueWish" placeholder={tu("warehouseFor500PeopleLate")} {...register("venueWish")} />
               </Field>
             )}
-            <Link href="/venues/planner" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-purple"><Sparkles className="size-4" aria-hidden /> Not sure? Try the AI event planner (demo)</Link>
+            <Link href="/venues/planner" className="inline-flex min-h-11 items-center gap-1.5 text-sm font-bold text-purple"><Sparkles className="size-4" aria-hidden /> {tu("notSureTryTheAi")}</Link>
           </>
         )}
 
         {step === 3 && (
           <>
-            <Field id="djSlots" label="Open DJ slots" error={errors.djSlots?.message}>
+            <Field id="djSlots" label={tu("openDjSlots")} error={msg(errors.djSlots?.message)}>
               <Input id="djSlots" type="number" inputMode="numeric" {...register("djSlots")} />
             </Field>
             <fieldset className="space-y-2">
-              <legend className="text-sm font-bold">Wanted genres</legend>
+              <legend className="text-sm font-bold">{tu("wantedGenres")}</legend>
               <Controller control={control} name="djGenres" render={({ field }) => (
                 <div className="flex flex-wrap gap-2">
                   {GENRES.map((g) => (
@@ -268,17 +272,17 @@ function Inner() {
               )} />
             </fieldset>
             <div className="grid grid-cols-2 gap-3">
-              <Field id="djMinBpm" label="Min BPM" error={errors.djMinBpm?.message}><Input id="djMinBpm" type="number" inputMode="numeric" {...register("djMinBpm")} /></Field>
-              <Field id="djMaxBpm" label="Max BPM" error={errors.djMaxBpm?.message}><Input id="djMaxBpm" type="number" inputMode="numeric" {...register("djMaxBpm")} /></Field>
+              <Field id="djMinBpm" label={tu("minBpm")} error={msg(errors.djMinBpm?.message)}><Input id="djMinBpm" type="number" inputMode="numeric" {...register("djMinBpm")} /></Field>
+              <Field id="djMaxBpm" label={tu("maxBpm")} error={msg(errors.djMaxBpm?.message)}><Input id="djMaxBpm" type="number" inputMode="numeric" {...register("djMaxBpm")} /></Field>
             </div>
-            <Field id="djFee" label="Fee per set (USD)" error={errors.djFee?.message}><Input id="djFee" type="number" inputMode="numeric" {...register("djFee")} /></Field>
-            <Field id="djNotes" label="Notes for applicants" optional><Textarea id="djNotes" placeholder="30-min audition required. Bring USB + headphones." {...register("djNotes")} /></Field>
+            <Field id="djFee" label={tu("feePerSetUsd")} error={msg(errors.djFee?.message)}><Input id="djFee" type="number" inputMode="numeric" {...register("djFee")} /></Field>
+            <Field id="djNotes" label={tu("notesForApplicants")} optional><Textarea id="djNotes" placeholder={tu("n30MinAuditionRequiredBring")} {...register("djNotes")} /></Field>
           </>
         )}
 
         {step === 4 && (
           <fieldset className="space-y-3">
-            <legend className="text-sm font-bold">Ticket types</legend>
+            <legend className="text-sm font-bold">{tu("ticketTypes")}</legend>
             {fields.map((f, i) => (
               <Card key={f.id} className="p-4">
                 <Controller control={control} name={`tickets.${i}.enabled`} render={({ field }) => (
@@ -286,28 +290,28 @@ function Inner() {
                 )} />
                 {v.tickets?.[i]?.enabled && (
                   <div className="mt-3 grid grid-cols-2 gap-3">
-                    <Field id={`tp${i}`} label="Price (USD)"><Input id={`tp${i}`} type="number" inputMode="decimal" {...register(`tickets.${i}.price`)} /></Field>
-                    <Field id={`tq${i}`} label="Quantity"><Input id={`tq${i}`} type="number" inputMode="numeric" {...register(`tickets.${i}.quantity`)} /></Field>
+                    <Field id={`tp${i}`} label={tu("priceUsd")}><Input id={`tp${i}`} type="number" inputMode="decimal" {...register(`tickets.${i}.price`)} /></Field>
+                    <Field id={`tq${i}`} label={tu("quantity")}><Input id={`tq${i}`} type="number" inputMode="numeric" {...register(`tickets.${i}.quantity`)} /></Field>
                   </div>
                 )}
               </Card>
             ))}
-            {errors.tickets?.root?.message || errors.tickets?.message ? <p role="alert" className="text-sm font-semibold text-coral">{errors.tickets?.root?.message ?? errors.tickets?.message}</p> : null}
+            {msg(errors.tickets?.root?.message) || msg(errors.tickets?.message) ? <p role="alert" className="text-sm font-semibold text-coral">{msg(errors.tickets?.root?.message) ?? msg(errors.tickets?.message)}</p> : null}
           </fieldset>
         )}
 
         {step === 5 && (
           <>
             <Controller control={control} name="afterParty" render={({ field }) => (
-              <ToggleRow checked={field.value} onChange={field.onChange} label="Add an after party" sub="メインイベントに紐づくアフターパーティーを作成" />
+              <ToggleRow checked={field.value} onChange={field.onChange} label={tu("addAnAfterParty")} sub={tu("text6")} />
             )} />
             {v.afterParty && (
               <>
-                <Field id="afterPartyName" label="After party name" error={errors.afterPartyName?.message}><Input id="afterPartyName" placeholder="SUNRISE SLIME" {...register("afterPartyName")} /></Field>
-                <Field id="afterPartyVenue" label="Venue" optional><Input id="afterPartyVenue" {...register("afterPartyVenue")} /></Field>
+                <Field id="afterPartyName" label={tu("afterPartyName")} error={msg(errors.afterPartyName?.message)}><Input id="afterPartyName" placeholder={tu("sunriseSlime")} {...register("afterPartyName")} /></Field>
+                <Field id="afterPartyVenue" label={tu("venue")} optional><Input id="afterPartyVenue" {...register("afterPartyVenue")} /></Field>
                 <div className="grid grid-cols-2 gap-3">
-                  <Field id="afterPartyStart" label="Starts"><Input id="afterPartyStart" type="time" {...register("afterPartyStart")} /></Field>
-                  <Field id="afterPartyPrice" label="Price (USD)"><Input id="afterPartyPrice" type="number" inputMode="decimal" {...register("afterPartyPrice")} /></Field>
+                  <Field id="afterPartyStart" label={tu("starts")}><Input id="afterPartyStart" type="time" {...register("afterPartyStart")} /></Field>
+                  <Field id="afterPartyPrice" label={tu("priceUsd")}><Input id="afterPartyPrice" type="number" inputMode="decimal" {...register("afterPartyPrice")} /></Field>
                 </div>
               </>
             )}
@@ -319,41 +323,42 @@ function Inner() {
         <div className="flex items-center gap-3 pt-2">
           {step > 0 && (
             <Button variant="ghost" onClick={() => go(-1)}>
-              <ArrowLeft className="size-4" aria-hidden /> Back
+              <ArrowLeft className="size-4" aria-hidden /> {tu("back")}
             </Button>
           )}
           {step < STEPS.length - 1 ? (
             <Button key="next" className="ml-auto flex-1 sm:flex-none" onClick={() => go(1)}>
-              Next <ArrowRight className="size-4" aria-hidden />
+              {tu("next")} <ArrowRight className="size-4" aria-hidden />
             </Button>
           ) : (
             <Button key="submit" type="submit" className="ml-auto flex-1 sm:flex-none" size="lg">
-              <Check className="size-5" aria-hidden /> Publish (demo)
+              <Check className="size-5" aria-hidden /> {tu("publishDemo")}
             </Button>
           )}
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-mute">
-          <span className="inline-flex items-center gap-1"><Save className="size-3.5" aria-hidden /> Draft auto-saved in this browser</span>
-          <button type="button" className="min-h-11 font-bold text-coral" onClick={() => { reset(); form.reset(DEFAULTS); setStep(0); toast({ title: "Draft cleared" }); }}>Clear draft</button>
+          <span className="inline-flex items-center gap-1"><Save className="size-3.5" aria-hidden /> {tu("draftAutoSavedInThis")}</span>
+          <button type="button" className="min-h-11 font-bold text-coral" onClick={() => { reset(); form.reset(DEFAULTS); setStep(0); toast({ title: tu("draftCleared") }); }}>{tu("clearDraft")}</button>
         </div>
       </form>
-      <DemoNotice className="mx-4 mt-6 md:mx-0">Publishing saves the event in your browser only. It will not appear publicly or on the map in Phase 1.</DemoNotice>
+      <DemoNotice className="mx-4 mt-6 md:mx-0">{tu("publishingSavesTheEventIn")}</DemoNotice>
     </div>
   );
 }
 
 function Review({ values: v, onEdit }: { values: FormValues; onEdit: (s: number) => void }) {
+  const tu = useTranslations("events");
   const venue = VENUES.find((x) => x.id === v.venueId);
   const rows: [string, string, number][] = [
-    ["Name", v.name, 0],
-    ["Genres", v.genres.join(", "), 0],
-    ["City", v.city, 0],
-    ["When", `${v.date} · ${v.startTime}–${v.endTime}`, 1],
-    ["Size & budget", `${v.capacity} people · ${money(Number(v.budget))}`, 1],
-    ["Venue", v.venueMode === "select" ? venue?.name ?? "—" : `Recruiting: ${v.venueWish}`, 2],
-    ["DJ call", `${v.djSlots} slots · ${v.djMinBpm}–${v.djMaxBpm} BPM · ${money(Number(v.djFee))}/set`, 3],
-    ["Tickets", v.tickets.filter((t) => t.enabled).map((t) => `${TICKET_NAMES[t.kind]} ${money(Number(t.price))}`).join(", "), 4],
-    ["After party", v.afterParty ? `${v.afterPartyName} · ${v.afterPartyStart}` : "None", 5],
+    [tu("name"), v.name, 0],
+    [tu("genres"), v.genres.join(", "), 0],
+    [tu("city"), v.city, 0],
+    [tu("when"), `${v.date} · ${v.startTime}–${v.endTime}`, 1],
+    [tu("sizeBudget"), tu("reviewSize", { n: Number(v.capacity), budget: money(Number(v.budget)) }), 1],
+    [tu("venue"), v.venueMode === "select" ? venue?.name ?? "—" : tu("reviewRecruiting", { wish: v.venueWish ?? "" }), 2],
+    [tu("djCall"), tu("reviewDjCall", { n: Number(v.djSlots), min: Number(v.djMinBpm), max: Number(v.djMaxBpm), fee: money(Number(v.djFee)) }), 3],
+    [tu("tickets"), v.tickets.filter((t) => t.enabled).map((t) => `${TICKET_NAMES[t.kind]} ${money(Number(t.price))}`).join(", "), 4],
+    [tu("afterParty"), v.afterParty ? `${v.afterPartyName} · ${v.afterPartyStart}` : tu("none"), 5],
   ];
   return (
     <dl className="divide-y divide-line overflow-hidden rounded-3xl border border-line bg-surface">
@@ -361,7 +366,7 @@ function Review({ values: v, onEdit }: { values: FormValues; onEdit: (s: number)
         <div key={k} className="flex items-start gap-3 p-4">
           <dt className="w-28 shrink-0 text-sm font-bold text-mute">{k}</dt>
           <dd className="min-w-0 flex-1 text-sm">{val || "—"}</dd>
-          <button type="button" onClick={() => onEdit(s)} className="-my-2 min-h-11 shrink-0 text-sm font-bold text-acid" aria-label={`Edit ${k}`}>Edit</button>
+          <button type="button" onClick={() => onEdit(s)} className="-my-2 min-h-11 shrink-0 text-sm font-bold text-acid" aria-label={tu("editK", { k })}>{tu("edit")}</button>
         </div>
       ))}
     </dl>

@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -46,6 +48,8 @@ function apiParams(s: UrlState, page: number, pers?: { genres: string[]; city: s
 }
 
 export function RankingsView() {
+  const tx = useTx();
+  const tu = useTranslations("ranking");
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -174,74 +178,74 @@ export function RankingsView() {
     );
 
   const activeChips: { label: string; clear: Partial<UrlState> }[] = [
-    state.period !== "all" && { label: PERIOD_LABEL[state.period], clear: { period: "all" as const } },
+    state.period !== "all" && { label: tx(PERIOD_LABEL[state.period]), clear: { period: "all" as const } },
     state.country && { label: state.country, clear: { country: undefined, city: undefined } },
     state.city && { label: state.city, clear: { city: undefined } },
     state.genre && { label: state.genre, clear: { genre: undefined } },
     state.status && { label: state.status, clear: { status: undefined } },
     state.price && { label: state.price, clear: { price: undefined } },
     state.level && { label: `LV.${state.level}`, clear: { level: undefined } },
-    state.dj && { label: "DJ recruiting", clear: { dj: undefined } },
-    state.ap && { label: "After party", clear: { ap: undefined } },
-    state.dao && { label: "DAO active", clear: { dao: undefined } },
+    state.dj && { label: tu("djRecruiting"), clear: { dj: undefined } },
+    state.ap && { label: tu("afterParty"), clear: { ap: undefined } },
+    state.dao && { label: tu("daoActive"), clear: { dao: undefined } },
   ].filter(Boolean) as { label: string; clear: Partial<UrlState> }[];
 
   return (
     <div className="mx-auto max-w-6xl md:px-6">
       {/* TITLE + ART */}
       <header className="px-4 pt-4 md:px-0 md:pt-8">
-        <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid">Festival discovery engine</p>
+        <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid">{tu("festivalDiscoveryEngine")}</p>
         <h1 className="mt-1 text-[46px] uppercase leading-[0.88] sm:text-7xl">
-          World <span className="text-acid glow-text">ranking</span>
+          {tu("world")} <span className="text-acid glow-text">{tu("ranking")}</span>
         </h1>
-        <p className="ja mt-2 max-w-xl text-sm text-mute">世界中のフェスの人気度・参加者数・資金・チケット販売・成長率を、サーバー側で集計してランキング化。</p>
+        <p className="mt-2 max-w-xl text-sm text-mute">{tu("text")}</p>
       </header>
       <div className="mx-4 mt-4 overflow-hidden rounded-[28px] border-2 border-purple/50 bg-ink/60 shadow-[0_0_36px_-12px_rgba(162,118,233,0.7)] md:mx-0">
         <RankingArt className="block h-auto w-full" />
       </div>
 
       {/* CATEGORIES */}
-      <nav aria-label="Ranking categories" className="rail mt-5 !gap-2 md:!px-0">
+      <nav aria-label={tu("rankingCategories")} className="rail mt-5 !gap-2 md:!px-0">
         {cats.map((c) => (
           <button key={c} type="button" aria-pressed={state.category === c} onClick={() => update({ category: c })} className={chip(state.category === c)}>
             {c === "for_you" && <Sparkles className="size-4" aria-hidden />}
-            {CATEGORY_META[c].label}
+            <Tx>{CATEGORY_META[c].label}</Tx>
           </button>
         ))}
         <button type="button" aria-pressed={!!state.dao} onClick={() => update({ dao: state.dao ? undefined : true })} className={chip(!!state.dao)}>
           <Landmark className="size-4" aria-hidden />
-          DAO active
+          {tu("daoActive")}
         </button>
       </nav>
-      <p className="ja mt-2 px-4 text-xs text-mute md:px-0">
-        <span className="font-bold text-cream">{meta.label}:</span> {meta.ja}
-        {state.category === "for_you" && " · 公開ランキングとは別の、あなた専用の並び順です。"}
+      <p className="mt-2 px-4 text-xs text-mute md:px-0">
+        <span className="font-bold text-cream"><Tx>{meta.label}</Tx>:</span> <Tx>{meta.desc}</Tx>
+        {state.category === "for_you" && tu("text6")}
       </p>
 
       {/* SEARCH + FILTERS */}
       <div className="mt-4 flex gap-2 px-4 md:px-0">
         <label className="relative min-w-0 flex-1">
-          <span className="sr-only">Search rankings</span>
+          <span className="sr-only">{tu("searchRankings")}</span>
           <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-mute" aria-hidden />
           <input
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Event, city or genre"
+            placeholder={tu("eventCityOrGenre")}
             className="h-12 w-full rounded-full border-2 border-purple/40 bg-ink/70 pl-12 pr-4 text-base outline-none focus:border-acid"
           />
         </label>
-        <button type="button" onClick={openFilters} className="relative inline-flex h-12 shrink-0 items-center gap-2 rounded-full border-2 border-cream/25 bg-ink/70 px-4 font-extrabold uppercase hover:border-cream/60" aria-label={`Filters${filterCount ? ` (${filterCount} active)` : ""}`}>
+        <button type="button" onClick={openFilters} className="relative inline-flex h-12 shrink-0 items-center gap-2 rounded-full border-2 border-cream/25 bg-ink/70 px-4 font-extrabold uppercase hover:border-cream/60" aria-label={tu("filtersValue", { value: filterCount ? tu("filtercountActive", { filterCount }) : "" })}>
           <SlidersHorizontal className="size-5" aria-hidden />
-          <span className="hidden min-[400px]:inline">Filters</span>
+          <span className="hidden min-[400px]:inline">{tu("filters")}</span>
           {filterCount > 0 && <span className="flex size-6 items-center justify-center rounded-full bg-acid text-xs text-ink">{filterCount}</span>}
         </button>
       </div>
       {activeChips.length > 0 && (
         <div className="rail mt-3 !gap-2 md:!px-0">
           {activeChips.map((c) => (
-            <button key={c.label} type="button" onClick={() => update(c.clear)} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-surface-2 px-3 text-sm font-bold capitalize" aria-label={`Remove filter ${c.label}`}>
-              {c.label} <X className="size-4" aria-hidden />
+            <button key={c.label} type="button" onClick={() => update(c.clear)} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-surface-2 px-3 text-sm font-bold capitalize" aria-label={tu("removeFilterLabel", { label: c.label })}>
+              <Tx>{c.label}</Tx> <X className="size-4" aria-hidden />
             </button>
           ))}
         </div>
@@ -249,51 +253,51 @@ export function RankingsView() {
 
       {/* VIEW + STATUS */}
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 px-4 md:px-0">
-        <div className="inline-flex rounded-full border-2 border-line p-1" role="group" aria-label="View">
+        <div className="inline-flex rounded-full border-2 border-line p-1" role="group" aria-label={tu("view")}>
           {(["list", "map"] as const).map((v) => (
             <button key={v} type="button" aria-pressed={state.view === v} onClick={() => update({ view: v })} className={cn("inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", state.view === v ? "bg-cream text-ink" : "text-cream/80")}>
-              {v === "list" ? <List className="size-4" aria-hidden /> : <MapIcon className="size-4" aria-hidden />} {v === "list" ? "List" : "Map view"}
+              {v === "list" ? <List className="size-4" aria-hidden /> : <MapIcon className="size-4" aria-hidden />} {v === "list" ? tu("list") : tu("mapView")}
             </button>
           ))}
         </div>
-        <button type="button" onClick={() => setRefreshKey((k) => k + 1)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-acid hover:bg-surface" aria-label="Refresh ranking">
-          <RefreshCw className={cn("size-4", load.status === "loading" && "animate-spin")} aria-hidden /> Refresh
+        <button type="button" onClick={() => setRefreshKey((k) => k + 1)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-sm font-bold text-acid hover:bg-surface" aria-label={tu("refreshRanking")}>
+          <RefreshCw className={cn("size-4", load.status === "loading" && "animate-spin")} aria-hidden /> {tu("refresh")}
         </button>
       </div>
       {data && (
         <p className="mt-2 px-4 text-[12px] text-mute md:px-0" aria-live="polite">
-          {data.total} events · {PERIOD_LABEL[data.period]} · aggregated {new Date(data.generatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} (data as of {new Date(data.asOf).toISOString().slice(0, 16).replace("T", " ")} UTC) · updates every {Math.round(data.refreshSeconds / 60)} min · {data.calculationVersion}
+          {tu("totalEventsValueAggregatedTolocaleti", { total: data.total, value: tx(PERIOD_LABEL[data.period]), toLocaleTimeString: new Date(data.generatedAt).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }), replace: new Date(data.asOf).toISOString().slice(0, 16).replace("T", " "), round: Math.round(data.refreshSeconds / 60), calculationVersion: data.calculationVersion })}
         </p>
       )}
       {data?.mode === "demo" && (
         <DemoNotice className="mx-4 mt-3 md:mx-0">
-          <strong>Demo ranking.</strong> All events and numbers are sample data generated for this prototype, ranked by the real engine (duplicates, bots, refunds and unpaid funds excluded). 本番データではありません。
+          <strong>{tu("demoRanking")}</strong> {tu("allEventsAndNumbersAre")}
         </DemoNotice>
       )}
 
       {/* RESULTS */}
       <section aria-labelledby="rk-results" className="mt-5">
-        <h2 id="rk-results" className="sr-only">{meta.label} ranking</h2>
+        <h2 id="rk-results" className="sr-only">{tu("categoryRanking", { label: tx(meta.label) })}</h2>
         {state.view === "map" ? (
           <RankingMap apiQuery={apiParams(state, 1, pers)} category={state.category} />
         ) : load.status === "loading" ? (
-          <div className="space-y-3 px-4 md:px-0" role="status" aria-label="Loading ranking">
+          <div className="space-y-3 px-4 md:px-0" role="status" aria-label={tu("loadingRanking")}>
             <div className="skeleton aspect-[16/10] rounded-[28px] sm:aspect-[16/8]" />
             <div className="skeleton h-40 rounded-[24px]" />
             <div className="skeleton h-40 rounded-[24px]" />
           </div>
         ) : load.status === "error" ? (
           <div className="mx-4 rounded-3xl border-2 border-coral/50 bg-coral/10 p-5 md:mx-0" role="alert">
-            <h3 className="text-xl uppercase">{load.code === "DATA_SOURCE_NOT_CONFIGURED" ? "No production data yet" : "Ranking unavailable"}</h3>
+            <h3 className="text-xl uppercase">{load.code === "DATA_SOURCE_NOT_CONFIGURED" ? tu("noProductionDataYet") : tu("rankingUnavailable")}</h3>
             <p className="mt-2 text-sm text-cream/85">{load.message}</p>
-            <Button className="mt-4" onClick={() => setRefreshKey((k) => k + 1)}>Try again</Button>
+            <Button className="mt-4" onClick={() => setRefreshKey((k) => k + 1)}>{tu("tryAgain")}</Button>
           </div>
         ) : items.length === 0 ? (
           <EmptyState
             className="mx-4 md:mx-0"
-            title={state.category === "for_you" ? "No matches yet" : "No events here"}
-            body={state.category === "for_you" ? "好きなジャンル・都市・DJ・フォロー中のイベントに合うものがありません。プロフィールで好みを設定しよう。" : "この条件に合うイベントはありません。フィルターを外してみよう。"}
-            action={<Button onClick={() => router.replace(pathname, { scroll: false })}>Reset ranking</Button>}
+            title={state.category === "for_you" ? tu("noMatchesYet") : tu("noEventsHere")}
+            body={state.category === "for_you" ? tu("dj") : tu("text2")}
+            action={<Button onClick={() => router.replace(pathname, { scroll: false })}>{tu("resetRanking")}</Button>}
           />
         ) : (
           <>
@@ -303,7 +307,7 @@ export function RankingsView() {
               </div>
             )}
             {top.length > 1 && (
-              <div className="rail mt-3 sm:!grid sm:grid-cols-2 sm:!overflow-visible md:!px-0" role="list" aria-label="Rank 2 and 3">
+              <div className="rail mt-3 sm:!grid sm:grid-cols-2 sm:!overflow-visible md:!px-0" role="list" aria-label={tu("rank2And3")}>
                 {top.slice(1).map((e) => (
                   <div role="listitem" key={e.event.id} className="flex">
                     <TopSmallCard e={e} category={state.category} />
@@ -312,7 +316,7 @@ export function RankingsView() {
               </div>
             )}
             {rest.length > 0 && (
-              <ol className="mt-5 grid gap-3 px-4 md:grid-cols-2 md:px-0 [&>*]:min-w-0" aria-label="Rank 4 and below">
+              <ol className="mt-5 grid gap-3 px-4 md:grid-cols-2 md:px-0 [&>*]:min-w-0" aria-label={tu("rank4AndBelow")}>
                 {rest.map((e) => (
                   <li key={e.event.id}>
                     <RankingCard e={e} category={state.category} />
@@ -323,7 +327,7 @@ export function RankingsView() {
             {data && items.length < data.total && (
               <div className="mt-4 px-4 md:px-0">
                 <Button variant="ghost" className="w-full" onClick={loadMore} disabled={moreLoading}>
-                  {moreLoading ? "Loading…" : `Show more (${data.total - items.length})`}
+                  {moreLoading ? tu("loading") : tu("showMoreValue", { value: data.total - items.length })}
                 </Button>
               </div>
             )}
@@ -335,10 +339,10 @@ export function RankingsView() {
       {boards && boards.rising.length > 0 && (
         <section aria-labelledby="rk-rising" className="mt-12">
           <div className="px-4 md:px-0">
-            <h2 id="rk-rising" className="text-[28px] uppercase sm:text-4xl">Rising picks</h2>
-            <p className="ja mt-1 text-sm text-mute">直近7日間で応援が伸びているおすすめイベント。</p>
+            <h2 id="rk-rising" className="text-[28px] uppercase sm:text-4xl">{tu("risingPicks")}</h2>
+            <p className="mt-1 text-sm text-mute">{tu("n7")}</p>
           </div>
-          <div className="rail mt-4 pb-2 md:!px-0" role="list" aria-label="Recommended events">
+          <div className="rail mt-4 pb-2 md:!px-0" role="list" aria-label={tu("recommendedEvents")}>
             {boards.rising.map((id) => {
               const ev = getEvent(id);
               return ev ? (
@@ -353,8 +357,8 @@ export function RankingsView() {
 
       {/* REWARDS */}
       <section aria-labelledby="rk-rewards" className="mt-12 px-4 md:px-0">
-        <h2 id="rk-rewards" className="text-[28px] uppercase sm:text-4xl">Ranking rewards</h2>
-        <p className="ja mt-1 text-sm text-mute">ランキング実績に応じたデジタルバッジやアバター装飾。金銭的な配当や利益の保証はありません（NFT化は任意・未実装）。</p>
+        <h2 id="rk-rewards" className="text-[28px] uppercase sm:text-4xl">{tu("rankingRewards")}</h2>
+        <p className="mt-1 text-sm text-mute">{tu("nft")}</p>
         <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {REWARDS.map((r) => {
             const earned = r.who === "user" && rewards[r.id];
@@ -365,9 +369,9 @@ export function RankingsView() {
                 </span>
                 <div className="min-w-0">
                   <div className="font-bold">{r.name}</div>
-                  <div className="ja text-xs text-mute">{r.ja}</div>
+                  <div className="text-xs text-mute"><Tx>{r.desc}</Tx></div>
                 </div>
-                <span className="ml-auto shrink-0 text-[11px] font-extrabold uppercase">{r.who === "event" ? <span className="text-blue">Events</span> : earned ? <span className="text-acid">Earned</span> : <span className="text-mute">Locked</span>}</span>
+                <span className="ml-auto shrink-0 text-[11px] font-extrabold uppercase">{r.who === "event" ? <span className="text-blue">{tu("events")}</span> : earned ? <span className="text-acid">{tu("earned")}</span> : <span className="text-mute">{tu("locked")}</span>}</span>
               </li>
             );
           })}
@@ -380,7 +384,7 @@ export function RankingsView() {
           <Image src={ART.mapCities} alt="" sizes="(min-width:1152px) 1100px, 100vw" className="h-44 w-full object-cover transition-transform duration-700 group-hover:scale-[1.03] sm:h-60" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/30 to-transparent" aria-hidden />
           <div className="absolute inset-x-4 bottom-4 flex items-end justify-between gap-3">
-            <h2 id="rk-map" className="text-2xl uppercase sm:text-4xl">Explore the world map</h2>
+            <h2 id="rk-map" className="text-2xl uppercase sm:text-4xl">{tu("exploreTheWorldMap")}</h2>
             <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-acid text-ink"><ArrowRight className="size-5" aria-hidden /></span>
           </div>
         </Link>
@@ -394,13 +398,13 @@ export function RankingsView() {
             <div className="mx-auto flex max-w-6xl items-center gap-2">
               <GitCompareArrows className="size-5 shrink-0 text-blue" aria-hidden />
               <span className="min-w-0 flex-1 truncate text-sm font-bold">{compareIds.length}/3 selected</span>
-              <button type="button" onClick={clearCompare} className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold text-mute">Clear</button>
+              <button type="button" onClick={clearCompare} className="inline-flex min-h-11 items-center rounded-full px-3 text-sm font-bold text-mute">{tu("clear")}</button>
               {compareIds.length >= 2 ? (
                 <Link href={`/rankings/compare?ids=${compareIds.join(",")}`} className="inline-flex min-h-12 items-center gap-1.5 rounded-full bg-blue px-5 font-extrabold uppercase text-ink">
-                  Compare <ArrowRight className="size-4" aria-hidden />
+                  {tu("compare")} <ArrowRight className="size-4" aria-hidden />
                 </Link>
               ) : (
-                <span className="text-xs text-mute">Pick 1 more</span>
+                <span className="text-xs text-mute">{tu("pick1More")}</span>
               )}
             </div>
           </div>
@@ -411,10 +415,10 @@ export function RankingsView() {
       <BottomSheet
         open={sheet}
         onClose={() => setSheet(false)}
-        title="Ranking filters"
+        title={tu("rankingFilters")}
         footer={
           <div className="flex gap-2 pb-1">
-            <Button variant="ghost" className="flex-1" onClick={() => setDraft({ category: state.category, period: "all", view: state.view, q: state.q })}>Reset</Button>
+            <Button variant="ghost" className="flex-1" onClick={() => setDraft({ category: state.category, period: "all", view: state.view, q: state.q })}>{tu("reset")}</Button>
             <Button
               className="flex-[1.4]"
               onClick={() => {
@@ -422,76 +426,76 @@ export function RankingsView() {
                 setSheet(false);
               }}
             >
-              Show results
+              {tu("showResults")}
             </Button>
           </div>
         }
       >
         <div className="space-y-5">
           <fieldset>
-            <legend className="mb-2 text-sm font-bold">Period</legend>
+            <legend className="mb-2 text-sm font-bold">{tu("period")}</legend>
             <div className="grid grid-cols-4 gap-1.5">
               {RANKING_PERIODS.map((p) => (
                 <button key={p} type="button" aria-pressed={draft.period === p} onClick={() => setDraft({ ...draft, period: p })} className={cn("min-h-11 rounded-full border-2 text-[13px] font-extrabold", draft.period === p ? "border-acid bg-acid text-ink" : "border-line")}>
-                  {p === "all" ? "All" : p.toUpperCase()}
+                  {p === "all" ? tu("all") : p.toUpperCase()}
                 </button>
               ))}
             </div>
           </fieldset>
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="Country" id="rk-country">
+            <Field label={tu("country")} id="rk-country">
               <Select id="rk-country" value={draft.country ?? ""} onChange={(e) => setDraft({ ...draft, country: e.target.value || undefined, city: undefined })}>
-                <option value="">World</option>
+                <option value="">{tu("world")}</option>
                 {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </Select>
             </Field>
-            <Field label="City" id="rk-city">
+            <Field label={tu("city")} id="rk-city">
               <Select id="rk-city" value={draft.city ?? ""} onChange={(e) => setDraft({ ...draft, city: e.target.value || undefined })}>
-                <option value="">All cities</option>
+                <option value="">{tu("allCities")}</option>
                 {CITIES.filter((c) => !draft.country || c.startsWith(draft.country + "|")).map((c) => {
                   const city = c.split("|")[1];
                   return <option key={c} value={city}>{city}</option>;
                 })}
               </Select>
             </Field>
-            <Field label="Music genre" id="rk-genre">
+            <Field label={tu("musicGenre")} id="rk-genre">
               <Select id="rk-genre" value={draft.genre ?? ""} onChange={(e) => setDraft({ ...draft, genre: (e.target.value || undefined) as UrlState["genre"] })}>
-                <option value="">All genres</option>
+                <option value="">{tu("allGenres")}</option>
                 {GENRES.map((g) => <option key={g} value={g}>{g}</option>)}
               </Select>
             </Field>
-            <Field label="Event level" id="rk-level">
+            <Field label={tu("eventLevel")} id="rk-level">
               <Select id="rk-level" value={draft.level ?? ""} onChange={(e) => setDraft({ ...draft, level: e.target.value ? Number(e.target.value) : undefined })}>
-                <option value="">Any level</option>
+                <option value="">{tu("anyLevel")}</option>
                 {[1, 2, 3, 4, 5].map((l) => <option key={l} value={l}>LV.{l}</option>)}
               </Select>
             </Field>
           </div>
           <fieldset>
-            <legend className="mb-2 text-sm font-bold">Status</legend>
+            <legend className="mb-2 text-sm font-bold">{tu("status")}</legend>
             <div className="grid grid-cols-4 gap-1.5">
               {([undefined, "upcoming", "live", "completed"] as const).map((s) => (
                 <button key={s ?? "any"} type="button" aria-pressed={draft.status === s} onClick={() => setDraft({ ...draft, status: s })} className={cn("min-h-11 rounded-full border-2 text-[12px] font-extrabold uppercase", draft.status === s ? "border-acid bg-acid text-ink" : "border-line")}>
-                  {s ?? "Any"}
+                  {s ?? tu("any")}
                 </button>
               ))}
             </div>
           </fieldset>
           <fieldset>
-            <legend className="mb-2 text-sm font-bold">Price</legend>
+            <legend className="mb-2 text-sm font-bold">{tu("price")}</legend>
             <div className="grid grid-cols-3 gap-1.5">
               {([undefined, "free", "paid"] as const).map((s) => (
                 <button key={s ?? "any"} type="button" aria-pressed={draft.price === s} onClick={() => setDraft({ ...draft, price: s })} className={cn("min-h-11 rounded-full border-2 text-[12px] font-extrabold uppercase", draft.price === s ? "border-acid bg-acid text-ink" : "border-line")}>
-                  {s ?? "Any"}
+                  {s ?? tu("any")}
                 </button>
               ))}
             </div>
           </fieldset>
           <div className="space-y-2">
-            <ToggleRow checked={!!draft.dj} onChange={(v) => setDraft({ ...draft, dj: v || undefined })} label="DJ recruiting" sub="DJ募集中のイベントのみ" />
-            <ToggleRow checked={!!draft.ap} onChange={(v) => setDraft({ ...draft, ap: v || undefined })} label="After party available" sub="アフターパーティーありのみ" />
-            <ToggleRow checked={!!draft.dao} onChange={(v) => setDraft({ ...draft, dao: v || undefined })} label="DAO active" sub="コミュニティDAOが活動中のイベントのみ" />
-            <ToggleRow checked={personalize} onChange={setPersonalize} label="Personalized FOR YOU" sub="好きなジャンル・都市・DJ・フォロー中のイベントでおすすめ順を作成（この端末のみ）" />
+            <ToggleRow checked={!!draft.dj} onChange={(v) => setDraft({ ...draft, dj: v || undefined })} label={tu("djRecruiting")} sub={tu("dj2")} />
+            <ToggleRow checked={!!draft.ap} onChange={(v) => setDraft({ ...draft, ap: v || undefined })} label={tu("afterPartyAvailable")} sub={tu("text3")} />
+            <ToggleRow checked={!!draft.dao} onChange={(v) => setDraft({ ...draft, dao: v || undefined })} label={tu("daoActive")} sub={tu("dao")} />
+            <ToggleRow checked={personalize} onChange={setPersonalize} label={tu("personalizedForYou")} sub={tu("dj3")} />
           </div>
         </div>
       </BottomSheet>

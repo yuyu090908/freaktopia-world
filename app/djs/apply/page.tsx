@@ -1,9 +1,13 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { DJApplyForm } from "./DJApplyForm";
 import { LoadingSkeleton } from "@/components/ui/States";
 
-export const metadata: Metadata = { title: "Apply as DJ", description: "Apply to play a demo event and book your 30-minute audition slot." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("djsApplyTitle"), description: tu("djsApplyDescription") };
+}
 
 export default function Page() {
   return (

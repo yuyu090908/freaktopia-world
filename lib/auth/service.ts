@@ -62,7 +62,7 @@ export async function signUp(email: string, password: string, ctx: Ctx) {
   const store = getStore();
   const existing = await store.findUserByEmail(email);
   if (existing) {
-    await sendMail(email, "signupExisting", ctx.locale, `${ctx.baseUrl}/auth/signin`);
+    await sendMail(email, "signupExisting", ctx.locale, `${ctx.baseUrl}/login`);
     await audit("signup.existing", existing.id, ctx);
     return;
   }
@@ -75,7 +75,7 @@ export async function signUp(email: string, password: string, ctx: Ctx) {
     throw e;
   }
   const token = await issueToken("verify", user.id);
-  const delivery = await sendMail(email, "verify", ctx.locale, `${ctx.baseUrl}/auth/verify?token=${token}`);
+  const delivery = await sendMail(email, "verify", ctx.locale, `${ctx.baseUrl}/verify-email?token=${token}`);
   await audit("signup", user.id, ctx, { delivery });
 }
 
@@ -83,7 +83,7 @@ export async function resendVerification(email: string, ctx: Ctx) {
   const u = await getStore().findUserByEmail(email);
   if (!u || u.emailVerified) return; // same answer either way
   const token = await issueToken("verify", u.id);
-  await sendMail(email, "verify", ctx.locale, `${ctx.baseUrl}/auth/verify?token=${token}`);
+  await sendMail(email, "verify", ctx.locale, `${ctx.baseUrl}/verify-email?token=${token}`);
   await audit("verify.resend", u.id, ctx);
 }
 
@@ -119,12 +119,12 @@ export async function signIn(email: string, password: string, ctx: Ctx) {
 export async function requestReset(email: string, ctx: Ctx) {
   const u = await getStore().findUserByEmail(email);
   if (!u) {
-    await sendMail(email, "resetNoAccount", ctx.locale, `${ctx.baseUrl}/auth/signup`);
+    await sendMail(email, "resetNoAccount", ctx.locale, `${ctx.baseUrl}/signup`);
     await audit("reset.request.unknown", null, ctx);
     return;
   }
   const token = await issueToken("reset", u.id);
-  await sendMail(email, "reset", ctx.locale, `${ctx.baseUrl}/auth/reset?token=${token}`);
+  await sendMail(email, "reset", ctx.locale, `${ctx.baseUrl}/forgot-password?token=${token}`);
   await audit("reset.request", u.id, ctx);
 }
 

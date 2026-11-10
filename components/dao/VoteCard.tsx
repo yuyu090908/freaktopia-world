@@ -1,5 +1,6 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth/client";
 import { DaoAvatar } from "./DaoAvatar";
@@ -25,6 +26,8 @@ import { Gate, timeLeft } from "./DaoUi";
  * Supports single choice and yes/no/abstain (priority) plus multiple and ranked.
  */
 export function VoteCard({ vote, title, onVoted, compact = false }: { vote: VoteDto; title: string; onVoted?: () => void; compact?: boolean }) {
+  const tx = useTx();
+  const tu = useTranslations("dao");
   const { home, eventId, setJoinOpen } = useDao();
   const [choice, setChoice] = useState<string[]>([]);
   const [confirm, setConfirm] = useState(false);
@@ -58,7 +61,7 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
       return;
     }
     setReceipt(r.data.receipt);
-    if (r.data.xp) toast({ title: `+${r.data.xp} DAO XP`, body: "Vote recorded", tone: "success" });
+    if (r.data.xp) toast({ title: tu("xpDaoXp", { xp: r.data.xp }), body: tu("voteRecorded"), tone: "success" });
     onVoted?.();
   };
 
@@ -67,8 +70,8 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
   return (
     <article id={vote.id} aria-labelledby={`${vote.id}-t`} className="neon scroll-mt-32 rounded-[26px] border bg-surface/95 p-3 sm:p-4">
       <div className="flex flex-wrap items-center gap-2 text-[11px] font-extrabold uppercase tracking-wider">
-        <span className={cn("rounded-full px-2.5 py-1 text-ink", open ? "bg-acid" : "bg-mute")}>{open ? "Voting open" : vote.status === "closed" ? "Closed" : "Scheduled"}</span>
-        <span className="text-mute">{METHOD_LABEL[vote.method]}</span>
+        <span className={cn("rounded-full px-2.5 py-1 text-ink", open ? "bg-acid" : "bg-mute")}>{open ? tu("votingOpen") : vote.status === "closed" ? tu("closed") : tu("scheduled")}</span>
+        <span className="text-mute"><Tx>{METHOD_LABEL[vote.method]}</Tx></span>
         {open && (
           <span className="inline-flex items-center gap-1 text-orange">
             <Clock className="size-3.5" aria-hidden /> {timeLeft(vote.endAt - Date.now())}
@@ -83,7 +86,7 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
 
       {/* Options */}
       <fieldset className="mt-3" disabled={!canPick}>
-        <legend className="sr-only">Options for {title}</legend>
+        <legend className="sr-only">{tu("optionsForTitle", { title })}</legend>
         <div className={cn("grid gap-3", visual ? (compact ? "sm:grid-cols-2 lg:grid-cols-3" : "md:grid-cols-2 xl:grid-cols-3") : "sm:grid-cols-3")}>
           {vote.options.map((o) => {
             const on = choice.includes(o.id);
@@ -96,7 +99,7 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
               <label key={o.id} className={cn("relative block cursor-pointer overflow-hidden rounded-2xl border-2 bg-ink/60 transition-colors", on ? "border-acid shadow-[0_0_20px_-6px_rgba(182,240,92,0.8)]" : "border-line", !canPick && "cursor-default", winner && "border-acid")}>
                 <input type={vote.method === "multiple" || vote.method === "ranked" ? "checkbox" : "radio"} name={vote.id} value={o.id} checked={on} onChange={() => toggle(o.id)} className="peer sr-only" aria-label={o.label} />
                 {o.concept?.photo && (
-                  <ConceptRender photoUrl={o.concept.photo.url} zone={o.concept.photo.stageZone} ceilingY={o.concept.photo.ceilingY} spec={o.concept.current.spec} title={`${o.label} concept render`} showLabel />
+                  <ConceptRender photoUrl={o.concept.photo.url} zone={o.concept.photo.stageZone} ceilingY={o.concept.photo.ceilingY} spec={o.concept.current.spec} title={tu("labelConceptRender", { label: o.label })} showLabel />
                 )}
                 {o.dj && (
                   <div className="flex items-center gap-3 p-3">
@@ -106,8 +109,8 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
                 )}
                 <div className="flex items-start justify-between gap-2 p-3">
                   <div className="min-w-0">
-                    <div className="font-display text-lg uppercase leading-tight">{o.label}</div>
-                    {o.concept && <div className="mt-0.5 text-[12px] text-mute">AI est. {usd(o.concept.current.estimate.low)}–{usd(o.concept.current.estimate.high)} · by @{o.concept.creatorHandle}</div>}
+                    <div className="font-display text-lg uppercase leading-tight"><Tx>{o.label}</Tx></div>
+                    {o.concept && <div className="mt-0.5 text-[12px] text-mute">{tu("aiEstUsdUsd2By", { usd: usd(o.concept.current.estimate.low), usd2: usd(o.concept.current.estimate.high), creatorHandle: o.concept.creatorHandle })}</div>}
                   </div>
                   <span aria-hidden className={cn("mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-full border-2 text-sm font-extrabold", on ? "border-acid bg-acid text-ink" : "border-cream/40")}>
                     {rank > 0 ? rank : on ? "✓" : ""}
@@ -115,14 +118,14 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
                 </div>
                 {count !== null && (
                   <div className="px-3 pb-3">
-                    <Progress value={count / denom} label={`${o.label}: ${Math.round((count / denom) * 100)}%`} className="h-2.5" color={winner ? "#B6F05C" : "#A276E9"} />
+                    <Progress value={count / denom} label={`${tx(o.label)}: ${Math.round((count / denom) * 100)}%`} className="h-2.5" color={winner ? "#B6F05C" : "#A276E9"} />
                     <div className="mt-1 flex justify-between text-[11px] font-bold text-mute">
-                      <span>{Math.round((count / denom) * 100)}%{winner ? " · winner" : ""}</span>
-                      <span>{count} votes</span>
+                      <span>{Math.round((count / denom) * 100)}%{winner ? tu("winner") : ""}</span>
+                      <span>{tu("countVotes", { count })}</span>
                     </div>
                   </div>
                 )}
-                {mine && <span className="absolute right-2 top-2 rounded-full bg-acid px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink">Your vote</span>}
+                {mine && <span className="absolute right-2 top-2 rounded-full bg-acid px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink">{tu("yourVote")}</span>}
               </label>
             );
           })}
@@ -131,26 +134,26 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
 
       {/* Facts */}
       <dl className="mt-3 grid grid-cols-2 gap-2 text-[12px] sm:grid-cols-4">
-        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">Participation</dt><dd className="font-extrabold">{Math.round((result ? result.turnout / Math.max(1, result.eligible) : vote.participation) * 100)}% <span className="font-normal text-mute">(quorum {Math.round(vote.quorum * 100)}%)</span></dd></div>
-        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">Eligible voters</dt><dd className="font-extrabold"><Users className="mr-1 inline size-3" aria-hidden />{vote.snapshot.eligible}</dd></div>
-        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">Snapshot</dt><dd className="font-extrabold">{fmtDate(new Date(vote.snapshot.takenAt).toISOString(), { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</dd></div>
-        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">Threshold</dt><dd className="font-extrabold">{Math.round(vote.threshold * 100)}% · v{vote.proposalVersion}</dd></div>
+        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">{tu("participation")}</dt><dd className="font-extrabold">{Math.round((result ? result.turnout / Math.max(1, result.eligible) : vote.participation) * 100)}% <span className="font-normal text-mute">{tu("quorumRound", { round: Math.round(vote.quorum * 100) })}</span></dd></div>
+        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">{tu("eligibleVoters")}</dt><dd className="font-extrabold"><Users className="mr-1 inline size-3" aria-hidden />{vote.snapshot.eligible}</dd></div>
+        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">{tu("snapshot")}</dt><dd className="font-extrabold">{fmtDate(new Date(vote.snapshot.takenAt).toISOString(), { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}</dd></div>
+        <div className="rounded-xl bg-surface-2 p-2"><dt className="text-mute">{tu("threshold")}</dt><dd className="font-extrabold">{Math.round(vote.threshold * 100)}% · v{vote.proposalVersion}</dd></div>
       </dl>
 
       {/* Status / actions */}
       <div className="mt-3 space-y-2">
         {result && (
           <p className={cn("rounded-2xl border p-3 text-sm", result.outcome === "APPROVED" ? "border-acid/50 bg-acid/10" : "border-coral/50 bg-coral/10")}>
-            <b>Result: {result.outcome}</b> · turnout {result.turnout}/{result.eligible}
-            {!result.quorumMet && " · quorum not met"}
-            {result.heldBallots > 0 && ` · ${result.heldBallots} held ballots excluded`}
+            <b>{tu("resultOutcome", { outcome: result.outcome })}</b> {tu("turnoutTurnoutEligible", { turnout: result.turnout, eligible: result.eligible })}
+            {!result.quorumMet && tu("quorumNotMet")}
+            {result.heldBallots > 0 && tu("heldballotsHeldBallotsExcluded", { heldBallots: result.heldBallots })}
             <span className="mt-1 flex items-center gap-1 break-all font-mono text-[10px] text-mute"><Hash className="size-3 shrink-0" aria-hidden />{result.resultHash}</span>
           </p>
         )}
-        {open && !home?.me && <Gate reason="Connect a wallet and stake to vote." action={<Button size="sm" onClick={() => setJoinOpen(true)}>Join DAO</Button>} />}
-        {open && home?.me && !home.me.staked && <Gate reason="Stake the minimum to vote. A wallet alone is not membership." action={<Button size="sm" onClick={() => setJoinOpen(true)}>Stake</Button>} />}
+        {open && !home?.me && <Gate reason={tu("connectAWalletAndStake")} action={<Button size="sm" onClick={() => setJoinOpen(true)}>{tu("joinDao")}</Button>} />}
+        {open && home?.me && !home.me.staked && <Gate reason={tu("stakeTheMinimumToVote")} action={<Button size="sm" onClick={() => setJoinOpen(true)}>{tu("stake")}</Button>} />}
         {open && me && !me.eligible && home?.me?.staked && (
-          <Gate reason="You’re not in this vote’s snapshot.">You joined after voting opened. Eligibility is frozen when a vote starts, so staking later never changes an open vote. You can vote in the next one.</Gate>
+          <Gate reason={tu("youreNotInThisVotes")}>{tu("youJoinedAfterVotingOpened")}</Gate>
         )}
         {open && account && !account.user.emailVerified && (
           <Gate reason={td("verifiedRequired")} />
@@ -166,24 +169,24 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
               <BadgeCheck className="mt-0.5 size-4 shrink-0 text-acid" aria-hidden />
             )}
             <span>
-              Vote recorded: <b>{(receipt ? choice : me?.ballot?.choice ?? []).map(label).join(" → ")}</b>. Ballots are final (one per account).
-              <span className="mt-1 block break-all font-mono text-[10px] text-mute">receipt {receipt?.hash ?? me?.ballot?.hash}</span>
-              {(receipt?.held || me?.ballot?.held) && <span className="mt-1 flex gap-1 text-coral"><ShieldAlert className="size-4" aria-hidden /> Held for duplicate-account review; not counted until cleared.</span>}
+              {tu("voteRecorded2")} <b>{(receipt ? choice : me?.ballot?.choice ?? []).map(label).join(" → ")}</b>{tu("ballotsAreFinalOnePer")}
+              <span className="mt-1 block break-all font-mono text-[10px] text-mute">{tu("receiptHash", { hash: receipt?.hash ?? me?.ballot?.hash ?? "" })}</span>
+              {(receipt?.held || me?.ballot?.held) && <span className="mt-1 flex gap-1 text-coral"><ShieldAlert className="size-4" aria-hidden /> {tu("heldForDuplicateAccountReview")}</span>}
             </span>
           </p>
         )}
         {canPick && (
           <Button className="w-full sm:w-auto" disabled={!choice.length || (account ? !account.user.emailVerified : false)} onClick={() => setConfirm(true)}>
-            <Vote className="size-5" aria-hidden /> Review vote
+            <Vote className="size-5" aria-hidden /> {tu("reviewVote")}
           </Button>
         )}
         {open && <p className="text-[11px] text-mute">{td("avatarNoPower")}</p>}
         <Link href={`/dao/${eventId}/proposals/${vote.proposalId}#audit`} className="inline-flex min-h-11 items-center text-[13px] font-bold text-mute underline-offset-4 hover:underline">
-          Audit trail & proposal
+          {tu("auditTrailProposal")}
         </Link>
       </div>
 
-      <BottomSheet open={confirm} onClose={() => { setConfirm(false); }} title="Confirm your vote">
+      <BottomSheet open={confirm} onClose={() => { setConfirm(false); }} title={tu("confirmYourVote")}>
         {!receipt ? (
           <div className="space-y-4">
             <p className="text-sm text-mute">{title}</p>
@@ -196,22 +199,22 @@ export function VoteCard({ vote, title, onVoted, compact = false }: { vote: Vote
               ))}
             </ol>
             <ul className="space-y-1 text-[13px] text-mute">
-              <li>• One account, one vote. Stake size does not change your weight.</li>
-              <li>• Ballots are final and cannot be changed.</li>
-              <li>• You vote on proposal version v{vote.proposalVersion}.</li>
+              <li>{tu("oneAccountOneVoteStake")}</li>
+              <li>{tu("ballotsAreFinalAndCannot")}</li>
+              <li>{tu("youVoteOnProposalVersion", { proposalVersion: vote.proposalVersion })}</li>
             </ul>
             {err && <p role="alert" className="rounded-2xl border border-coral/50 bg-coral/10 p-3 text-sm">{err}</p>}
             <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1" onClick={() => setConfirm(false)}>Back</Button>
-              <Button className="flex-1" onClick={submit} disabled={busy}>{busy ? "Submitting…" : "Submit vote"}</Button>
+              <Button variant="ghost" className="flex-1" onClick={() => setConfirm(false)}>{tu("back")}</Button>
+              <Button className="flex-1" onClick={submit} disabled={busy}>{busy ? tu("submitting") : tu("submitVote")}</Button>
             </div>
           </div>
         ) : (
           <div className="space-y-3 text-center">
             <CheckCircle2 className="mx-auto size-12 text-acid" aria-hidden />
-            <p className="font-display text-2xl uppercase">Vote submitted</p>
+            <p className="font-display text-2xl uppercase">{tu("voteSubmitted")}</p>
             <p className="break-all font-mono text-[11px] text-mute">{receipt.hash}</p>
-            <Button className="w-full" onClick={() => setConfirm(false)}>Done</Button>
+            <Button className="w-full" onClick={() => setConfirm(false)}>{tu("done")}</Button>
           </div>
         )}
       </BottomSheet>

@@ -132,7 +132,7 @@ function SearchSheet({ open, onClose }: { open: boolean; onClose: () => void }) 
         <div className="mt-5">
           <div className="text-xs font-bold uppercase tracking-wider text-mute">{t("searchTry")}</div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {["Tokyo", "Techno", "Berlin", "Amapiano", "Disco", "London"].map((t) => (
+            {["Tokyo", "Techno", "Berlin", "Amapiano", "Disco", "London"].map((t) => ( // i18n-ignore — search terms that match event data
               <button key={t} type="button" onClick={() => setQ(t)} className="min-h-11 rounded-full bg-surface-2 px-4 text-sm font-bold">
                 {t}
               </button>

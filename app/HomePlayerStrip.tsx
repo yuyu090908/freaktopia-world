@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowRight, Trophy } from "lucide-react";
 import { Alien } from "@/components/art/Alien";
@@ -8,6 +9,7 @@ import { useDemo } from "@/lib/store";
 import { userLevel } from "@/lib/levels";
 
 export function HomePlayerStrip() {
+  const tu = useTranslations("home");
   const profile = useDemo((s) => s.profile);
   const lv = userLevel(profile.xp);
   return (
@@ -15,10 +17,10 @@ export function HomePlayerStrip() {
       <div className="flex items-center gap-4">
         <div className="relative size-24 shrink-0 rounded-3xl bg-purple">
           <div className="halftone absolute inset-0 rounded-3xl" aria-hidden />
-          <Alien look={profile.look} className="relative h-full w-full p-1" title={`Your alien, ${profile.avatarName}`} bob />
+          <Alien look={profile.look} className="relative h-full w-full p-1" title={tu("yourAlienAvatarname", { avatarName: profile.avatarName })} bob />
         </div>
         <div className="min-w-0">
-          <h2 id="you" className="text-2xl uppercase">Your alien</h2>
+          <h2 id="you" className="text-2xl uppercase">{tu("yourAlien")}</h2>
           <div className="mt-1 truncate text-sm text-mute">@{profile.username} · {profile.avatarName}</div>
         </div>
       </div>
@@ -27,12 +29,12 @@ export function HomePlayerStrip() {
           <span>LV.{lv.level}</span>
           <span className="text-mute">{lv.intoLevel} / {lv.need} XP</span>
         </div>
-        <Progress value={lv.pct} color="#A276E9" label="XP to next level" />
-        <p className="ja mt-2 text-xs text-mute">イベントを応援・参加・作成するとXPがたまり、アバターがレベルアップします。</p>
+        <Progress value={lv.pct} color="#A276E9" label={tu("xpToNextLevel")} />
+        <p className="mt-2 text-xs text-mute">{tu("xp")}</p>
       </div>
       <div className="flex flex-col gap-2 min-[420px]:flex-row md:flex-col">
-        <Link href="/avatar" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-purple px-5 font-extrabold uppercase text-ink">Customize <ArrowRight className="size-4" aria-hidden /></Link>
-        <Link href="/quests" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border-2 border-line px-5 font-extrabold uppercase"><Trophy className="size-4" aria-hidden /> Quests</Link>
+        <Link href="/avatar" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full bg-purple px-5 font-extrabold uppercase text-ink">{tu("customize")} <ArrowRight className="size-4" aria-hidden /></Link>
+        <Link href="/quests" className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-full border-2 border-line px-5 font-extrabold uppercase"><Trophy className="size-4" aria-hidden /> {tu("quests")}</Link>
       </div>
     </div>
   );

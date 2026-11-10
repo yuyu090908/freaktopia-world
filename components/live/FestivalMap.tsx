@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 /**
  * Interactive isometric festival map (SVG, no game engine).
  * Everything is placed in tile coordinates (lib/live/zones.ts) and projected with iso(),
@@ -77,7 +79,7 @@ function Ground({ z, active, count }: { z: ZoneDef; active: boolean; count: numb
       <polygon points={b.top} fill={z.color} fillOpacity={active ? 0.32 : 0.16} stroke={z.color} strokeWidth={active ? 3.5 : 2} />
       <g transform={`translate(${c.x} ${c.y + 24})`} pointerEvents="none">
         <rect x={-z.short.length * 6.2 - 12 - (count ? 16 : 0)} y={-12} width={z.short.length * 12.4 + 24 + (count ? 32 : 0)} height={24} rx={12} fill="#080808" fillOpacity={0.82} stroke={z.color} strokeWidth={1.5} />
-        <text x={count ? -16 : 0} y={5} textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize={14} fill={z.color}>{z.short}</text>
+        <text x={count ? -16 : 0} y={5} textAnchor="middle" fontFamily="var(--font-display), sans-serif" fontSize={14} fill={z.color}><Tx>{z.short}</Tx></text>
         {count > 0 && (
           <text x={z.short.length * 6.2 + 4} y={5} textAnchor="middle" fontSize={12} fontWeight={800} fill="#F5F2EA">{count}</text>
         )}
@@ -227,6 +229,7 @@ function Crowd({ avatars, maxShown }: { avatars: RoomAvatar[]; maxShown: number 
 
 /** The player's avatar. Walks with requestAnimationFrame and writes the transform directly (no React re-render per frame). */
 function MyAvatar({ me, reduceMotion }: { me: MeOnMap; reduceMotion: boolean }) {
+  const tu = useTranslations("live");
   const ref = useRef<SVGGElement>(null);
   const pos = useRef<{ gx: number; gy: number } | null>(null);
   const [moving, setMoving] = useState(false);
@@ -277,7 +280,7 @@ function MyAvatar({ me, reduceMotion }: { me: MeOnMap; reduceMotion: boolean }) 
       </g>
       <g transform="translate(0 -62)">
         <rect x={-34} y={-11} width={68} height={18} rx={9} fill="#B6F05C" stroke="#080808" strokeWidth={2} />
-        <text x={0} y={2.5} textAnchor="middle" fontSize={10} fontWeight={900} fill="#080808">{me.visibility === "hidden" ? "YOU · HIDDEN" : "YOU"}</text>
+        <text x={0} y={2.5} textAnchor="middle" fontSize={10} fontWeight={900} fill="#080808">{me.visibility === "hidden" ? tu("youHidden") : tu("you")}</text>
       </g>
     </g>
   );
@@ -306,6 +309,8 @@ export function FestivalMap({
   invasion: boolean;
   paused?: boolean;
 }) {
+  const tx = useTx();
+  const tu = useTranslations("live");
   const wrap = useRef<HTMLDivElement>(null);
   const svg = useRef<SVGSVGElement>(null);
   const [size, setSize] = useState({ w: 375, h: 440 });
@@ -428,7 +433,7 @@ export function FestivalMap({
 
   return (
     <div ref={wrap} className={`relative h-full w-full overflow-hidden bg-[#110f18] ${paused ? "paused" : ""}`} data-testid="festival-map">
-      <svg ref={svg} viewBox={viewBox} className="fm-svg block h-full w-full" role="group" aria-label="Isometric festival map. Drag to pan, pinch or use the buttons to zoom. Each zone is a button." onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}>
+      <svg ref={svg} viewBox={viewBox} className="fm-svg block h-full w-full" role="group" aria-label={tu("isometricFestivalMapDragTo")} onPointerDown={onDown} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp} onPointerLeave={onUp}>
         <defs>
           <pattern id="fm-dots" width="24" height="24" patternUnits="userSpaceOnUse">
             <circle cx="2" cy="2" r="1.4" fill="#2b2838" />
@@ -452,7 +457,7 @@ export function FestivalMap({
             key={z.id}
             role="button"
             tabIndex={0}
-            aria-label={`${z.name}${zoneCounts[z.id] ? `, ${zoneCounts[z.id]} public avatars` : ""}${me?.zone === z.id ? ", you are here" : ""}`}
+            aria-label={tu("zoneAria", { zone: tx(z.name), count: zoneCounts[z.id] ?? 0, here: me?.zone === z.id ? "yes" : "no" })}
             data-zone={z.id}
             className="cursor-pointer outline-none [&:focus-visible>g>polygon:last-of-type]:stroke-[5]"
             onClick={() => tapZone(z.id)}
@@ -486,11 +491,11 @@ export function FestivalMap({
       </svg>
 
       <div className="absolute right-2 top-2 flex flex-col gap-1.5">
-        <button type="button" onClick={() => zoomBy(1.25)} aria-label="Zoom in" className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Plus className="size-5" /></button>
-        <button type="button" onClick={() => zoomBy(1 / 1.25)} aria-label="Zoom out" className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Minus className="size-5" /></button>
-        <button type="button" onClick={() => setVb({ cx: MAP_BOUNDS.x + MAP_BOUNDS.w / 2, cy: MAP_BOUNDS.y + MAP_BOUNDS.h / 2, zoom: fitZoom })} aria-label="Show whole map" className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Maximize2 className="size-5" /></button>
+        <button type="button" onClick={() => zoomBy(1.25)} aria-label={tu("zoomIn")} className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Plus className="size-5" /></button>
+        <button type="button" onClick={() => zoomBy(1 / 1.25)} aria-label={tu("zoomOut")} className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Minus className="size-5" /></button>
+        <button type="button" onClick={() => setVb({ cx: MAP_BOUNDS.x + MAP_BOUNDS.w / 2, cy: MAP_BOUNDS.y + MAP_BOUNDS.h / 2, zoom: fitZoom })} aria-label={tu("showWholeMap")} className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Maximize2 className="size-5" /></button>
         {me && (
-          <button type="button" onClick={() => setVb(home(me.zone))} aria-label="Center on my avatar" className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Crosshair className="size-5" /></button>
+          <button type="button" onClick={() => setVb(home(me.zone))} aria-label={tu("centerOnMyAvatar")} className="inline-flex size-11 items-center justify-center rounded-full border border-line bg-ink/85 text-cream"><Crosshair className="size-5" /></button>
         )}
       </div>
     </div>

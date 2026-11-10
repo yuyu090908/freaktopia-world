@@ -61,7 +61,7 @@ describe("dictionaries (missing-key detection)", () => {
         const v = leaf(d, k);
         expect(typeof v === "string" && v.trim().length > 0, `empty ${k}`).toBe(true);
         expect(vars(v), `placeholders ${k}`).toEqual(vars(leaf(en, k)));
-        expect(() => new IntlMessageFormat(v, l).format({ count: 2, name: "N", email: "e", price: "p", date: "d", time: "t", tz: "z", level: 1, rank: 1, provider: "P" }), `ICU ${k}`).not.toThrow();
+        expect(() => new IntlMessageFormat(v, l).format({ ...Object.fromEntries(vars(v).map((x) => [x, 2])), ...Object.fromEntries([...v.matchAll(/<(\w+)>/g)].map((m) => [m[1], (c: unknown) => c])), count: 2, name: "N", email: "e", price: "p", date: "d", time: "t", tz: "z", level: 1, rank: 1, provider: "P" }), `ICU ${k}`).not.toThrow();
       }
     });
   }

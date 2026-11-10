@@ -1,12 +1,18 @@
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { InfoPage } from "@/components/layout/InfoPage";
 import { ContactForm } from "./ContactForm";
 
-export const metadata: Metadata = { title: "Contact", description: "Get in touch with the FREAKTOPIA team." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("contactTitle"), description: tu("contactDescription") };
+}
 
 export default function Page() {
+  const tu = useTranslations("pages");
   return (
-    <InfoPage kicker="Contact" title="Say hello" sub="お問い合わせフォーム（デモ）。送信内容は実際には送られません。">
+    <InfoPage kicker={tu("contact")} title={tu("sayHello")} sub={tu("text3")}>
       <ContactForm />
     </InfoPage>
   );

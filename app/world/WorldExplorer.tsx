@@ -1,5 +1,6 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
 /**
  * FREAKTOPIA WORLD 7.0 — "THE PLANET IS ONE GIANT FESTIVAL".
  *
@@ -85,6 +86,7 @@ const SUGGEST_ICON: Record<Suggestion["kind"], React.ReactNode> = {
 };
 
 export function WorldExplorer() {
+  const tu = useTranslations("world");
   const t = useTranslations("world");
   const tc = useTranslations("common");
   const [load, setLoad] = useState<Load>({ status: "loading" });
@@ -453,7 +455,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
             >
               <span className="text-mute">{SUGGEST_ICON[s.kind]}</span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-bold">{s.label}</span>
+                <span className="block truncate font-bold"><Tx>{s.label}</Tx></span>
                 <span className="block truncate text-[12px] text-mute">
                   {t(`kinds.${s.kind}`)} · {s.sub}
                 </span>
@@ -467,6 +469,7 @@ function SearchBox({ events, value, onChange, onPick, onSubmit }: { events: Worl
 }
 
 function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: string) => void }) {
+  const tu = useTranslations("world");
   const t = useTranslations("world");
   const locale = useLocale() as Locale;
   const sorted = [...events].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0) || Date.parse(a.startsAt) - Date.parse(b.startsAt));
@@ -481,7 +484,7 @@ function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: strin
                 <span className="flex flex-wrap items-center gap-1.5">
                   <StatusPill status={e.status} />
                   <LevelPill e={e} />
-                  {e.ranking.badge && <span className="rounded-full bg-[#E8C66A] px-2 py-0.5 text-[11px] font-extrabold text-ink">TOP {e.ranking.rank}</span>}
+                  {e.ranking.badge && <span className="rounded-full bg-[#E8C66A] px-2 py-0.5 text-[11px] font-extrabold text-ink">{tu("top")} {e.ranking.rank}</span>}
                 </span>
                 <span className="mt-1 block truncate font-display text-lg uppercase leading-tight">{e.name}</span>
                 <span className="block truncate text-[12px] text-mute">

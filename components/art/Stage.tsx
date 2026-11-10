@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import type { EventLevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -60,9 +61,10 @@ export function Stage({
   className?: string;
   title?: string;
 }) {
+  const tu = useTranslations("ui");
   const [p1, p2, p3] = palette;
   return (
-    <svg viewBox="0 0 320 200" className={cn("block", className)} role="img" aria-label={title ?? `Stage illustration, level ${level}`}>
+    <svg viewBox="0 0 320 200" className={cn("block", className)} role="img" aria-label={title ?? tu("stageIllustrationLevelLevel", { level })}>
       <defs>
         <pattern id={`dots-${level}`} width="8" height="8" patternUnits="userSpaceOnUse">
           <circle cx="2" cy="2" r="1.1" fill="#fff" opacity="0.08" />

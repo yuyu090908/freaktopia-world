@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { Check, EyeOff, Globe2, Lock, Users } from "lucide-react";
 import type { ReactNode } from "react";
@@ -11,7 +13,7 @@ export function StateTag({ state, className }: { state: ProposalState; className
   const m = STATE_META[state];
   return (
     <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-extrabold uppercase leading-none tracking-wider text-ink", className)} style={{ background: m.color }}>
-      {m.label}
+      <Tx>{m.label}</Tx>
     </span>
   );
 }
@@ -20,7 +22,7 @@ export function CategoryTag({ c }: { c: DiscussionCategory }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-line px-2.5 py-1 text-[11px] font-bold uppercase leading-none tracking-wider">
       <span className="size-2 rounded-full" style={{ background: CATEGORY_COLOR[c] }} aria-hidden />
-      {CATEGORY_LABEL[c]}
+      <Tx>{CATEGORY_LABEL[c]}</Tx>
     </span>
   );
 }
@@ -37,19 +39,21 @@ export function VisibilityTag({ v }: { v: "public" | "members" | "private" }) {
 }
 
 export function HiddenTag() {
+  const tu = useTranslations("dao");
   return (
     <span className="inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-wider text-coral">
-      <EyeOff className="size-3.5" aria-hidden /> Hidden by moderation
+      <EyeOff className="size-3.5" aria-hidden /> {tu("hiddenByModeration")}
     </span>
   );
 }
 
 export function LifecycleTracker({ state }: { state: ProposalState }) {
+  const tu = useTranslations("dao");
   const offPath = !LIFECYCLE_PATH.includes(state);
   const idx = offPath ? STATE_META[state].step : LIFECYCLE_PATH.indexOf(state);
   return (
     <div className="-mx-1 overflow-x-auto px-1 pb-1 [scrollbar-width:none]">
-      <ol className="flex min-w-max items-center gap-1" aria-label="Proposal lifecycle">
+      <ol className="flex min-w-max items-center gap-1" aria-label={tu("proposalLifecycle")}>
         {LIFECYCLE_PATH.map((s, i) => {
           const done = i < idx || (!offPath && i === idx && s === "COMPLETED");
           const cur = !offPath && i === idx;
@@ -57,7 +61,7 @@ export function LifecycleTracker({ state }: { state: ProposalState }) {
             <li key={s} className="flex items-center gap-1" aria-current={cur ? "step" : undefined}>
               <span className={cn("inline-flex h-7 items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-[10px] font-extrabold uppercase tracking-wider", cur ? "bg-acid text-ink" : done ? "bg-acid/25 text-acid" : "border border-line text-mute")}>
                 {done && <Check className="size-3" aria-hidden />}
-                {STATE_META[s].label}
+                <Tx>{STATE_META[s].label}</Tx>
               </span>
               {i < LIFECYCLE_PATH.length - 1 && <span className="h-0.5 w-3 bg-line" aria-hidden />}
             </li>
@@ -66,7 +70,7 @@ export function LifecycleTracker({ state }: { state: ProposalState }) {
       </ol>
       {offPath && (
         <p className="mt-2 text-sm">
-          Current state: <StateTag state={state} />
+          {tu("currentState")} <StateTag state={state} />
         </p>
       )}
     </div>
@@ -91,6 +95,8 @@ export const ago = (t: number) => {
 };
 
 export function ReactionBar({ reactions, mine, onToggle, disabled }: { reactions: Record<string, number>; mine: string[]; onToggle: (k: ReactionKind) => void; disabled?: boolean }) {
+  const tx = useTx();
+  const tu = useTranslations("dao");
   return (
     <div className="flex flex-wrap gap-1.5">
       {(Object.keys(REACTION_META) as ReactionKind[]).map((k) => {
@@ -101,7 +107,7 @@ export function ReactionBar({ reactions, mine, onToggle, disabled }: { reactions
             type="button"
             disabled={disabled}
             aria-pressed={on}
-            aria-label={`${REACTION_META[k].label} (${reactions[k] ?? 0})`}
+            aria-label={`${tx(REACTION_META[k].label)} (${reactions[k] ?? 0})`}
             onClick={() => onToggle(k)}
             className={cn("inline-flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full border px-3 text-sm font-bold disabled:cursor-not-allowed disabled:opacity-60", on ? "border-acid bg-acid/20" : "border-line bg-ink/50 hover:border-cream/50")}
           >

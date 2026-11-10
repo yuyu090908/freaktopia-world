@@ -54,6 +54,8 @@ export interface AlienTraits {
 
 export interface AlienIdentity extends AlienTraits {
   userId: string;
+  /** Public display id such as FREAK-00001284. Unique, shown to people; never used for authentication. */
+  publicId: string;
   seed: string;
   assetVersion: number;
   createdAt: string;
@@ -115,3 +117,7 @@ export function validateCosmetics(p: AlienCosmeticsPatch, owned: Accessory[] = [
   if (p.accessory !== undefined && !BASE_ACCESSORIES.includes(p.accessory) && !owned.includes(p.accessory)) return "accessory";
   return null;
 }
+
+/** Formats the public Alien ID: FREAK- followed by an 8-digit, zero-padded serial. */
+export const formatAlienPublicId = (n: number) => `FREAK-${String(n).padStart(8, "0")}`;
+export const ALIEN_PUBLIC_ID_RE = /^FREAK-\d{8}$/;

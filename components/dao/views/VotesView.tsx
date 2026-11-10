@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useDaoQuery } from "@/lib/dao/client";
 import { LoadingSkeleton } from "@/components/ui/States";
 import { useDao, type VoteDto } from "../DaoContext";
@@ -7,6 +8,7 @@ import { SubHead } from "../DaoUi";
 import { VoteCard } from "../VoteCard";
 
 export function VotesView() {
+  const tu = useTranslations("dao");
   const { eventId, reload: reloadHome } = useDao();
   const { state, reload } = useDaoQuery<{ votes: (VoteDto & { proposal: { id: string; title: string; state: string; category: string } })[] }>(`${eventId}/votes`);
   if (state.status === "loading") return <LoadingSkeleton variant="list" />;
@@ -20,17 +22,17 @@ export function VotesView() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">Votes</h1>
-        <p className="mt-2 max-w-2xl text-sm text-mute">One account, one vote. Eligibility is frozen in a snapshot when each vote opens; stake size never adds weight. Results are final and auditable.</p>
+        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{tu("votes")}</h1>
+        <p className="mt-2 max-w-2xl text-sm text-mute">{tu("oneAccountOneVoteEligibility")}</p>
       </div>
       <section aria-labelledby="open-h">
-        <SubHead id="open-h" title={`Open (${open.length})`} />
+        <SubHead id="open-h" title={tu("openLength", { length: open.length })} />
         <div className="space-y-4">
-          {open.length ? open.map((v) => <VoteCard key={v.id} vote={v} title={v.proposal.title} onVoted={refresh} />) : <p className="text-sm text-mute">No open votes.</p>}
+          {open.length ? open.map((v) => <VoteCard key={v.id} vote={v} title={v.proposal.title} onVoted={refresh} />) : <p className="text-sm text-mute">{tu("noOpenVotes")}</p>}
         </div>
       </section>
       <section aria-labelledby="closed-h">
-        <SubHead id="closed-h" title={`Closed (${closed.length})`} />
+        <SubHead id="closed-h" title={tu("closedLength", { length: closed.length })} />
         <div className="space-y-4">
           {closed.map((v) => (
             <VoteCard key={v.id} vote={v} title={v.proposal.title} compact />

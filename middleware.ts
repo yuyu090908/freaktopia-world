@@ -7,9 +7,26 @@ import { DEFAULT_LOCALE, LOCALE_COOKIE, LOCALE_HEADER, PATH_HEADER, PREFIX_HEADE
  *  - /world     → unchanged URL; locale = cookie → Accept-Language → en
  * Existing unprefixed links keep working, and a prefixed URL is a shareable, indexable language version.
  */
+/** 8.0 addresses (old bookmarks and emails already sent) → 8.1 pages. The query (?token=…) is kept. */
+const LEGACY: Record<string, string> = {
+  "/auth/signin": "/login",
+  "/auth/signup": "/signup",
+  "/auth/reset": "/forgot-password",
+  "/auth/verify": "/verify-email",
+  "/welcome": "/onboarding",
+  "/profile/settings": "/settings",
+};
+
 export function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const { locale: prefixed, rest } = splitLocalePath(pathname);
+  const moved = LEGACY[rest.replace(/\/$/, "")];
+  if (moved) {
+    const url = req.nextUrl.clone();
+    url.pathname = (prefixed ? `/${prefixed}` : "") + moved;
+    url.search = search;
+    return NextResponse.redirect(url, 308);
+  }
   const headers = new Headers(req.headers);
   headers.set(PATH_HEADER, rest);
 

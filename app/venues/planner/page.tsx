@@ -1,8 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Planner } from "./Planner";
 
-export const metadata: Metadata = { title: "AI Event Planner (demo)", description: "A beginner-friendly event planning assistant. Phase 1 uses simple rules, not a real AI model." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("venuesPlannerTitle"), description: tu("venuesPlannerDescription") };
+}
 
 export default function Page() {
   return (

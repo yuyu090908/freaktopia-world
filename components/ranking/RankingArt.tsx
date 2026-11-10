@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { AlienG } from "@/components/art/Alien";
 
 const INK = "#080808";
@@ -20,8 +21,9 @@ function Speaker({ x, y, s = 1, color }: { x: number; y: number; s?: number; col
  * stacks of speakers, with a DJ booth and stage lights. Pure SVG.
  */
 export function RankingArt({ className }: { className?: string }) {
+  const tu = useTranslations("ranking");
   return (
-    <svg viewBox="0 0 640 360" className={className} role="img" aria-label="Three aliens celebrating on a ranking podium between giant speakers">
+    <svg viewBox="0 0 640 360" className={className} role="img" aria-label={tu("threeAliensCelebratingOnA")}>
       <defs>
         <radialGradient id="rk-glow" cx="50%" cy="40%" r="60%">
           <stop offset="0" stopColor={C.purple} stopOpacity="0.55" />

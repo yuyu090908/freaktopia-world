@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState } from "react";
 import { CalendarCheck, Heart, Landmark, MapPin, Pause, Play, Trophy, Users, Radio, Gauge } from "lucide-react";
@@ -13,6 +14,7 @@ import { grantXp, toast, uid, useDemo } from "@/lib/store";
 import { compact, money } from "@/lib/utils";
 
 export function DJProfile({ dj }: { dj: DJ }) {
+  const tu = useTranslations("djs");
   const fav = useDemo((s) => s.favorites.includes(dj.id));
   const toggle = useDemo((s) => s.toggleFavorite);
   const addBooking = useDemo((s) => s.addBooking);
@@ -24,8 +26,8 @@ export function DJProfile({ dj }: { dj: DJ }) {
 
   const follow = () => {
     const on = toggle(dj.id);
-    toast({ title: on ? `Following ${dj.name}` : `Unfollowed ${dj.name}`, tone: on ? "success" : "default" });
-    if (on) grantXp(10, "Followed a DJ");
+    toast({ title: on ? tu("followingName", { name: dj.name }) : tu("unfollowedName", { name: dj.name }), tone: on ? "success" : "default" });
+    if (on) grantXp(10, tu("xpFollowedADj"));
   };
 
   const submitBooking = () => {
@@ -36,7 +38,7 @@ export function DJProfile({ dj }: { dj: DJ }) {
     addBooking({ id: uid("bk"), djId: dj.id, ...form, createdAt: new Date().toISOString() });
     setBook(false);
     setErr(null);
-    toast({ title: "Booking request saved", body: `Demo request to ${dj.name}. No message was actually sent.`, tone: "success" });
+    toast({ title: tu("bookingRequestSaved"), body: tu("demoRequestToNameNo", { name: dj.name }), tone: "success" });
   };
 
   return (
@@ -44,9 +46,9 @@ export function DJProfile({ dj }: { dj: DJ }) {
       <section className="md:grid md:grid-cols-[380px_1fr] md:gap-8 md:pt-6" aria-labelledby="dj-name">
         <div className="relative aspect-square overflow-hidden md:rounded-[32px] md:border-[3px] md:border-ink" style={{ background: dj.look.accent }}>
           <div className="halftone absolute inset-0" aria-hidden />
-          <Alien look={dj.look} className="relative mx-auto h-full w-[82%] pt-6" title={`${dj.name} alien avatar`} bob />
-          <span className="absolute left-4 top-4 rounded-full border-[3px] border-ink bg-cream px-3 py-1 font-display text-ink">RANK #{dj.rank}</span>
-          <DemoBadge label="Sample DJ" className="absolute right-4 top-4 bg-ink/85" />
+          <Alien look={dj.look} className="relative mx-auto h-full w-[82%] pt-6" title={tu("nameAlienAvatar", { name: dj.name })} bob />
+          <span className="absolute left-4 top-4 rounded-full border-[3px] border-ink bg-cream px-3 py-1 font-display text-ink">{tu("rankRank", { rank: dj.rank })}</span>
+          <DemoBadge label={tu("sampleDj")} className="absolute right-4 top-4 bg-ink/85" />
         </div>
         <div className="px-4 pt-5 md:px-0">
           <h1 id="dj-name" className="text-[42px] uppercase sm:text-6xl">{dj.name}</h1>
@@ -55,20 +57,20 @@ export function DJProfile({ dj }: { dj: DJ }) {
           <p className="mt-4 leading-relaxed text-cream/85">{dj.bio}</p>
           <div className="mt-4 grid grid-cols-3 gap-2">
             <Stat label="BPM" value={`${dj.bpm[0]}–${dj.bpm[1]}`} accent="#B6F05C" />
-            <Stat label="Followers" value={compact(dj.followers + (fav ? 1 : 0))} />
-            <Stat label="Votes" value={compact(dj.votes)} accent="#FFAD5B" />
+            <Stat label={tu("followers")} value={compact(dj.followers + (fav ? 1 : 0))} />
+            <Stat label={tu("votes")} value={compact(dj.votes)} accent="#FFAD5B" />
           </div>
           <div className="mt-5 grid grid-cols-2 gap-2.5">
             <Button variant={fav ? "secondary" : "coral"} onClick={follow} aria-pressed={fav}>
-              <Heart className={fav ? "size-4 fill-current" : "size-4"} aria-hidden /> {fav ? "Following" : "Follow"}
+              <Heart className={fav ? "size-4 fill-current" : "size-4"} aria-hidden /> {fav ? tu("following") : tu("follow")}
             </Button>
-            <Button onClick={() => setBook(true)}><CalendarCheck className="size-4" aria-hidden /> Booking</Button>
-            <ButtonLink href={`/djs/${dj.id}/audition`} variant="ghost" className="col-span-2"><Radio className="size-4" aria-hidden /> Watch audition (demo)</ButtonLink>
+            <Button onClick={() => setBook(true)}><CalendarCheck className="size-4" aria-hidden /> {tu("booking")}</Button>
+            <ButtonLink href={`/djs/${dj.id}/audition`} variant="ghost" className="col-span-2"><Radio className="size-4" aria-hidden /> {tu("watchAuditionDemo")}</ButtonLink>
             {(() => {
               const ev = EVENTS.find((e) => e.status !== "ended" && (e.auditionDjIds.includes(dj.id) || e.lineup.includes(dj.id))) ?? EVENTS.find((e) => e.status !== "ended");
               return ev ? (
                 <ButtonLink href={`/dao/${ev.id}/proposals?new=1&dj=${dj.id}`} variant="purple" className="col-span-2" data-testid="dj-nominate">
-                  <Landmark className="size-4" aria-hidden /> Nominate in {ev.name} DAO
+                  <Landmark className="size-4" aria-hidden /> {tu("nominateInNameDao", { name: ev.name })}
                 </ButtonLink>
               ) : null;
             })()}
@@ -78,16 +80,16 @@ export function DJProfile({ dj }: { dj: DJ }) {
 
       <div className="mt-8 grid gap-8 px-4 md:grid-cols-2 md:px-0">
         <section aria-labelledby="mix-h">
-          <h2 id="mix-h" className="text-3xl uppercase">Mix samples</h2>
+          <h2 id="mix-h" className="text-3xl uppercase">{tu("mixSamples")}</h2>
           <ul className="mt-3 space-y-2">
             {dj.mixes.map((m, i) => (
               <li key={m.title} className="flex items-center gap-3 rounded-2xl border border-line bg-surface p-3">
-                <button type="button" onClick={() => setPlaying(playing === i ? null : i)} aria-label={playing === i ? `Pause ${m.title}` : `Play ${m.title} (demo preview)`} className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-acid text-ink">
+                <button type="button" onClick={() => setPlaying(playing === i ? null : i)} aria-label={playing === i ? tu("pauseTitle", { title: m.title }) : tu("playTitleDemoPreview", { title: m.title })} className="inline-flex size-12 shrink-0 items-center justify-center rounded-full bg-acid text-ink">
                   {playing === i ? <Pause className="size-5" /> : <Play className="size-5" />}
                 </button>
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-bold">{m.title}</div>
-                  <div className="text-xs text-mute">{m.length} · {compact(m.plays)} plays</div>
+                  <div className="text-xs text-mute">{tu("lengthCompactPlays", { length: m.length, compact: compact(m.plays) })}</div>
                   {playing === i && (
                     <div className="mt-1.5 flex h-5 items-end gap-0.5" aria-hidden>
                       {Array.from({ length: 28 }).map((_, k) => (
@@ -99,17 +101,17 @@ export function DJProfile({ dj }: { dj: DJ }) {
               </li>
             ))}
           </ul>
-          {playing !== null && <p className="mt-2 text-xs text-orange" role="status">Visual preview only. Audio streaming connects in a later phase.</p>}
+          {playing !== null && <p className="mt-2 text-xs text-orange" role="status">{tu("visualPreviewOnlyAudioStreaming")}</p>}
         </section>
 
         <section aria-labelledby="gig-h">
-          <h2 id="gig-h" className="text-3xl uppercase">Appearances</h2>
+          <h2 id="gig-h" className="text-3xl uppercase">{tu("appearances")}</h2>
           <ul className="mt-3 space-y-2">
             {upcoming.map((e) => (
               <li key={e.id}>
                 <Link href={`/events/${e.id}`} className="flex min-h-14 items-center justify-between gap-3 rounded-2xl border border-line bg-surface px-4 py-2 hover:border-cream/30">
-                  <span className="min-w-0"><span className="block truncate font-bold">{e.name}</span><span className="text-xs text-mute">{e.city} · upcoming</span></span>
-                  <Tag color="#B6F05C" dark>Booked</Tag>
+                  <span className="min-w-0"><span className="block truncate font-bold">{e.name}</span><span className="text-xs text-mute">{tu("cityUpcoming", { city: e.city })}</span></span>
+                  <Tag color="#B6F05C" dark>{tu("booked")}</Tag>
                 </Link>
               </li>
             ))}
@@ -119,28 +121,28 @@ export function DJProfile({ dj }: { dj: DJ }) {
           </ul>
           <Card className="mt-4 flex items-center gap-3 p-4">
             <Gauge className="size-6 text-blue" aria-hidden />
-            <div className="text-sm">Booking from <strong>{money(dj.bookingFrom)}</strong> per set (demo rate)</div>
+            <div className="text-sm">{tu("bookingFrom")} <strong>{money(dj.bookingFrom)}</strong> {tu("perSetDemoRate")}</div>
           </Card>
         </section>
       </div>
 
-      <BottomSheet open={book} onClose={() => setBook(false)} title="Booking request" footer={<Button className="mb-1 w-full" onClick={submitBooking}>Send request (demo)</Button>}>
+      <BottomSheet open={book} onClose={() => setBook(false)} title={tu("bookingRequest")} footer={<Button className="mb-1 w-full" onClick={submitBooking}>{tu("sendRequestDemo")}</Button>}>
         <div className="space-y-4">
-          <Field id="bk-event" label="Event name" error={err && !form.eventName ? err : undefined}>
+          <Field id="bk-event" label={tu("eventName")} error={err && !form.eventName ? err : undefined}>
             <Input id="bk-event" value={form.eventName} onChange={(e) => setForm({ ...form, eventName: e.target.value })} />
           </Field>
-          <Field id="bk-date" label="Date">
+          <Field id="bk-date" label={tu("date")}>
             <Input id="bk-date" type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
           </Field>
-          <Field id="bk-budget" label="Budget (USD)">
+          <Field id="bk-budget" label={tu("budgetUsd")}>
             <Input id="bk-budget" type="number" inputMode="numeric" value={form.budget} onChange={(e) => setForm({ ...form, budget: +e.target.value })} />
           </Field>
-          <Field id="bk-msg" label="Message" optional>
+          <Field id="bk-msg" label={tu("message")} optional>
             <Textarea id="bk-msg" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
           </Field>
           {err && <p role="alert" className="text-sm font-semibold text-coral">{err}</p>}
-          <DemoNotice>The request is saved in your browser and shown in your dashboard. Nothing is sent to the DJ.</DemoNotice>
-          <div className="flex items-center gap-2 text-xs text-mute"><Users className="size-3.5" aria-hidden /> Typical reply time: 2 days (demo)</div>
+          <DemoNotice>{tu("theRequestIsSavedIn")}</DemoNotice>
+          <div className="flex items-center gap-2 text-xs text-mute"><Users className="size-3.5" aria-hidden /> {tu("typicalReplyTime2Days")}</div>
         </div>
       </BottomSheet>
     </div>

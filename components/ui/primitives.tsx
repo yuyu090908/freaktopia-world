@@ -121,7 +121,7 @@ export function SectionHeader({ title, sub, action, id }: { title: string; sub?:
         <h2 id={id} className="text-[28px] uppercase sm:text-4xl">
           {title}
         </h2>
-        {sub && <p className="ja mt-2 text-sm text-mute">{sub}</p>}
+        {sub && <p className="mt-2 text-sm text-mute">{sub}</p>}
       </div>
       {action}
     </div>
@@ -156,7 +156,7 @@ export function PageTitle({ kicker, title, sub, children, art }: { kicker?: stri
         {kicker && <div className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-acid drop-shadow-[0_1px_0_#080808]">{kicker}</div>}
         <h1 className="text-[40px] uppercase drop-shadow-[0_3px_0_#080808] sm:text-6xl">{title}</h1>
       </div>
-      {sub && <p className="ja mt-3 max-w-2xl text-[15px] leading-relaxed text-mute">{sub}</p>}
+      {sub && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-mute">{sub}</p>}
       {children}
     </div>
   );

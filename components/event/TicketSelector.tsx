@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Minus, Plus, ShieldAlert, Ticket } from "lucide-react";
@@ -13,6 +14,7 @@ const COLORS: Record<TicketKind, string> = { main: "#B6F05C", afterparty: "#55BC
 const MAX = 6;
 
 export function TicketSelector({ event }: { event: FreakEvent }) {
+  const tu = useTranslations("events");
   const router = useRouter();
   const [qty, setQty] = useState<Record<TicketKind, number>>({ main: 1, afterparty: 0, allnight: 0, vip: 0 });
   const [review, setReview] = useState(false);
@@ -33,18 +35,18 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
     setBusy(true);
     const id = uid("FK");
     addOrder({ id, eventId: event.id, lines, total, createdAt: new Date().toISOString(), holder: username, demo: true });
-    grantXp(60, `Got tickets for ${event.name}`);
+    grantXp(60, tu("xpGotTicketsFor", { name: event.name }));
     setTimeout(() => router.push(`/tickets/${id}`), 350);
   };
 
   return (
     <div className="mx-auto max-w-3xl md:px-6">
-      <PageTitle kicker="Tickets" title={event.name} sub={`${event.city} · ${fmtDateLong(event.startsAt)}`}>
-        <div className="mt-3"><DemoBadge label="Demo checkout · no payment" /></div>
+      <PageTitle kicker={tu("tickets")} title={event.name} sub={`${event.city} · ${fmtDateLong(event.startsAt)}`}>
+        <div className="mt-3"><DemoBadge label={tu("demoCheckoutNoPayment")} /></div>
       </PageTitle>
 
       <fieldset className="space-y-3 px-4 md:px-0">
-        <legend className="sr-only">Choose tickets</legend>
+        <legend className="sr-only">{tu("chooseTickets")}</legend>
         {tickets.map((t) => {
           const n = qty[t.kind];
           return (
@@ -64,13 +66,13 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
                     ))}
                   </ul>
                   <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className={cn("text-xs font-bold", t.remaining < 60 ? "text-coral" : "text-mute")}>{t.remaining} left (demo)</span>
-                    <div className="flex items-center gap-1 rounded-full bg-ink p-1" role="group" aria-label={`${t.name} quantity`}>
-                      <button type="button" onClick={() => set(t.kind, -1)} disabled={!n} aria-label={`Remove one ${t.name}`} className="inline-flex size-11 items-center justify-center rounded-full bg-surface-2 disabled:opacity-40">
+                    <span className={cn("text-xs font-bold", t.remaining < 60 ? "text-coral" : "text-mute")}>{tu("remainingLeftDemo", { remaining: t.remaining })}</span>
+                    <div className="flex items-center gap-1 rounded-full bg-ink p-1" role="group" aria-label={tu("quantityOf", { name: t.name })}>
+                      <button type="button" onClick={() => set(t.kind, -1)} disabled={!n} aria-label={tu("removeOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-surface-2 disabled:opacity-40">
                         <Minus className="size-4" />
                       </button>
                       <output aria-live="polite" className="w-8 text-center font-display text-lg">{n}</output>
-                      <button type="button" onClick={() => set(t.kind, 1)} disabled={n >= MAX} aria-label={`Add one ${t.name}`} className="inline-flex size-11 items-center justify-center rounded-full bg-acid text-ink disabled:opacity-40">
+                      <button type="button" onClick={() => set(t.kind, 1)} disabled={n >= MAX} aria-label={tu("addOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-acid text-ink disabled:opacity-40">
                         <Plus className="size-4" />
                       </button>
                     </div>
@@ -83,18 +85,18 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
       </fieldset>
 
       <DemoNotice className="mx-4 mt-5 md:mx-0">
-        <strong>Phase 1 demo checkout.</strong> Completing this flow creates a sample ticket in your browser only. No card is charged and the ticket is not valid for entry. 本番決済はPhase 2以降で接続されます。
+        <strong>{tu("phase1DemoCheckout")}</strong> {tu("completingThisFlowCreatesA")}
       </DemoNotice>
 
       <div className="h-28" aria-hidden />
       <div className="sticky-cta fixed inset-x-0 z-40 border-t border-purple/40 bg-ink px-4 py-3 shadow-[0_-10px_30px_-12px_rgba(162,118,233,0.5)]">
         <div className="mx-auto flex max-w-3xl items-center gap-4">
           <div className="min-w-0 flex-1">
-            <div className="text-xs font-bold uppercase text-mute">{count} ticket{count === 1 ? "" : "s"}</div>
+            <div className="text-xs font-bold uppercase text-mute">{tu("ticketsCount", { n: count })}</div>
             <div className="font-display text-2xl" aria-live="polite">{money(total)}</div>
           </div>
           <Button size="lg" disabled={!count} onClick={() => setReview(true)}>
-            Review order
+            {tu("reviewOrder")}
           </Button>
         </div>
       </div>
@@ -102,10 +104,10 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
       <BottomSheet
         open={review}
         onClose={() => setReview(false)}
-        title="Confirm order"
+        title={tu("confirmOrder")}
         footer={
           <Button size="lg" className="mb-1 w-full" onClick={complete} disabled={busy}>
-            {busy ? "Creating demo ticket…" : "Complete demo purchase"}
+            {busy ? tu("creatingDemoTicket") : tu("completeDemoPurchase")}
           </Button>
         }
       >
@@ -117,18 +119,18 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
             </li>
           ))}
           <li className="flex justify-between gap-3 py-2.5 text-sm text-mute">
-            <span>Service fee (illustrative)</span>
+            <span>{tu("serviceFeeIllustrative")}</span>
             <span>{money(fee)}</span>
           </li>
           <li className="flex justify-between gap-3 py-3 font-display text-xl">
-            <span>Total</span>
+            <span>{tu("total")}</span>
             <span>{money(total)}</span>
           </li>
         </ul>
         <div className="mt-2 flex gap-3 rounded-2xl bg-coral/15 p-3 text-sm">
           <ShieldAlert className="mt-0.5 size-5 shrink-0 text-coral" aria-hidden />
           <p>
-            <strong>This is not a real purchase.</strong> In production this step would hand off to a secure payment provider. Here we only save a demo ticket in your browser.
+            <strong>{tu("thisIsNotAReal")}</strong> {tu("inProductionThisStepWould")}
           </p>
         </div>
       </BottomSheet>

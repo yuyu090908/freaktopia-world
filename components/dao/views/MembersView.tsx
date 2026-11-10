@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import { DaoAvatar } from "@/components/dao/DaoAvatar";
 
 import { useEffect, useState } from "react";
@@ -23,6 +25,7 @@ interface MembersDto {
 }
 
 export function MembersView() {
+  const tu = useTranslations("dao");
   const { eventId } = useDao();
   const [q, setQ] = useState("");
   const [query, setQuery] = useState("");
@@ -36,8 +39,8 @@ export function MembersView() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">Members</h1>
-        {state.status === "ok" && <p className="mt-2 text-sm text-mute">{state.data.total.toLocaleString("en-US")} staked members{state.data.flaggedCount !== undefined ? ` · ${state.data.flaggedCount} flagged for review` : ""}</p>}
+        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{tu("members")}</h1>
+        {state.status === "ok" && <p className="mt-2 text-sm text-mute">{tu("tolocalestringStakedMembersValue", { toLocaleString: state.data.total.toLocaleString("en-US"), value: state.data.flaggedCount !== undefined ? tu("flaggedcountFlaggedForReview", { flaggedCount: state.data.flaggedCount }) : "" })}</p>}
       </div>
 
       {state.status === "ok" && (
@@ -45,9 +48,9 @@ export function MembersView() {
       )}
 
       <label className="relative block">
-        <span className="sr-only">Search members</span>
+        <span className="sr-only">{tu("searchMembers")}</span>
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-mute" aria-hidden />
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by handle" className="min-h-12 w-full rounded-2xl border border-line bg-surface pl-9 pr-3" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={tu("searchByHandle")} className="min-h-12 w-full rounded-2xl border border-line bg-surface pl-9 pr-3" />
       </label>
 
       {state.status === "loading" && <LoadingSkeleton variant="list" />}
@@ -59,24 +62,24 @@ export function MembersView() {
               <li key={m.uid ?? m.handle} className={`p-3 ${m.isMe ? "bg-acid/10" : ""}`}>
                 <div className="flex flex-wrap items-center gap-2">
                   <DaoAvatar handle={m.handle} mine={m.isMe} size={32} />
-                  <span className="min-w-0 truncate font-bold">@{m.handle}{m.isMe && <span className="ml-1 text-acid">(you)</span>}</span>
-                  {m.roles.filter((r) => r !== "member").map((r) => <span key={r} className="rounded-full bg-purple px-2 py-0.5 text-[11px] font-extrabold uppercase text-ink">{ROLE_LABEL[r]}</span>)}
+                  <span className="min-w-0 truncate font-bold">@{m.handle}{m.isMe && <span className="ml-1 text-acid">{tu("you")}</span>}</span>
+                  {m.roles.filter((r) => r !== "member").map((r) => <span key={r} className="rounded-full bg-purple px-2 py-0.5 text-[11px] font-extrabold uppercase text-ink"><Tx>{ROLE_LABEL[r]}</Tx></span>)}
                   <span className="ml-auto text-sm text-mute">{m.xp} XP</span>
                 </div>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[12px] text-mute">
-                  <span>joined {ago(m.joinedAt)}</span>
-                  {m.badges.map((b) => <span key={b} className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: BADGE_META[b].color }}>{BADGE_META[b].label}</span>)}
+                  <span>{tu("joinedAgo", { ago: ago(m.joinedAt) })}</span>
+                  {m.badges.map((b) => <span key={b} className="rounded-full px-2 py-0.5 text-[10px] font-extrabold uppercase text-ink" style={{ background: BADGE_META[b].color }}><Tx>{BADGE_META[b].label}</Tx></span>)}
                 </div>
-                {m.flagged && <p className="mt-1 flex items-center gap-1 text-[12px] text-coral"><ShieldAlert className="size-4" aria-hidden />Flagged: {m.flagged} · ballots held</p>}
+                {m.flagged && <p className="mt-1 flex items-center gap-1 text-[12px] text-coral"><ShieldAlert className="size-4" aria-hidden />{tu("flaggedFlaggedBallotsHeld", { flagged: m.flagged })}</p>}
               </li>
             ))}
-            {!state.data.members.length && <li className="p-4 text-sm text-mute">No member matches “{query}”.</li>}
+            {!state.data.members.length && <li className="p-4 text-sm text-mute">{tu("noMemberMatchesQuery", { query })}</li>}
           </ul>
           {state.data.total > state.data.pageSize && (
             <div className="flex items-center justify-between gap-2">
-              <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>Previous</Button>
-              <span className="text-sm text-mute">Page {page} / {Math.ceil(state.data.total / state.data.pageSize)}</span>
-              <Button size="sm" variant="ghost" disabled={page * state.data.pageSize >= state.data.total} onClick={() => setPage((p) => p + 1)}>Next</Button>
+              <Button size="sm" variant="ghost" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>{tu("previous")}</Button>
+              <span className="text-sm text-mute">{tu("pagePageCeil", { page, ceil: Math.ceil(state.data.total / state.data.pageSize) })}</span>
+              <Button size="sm" variant="ghost" disabled={page * state.data.pageSize >= state.data.total} onClick={() => setPage((p) => p + 1)}>{tu("next2")}</Button>
             </div>
           )}
         </>

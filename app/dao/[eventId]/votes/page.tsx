@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { VotesView } from "@/components/dao/views/VotesView";
 
-export const metadata: Metadata = { title: "DAO Votes", description: "Open and closed DAO votes (demo)." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("daoEventIdVotesTitle"), description: tu("daoEventIdVotesDescription") };
+}
 
 export default function Page() {
   return <VotesView />;

@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { DiscussionView } from "@/components/dao/views/DiscussionView";
 
-export const metadata: Metadata = { title: "DAO Discussion", description: "Member discussion threads for this event DAO (demo)." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("daoEventIdDiscussionTitle"), description: tu("daoEventIdDiscussionDescription") };
+}
 
 export default function Page() {
   return <DiscussionView />;

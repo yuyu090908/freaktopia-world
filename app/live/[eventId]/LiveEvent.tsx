@@ -1,7 +1,9 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { type Tu } from "@/lib/i18n/tu";
 import { useTranslations } from "next-intl";
-import { useAuth } from "@/lib/auth/client";
+import { useAuth, useMyAvatar } from "@/lib/auth/client";
 import { useLocalHref } from "@/components/i18n/LocaleContext";
 
 import Link from "next/link";
@@ -30,11 +32,11 @@ import { grantXp, toast, useDemo, useHydrated } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const TABS = [
-  { id: "watch", label: "Watch", icon: Tv },
-  { id: "map", label: "Map", icon: MapIcon },
-  { id: "schedule", label: "Schedule", icon: CalendarClock },
-  { id: "community", label: "Community", icon: MessageCircle },
-  { id: "more", label: "More", icon: MoreHorizontal },
+  { id: "watch", label: "tabWatch", icon: Tv },
+  { id: "map", label: "tabMap", icon: MapIcon },
+  { id: "schedule", label: "tabSchedule", icon: CalendarClock },
+  { id: "community", label: "tabCommunity", icon: MessageCircle },
+  { id: "more", label: "tabMore", icon: MoreHorizontal },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -42,13 +44,16 @@ const MAX_FLOATS = 12;
 const isZone = (z: string): z is ZoneId => ZONES.some((x) => x.id === z);
 
 export function LiveEvent({ eventId }: { eventId: string }) {
+  const tu = useTranslations("live");
   const q = useLiveQuery<LiveDetail>(eventId);
   if (q.state.status === "loading") return <div className="mx-auto max-w-6xl p-4"><LoadingSkeleton variant="page" /></div>;
-  if (q.state.status === "error") return <ErrorState title={q.state.httpStatus === 404 ? "Festival not found" : "Live data unavailable"} body={q.state.error.message} retry={<button type="button" onClick={() => q.reload()} className="min-h-11 rounded-full bg-acid px-5 font-bold text-ink">Retry</button>} />;
+  if (q.state.status === "error") return <ErrorState title={q.state.httpStatus === 404 ? tu("festivalNotFound") : tu("liveDataUnavailable")} body={q.state.error.message} retry={<button type="button" onClick={() => q.reload()} className="min-h-11 rounded-full bg-acid px-5 font-bold text-ink">{tu("retry")}</button>} />;
   return <Festival detail={q.state.data} />;
 }
 
 function Festival({ detail }: { detail: LiveDetail }) {
+  const tx = useTx();
+  const tu = useTranslations("live");
   const hydrated = useHydrated();
   const eventId = detail.event.id;
   const running = detail.status === "demo_live" || detail.status === "live";
@@ -87,7 +92,7 @@ function Festival({ detail }: { detail: LiveDetail }) {
   const lastSet = useRef<string | null>(null);
   useEffect(() => {
     if (!running || !current) return;
-    if (lastSet.current && lastSet.current !== current.id) toast({ title: `Now playing: ${current.dj.name}`, body: `${detail.stages.find((s) => s.id === stageId)?.name} · demo clock`, tone: "level" });
+    if (lastSet.current && lastSet.current !== current.id) toast({ title: tu("nowPlayingName", { name: current.dj.name }), body: tu("stageDemoClock", { stage: detail.stages.find((s) => s.id === stageId)?.name ?? "" }), tone: "level" });
     lastSet.current = current.id;
   }, [current, running, stageId, detail.stages]);
   const skip = () => {
@@ -113,14 +118,11 @@ function Festival({ detail }: { detail: LiveDetail }) {
   const storedZone = useDemo((s) => s.liveZone);
   const zone: ZoneId = isZone(storedZone) ? storedZone : "entrance";
   const chosenVisibility = useDemo((s) => s.liveVisibility);
-  const demoLook = useDemo((s) => s.profile.look);
-  const demoName = useDemo((s) => s.profile.avatarName);
   // Signed in: the account alien is the LIVE avatar everywhere, and the privacy setting can hide it.
   const account = useAuth((s) => s.me);
   const accountAlien = account?.alien ?? null;
   const visibility = accountAlien && !account?.privacy.liveAvatar ? "hidden" : chosenVisibility;
-  const look = accountAlien?.look ?? demoLook;
-  const avatarName = accountAlien ? account?.profile.displayName ?? accountAlien.name : demoName;
+  const { look, name: avatarName } = useMyAvatar();
   const tlive = useTranslations("live");
   const localHref = useLocalHref();
   const dance = useDemo((s) => s.liveDance);
@@ -140,7 +142,7 @@ function Festival({ detail }: { detail: LiveDetail }) {
       const r = applySignal(cur, s);
       setLiveQuests(eventId, r.next, r.completed.map((q) => q.badge).filter((b): b is string => !!b));
       for (const qd of r.completed) {
-        grantXp(qd.xp, `Quest complete: ${qd.title}`);
+        grantXp(qd.xp, tu("xpQuestComplete", { title: tx(qd.title) }));
         void liveApi(`${eventId}/quests`, { method: "POST", json: { questId: qd.id } });
       }
     },
@@ -196,7 +198,7 @@ function Festival({ detail }: { detail: LiveDetail }) {
   /* ---------- actions ---------- */
   const [reactNote, setReactNote] = useState<string | null>(null);
   const react = async (kind: ReactionKind) => {
-    if (!running) return toast({ title: "Reactions open when the festival is live" });
+    if (!running) return toast({ title: tu("reactionsOpenWhenTheFestival") });
     const z = showAvatar ? zone : "dancefloor";
     addFloat(kind, z);
     mine.current[kind] = (mine.current[kind] ?? 0) + 1;
@@ -208,16 +210,16 @@ function Festival({ detail }: { detail: LiveDetail }) {
 
   const move = (to: ZoneId) => {
     if (!showAvatar) {
-      toast({ title: "Turn on ‘Show my avatar’ first", body: "Your avatar only appears with your consent." });
+      toast({ title: tu("turnOnShowMyAvatar"), body: tu("yourAvatarOnlyAppearsWith") });
       return false;
     }
     if (to === "vip") {
-      toast({ title: "VIP balcony is for VIP ticket holders", body: "VIP is verified at the door. You can still look at the zone info." });
+      toast({ title: tu("vipBalconyIsForVip"), body: tu("vipIsVerifiedAtThe") });
       return false;
     }
     if (to === zone) return true;
     setLive({ liveZone: to });
-    toast({ title: `Moved to ${zoneById(to).name}` });
+    toast({ title: tu("movedToName", { name: zoneById(to).name }) });
     signal({ kind: "zone", zone: to });
     if (to === "portal") signal({ kind: "portal_opened" });
     return true;
@@ -233,32 +235,32 @@ function Festival({ detail }: { detail: LiveDetail }) {
     <div className="mx-auto max-w-6xl pb-6 md:px-6">
       {/* HEADER */}
       <header className="px-4 pb-3 pt-3 md:px-0 md:pt-6">
-        <Link href="/live" className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-mute hover:text-cream"><ArrowLeft className="size-4" aria-hidden />All live festivals</Link>
+        <Link href="/live" className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-mute hover:text-cream"><ArrowLeft className="size-4" aria-hidden />{tu("allLiveFestivals")}</Link>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
-          <Tag color={st.color} dark={st.dark}>{st.label}</Tag>
-          {detail.event.isDemo && <DemoBadge label="Demo event" />}
+          <Tag color={st.color} dark={st.dark}>{tu(st.label)}</Tag>
+          {detail.event.isDemo && <DemoBadge label={tu("demoEvent")} />}
           {running && (
             <span className={cn("inline-flex items-center gap-1 text-[11px] font-bold", conn === "live" ? "text-acid" : "text-orange")} role="status" data-testid="conn">
               {conn === "offline" ? <WifiOff className="size-3.5" aria-hidden /> : <Wifi className="size-3.5" aria-hidden />}
-              {conn === "live" ? "Room synced" : conn === "connecting" ? "Connecting…" : conn === "offline" ? "Offline, will reconnect" : "Reconnecting…"}
+              {conn === "live" ? tu("roomSynced") : conn === "connecting" ? tu("connecting") : conn === "offline" ? tu("offlineWillReconnect") : tu("reconnecting")}
             </span>
           )}
         </div>
         <h1 className="mt-2 text-[36px] uppercase leading-none sm:text-6xl">{detail.event.name}</h1>
         <p className="mt-1 text-[13px] text-mute">
-          {detail.event.city} · {detail.event.venue ?? "Venue TBA"} · venue time {fmtInTz(clockNow, tzVenue)} {detail.clock.demo && <span className="text-orange">(demo clock)</span>}
+          {tu("cityValueVenueTimeFmtintz", { city: detail.event.city, value: detail.event.venue ?? tu("venueTba"), fmtInTz: fmtInTz(clockNow, tzVenue) })} {detail.clock.demo && <span className="text-orange">{tu("demoClock")}</span>}
         </p>
       </header>
 
       {/* STICKY: mini player + in-event tabs */}
       <div className="sticky top-[calc(64px+env(safe-area-inset-top))] z-30 -mx-0 bg-ink/95 backdrop-blur md:mx-0">
         {running && tab !== "watch" && <MiniPlayer dj={current?.dj.name ?? null} playing={playing} setPlaying={setPlaying} onOpen={() => setTab("watch")} demo={detail.status === "demo_live"} />}
-        <nav aria-label="Festival sections">
+        <nav aria-label={tu("festivalSections")}>
           <div role="tablist" className="grid grid-cols-5 border-b border-line">
             {TABS.map((t) => (
               <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls={`panel-${t.id}`} onClick={() => setTab(t.id)} className={cn("flex min-h-[52px] flex-col items-center justify-center gap-0.5 border-b-[3px] text-[11px] font-bold sm:flex-row sm:gap-1.5 sm:text-sm", tab === t.id ? "border-acid text-acid" : "border-transparent text-mute hover:text-cream")}>
                 <t.icon className="size-5" aria-hidden />
-                {t.label}
+                {tu(t.label)}
               </button>
             ))}
           </div>
@@ -276,10 +278,10 @@ function Festival({ detail }: { detail: LiveDetail }) {
                   <EnergyMeter energy={energy} />
                   <ReactionBar onReact={react} counts={room?.reactions} note={reactNote} />
                   <div className="grid grid-cols-2 gap-2 text-[12px]">
-                    <div className="rounded-2xl bg-surface-2 p-3"><div className="font-bold uppercase text-mute">Online viewers</div><div className="font-display text-lg">{fmtCount(viewers ?? 0)}</div></div>
-                    <div className="rounded-2xl bg-surface-2 p-3"><div className="font-bold uppercase text-mute">Checked in at venue</div><div className="font-display text-lg">{fmtCount(detail.attendance.checkedIn)}</div></div>
+                    <div className="rounded-2xl bg-surface-2 p-3"><div className="font-bold uppercase text-mute">{tu("viewers")}</div><div className="font-display text-lg">{fmtCount(viewers ?? 0)}</div></div>
+                    <div className="rounded-2xl bg-surface-2 p-3"><div className="font-bold uppercase text-mute">{tu("checkedInAtVenue")}</div><div className="font-display text-lg">{fmtCount(detail.attendance.checkedIn)}</div></div>
                   </div>
-                  <p className="text-[11px] text-mute">Viewers and on-site guests are separate counts. Watching never counts as attending.</p>
+                  <p className="text-[11px] text-mute">{tu("viewersAndOnSiteGuests")}</p>
                 </div>
               )}
               {/* mobile chat entry */}
@@ -288,16 +290,16 @@ function Festival({ detail }: { detail: LiveDetail }) {
                   <button type="button" onClick={() => setChatOpen(true)} className="flex min-h-14 w-full items-center gap-3 rounded-3xl border border-line bg-surface px-4 py-2 text-left" data-testid="open-chat">
                     <MessageCircle className="size-5 shrink-0 text-acid" aria-hidden />
                     <span className="min-w-0 flex-1">
-                      <b className="block text-sm">Live chat</b>
-                      <span className="block truncate text-[12px] text-mute">{room?.chat.at(-1) ? `${room.chat.at(-1)!.name}: ${room.chat.at(-1)!.body}` : "Say hi to the crowd"}</span>
+                      <b className="block text-sm">{tu("liveChat")}</b>
+                      <span className="block truncate text-[12px] text-mute">{room?.chat.at(-1) ? `${room.chat.at(-1)!.name}: ${room.chat.at(-1)!.body}` : tu("sayHiToTheCrowd")}</span>
                     </span>
                   </button>
                 </div>
               )}
             </div>
             {running && (
-              <aside className="hidden h-[640px] flex-col rounded-[26px] border border-line bg-surface p-3 lg:flex" aria-label="Live chat">
-                <h2 className="px-1 text-lg uppercase">Live chat</h2>
+              <aside className="hidden h-[640px] flex-col rounded-[26px] border border-line bg-surface p-3 lg:flex" aria-label={tu("liveChat")}>
+                <h2 className="px-1 text-lg uppercase">{tu("liveChat")}</h2>
                 <Chat eventId={eventId} messages={room?.chat ?? []} onSent={refresh} className="flex-1" />
               </aside>
             )}
@@ -311,19 +313,19 @@ function Festival({ detail }: { detail: LiveDetail }) {
               <FestivalMap me={me} avatars={running ? room?.avatars ?? [] : []} zoneCounts={room?.zoneCounts ?? {}} floats={floats} selectedZone={sheetZone} onZoneTap={setSheetZone} beam={lv.color} invasion={lv.key === "ALIEN_INVASION"} paused={!playing} />
               {running && (
                 <div className="pointer-events-none absolute left-2 top-2 flex flex-col gap-1">
-                  <span className="pointer-events-auto rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-bold" style={{ color: lv.color }} data-testid="map-energy">⚡ {lv.label} · {energy}</span>
-                  <span className="rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-bold text-cream">{fmtCount(room?.publicAvatars ?? 0)} public avatars</span>
+                  <span className="pointer-events-auto rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-bold" style={{ color: lv.color }} data-testid="map-energy">⚡ <Tx>{lv.label}</Tx> · {energy}</span>
+                  <span className="rounded-full bg-ink/85 px-2.5 py-1 text-[11px] font-bold text-cream">{tu("fmtcountPublicAvatars", { fmtCount: fmtCount(room?.publicAvatars ?? 0) })}</span>
                 </div>
               )}
-              {!running && <p className="absolute inset-x-2 bottom-2 rounded-2xl bg-ink/90 p-2 text-center text-[12px] text-mute">Preview map. Other avatars appear when the festival room opens.</p>}
+              {!running && <p className="absolute inset-x-2 bottom-2 rounded-2xl bg-ink/90 p-2 text-center text-[12px] text-mute">{tu("previewMapOtherAvatarsAppear")}</p>}
             </div>
             <div className="space-y-3 px-4 md:px-0">
               {running && <ReactionBar onReact={react} counts={room?.reactions} note={reactNote} />}
-              <div className="rail !gap-2 !px-0" role="group" aria-label="Move my avatar">
+              <div className="rail !gap-2 !px-0" role="group" aria-label={tu("moveMyAvatar")}>
                 {ZONES.map((z) => (
                   <button key={z.id} type="button" onClick={() => move(z.id)} aria-pressed={zone === z.id && showAvatar} className={cn("inline-flex min-h-11 shrink-0 items-center gap-2 rounded-full border-2 px-4 text-sm font-bold", zone === z.id && showAvatar ? "border-acid bg-acid text-ink" : "border-line bg-surface")}>
                     <span className="size-2.5 rounded-full" style={{ background: z.color }} aria-hidden />
-                    {z.name}
+                    <Tx>{z.name}</Tx>
                     {(room?.zoneCounts?.[z.id] ?? 0) > 0 && <span className="text-[11px] opacity-70">{room!.zoneCounts[z.id]}</span>}
                   </button>
                 ))}
@@ -332,31 +334,31 @@ function Festival({ detail }: { detail: LiveDetail }) {
                 checked={hydrated && showAvatar}
                 onChange={(v) => {
                   setLive({ liveShowAvatar: v });
-                  toast({ title: v ? `${avatarName} joined the map` : "Avatar removed from the map", body: v ? "Only your avatar and chosen zone are shared. Never your real location." : undefined });
+                  toast({ title: v ? tu("avatarnameJoinedTheMap", { avatarName }) : tu("avatarRemovedFromTheMap"), body: v ? tu("onlyYourAvatarAndChosen2") : undefined });
                   if (v) signal({ kind: "zone", zone });
                 }}
-                label="Show my avatar on the map"
-                sub="本人の同意がある場合のみ表示。実際の位置情報（GPS）は使用しません。"
+                label={tu("showMyAvatarOnThe")}
+                sub={tu("gps")}
               />
               <div className="flex items-center gap-3 rounded-3xl border border-line bg-surface p-3">
                 <Alien look={look} className="size-16 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <b className="block truncate">{avatarName}</b>
-                  <span className="text-[12px] text-mute">{visibility === "public" ? "Public" : visibility === "friends" ? "Friends only" : "Hidden"} · {dance} · {zoneById(zone).name}</span>
+                  <span className="text-[12px] text-mute">{visibility === "public" ? tu("public") : visibility === "friends" ? tu("friendsOnly") : tu("hidden")} · {dance} · {zoneById(zone).name}</span>
                 </div>
                 {accountAlien ? (
-                  <Link href={localHref("/profile/alien")} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />Customize</Link>
+                  <Link href={localHref("/profile/alien")} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />{tu("customize")}</Link>
                 ) : (
-                  <button type="button" onClick={() => setAvatarOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />Customize</button>
+                  <button type="button" onClick={() => setAvatarOpen(true)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border-2 border-line px-3 text-sm font-bold"><Pencil className="size-4" aria-hidden />{tu("customize")}</button>
                 )}
               </div>
               {accountAlien && (
                 <p className="text-[12px] text-mute" data-testid="live-identity-note">
                   {tlive("identityAvatar")}
-                  {!account?.privacy.liveAvatar && <> · <Link href={localHref("/profile/settings")} className="font-bold text-orange underline">{tlive("hiddenAvatar")}</Link></>}
+                  {!account?.privacy.liveAvatar && <> · <Link href={localHref("/settings")} className="font-bold text-orange underline">{tlive("hiddenAvatar")}</Link></>}
                 </p>
               )}
-              <VisibilityPicker value={visibility} onChange={(v) => { setLive({ liveVisibility: v }); toast({ title: `Avatar visibility: ${v}` }); }} />
+              <VisibilityPicker value={visibility} onChange={(v) => { setLive({ liveVisibility: v }); toast({ title: tu("avatarVisibilityV", { v: v === "public" ? tu("public") : v === "friends" ? tu("friendsOnly") : tu("hidden") }) }); }} />
             </div>
           </div>
         )}
@@ -371,9 +373,9 @@ function Festival({ detail }: { detail: LiveDetail }) {
         {/* COMMUNITY */}
         {tab === "community" && (
           <div className="grid gap-6 px-4 md:px-0 lg:grid-cols-[1fr_380px]">
-            <section aria-label="Live chat" className="flex h-[min(70vh,640px)] flex-col rounded-[26px] border border-line bg-surface p-3">
-              <h2 className="px-1 text-lg uppercase">Live chat</h2>
-              {running ? <Chat eventId={eventId} messages={room?.chat ?? []} onSent={refresh} className="flex-1" /> : <p className="p-2 text-sm text-mute">Chat opens when the festival starts.</p>}
+            <section aria-label={tu("liveChat")} className="flex h-[min(70vh,640px)] flex-col rounded-[26px] border border-line bg-surface p-3">
+              <h2 className="px-1 text-lg uppercase">{tu("liveChat")}</h2>
+              {running ? <Chat eventId={eventId} messages={room?.chat ?? []} onSent={refresh} className="flex-1" /> : <p className="p-2 text-sm text-mute">{tu("chatOpensWhenTheFestival")}</p>}
             </section>
             <div className="space-y-4">
               {running && <EnergyMeter energy={energy} compact />}
@@ -393,7 +395,7 @@ function Festival({ detail }: { detail: LiveDetail }) {
             <div className="space-y-6">
               <DaoPanel eventId={eventId} />
               <RankingsPanel eventId={eventId} />
-              <Link href={`/events/${eventId}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-line font-extrabold uppercase"><LayoutGrid className="size-4" aria-hidden />Event page & tickets</Link>
+              <Link href={`/events/${eventId}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full border-2 border-line font-extrabold uppercase"><LayoutGrid className="size-4" aria-hidden />{tu("eventPageTickets")}</Link>
             </div>
           </div>
         )}
@@ -401,11 +403,11 @@ function Festival({ detail }: { detail: LiveDetail }) {
 
       <DemoNotice className="mx-4 mt-8 md:mx-0">
         <Radio className="mr-1 inline size-4" aria-hidden />
-        {detail.status === "demo_live" ? "DEMO LIVE: a simulation. No real stream, payment or door system is connected. Demo viewers, avatars, chat bots and energy are labelled as demo and never count as real attendance." : "Demo festival data. Live features open when a real, licensed stream is connected for this event."}
+        {detail.status === "demo_live" ? tu("demoLiveASimulationNo") : tu("demoFestivalDataLiveFeatures")}
       </DemoNotice>
 
       {/* SHEETS */}
-      <AvatarSheet open={avatarOpen} onClose={() => setAvatarOpen(false)} onSaved={() => toast({ title: "Avatar saved", tone: "success" })} />
+      <AvatarSheet open={avatarOpen} onClose={() => setAvatarOpen(false)} onSaved={() => toast({ title: tu("avatarSaved"), tone: "success" })} />
       {sheetZone && (
         <ZoneSheet
           zoneId={sheetZone}
@@ -425,7 +427,7 @@ function Festival({ detail }: { detail: LiveDetail }) {
           onPortal={() => signal({ kind: "portal_opened" })}
         />
       )}
-      <BottomSheet open={chatOpen} onClose={() => setChatOpen(false)} title="Live chat">
+      <BottomSheet open={chatOpen} onClose={() => setChatOpen(false)} title={tu("liveChat")}>
         <div className="flex h-[60vh] flex-col">
           <Chat eventId={eventId} messages={room?.chat ?? []} onSent={refresh} className="flex-1" />
         </div>
@@ -436,13 +438,13 @@ function Festival({ detail }: { detail: LiveDetail }) {
 
 /* ---------------- zone sheet ---------------- */
 
-const FOOD = [
-  { name: "Kaiju Ramen Cart", hours: "22:00–05:00", note: "Vegan broth available" },
-  { name: "Slime Taiyaki", hours: "23:00–04:00", note: "Matcha & red bean" },
-  { name: "Orbit Onigiri", hours: "22:00–06:00", note: "Gluten-free options" },
-];
-const DRINKS = ["Free water refill points: Bar + Entrance", "Neon yuzu soda", "Alien-green matcha tonic", "Local craft beer (20+, ID required)"];
-const RULES = ["Ticket QR or wristband required for re-entry", "No GPS tracking: the app only knows the zone you choose", "Zero tolerance for harassment: report to staff or in chat", "Earplugs and water are free at the bar"];
+const FOOD = (tu: Tu) => ([
+  { name: tu("kaijuRamenCart"), hours: "22:00–05:00", note: tu("veganBrothAvailable") },
+  { name: tu("slimeTaiyaki"), hours: "23:00–04:00", note: tu("matchaRedBean") },
+  { name: tu("orbitOnigiri"), hours: "22:00–06:00", note: tu("glutenFreeOptions") },
+]);
+const DRINKS = ["drinkWater", "drinkYuzuSoda", "drinkMatchaTonic", "drinkCraftBeer"] as const;
+const RULES = ["ruleReentry", "ruleNoGps", "ruleHarassment", "ruleEarplugs"] as const;
 
 function ZoneSheet({
   zoneId,
@@ -477,6 +479,8 @@ function ZoneSheet({
   energy: number;
   onPortal: () => void;
 }) {
+  const tx = useTx();
+  const tu = useTranslations("live");
   const z = zoneById(zoneId);
   const stage = zoneId === "main" || zoneId === "second" ? zoneId : null;
   const cn2 = stage ? currentAndNext(detail.sets, stage, clockNow) : null;
@@ -489,13 +493,13 @@ function ZoneSheet({
       open
       modal={false}
       onClose={onClose}
-      title={z.name}
+      title={tx(z.name)}
       footer={
         here ? (
-          <p className="text-center text-sm font-bold text-acid">You are here</p>
+          <p className="text-center text-sm font-bold text-acid">{tu("youAreHere")}</p>
         ) : (
           <button type="button" onClick={() => { if (onMove()) onClose(); }} className="flex min-h-12 w-full items-center justify-center rounded-full bg-acid font-extrabold uppercase text-ink" data-testid="zone-move">
-            Move my avatar here
+            {tu("moveMyAvatarHere")}
           </button>
         )
       }
@@ -503,65 +507,65 @@ function ZoneSheet({
       <div className="space-y-3" data-testid="zone-sheet" data-zone={zoneId}>
         <div className="flex flex-wrap items-center gap-2">
           <span className="size-3 rounded-full" style={{ background: z.color }} aria-hidden />
-          <span className="text-[13px] text-mute">{count} public avatars here{running ? "" : " (preview)"}</span>
-          {z.dance && <Tag color="#B6F05C" dark>Dance zone</Tag>}
+          <span className="text-[13px] text-mute">{tu("countPublicAvatarsHereValue", { count, value: running ? "" : tu("preview") })}</span>
+          {z.dance && <Tag color="#B6F05C" dark>{tu("danceZone")}</Tag>}
         </div>
-        <p className="text-sm">{z.desc}</p>
+        <p className="text-sm"><Tx>{z.desc}</Tx></p>
 
         {stage && cn2 && (
           <div className="rounded-2xl bg-surface-2 p-3 text-sm">
-            <p><b>Now:</b> {cn2.current ? `${cn2.current.dj.name} (${fmtInTz(cn2.current.startAt, detail.tz)}–${fmtInTz(cn2.current.endAt, detail.tz)})` : running ? "Between sets" : "Not started"}</p>
-            <p className="text-mute"><b className="text-cream">Next:</b> {cn2.next ? `${cn2.next.dj.name} at ${fmtInTz(cn2.next.startAt, detail.tz)}` : "—"}</p>
+            <p><b>{tu("now2")}</b> {cn2.current ? `${cn2.current.dj.name} (${fmtInTz(cn2.current.startAt, detail.tz)}–${fmtInTz(cn2.current.endAt, detail.tz)})` : running ? tu("betweenSets") : tu("notStarted")}</p>
+            <p className="text-mute"><b className="text-cream">{tu("next")}</b> {cn2.next ? tu("djAt", { name: cn2.next.dj.name, time: fmtInTz(cn2.next.startAt, detail.tz) }) : "—"}</p>
             <div className="mt-2 grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => onWatch(stage)} className="min-h-11 rounded-full bg-coral font-bold text-ink">Watch this stage</button>
-              <button type="button" onClick={() => onTab("schedule")} className="min-h-11 rounded-full border-2 border-line font-bold">Timetable</button>
+              <button type="button" onClick={() => onWatch(stage)} className="min-h-11 rounded-full bg-coral font-bold text-ink">{tu("watchThisStage")}</button>
+              <button type="button" onClick={() => onTab("schedule")} className="min-h-11 rounded-full border-2 border-line font-bold">{tu("timetable")}</button>
             </div>
           </div>
         )}
         {zoneId === "dancefloor" && (
           <div className="space-y-2">
-            <p className="text-[13px] text-mute">Energy {energy} (game metric). Pick your move:</p>
+            <p className="text-[13px] text-mute">{tu("energyEnergyGameMetricPick", { energy })}</p>
             <div className="grid grid-cols-3 gap-2">
               {(["bounce", "wiggle", "spin"] as const).map((d) => <button key={d} type="button" aria-pressed={dance === d} onClick={() => onDance(d)} className={cn("min-h-11 rounded-full border-2 text-sm font-bold capitalize", dance === d ? "border-acid bg-acid text-ink" : "border-line")}>{d}</button>)}
             </div>
             {running && <ReactionBar onReact={onReact} />}
           </div>
         )}
-        {zoneId === "vip" && <p className="rounded-2xl bg-surface-2 p-3 text-[13px]">VIP access is checked at the venue door with a VIP ticket. Online avatars can&apos;t enter the VIP balcony.</p>}
-        {zoneId === "lounge" && <button type="button" onClick={() => onTab("community")} className="min-h-11 w-full rounded-full border-2 border-line font-bold">Open lounge chat</button>}
-        {zoneId === "bar" && <ul className="list-disc space-y-1 pl-5 text-[13px]">{DRINKS.map((d) => <li key={d}>{d}</li>)}</ul>}
+        {zoneId === "vip" && <p className="rounded-2xl bg-surface-2 p-3 text-[13px]">{tu("vipAccessIsCheckedAt")}</p>}
+        {zoneId === "lounge" && <button type="button" onClick={() => onTab("community")} className="min-h-11 w-full rounded-full border-2 border-line font-bold">{tu("openLoungeChat")}</button>}
+        {zoneId === "bar" && <ul className="list-disc space-y-1 pl-5 text-[13px]">{DRINKS.map((d) => <li key={d}>{tu(d)}</li>)}</ul>}
         {zoneId === "food" && (
           <ul className="space-y-1.5 text-[13px]">
-            {FOOD.map((f) => <li key={f.name} className="rounded-xl bg-surface-2 px-3 py-2"><b>{f.name}</b> · {f.hours} <span className="text-mute">· {f.note}</span></li>)}
+            {FOOD(tu).map((f) => <li key={f.name} className="rounded-xl bg-surface-2 px-3 py-2"><b>{f.name}</b> · {f.hours} <span className="text-mute">· {f.note}</span></li>)}
           </ul>
         )}
         {zoneId === "community" && (
           <div className="grid grid-cols-3 gap-2">
-            <button type="button" onClick={() => onTab("community")} className="min-h-11 rounded-full border-2 border-line text-sm font-bold">Chat</button>
-            <button type="button" onClick={() => onTab("community")} className="min-h-11 rounded-full border-2 border-line text-sm font-bold">Quests</button>
+            <button type="button" onClick={() => onTab("community")} className="min-h-11 rounded-full border-2 border-line text-sm font-bold">{tu("chat")}</button>
+            <button type="button" onClick={() => onTab("community")} className="min-h-11 rounded-full border-2 border-line text-sm font-bold">{tu("quests")}</button>
             <Link href={`/dao/${detail.event.id}`} className="flex min-h-11 items-center justify-center rounded-full border-2 border-line text-sm font-bold">DAO</Link>
           </div>
         )}
         {zoneId === "entrance" && (
           <div className="space-y-2">
-            <ul className="list-disc space-y-1 pl-5 text-[13px]">{RULES.map((r) => <li key={r}>{r}</li>)}</ul>
-            <button type="button" onClick={() => onTab("more")} className="min-h-11 w-full rounded-full border-2 border-line font-bold">Ticket check-in (demo)</button>
+            <ul className="list-disc space-y-1 pl-5 text-[13px]">{RULES.map((r) => <li key={r}>{tu(r)}</li>)}</ul>
+            <button type="button" onClick={() => onTab("more")} className="min-h-11 w-full rounded-full border-2 border-line font-bold">{tu("ticketCheckInDemo")}</button>
           </div>
         )}
         {zoneId === "portal" && (
           <div className="space-y-2 text-sm">
             {detail.afterParty ? (
               <>
-                <p><b>{detail.afterParty.name}</b> · {detail.afterParty.venueName} · from {fmtInTz(Date.parse(detail.afterParty.startsAt), detail.tz)}</p>
-                <p className="text-mute">{detail.afterParty.seatsLeft} of {detail.afterParty.capacity} spots left · ${detail.afterParty.price}</p>
+                <p><b>{detail.afterParty.name}</b> {tu("venuenameFromFmtintz", { venueName: detail.afterParty.venueName, fmtInTz: fmtInTz(Date.parse(detail.afterParty.startsAt), detail.tz) })}</p>
+                <p className="text-mute">{tu("seatsleftOfCapacitySpotsLeft", { seatsLeft: detail.afterParty.seatsLeft, capacity: detail.afterParty.capacity, price: detail.afterParty.price })}</p>
               </>
             ) : (
-              <p className="text-mute">After party not confirmed yet.</p>
+              <p className="text-mute">{tu("afterPartyNotConfirmedYet")}</p>
             )}
-            <button type="button" onClick={() => onTab("more")} className="min-h-11 w-full rounded-full bg-purple font-bold text-ink" data-testid="portal-details">After party details</button>
+            <button type="button" onClick={() => onTab("more")} className="min-h-11 w-full rounded-full bg-purple font-bold text-ink" data-testid="portal-details">{tu("afterPartyDetails")}</button>
           </div>
         )}
-        {(z.id === "bar" || z.id === "food") && <p className="text-[11px] text-mute">Sample venue info for the demo.</p>}
+        {(z.id === "bar" || z.id === "food") && <p className="text-[11px] text-mute">{tu("sampleVenueInfoForThe")}</p>}
       </div>
     </BottomSheet>
   );

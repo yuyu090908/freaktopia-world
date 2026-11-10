@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 /**
  * Demo compositor for AI STAGE DESIGNER concepts.
  * Draws production elements (LED, lighting, sculptures, booth, FX) as vector layers on
@@ -32,6 +33,7 @@ export function ConceptRender({
   showLabel?: boolean;
   priority?: boolean;
 }) {
+  const tu = useTranslations("dao");
   const uid = useId().replace(/:/g, "");
   const z = { x: zone.x * W, y: zone.y * H, w: zone.w * W, h: zone.h * H };
   const cx = z.x + z.w / 2;
@@ -193,7 +195,7 @@ export function ConceptRender({
         <g>
           <rect x="24" y="24" width="560" height="54" rx="27" fill="#080808" fillOpacity="0.88" stroke="#B6F05C" strokeWidth="3" />
           <text x="304" y="60" textAnchor="middle" fontFamily="Inter, Arial, sans-serif" fontWeight="800" fontSize="25" letterSpacing="2" fill="#B6F05C">
-            AI CONCEPT / NOT A CONSTRUCTION PLAN
+            {tu("aiConceptNotAConstruction")}
           </text>
         </g>
       )}

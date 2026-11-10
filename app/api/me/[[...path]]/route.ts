@@ -19,6 +19,7 @@ const zProfile = z
     country: z.string().regex(/^[A-Z]{2}$/).nullable(),
     favoriteGenres: z.array(z.string().max(32)).max(12),
     revealSeen: z.literal(true),
+    onboardingStep: z.enum(["name", "genres", "done"]), // forward only; "reveal" cannot be requested
   })
   .partial()
   .strict();

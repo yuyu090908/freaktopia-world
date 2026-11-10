@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { NFTMarket } from "./NFTMarket";
 
-export const metadata: Metadata = { title: "NFT Market (preview)", description: "Preview of future FREAKTOPIA collectibles. Nothing is minted and no wallet is connected in Phase 1." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("nftTitle"), description: tu("nftDescription") };
+}
 
 export default function Page() {
   return <NFTMarket />;

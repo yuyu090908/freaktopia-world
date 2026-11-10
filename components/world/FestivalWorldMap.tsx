@@ -1,5 +1,7 @@
 "use client";
 
+import { useTx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 /**
  * FREAKTOPIA WORLD 7.0 map engine (MapLibre GL).
  *
@@ -146,8 +148,8 @@ function baseStyle(rich: boolean, remote: boolean): StyleSpecification {
     style.layers.push(
       { id: "osm-roads", type: "line", source: "osm", "source-layer": "transportation", minzoom: 7, filter: ["in", ["get", "class"], ["literal", ["motorway", "trunk", "primary", "secondary", "tertiary", "minor"]]], paint: { "line-color": C.road, "line-opacity": 0.55, "line-width": ["interpolate", ["exponential", 1.6], ["zoom"], 7, 0.3, 16, 6] } },
       { id: "osm-buildings", type: "fill-extrusion", source: "osm", "source-layer": "building", minzoom: 14, paint: { "fill-extrusion-color": "#1F2A36", "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6], "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0], "fill-extrusion-opacity": 0.75 } },
-      { id: "osm-roadnames", type: "symbol", source: "osm", "source-layer": "transportation_name", minzoom: 13, layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 10 }, paint: { "text-color": "#7D8898", "text-halo-color": C.ocean, "text-halo-width": 1 } },
-      { id: "osm-places", type: "symbol", source: "osm", "source-layer": "place", minzoom: 4, filter: ["in", ["get", "class"], ["literal", ["city", "town"]]], layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 4, 10, 10, 13], "text-letter-spacing": 0.08, "text-transform": "uppercase" }, paint: { "text-color": "#9AA6B5", "text-halo-color": C.space, "text-halo-width": 1.2, "text-opacity": 0.8 } },
+      { id: "osm-roadnames", type: "symbol", source: "osm", "source-layer": "transportation_name", minzoom: 13, layout: { "symbol-placement": "line", "text-field": ["get", "name"], "text-font": ["Noto Sans Regular"], "text-size": 10 }, paint: { "text-color": "#7D8898", "text-halo-color": C.ocean, "text-halo-width": 1 } }, // i18n-ignore — font stack
+      { id: "osm-places", type: "symbol", source: "osm", "source-layer": "place", minzoom: 4, filter: ["in", ["get", "class"], ["literal", ["city", "town"]]], layout: { "text-field": ["coalesce", ["get", "name:en"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": ["interpolate", ["linear"], ["zoom"], 4, 10, 10, 13], "text-letter-spacing": 0.08, "text-transform": "uppercase" }, paint: { "text-color": "#9AA6B5", "text-halo-color": C.space, "text-halo-width": 1.2, "text-opacity": 0.8 } }, // i18n-ignore — font stack
     );
   }
   // Festival aura sits on the ground under the landmarks.
@@ -184,15 +186,23 @@ const RADIUS: Record<Tier, number> = { far: 34, mid: 64, near: 92 };
 
 const priority = (e: WorldEvent) => (e.live ? 1000 : 0) + (e.ranking.badge ? 400 - (e.ranking.rank ?? 0) * 10 : 0) + e.level * 50 + (e.status === "completed" ? -300 : 0);
 
-function eventHtml(e: WorldEvent, tier: Tier, selected: boolean, animate: boolean) {
+interface MarkerText {
+  top: (rank: number) => string;
+  trending: string;
+  trendingTitle: string;
+  funding: (pct: number) => string;
+  status: (english: string) => string;
+}
+
+function eventHtml(e: WorldEvent, tier: Tier, selected: boolean, animate: boolean, L: MarkerText) {
   const s = STATUS_META[e.status];
   const pct = e.goalUsd ? e.growth.fundingUsd / e.goalUsd : 0;
   // Single festivals are always drawn as landmarks; only groups collapse into orbs.
   const art = landmarkSvg({ type: e.landmark.type, level: e.level, status: e.status, palette: e.palette, fundingPct: pct, daoTier: tier === "far" ? 0 : e.dao?.tier ?? 0, rank: null, animate: animate && (tier === "near" || selected) });
-  const rank = e.ranking.badge ? `<span class="wm-rank wm-rank-${e.ranking.rank}">TOP ${e.ranking.rank}</span>` : "";
-  const trend = e.ranking.trendingRank && tier !== "far" ? `<span class="wm-trend" title="Trending (7 days)">▲ TRENDING</span>` : "";
+  const rank = e.ranking.badge ? `<span class="wm-rank wm-rank-${e.ranking.rank}">${esc(L.top(e.ranking.rank ?? 0))}</span>` : "";
+  const trend = e.ranking.trendingRank && tier !== "far" ? `<span class="wm-trend" title="${esc(L.trendingTitle)}">▲ ${esc(L.trending)}</span>` : "";
   const name = tier === "near" || selected ? `<span class="wm-name">${esc(e.name)}</span>` : "";
-  const chip = tier !== "far" || selected ? `<span class="wm-chip" style="--c:${s.color}"><b aria-hidden="true">${s.glyph}</b>${e.status === "funding" ? `FUNDING ${Math.round(Math.min(1, pct) * 100)}%` : s.label}</span>` : "";
+  const chip = tier !== "far" || selected ? `<span class="wm-chip" style="--c:${s.color}"><b aria-hidden="true">${s.glyph}</b>${esc(e.status === "funding" ? L.funding(Math.round(Math.min(1, pct) * 100)) : L.status(s.label))}</span>` : "";
   const dao = e.dao ? `<span class="fk-dao wm-dao" aria-hidden="true">DAO</span>` : "";
   return `<span class="wm-art">${art}</span>${rank}${trend}${dao}${chip}${name}`;
 }
@@ -210,6 +220,11 @@ interface Group {
 /* ---------------- component ---------------- */
 
 const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function FestivalWorldMap({ events, selectedId, onSelect, rich, animate, reducedMotion, padding, remoteTiles, onReady, onZoom, me = null }, ref) {
+  const tu = useTranslations("world");
+  const tx = useTx();
+  const markerText = useRef<MarkerText>(null as unknown as MarkerText);
+  markerText.current = { top: (rank) => tu("markerTop", { rank }), trending: tu("markerTrending"), trendingTitle: tu("markerTrendingTitle"), funding: (pct) => tu("markerFunding", { pct }), status: tx };
+  const aria = (e: WorldEvent) => ariaFor(e, tu, tx);
   const box = useRef<HTMLDivElement>(null);
   const mapRef = useRef<maplibregl.Map | null>(null);
   const markers = useRef(new Map<string, { m: maplibregl.Marker; box: HTMLDivElement; el: HTMLButtonElement; sig: string }>());
@@ -312,11 +327,11 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
         el.dataset.testid = single ? "landmark" : "landmark-cluster";
         if (single) {
           el.className = `wm-mk wm-${tier}${selected ? " wm-sel" : ""} wm-st-${g.lead.status}${g.lead.live ? " wm-live" : ""}`;
-          el.setAttribute("aria-label", ariaFor(g.lead));
+          el.setAttribute("aria-label", aria(g.lead));
           el.setAttribute("aria-pressed", String(selected));
-          el.title = `${g.lead.name} · ${LANDMARK_LABEL[g.lead.landmark.type]}`;
-          el.innerHTML = eventHtml(g.lead, tier, selected, anim) + (here && mine ? `<span class="wm-me" data-testid="map-my-alien" title="${mine.label}">${mine.svg}</span>` : "");
-          if (here && mine) el.setAttribute("aria-label", `${ariaFor(g.lead)}. ${mine.label}`);
+          el.title = `${g.lead.name} · ${tx(LANDMARK_LABEL[g.lead.landmark.type])}`;
+          el.innerHTML = eventHtml(g.lead, tier, selected, anim, markerText.current) + (here && mine ? `<span class="wm-me" data-testid="map-my-alien" title="${mine.label}">${mine.svg}</span>` : "");
+          if (here && mine) el.setAttribute("aria-label", `${aria(g.lead)}. ${mine.label}`);
         } else {
           const live = g.members.some((m) => m.live);
           const dao = g.members.some((m) => m.dao);
@@ -498,7 +513,7 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
   // maplibre sets position:relative on its container, so the sizing lives on a wrapper.
   return (
     <div className="absolute inset-0 isolate z-0">
-      <div ref={box} className="wm-root size-full" data-testid="world-map" role="application" aria-label="World festival map. Use arrow keys to pan and plus or minus to zoom; festival landmarks are buttons." />
+      <div ref={box} className="wm-root size-full" data-testid="world-map" role="application" aria-label={tu("worldFestivalMapUseArrow")} />
     </div>
   );
 });

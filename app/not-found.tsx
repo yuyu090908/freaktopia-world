@@ -1,5 +1,7 @@
+import { useTranslations } from "next-intl";
 import { ErrorState } from "@/components/ui/States";
 
 export default function NotFound() {
-  return <ErrorState title="Lost in space" body="このページは見つかりませんでした。別の惑星に移動したのかも。" />;
+  const tu = useTranslations("pages");
+  return <ErrorState title={tu("lostInSpace")} body={tu("text5")} />;
 }

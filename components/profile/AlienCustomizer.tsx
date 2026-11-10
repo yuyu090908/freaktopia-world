@@ -32,7 +32,7 @@ export function AlienCustomizer() {
     return (
       <div>
         <p className="text-mute">{me ? tauth("notVerifiedBody") : t("signInToHatch")}</p>
-        {!me && <Link href={href("/auth/signup")} className={btnClass("primary", "md", "mt-4")}>{tauth("signUp")}</Link>}
+        {!me && <Link href={href("/signup")} className={btnClass("primary", "md", "mt-4")}>{tauth("signUp")}</Link>}
       </div>
     );
   }

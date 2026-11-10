@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,17 +27,20 @@ const WorldMap = dynamic(() => import("@/components/map/WorldMap"), {
   ),
 });
 
-const CATEGORIES = ["All", "Live Now", "Upcoming", "Tech House", "House", "Techno", "Afro House", "Bass House", "After Party"] as const;
+const CATEGORIES = ["All", "Live Now", "Upcoming", "Tech House", "House", "Techno", "Afro House", "Bass House", "After Party"] as const; // i18n-ignore — ids; labels via CATEGORY_KEY (genre names stay as-is)
 type Category = (typeof CATEGORIES)[number];
 
-const SORTS = { soon: "Starting soon", viewers: "Most online viewers", supporters: "Most supporters", name: "Name A–Z" } as const;
+// Values are translation keys (live namespace).
+const SORTS = { soon: "sortSoon", viewers: "sortViewers", supporters: "sortSupporters", name: "sortName" } as const;
+const CATEGORY_KEY: Partial<Record<string, string>> = { All: "catAll", "Live Now": "catLiveNow", Upcoming: "catUpcoming", "After Party": "catAfterParty" };
 type SortKey = keyof typeof SORTS;
 
 export const STATUS_LABEL: Record<LiveStatus, { label: string; color: string; dark: boolean }> = {
-  live: { label: "● LIVE NOW", color: "#FF625C", dark: true },
-  demo_live: { label: "● DEMO LIVE · simulation", color: "#FFAD5B", dark: true },
-  upcoming: { label: "Upcoming", color: "#2a2a2a", dark: false },
-  ended: { label: "Ended", color: "#2a2a2a", dark: false },
+  // label: translation key in the live namespace
+  live: { label: "statusLive", color: "#FF625C", dark: true },
+  demo_live: { label: "statusDemoLive", color: "#FFAD5B", dark: true },
+  upcoming: { label: "statusUpcoming", color: "#2a2a2a", dark: false },
+  ended: { label: "statusEnded", color: "#2a2a2a", dark: false },
 };
 
 const MAP_KINDS = ["LIVE NOW", "DEMO LIVE", "UPCOMING", "AFTER PARTY", "DJ AUDITION"] as const;
@@ -60,6 +64,7 @@ function matches(e: DiscoveryEvent, c: Category) {
 }
 
 export function LiveDiscovery() {
+  const tu = useTranslations("live");
   const q = useLiveQuery<Discovery>("");
   const [cat, setCat] = useState<Category>("All");
   const [query, setQuery] = useState("");
@@ -88,7 +93,7 @@ export function LiveDiscovery() {
       .map((d) => {
         const ev = EVENTS.find((x) => x.id === d.id)!;
         const k = kindOf(d);
-        return { event: ev, level: levelFor(ev.supporters, ev.raised), label: mapKind !== "ALL" ? undefined : k[0] === "DEMO LIVE" ? "DEMO LIVE" : k[0] === "LIVE NOW" ? "LIVE" : undefined, labelKind: "status" as const, approximate: d.approximateLocation, dao: d.dao };
+        return { event: ev, level: levelFor(ev.supporters, ev.raised), label: mapKind !== "ALL" ? undefined : k[0] === "DEMO LIVE" ? tu("demoLive4") : k[0] === "LIVE NOW" ? "LIVE" : undefined, labelKind: "status" as const, approximate: d.approximateLocation, dao: d.dao };
       });
   }, [data, mapKind]);
 
@@ -107,23 +112,23 @@ export function LiveDiscovery() {
         </div>
         <div className="flex items-center gap-3">
           <Image src={ART.logo} alt="FREAKTOPIA WORLD" sizes="110px" className="h-9 w-auto" />
-          <DemoBadge label="Demo data" />
+          <DemoBadge label={tu("demoData")} />
         </div>
         <div className="mt-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.2em] text-coral">
-          <Radio className="size-4" aria-hidden /> Live now
+          <Radio className="size-4" aria-hidden /> {tu("liveNow")}
         </div>
-        <h1 className="mt-1 text-[44px] uppercase leading-[0.95] drop-shadow-[0_3px_0_#080808] sm:text-7xl">The world is live.</h1>
-        <p className="ja mt-2 max-w-xl text-[15px] text-mute">世界中のフェスを見つけて、DJライブを観て、エイリアンアバターで参加しよう。</p>
+        <h1 className="mt-1 text-[44px] uppercase leading-[0.95] drop-shadow-[0_3px_0_#080808] sm:text-7xl">{tu("theWorldIsLive")}</h1>
+        <p className="mt-2 max-w-xl text-[15px] text-mute">{tu("dj")}</p>
       </header>
 
       {q.state.status === "loading" && <LoadingSkeleton variant="cards" className="px-4" />}
-      {q.state.status === "error" && <ErrorState title="Live data unavailable" body={q.state.error.message} retry={<button type="button" className="min-h-11 rounded-full bg-acid px-5 font-bold text-ink" onClick={() => q.reload()}>Retry</button>} />}
+      {q.state.status === "error" && <ErrorState title={tu("liveDataUnavailable")} body={q.state.error.message} retry={<button type="button" className="min-h-11 rounded-full bg-acid px-5 font-bold text-ink" onClick={() => q.reload()}>{tu("retry")}</button>} />}
 
       {data && (
         <>
           {/* FEATURED */}
           <section aria-labelledby="featured-h" className="px-4 md:px-0">
-            <h2 id="featured-h" className="sr-only">Featured</h2>
+            <h2 id="featured-h" className="sr-only">{tu("featured")}</h2>
             {featured ? (
               <FeaturedCard e={featured} />
             ) : (
@@ -131,7 +136,7 @@ export function LiveDiscovery() {
                 <div className="flex items-start gap-2 rounded-2xl border border-line bg-surface p-3 text-sm" data-testid="no-real-live">
                   <Radio className="mt-0.5 size-4 shrink-0 text-mute" aria-hidden />
                   <p>
-                    <b>No festival is streaming live right now.</b> <span className="text-mute">Only events with a connected, licensed stream are shown as LIVE NOW. Below: the demo simulation and what&apos;s next.</span>
+                    <b>{tu("noFestivalIsStreamingLive")}</b> <span className="text-mute">{tu("onlyEventsWithAConnected")}</span>
                   </p>
                 </div>
                 {demo.map((e) => <FeaturedCard key={e.id} e={e} />)}
@@ -142,34 +147,34 @@ export function LiveDiscovery() {
 
           {/* FILTERS */}
           <section aria-labelledby="browse-h" className="mt-8">
-            <h2 id="browse-h" className="px-4 text-[28px] uppercase sm:text-4xl md:px-0">Festivals</h2>
+            <h2 id="browse-h" className="px-4 text-[28px] uppercase sm:text-4xl md:px-0">{tu("festivals")}</h2>
             <div className="mt-3 flex flex-col gap-2 px-4 sm:flex-row md:px-0">
               <label className="relative flex-1">
-                <span className="sr-only">Search festivals</span>
+                <span className="sr-only">{tu("searchFestivals")}</span>
                 <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-mute" aria-hidden />
-                <input value={query} onChange={(e) => setQuery(e.target.value)} type="search" placeholder="Search festival, city, DJ, genre" className="min-h-12 w-full rounded-full border-2 border-line bg-surface pl-12 pr-4 text-[16px] outline-none focus:border-acid" />
+                <input value={query} onChange={(e) => setQuery(e.target.value)} type="search" placeholder={tu("searchFestivalCityDjGenre")} className="min-h-12 w-full rounded-full border-2 border-line bg-surface pl-12 pr-4 text-[16px] outline-none focus:border-acid" />
               </label>
               <label className="flex items-center gap-2 text-sm">
-                <span className="shrink-0 font-bold text-mute">Sort</span>
-                <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="min-h-12 w-full rounded-full border-2 border-line bg-surface px-4 text-[16px] sm:w-auto" aria-label="Sort festivals">
-                  {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                <span className="shrink-0 font-bold text-mute">{tu("sort")}</span>
+                <select value={sort} onChange={(e) => setSort(e.target.value as SortKey)} className="min-h-12 w-full rounded-full border-2 border-line bg-surface px-4 text-[16px] sm:w-auto" aria-label={tu("sortFestivals")}>
+                  {Object.entries(SORTS).map(([k, v]) => <option key={k} value={k}>{tu(v)}</option>)}
                 </select>
               </label>
             </div>
-            <div className="rail mt-3 !gap-2" role="group" aria-label="Categories">
+            <div className="rail mt-3 !gap-2" role="group" aria-label={tu("categories")}>
               {CATEGORIES.map((c) => (
                 <Chip key={c} active={cat === c} onClick={() => setCat(c)}>
                   {c === "Live Now" && <span className="size-2 rounded-full bg-coral" aria-hidden />}
-                  {c}
+                  {CATEGORY_KEY[c] ? tu(CATEGORY_KEY[c]!) : c}
                 </Chip>
               ))}
             </div>
             <p className="mt-2 px-4 text-[13px] text-mute md:px-0" aria-live="polite">
-              {list.length} {list.length === 1 ? "festival" : "festivals"}
-              {cat === "Live Now" && data.realLiveCount === 0 && " · none streaming for real; demo simulations are labelled"}
+              {tu("festivalsCount", { n: list.length })}
+              {cat === "Live Now" && data.realLiveCount === 0 && tu("noneStreamingForRealDemo")}
             </p>
             {list.length === 0 ? (
-              <EmptyState className="mx-4 mt-4 md:mx-0" title={`No ${cat === "All" ? "" : cat + " "}festivals yet`} body={query ? "Try another search word." : "Nothing in this category right now. Follow events to get an alert when one appears."} />
+              <EmptyState className="mx-4 mt-4 md:mx-0" title={tu("noValueFestivalsYet", { value: cat === "All" ? "" : (CATEGORY_KEY[cat] ? tu(CATEGORY_KEY[cat]!) : cat) + " " })} body={query ? tu("tryAnotherSearchWord") : tu("nothingInThisCategoryRight")} />
             ) : (
               <ul className="mt-4 grid gap-4 px-4 sm:grid-cols-2 md:px-0 lg:grid-cols-3">
                 {list.map((e) => (
@@ -184,13 +189,13 @@ export function LiveDiscovery() {
           {/* WORLD MAP */}
           <section aria-labelledby="map-h" className="mt-10">
             <div className="flex items-end justify-between gap-2 px-4 md:px-0">
-              <h2 id="map-h" className="text-[28px] uppercase sm:text-4xl">Live world map</h2>
-              <Link href="/world" className="inline-flex min-h-11 items-center text-sm font-bold text-acid">Full map →</Link>
+              <h2 id="map-h" className="text-[28px] uppercase sm:text-4xl">{tu("liveWorldMap")}</h2>
+              <Link href="/world" className="inline-flex min-h-11 items-center text-sm font-bold text-acid">{tu("fullMap")}</Link>
             </div>
-            <div className="rail mt-3 !gap-2" role="group" aria-label="Map pin types">
+            <div className="rail mt-3 !gap-2" role="group" aria-label={tu("mapPinTypes")}>
               {(["ALL", ...MAP_KINDS] as const).map((k) => (
                 <Chip key={k} active={mapKind === k} onClick={() => { setMapKind(k); setSelected(null); }}>
-                  {k === "ALL" ? "All pins" : k}
+                  {k === "ALL" ? tu("allPins") : k}
                 </Chip>
               ))}
             </div>
@@ -198,11 +203,11 @@ export function LiveDiscovery() {
               <WorldMap points={points} selectedId={selected} onSelect={setSelected} focus={0} />
               {sel && <MapSheet e={sel} onClose={() => setSelected(null)} />}
             </div>
-            <p className="mt-2 px-4 text-[12px] text-mute md:px-0">Pins with an unconfirmed venue sit at the city centre (approximate). DEMO LIVE pins are simulations, not real streams.</p>
+            <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tu("pinsWithAnUnconfirmedVenue")}</p>
           </section>
 
           <DemoNotice className="mx-4 mt-8 md:mx-0">
-            All festivals, viewer counts and avatars here are demo data. Real streams, ticket sales and attendance are not connected in this build. Online viewers and on-site guests are always counted separately.
+            {tu("allFestivalsViewerCountsAnd")}
           </DemoNotice>
         </>
       )}
@@ -215,6 +220,7 @@ function when(e: DiscoveryEvent) {
 }
 
 function FeaturedCard({ e }: { e: DiscoveryEvent }) {
+  const tu = useTranslations("live");
   const s = STATUS_LABEL[e.status];
   return (
     <article className="neon relative overflow-hidden rounded-[28px] border-2 bg-surface" data-testid="featured-live">
@@ -222,25 +228,25 @@ function FeaturedCard({ e }: { e: DiscoveryEvent }) {
         <EventCover id={e.id} priority sizes="(min-width:1152px) 1100px, 100vw" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/40 to-transparent" aria-hidden />
         <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
-          <Tag color={s.color} dark={s.dark}>{s.label}</Tag>
-          {e.status === "demo_live" && <DemoBadge className="!bg-ink" label="Demo · not a real stream" />}
+          <Tag color={s.color} dark={s.dark}>{tu(s.label)}</Tag>
+          {e.status === "demo_live" && <DemoBadge className="!bg-ink" label={tu("demoNotARealStream")} />}
         </div>
         <div className="absolute inset-x-0 bottom-0 p-4">
           <h3 className="text-[32px] uppercase leading-none drop-shadow-[0_2px_0_#080808] sm:text-5xl">{e.name}</h3>
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-cream/85">
             <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" aria-hidden />{e.city}{e.venue ? ` · ${e.venue}` : ""}</span>
-            {e.currentDj && <span className="inline-flex items-center gap-1"><Disc3 className="size-3.5" aria-hidden />Now: {e.currentDj.name} <span className="text-mute">(demo clock)</span></span>}
+            {e.currentDj && <span className="inline-flex items-center gap-1"><Disc3 className="size-3.5" aria-hidden />{tu("nowName", { name: e.currentDj.name })} <span className="text-mute">{tu("demoClock")}</span></span>}
           </div>
         </div>
       </div>
       <div className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
         <dl className="grid grid-cols-3 gap-2 text-center">
-          <Metric label="Online viewers" value={fmtCount(e.attendance.onlineViewers)} hint="demo" />
-          <Metric label="Public avatars" value={fmtCount(e.attendance.publicAvatars)} hint="demo" />
-          <Metric label="Checked in" value={fmtCount(e.attendance.checkedIn)} hint="demo" />
+          <Metric label={tu("viewers")} value={fmtCount(e.attendance.onlineViewers)} hint={tu("demo2")} />
+          <Metric label={tu("avatars")} value={fmtCount(e.attendance.publicAvatars)} hint={tu("demo2")} />
+          <Metric label={tu("checkedIn")} value={fmtCount(e.attendance.checkedIn)} hint={tu("demo2")} />
         </dl>
         <Link href={`/live/${e.id}`} className="flex min-h-12 items-center justify-center gap-2 rounded-full bg-coral px-6 font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b]">
-          Enter festival <ArrowRight className="size-4" aria-hidden />
+          {tu("enterFestival")} <ArrowRight className="size-4" aria-hidden />
         </Link>
       </div>
     </article>
@@ -258,11 +264,12 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
 }
 
 function NextUp({ e }: { e: DiscoveryEvent }) {
+  const tu = useTranslations("live");
   return (
     <Link href={`/live/${e.id}`} className="flex min-h-14 items-center gap-3 rounded-3xl border border-line bg-surface p-3 hover:border-cream/30">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-purple/20 text-purple" aria-hidden><CalendarDays className="size-5" /></span>
       <span className="min-w-0 flex-1">
-        <span className="block text-[11px] font-extrabold uppercase tracking-wider text-purple">Next up</span>
+        <span className="block text-[11px] font-extrabold uppercase tracking-wider text-purple">{tu("nextUp")}</span>
         <span className="block truncate font-bold">{e.name} · {e.city}</span>
         <span className="block truncate text-[13px] text-mute">{when(e)}</span>
       </span>
@@ -272,6 +279,7 @@ function NextUp({ e }: { e: DiscoveryEvent }) {
 }
 
 function LiveEventCard({ e }: { e: DiscoveryEvent }) {
+  const tu = useTranslations("live");
   const s = STATUS_LABEL[e.status];
   const followed = useDemo((st) => st.followedEvents.includes(e.id));
   const toggleFollow = useDemo((st) => st.toggleFollow);
@@ -284,9 +292,9 @@ function LiveEventCard({ e }: { e: DiscoveryEvent }) {
       </Link>
       <div className="flex flex-1 flex-col gap-2.5 p-4">
         <div className="flex flex-wrap gap-1.5">
-          <Tag color={s.color} dark={s.dark}>{s.label}</Tag>
-          {e.afterParty && <Tag color="#A276E9" dark>After party</Tag>}
-          {e.djAudition && <Tag color="#2a2a2a">DJ audition</Tag>}
+          <Tag color={s.color} dark={s.dark}>{tu(s.label)}</Tag>
+          {e.afterParty && <Tag color="#A276E9" dark>{tu("afterParty")}</Tag>}
+          {e.djAudition && <Tag color="#2a2a2a">{tu("djAudition")}</Tag>}
           {e.dao && <Tag color="#2a2a2a">DAO</Tag>}
         </div>
         <div className="flex items-center gap-3">
@@ -300,38 +308,38 @@ function LiveEventCard({ e }: { e: DiscoveryEvent }) {
           </h3>
         </div>
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-mute">
-          <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" aria-hidden />{e.city}{e.approximateLocation ? " (approx.)" : ""}</span>
+          <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" aria-hidden />{e.city}{e.approximateLocation ? tu("approx") : ""}</span>
           <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" aria-hidden />{when(e)}</span>
         </div>
         {e.currentDj && (
-          <div className="inline-flex items-center gap-1.5 text-[13px]"><Mic2 className="size-3.5 text-coral" aria-hidden />Now playing: <b>{e.currentDj.name}</b> <span className="text-mute">(demo)</span></div>
+          <div className="inline-flex items-center gap-1.5 text-[13px]"><Mic2 className="size-3.5 text-coral" aria-hidden />{tu("nowPlaying2")} <b>{e.currentDj.name}</b> <span className="text-mute">{tu("demo")}</span></div>
         )}
         <div className="flex flex-wrap gap-1.5">{e.genres.map((g) => <Tag key={g}>{g}</Tag>)}</div>
         <div className="grid grid-cols-2 gap-2 text-[12px]">
           {isLive ? (
             <>
-              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Eye className="size-3.5 text-blue" aria-hidden />{fmtCount(e.attendance.onlineViewers)} online</span>
-              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Users className="size-3.5 text-purple" aria-hidden />{fmtCount(e.attendance.publicAvatars)} avatars</span>
+              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Eye className="size-3.5 text-blue" aria-hidden />{tu("fmtcountOnline", { fmtCount: fmtCount(e.attendance.onlineViewers) })}</span>
+              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Users className="size-3.5 text-purple" aria-hidden />{tu("fmtcountAvatars", { fmtCount: fmtCount(e.attendance.publicAvatars) })}</span>
             </>
           ) : (
             <>
-              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Users className="size-3.5 text-acid" aria-hidden />{fmtCount(e.supporters)} supporters</span>
-              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><PartyPopper className="size-3.5 text-orange" aria-hidden />{fmtCount(e.attendance.ticketsSold)} tickets</span>
+              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><Users className="size-3.5 text-acid" aria-hidden />{tu("fmtcountSupporters", { fmtCount: fmtCount(e.supporters) })}</span>
+              <span className="inline-flex items-center gap-1 rounded-xl bg-surface-2 px-2 py-1.5"><PartyPopper className="size-3.5 text-orange" aria-hidden />{tu("fmtcountTickets", { fmtCount: fmtCount(e.attendance.ticketsSold) })}</span>
             </>
           )}
         </div>
         <div className="mt-auto grid grid-cols-[1fr_auto] gap-2 pt-1">
           <Link href={`/live/${e.id}`} className={cn("flex min-h-12 items-center justify-center gap-2 rounded-full font-extrabold uppercase", isLive ? "bg-coral text-ink shadow-[0_4px_0_0_#9b2f2b]" : "border-2 border-line")}>
-            {isLive ? "Enter festival" : "Preview festival"} <ArrowRight className="size-4" aria-hidden />
+            {isLive ? tu("enterFestival") : tu("previewFestival")} <ArrowRight className="size-4" aria-hidden />
           </Link>
           {!isLive && (
             <button
               type="button"
               aria-pressed={followed}
-              aria-label={followed ? `Stop alerts for ${e.name}` : `Remind me about ${e.name}`}
+              aria-label={followed ? tu("stopAlertsForName", { name: e.name }) : tu("remindMeAboutName", { name: e.name })}
               onClick={() => {
                 const on = toggleFollow(e.id);
-                toast({ title: on ? "We’ll remind you (demo)" : "Reminder removed", body: on ? "In-app alert only. No email or push is sent in this demo." : undefined });
+                toast({ title: on ? tu("wellRemindYouDemo") : tu("reminderRemoved"), body: on ? tu("inAppAlertOnlyNo") : undefined });
               }}
               className={cn("inline-flex size-12 items-center justify-center rounded-full border-2", followed ? "border-acid bg-acid text-ink" : "border-line")}
             >
@@ -345,9 +353,10 @@ function LiveEventCard({ e }: { e: DiscoveryEvent }) {
 }
 
 function MapSheet({ e, onClose }: { e: DiscoveryEvent; onClose: () => void }) {
+  const tu = useTranslations("live");
   const s = STATUS_LABEL[e.status];
   return (
-    <section aria-label={`${e.name} summary`} className="absolute inset-x-0 bottom-0 z-20 mx-auto max-w-lg rounded-t-[28px] border-2 border-b-0 border-line bg-surface/95 p-4 pt-2 backdrop-blur md:bottom-4 md:left-4 md:right-auto md:w-[380px] md:rounded-[28px] md:border-b-2">
+    <section aria-label={tu("summaryOf", { name: e.name })} className="absolute inset-x-0 bottom-0 z-20 mx-auto max-w-lg rounded-t-[28px] border-2 border-b-0 border-line bg-surface/95 p-4 pt-2 backdrop-blur md:bottom-4 md:left-4 md:right-auto md:w-[380px] md:rounded-[28px] md:border-b-2">
       <div className="mb-2 flex justify-center md:hidden" aria-hidden><span className="h-1.5 w-12 rounded-full bg-cream/30" /></div>
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
@@ -355,18 +364,18 @@ function MapSheet({ e, onClose }: { e: DiscoveryEvent; onClose: () => void }) {
             {kindOf(e).map((k) => <Tag key={k} color={k === "DEMO LIVE" ? "#FFAD5B" : k === "LIVE NOW" ? "#FF625C" : "#2a2a2a"} dark={k === "DEMO LIVE" || k === "LIVE NOW"}>{k}</Tag>)}
           </div>
           <h3 className="mt-2 text-xl uppercase leading-none">{e.name}</h3>
-          <p className="mt-1 text-[13px] text-mute">{e.city}{e.approximateLocation ? " · approximate location (venue not confirmed)" : e.venue ? ` · ${e.venue}` : ""}</p>
+          <p className="mt-1 text-[13px] text-mute">{e.city}{e.approximateLocation ? tu("approximateLocationVenueNotConfirmed") : e.venue ? ` · ${e.venue}` : ""}</p>
           <p className="text-[13px] text-mute">{when(e)}</p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close summary" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2"><X className="size-5" /></button>
+        <button type="button" onClick={onClose} aria-label={tu("closeSummary")} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2"><X className="size-5" /></button>
       </div>
-      {e.afterParty && <p className="mt-2 text-[13px]"><PartyPopper className="mr-1 inline size-3.5 text-purple" aria-hidden />After party: <b>{e.afterParty.name}</b></p>}
-      <p className="sr-only">Status: {s.label}</p>
+      {e.afterParty && <p className="mt-2 text-[13px]"><PartyPopper className="mr-1 inline size-3.5 text-purple" aria-hidden />{tu("afterParty2")} <b>{e.afterParty.name}</b></p>}
+      <p className="sr-only">{tu("statusLabel", { label: tu(s.label) })}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <Link href={`/live/${e.id}`} className="flex min-h-12 items-center justify-center gap-1 rounded-full bg-coral font-extrabold uppercase text-ink">
-          {e.status === "demo_live" || e.status === "live" ? "Enter" : "Preview"} <ArrowRight className="size-4" aria-hidden />
+          {e.status === "demo_live" || e.status === "live" ? tu("enter") : tu("preview2")} <ArrowRight className="size-4" aria-hidden />
         </Link>
-        <Link href={`/events/${e.id}`} className="flex min-h-12 items-center justify-center rounded-full border-2 border-line font-extrabold uppercase">Event</Link>
+        <Link href={`/events/${e.id}`} className="flex min-h-12 items-center justify-center rounded-full border-2 border-line font-extrabold uppercase">{tu("event")}</Link>
       </div>
     </section>
   );

@@ -26,7 +26,7 @@ async function afterSignIn(userId: string) {
   const cur = toLocale(jar.get(LOCALE_COOKIE)?.value);
   const profile = await getStore().getProfile(userId);
   if (cur && profile && profile.locale !== cur) await getStore().updateProfile(userId, { locale: cur });
-  return { next: profile?.revealSeen ? null : "/welcome", setLocale: !cur && profile ? profile.locale : null };
+  return { next: !profile || profile.onboardingStep === "done" ? null : "/onboarding", setLocale: !cur && profile ? profile.locale : null };
 }
 
 /** JSON answer for a completed sign-in: session cookie (+ saved language when the visitor had none). */
@@ -57,7 +57,7 @@ export async function GET(req: Request, { params }: Params) {
   if (path === "google/start") {
     const returnTo = safeReturnTo(url.searchParams.get("returnTo"));
     if (cfg.google === "demo-simulator") return NextResponse.redirect(new URL(`/auth/google-demo?returnTo=${encodeURIComponent(returnTo)}`, req.url));
-    if (cfg.google !== "connected") return NextResponse.redirect(new URL(`/auth/signin?error=GOOGLE_NOT_CONFIGURED`, req.url));
+    if (cfg.google !== "connected") return NextResponse.redirect(new URL(`/login?error=GOOGLE_NOT_CONFIGURED`, req.url));
     const state = randomToken(24);
     const verifier = randomToken(48);
     const challenge = Buffer.from(sha256hex(verifier), "hex").toString("base64url");
@@ -80,7 +80,7 @@ export async function GET(req: Request, { params }: Params) {
   if (path === "google/callback") {
     const jar = await cookies();
     const back = (code: string) => {
-      const r = NextResponse.redirect(new URL(`/auth/signin?error=${code}`, req.url));
+      const r = NextResponse.redirect(new URL(`/login?error=${code}`, req.url));
       r.cookies.set(OAUTH_COOKIE, "", { path: "/api/auth/google", maxAge: 0 });
       return r;
     };

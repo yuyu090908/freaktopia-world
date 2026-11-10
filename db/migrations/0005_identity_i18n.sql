@@ -27,7 +27,7 @@ create unique index if not exists users_email_unique on users (email) where emai
 
 -- ---------------------------------------------------------------- profile, preferences, privacy
 
-create table user_profiles (
+create table if not exists user_profiles (
   user_id         uuid primary key references users(id) on delete cascade,
   display_name    text check (display_name is null or length(display_name) between 1 and 32),
   username        text check (username is null or username ~ '^[a-z0-9_]{3,20}$'),
@@ -37,18 +37,18 @@ create table user_profiles (
   reveal_seen     boolean not null default false,
   updated_at      timestamptz not null default now()
 );
-create unique index user_profiles_username_unique on user_profiles (username) where username is not null;
+create unique index if not exists user_profiles_username_unique on user_profiles (username) where username is not null;
 
-create table user_preferences (
+create table if not exists user_preferences (
   user_id        uuid primary key references users(id) on delete cascade,
   locale         text not null default 'en' check (locale in ('en','ja','ko','zh-CN','ru','th','es','pt','fr','de','vi','id')),
   reduced_motion boolean not null default false,
   updated_at     timestamptz not null default now()
 );
 
-create type visibility as enum ('public', 'friends', 'private');
+do $$ begin create type visibility as enum ('public', 'friends', 'private'); exception when duplicate_object then null; end $$;
 
-create table user_privacy_settings (
+create table if not exists user_privacy_settings (
   user_id      uuid primary key references users(id) on delete cascade,
   profile      visibility not null default 'friends',
   avatar       visibility not null default 'public',
@@ -61,7 +61,7 @@ create table user_privacy_settings (
 
 -- ---------------------------------------------------------------- auth
 
-create table user_auth_providers (
+create table if not exists user_auth_providers (
   provider   text not null check (provider in ('google')),
   subject    text not null,
   user_id    uuid not null references users(id) on delete cascade,
@@ -71,32 +71,32 @@ create table user_auth_providers (
   unique (user_id, provider)
 );
 
-create table user_wallet_links (
+create table if not exists user_wallet_links (
   address   text primary key check (address ~ '^0x[0-9a-f]{40}$'), -- lower-case
   chain_id  integer not null,
   user_id   uuid not null references users(id) on delete cascade,
   linked_at timestamptz not null default now()
 );
-create index user_wallet_links_user on user_wallet_links (user_id);
+create index if not exists user_wallet_links_user on user_wallet_links (user_id);
 
-create table auth_sessions (
+create table if not exists auth_sessions (
   token_hash char(64) primary key, -- sha256 hex of the cookie token
   user_id    uuid not null references users(id) on delete cascade,
   created_at timestamptz not null default now(),
   expires_at timestamptz not null
 );
-create index auth_sessions_user on auth_sessions (user_id);
+create index if not exists auth_sessions_user on auth_sessions (user_id);
 
-create table auth_tokens (
+create table if not exists auth_tokens (
   token_hash char(64) primary key,
   kind       text not null check (kind in ('verify', 'reset')),
   user_id    uuid not null references users(id) on delete cascade,
   expires_at timestamptz not null,
   used_at    timestamptz
 );
-create index auth_tokens_user on auth_tokens (user_id, kind);
+create index if not exists auth_tokens_user on auth_tokens (user_id, kind);
 
-create table auth_audit_log (
+create table if not exists auth_audit_log (
   id      bigserial primary key,
   at      timestamptz not null default now(),
   event   text not null,
@@ -104,19 +104,19 @@ create table auth_audit_log (
   ip      text,
   meta    jsonb not null default '{}'::jsonb
 );
-create index auth_audit_log_user on auth_audit_log (user_id, at desc);
+create index if not exists auth_audit_log_user on auth_audit_log (user_id, at desc);
 
 -- ---------------------------------------------------------------- alien identity
 
-create table alien_families (
+create table if not exists alien_families (
   id        text primary key check (id in ('slime', 'fuzz', 'mutant', 'jelly')),
   name      text not null,
   is_active boolean not null default true
 );
-insert into alien_families (id, name) values ('slime', 'SLIME'), ('fuzz', 'FUZZ'), ('mutant', 'MUTANT'), ('jelly', 'JELLY');
+insert into alien_families (id, name) values ('slime', 'SLIME'), ('fuzz', 'FUZZ'), ('mutant', 'MUTANT'), ('jelly', 'JELLY') on conflict (id) do nothing;
 
 -- Every selectable part (eyes, mouth, pattern…) per asset version. Art is original SVG in the repo.
-create table alien_asset_variants (
+create table if not exists alien_asset_variants (
   asset_version integer not null,
   part          text not null check (part in ('body_color', 'eye', 'mouth', 'pattern', 'accessory', 'outfit', 'special')),
   variant       text not null,
@@ -125,7 +125,7 @@ create table alien_asset_variants (
   primary key (asset_version, part, variant)
 );
 
-create table user_alien_identities (
+create table if not exists user_alien_identities (
   user_id           uuid primary key references users(id) on delete cascade, -- 1:1, enforced
   alien_name        text not null,
   alien_family      text not null references alien_families(id),
@@ -145,7 +145,7 @@ create table user_alien_identities (
 );
 
 -- Base parts can never change after birth (no reroll). Only accessory, outfit and outfit colour may.
-create function alien_base_is_permanent() returns trigger language plpgsql as $$
+create or replace function alien_base_is_permanent() returns trigger language plpgsql as $$
 begin
   if (new.alien_family, new.body_color, new.accent_color, new.eye_variant, new.mouth_variant, new.pattern_variant,
       new.special_variant, new.generation_seed, new.alien_name, new.asset_version)
@@ -156,10 +156,11 @@ begin
   end if;
   return new;
 end $$;
+drop trigger if exists user_alien_identities_permanent on user_alien_identities;
 create trigger user_alien_identities_permanent before update on user_alien_identities
   for each row execute function alien_base_is_permanent();
 
-create table alien_cosmetics (
+create table if not exists alien_cosmetics (
   id          text primary key,
   part        text not null check (part in ('accessory', 'outfit')),
   variant     text not null,
@@ -169,7 +170,7 @@ create table alien_cosmetics (
   created_at  timestamptz not null default now()
 );
 
-create table user_alien_cosmetics (
+create table if not exists user_alien_cosmetics (
   user_id     uuid not null references users(id) on delete cascade,
   cosmetic_id text not null references alien_cosmetics(id),
   granted_at  timestamptz not null default now(),

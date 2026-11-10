@@ -1,5 +1,9 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+
+import { type Tu } from "@/lib/i18n/tu";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -11,16 +15,17 @@ import { grantXp, toast, useDemo, useHydrated } from "@/lib/store";
 import type { Amenity } from "@/lib/types";
 import { cn, money } from "@/lib/utils";
 
-const AMENITIES: Amenity[] = ["Funktion-One", "Void Acoustics", "CDJ-3000", "Technics 1200", "Lasers", "LED Wall", "Bar", "Kitchen", "Outdoor Area", "Green Room", "Step-free Access", "Coat Check"];
-const STEPS = ["Details", "Photos", "Address & price", "Equipment", "Dates & publish"];
+// Equipment values are data (stored on the venue); the UI shows them through tx() from the labels namespace.
+const AMENITIES: Amenity[] = ["Funktion-One", "Void Acoustics", "CDJ-3000", "Technics 1200", "Lasers", "LED Wall", "Bar", "Kitchen", "Outdoor Area", "Green Room", "Step-free Access", "Coat Check"]; // i18n-ignore
+const STEPS = ["stepDetails", "stepPhotos", "stepAddressPrice", "stepEquipment", "stepDatesPublish"] as const;
 
-const stepSchemas = [
-  z.object({ name: z.string().trim().min(2, "Venue name is required"), city: z.string().trim().min(2, "City is required"), description: z.string().trim().min(10, "Describe the space (10+ characters)") }),
+const stepSchemas = (tu: Tu) => ([
+  z.object({ name: z.string().trim().min(2, tu("errVenueNameIsRequired")), city: z.string().trim().min(2, tu("errCityIsRequired")), description: z.string().trim().min(10, tu("errDescribeTheSpace10Characters")) }),
   z.object({}),
-  z.object({ address: z.string().trim().min(4, "Address is required"), capacity: z.number({ message: "Capacity is required" }).int().min(10, "At least 10"), hourlyRate: z.number({ message: "Price is required" }).min(1, "Set an hourly price") }),
-  z.object({ amenities: z.array(z.string()).min(1, "Pick at least one") }),
-  z.object({ availableDates: z.array(z.string()).min(1, "Pick at least one available date") }),
-];
+  z.object({ address: z.string().trim().min(4, tu("errAddressIsRequired")), capacity: z.number({ message: tu("capacityIsRequired") }).int().min(10, tu("errAtLeast10")), hourlyRate: z.number({ message: tu("priceIsRequired") }).min(1, tu("errSetAnHourlyPrice")) }),
+  z.object({ amenities: z.array(z.string()).min(1, tu("errPickAtLeastOne")) }),
+  z.object({ availableDates: z.array(z.string()).min(1, tu("errPickAtLeastOneAvailable")) }),
+]);
 
 /** Downscale an uploaded image so the demo can keep it in localStorage. */
 function resize(file: File): Promise<string> {
@@ -47,6 +52,7 @@ export function VenueForm() {
 }
 
 function Inner() {
+  const tu = useTranslations("venues");
   const router = useRouter();
   const d = useDemo((s) => s.venueDraft);
   const savedStep = useDemo((s) => s.venueDraftStep);
@@ -57,7 +63,7 @@ function Inner() {
   const dates = Array.from({ length: 28 }, (_, i) => new Date(Date.UTC(2026, 10, 10 + i)).toISOString().slice(0, 10));
 
   const validate = (s: number) => {
-    const r = stepSchemas[s].safeParse(d);
+    const r = stepSchemas(tu)[s].safeParse(d);
     if (r.success) {
       setErrors({});
       return true;
@@ -83,49 +89,49 @@ function Inner() {
       const out = await Promise.all(picked.map(resize));
       setD({ photos: [...cur, ...out] });
     } catch {
-      toast({ title: "Couldn’t read that image", tone: "error" });
+      toast({ title: tu("couldntReadThatImage"), tone: "error" });
     }
   };
   const finish = () => {
     if (!validate(4)) return;
     const v = publish();
     if (v) {
-      grantXp(100, "Listed a venue");
-      toast({ title: "Venue listed (demo)", body: "Saved in this browser only.", tone: "success" });
+      grantXp(100, tu("xpListedAVenue"));
+      toast({ title: tu("venueListedDemo"), body: tu("savedInThisBrowserOnly"), tone: "success" });
       router.push(`/venues/${v.id}`);
     }
   };
 
   return (
     <div className="mx-auto max-w-2xl md:px-6">
-      <PageTitle kicker="Venue Market" title="List your venue" sub="5ステップで会場を掲載。入力内容はブラウザに自動保存されます。" />
-      <StepProgress step={step} total={STEPS.length} labels={STEPS} />
+      <PageTitle kicker={tu("venueMarket")} title={tu("listYourVenue")} sub={tu("n5")} />
+      <StepProgress step={step} total={STEPS.length} labels={STEPS.map((s) => tu(s))} />
       <div className="mt-6 space-y-5 px-4 md:px-0">
         {step === 0 && (
           <>
-            <Field id="vn" label="Venue name" error={errors.name}><Input id="vn" value={d.name ?? ""} aria-invalid={!!errors.name} onChange={(e) => setD({ name: e.target.value })} /></Field>
+            <Field id="vn" label={tu("venueName")} error={errors.name}><Input id="vn" value={d.name ?? ""} aria-invalid={!!errors.name} onChange={(e) => setD({ name: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field id="vc" label="City" error={errors.city}><Input id="vc" autoComplete="address-level2" value={d.city ?? ""} aria-invalid={!!errors.city} onChange={(e) => setD({ city: e.target.value })} /></Field>
-              <Field id="vco" label="Country" optional><Input id="vco" autoComplete="country-name" value={d.country ?? ""} onChange={(e) => setD({ country: e.target.value })} /></Field>
+              <Field id="vc" label={tu("city")} error={errors.city}><Input id="vc" autoComplete="address-level2" value={d.city ?? ""} aria-invalid={!!errors.city} onChange={(e) => setD({ city: e.target.value })} /></Field>
+              <Field id="vco" label={tu("country")} optional><Input id="vco" autoComplete="country-name" value={d.country ?? ""} onChange={(e) => setD({ country: e.target.value })} /></Field>
             </div>
-            <Field id="vd" label="Description" error={errors.description}><Textarea id="vd" value={d.description ?? ""} aria-invalid={!!errors.description} onChange={(e) => setD({ description: e.target.value })} /></Field>
+            <Field id="vd" label={tu("description")} error={errors.description}><Textarea id="vd" value={d.description ?? ""} aria-invalid={!!errors.description} onChange={(e) => setD({ description: e.target.value })} /></Field>
           </>
         )}
         {step === 1 && (
           <div>
-            <p className="text-sm text-mute">Up to 4 photos. Images are resized and stored only in this browser.</p>
+            <p className="text-sm text-mute">{tu("upTo4PhotosImages")}</p>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {(d.photos ?? []).map((p, i) => (
                 <div key={i} className="relative aspect-[4/3] overflow-hidden rounded-2xl border border-line">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p} alt={`Uploaded photo ${i + 1}`} className="h-full w-full object-cover" />
-                  <button type="button" aria-label={`Remove photo ${i + 1}`} onClick={() => setD({ photos: (d.photos ?? []).filter((_, k) => k !== i) })} className="absolute right-1.5 top-1.5 inline-flex size-11 items-center justify-center rounded-full bg-ink/85"><Trash2 className="size-4" /></button>
+                  <img src={p} alt={tu("uploadedPhotoValue", { value: i + 1 })} className="h-full w-full object-cover" />
+                  <button type="button" aria-label={tu("removePhotoValue", { value: i + 1 })} onClick={() => setD({ photos: (d.photos ?? []).filter((_, k) => k !== i) })} className="absolute right-1.5 top-1.5 inline-flex size-11 items-center justify-center rounded-full bg-ink/85"><Trash2 className="size-4" /></button>
                 </div>
               ))}
               {(d.photos?.length ?? 0) < 4 && (
                 <label className="flex aspect-[4/3] cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-line text-sm font-bold hover:border-acid focus-within:border-acid">
                   <ImagePlus className="size-7 text-acid" aria-hidden />
-                  Add photos
+                  {tu("addPhotos")}
                   <input type="file" accept="image/*" multiple className="sr-only" onChange={(e) => onFiles(e.target.files)} />
                 </label>
               )}
@@ -134,20 +140,20 @@ function Inner() {
         )}
         {step === 2 && (
           <>
-            <Field id="va" label="Address" error={errors.address}><Input id="va" autoComplete="street-address" value={d.address ?? ""} aria-invalid={!!errors.address} onChange={(e) => setD({ address: e.target.value })} /></Field>
+            <Field id="va" label={tu("address")} error={errors.address}><Input id="va" autoComplete="street-address" value={d.address ?? ""} aria-invalid={!!errors.address} onChange={(e) => setD({ address: e.target.value })} /></Field>
             <div className="grid grid-cols-2 gap-3">
-              <Field id="vcap" label="Capacity" error={errors.capacity}><Input id="vcap" type="number" inputMode="numeric" value={d.capacity ?? ""} aria-invalid={!!errors.capacity} onChange={(e) => setD({ capacity: e.target.value ? +e.target.value : undefined })} /></Field>
-              <Field id="vrate" label="Price / hour (USD)" error={errors.hourlyRate}><Input id="vrate" type="number" inputMode="numeric" value={d.hourlyRate ?? ""} aria-invalid={!!errors.hourlyRate} onChange={(e) => setD({ hourlyRate: e.target.value ? +e.target.value : undefined })} /></Field>
+              <Field id="vcap" label={tu("capacity")} error={errors.capacity}><Input id="vcap" type="number" inputMode="numeric" value={d.capacity ?? ""} aria-invalid={!!errors.capacity} onChange={(e) => setD({ capacity: e.target.value ? +e.target.value : undefined })} /></Field>
+              <Field id="vrate" label={tu("priceHourUsd")} error={errors.hourlyRate}><Input id="vrate" type="number" inputMode="numeric" value={d.hourlyRate ?? ""} aria-invalid={!!errors.hourlyRate} onChange={(e) => setD({ hourlyRate: e.target.value ? +e.target.value : undefined })} /></Field>
             </div>
           </>
         )}
         {step === 3 && (
           <fieldset>
-            <legend className="text-sm font-bold">Equipment & facilities</legend>
+            <legend className="text-sm font-bold">{tu("equipmentFacilities")}</legend>
             <div className="mt-2 flex flex-wrap gap-2">
               {AMENITIES.map((a) => {
                 const on = (d.amenities ?? []).includes(a);
-                return <Chip key={a} active={on} onClick={() => setD({ amenities: on ? (d.amenities ?? []).filter((x) => x !== a) : [...(d.amenities ?? []), a] })}>{a}</Chip>;
+                return <Chip key={a} active={on} onClick={() => setD({ amenities: on ? (d.amenities ?? []).filter((x) => x !== a) : [...(d.amenities ?? []), a] })}><Tx>{a}</Tx></Chip>;
               })}
             </div>
             {errors.amenities && <p role="alert" className="mt-2 text-sm font-semibold text-coral">{errors.amenities}</p>}
@@ -156,7 +162,7 @@ function Inner() {
         {step === 4 && (
           <>
             <fieldset>
-              <legend className="text-sm font-bold">Available dates (next 4 weeks)</legend>
+              <legend className="text-sm font-bold">{tu("availableDatesNext4Weeks")}</legend>
               <div className="mt-2 grid grid-cols-7 gap-1.5">
                 {dates.map((iso) => {
                   const on = (d.availableDates ?? []).includes(iso);
@@ -172,19 +178,19 @@ function Inner() {
               {errors.availableDates && <p role="alert" className="mt-2 text-sm font-semibold text-coral">{errors.availableDates}</p>}
             </fieldset>
             <dl className="divide-y divide-line rounded-3xl border border-line bg-surface text-sm">
-              {[["Name", d.name], ["City", d.city], ["Photos", `${d.photos?.length ?? 0}`], ["Capacity", d.capacity], ["Price", d.hourlyRate ? `${money(d.hourlyRate)}/h` : ""], ["Equipment", (d.amenities ?? []).join(", ")], ["Dates", `${d.availableDates?.length ?? 0} selected`]].map(([k, v]) => (
+              {[[tu("name"), d.name], [tu("city"), d.city], [tu("photos"), `${d.photos?.length ?? 0}`], [tu("capacity"), d.capacity], [tu("price"), d.hourlyRate ? `${money(d.hourlyRate)}/h` : ""], [tu("equipment"), (d.amenities ?? []).join(", ")], [tu("dates"), tu("datesSelected", { n: d.availableDates?.length ?? 0 })]].map(([k, v]) => (
                 <div key={k as string} className="flex gap-3 p-3"><dt className="w-24 shrink-0 font-bold text-mute">{k}</dt><dd className="min-w-0">{String(v ?? "—") || "—"}</dd></div>
               ))}
             </dl>
-            <DemoNotice>Publishing saves the listing in your browser. It is not visible to anyone else in Phase 1.</DemoNotice>
+            <DemoNotice>{tu("publishingSavesTheListingIn")}</DemoNotice>
           </>
         )}
         <div className="flex gap-3 pt-2">
-          {step > 0 && <Button variant="ghost" onClick={() => go(step - 1)}><ArrowLeft className="size-4" aria-hidden /> Back</Button>}
+          {step > 0 && <Button variant="ghost" onClick={() => go(step - 1)}><ArrowLeft className="size-4" aria-hidden /> {tu("back")}</Button>}
           {step < STEPS.length - 1 ? (
-            <Button className="ml-auto flex-1 sm:flex-none" onClick={() => go(step + 1)}>Next <ArrowRight className="size-4" aria-hidden /></Button>
+            <Button className="ml-auto flex-1 sm:flex-none" onClick={() => go(step + 1)}>{tu("next")} <ArrowRight className="size-4" aria-hidden /></Button>
           ) : (
-            <Button className="ml-auto flex-1 sm:flex-none" onClick={finish}><Check className="size-4" aria-hidden /> Publish listing</Button>
+            <Button className="ml-auto flex-1 sm:flex-none" onClick={finish}><Check className="size-4" aria-hidden /> {tu("publishListing")}</Button>
           )}
         </div>
       </div>

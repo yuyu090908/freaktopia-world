@@ -1,7 +1,11 @@
+import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 import { AvatarStudio } from "./AvatarStudio";
 
-export const metadata: Metadata = { title: "Alien Avatar", description: "Pick your alien, change its outfit and accessories, and level it up." };
+export async function generateMetadata(): Promise<Metadata> {
+  const tu = await getTranslations("seo");
+  return { title: tu("avatarTitle"), description: tu("avatarDescription") };
+}
 
 export default function Page() {
   return <AvatarStudio />;

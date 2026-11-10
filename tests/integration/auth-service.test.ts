@@ -14,7 +14,7 @@ const RUN = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}
 const email = () => `alien${Date.now()}-${++n}@example.test`;
 const PW = "a long party sentence";
 const linkToken = (to: string, kind: "verify" | "reset") => {
-  const m = demoOutboxFor(to).find((x) => x.link?.includes(`/auth/${kind}?token=`));
+  const m = demoOutboxFor(to).find((x) => x.link?.includes(`${kind === "verify" ? "/verify-email" : "/forgot-password"}?token=`));
   return m ? new URL(m.link!).searchParams.get("token")! : null;
 };
 const code = async (p: Promise<unknown>) => p.then(() => "OK", (e) => (e instanceof AuthError ? e.code : String(e)));
@@ -25,7 +25,7 @@ async function verified(addr = email()) {
 }
 
 // The suite runs on the in-memory store, and again on Postgres when TEST_DATABASE_URL points at a database with
-// db/migrations/0005_identity_i18n.sql applied.
+// db/migrations/0005_identity_i18n.sql and 0006_identity_onboarding.sql applied.
 const stores: [string, () => AuthStore][] = [["memory", () => memoryStore]];
 if (process.env.TEST_DATABASE_URL) stores.push(["postgres", () => createPgStore(process.env.TEST_DATABASE_URL!)]);
 
@@ -67,7 +67,7 @@ describe.each(stores)("auth service on %s store", (_name, make) => {
     expect(demoOutboxFor(addr)[0].subject).toMatch(/already have/);
     const nobody = email();
     await expect(requestReset(nobody, ctx)).resolves.toBeUndefined();
-    expect(demoOutboxFor(nobody)[0].link).toContain("/auth/signup");
+    expect(demoOutboxFor(nobody)[0].link).toContain("/signup");
     expect(await code(signIn(nobody, PW, ctx))).toBe("INVALID_CREDENTIALS");
     expect(await code(signIn(addr, "wrong password!!", ctx))).toBe("INVALID_CREDENTIALS");
   });
@@ -148,6 +148,38 @@ describe.each(stores)("auth service on %s store", (_name, make) => {
     const after = await getStore().updateAlienCosmetics(v.userId, { outfit: "kimono", accessory: "halo" });
     expect(after.outfit).toBe("kimono");
     expect({ ...after, outfit: before.outfit, accessory: before.accessory, outfitColor: before.outfitColor, updatedAt: undefined }).toMatchObject({ ...before, updatedAt: undefined });
+  });
+
+  it("8.1: every alien gets a unique public Alien ID in the FREAK-00001284 format", async () => {
+    const a = (await getStore().getAlien((await verified()).userId))!;
+    const b = (await getStore().getAlien((await verified()).userId))!;
+    expect(a.publicId).toMatch(/^FREAK-\d{8}$/);
+    expect(b.publicId).toMatch(/^FREAK-\d{8}$/);
+    expect(a.publicId).not.toBe(b.publicId);
+    const m = await me(a.userId);
+    expect(m?.alien?.publicId).toBe(a.publicId);
+  });
+
+  it("8.1: concurrent first-time generation creates exactly one alien", async () => {
+    const addr = email();
+    await signUp(addr, PW, ctx);
+    const u = (await getStore().findUserByEmail(addr))!;
+    const runs = await Promise.all(Array.from({ length: 10 }, () => ensureAlien(u.id, ctx)));
+    expect(runs.filter((r) => r.created).length).toBe(1);
+    expect(new Set(runs.map((r) => r.alien.publicId)).size).toBe(1);
+    expect(new Set(runs.map((r) => r.alien.seed)).size).toBe(1);
+  });
+
+  it("8.1: onboarding resumes at the saved step and never goes back to the Reveal", async () => {
+    const v = await verified();
+    expect((await getStore().getProfile(v.userId))?.onboardingStep).toBe("reveal");
+    await getStore().updateProfile(v.userId, { onboardingStep: "name" });
+    expect((await getStore().getProfile(v.userId))).toMatchObject({ onboardingStep: "name", revealSeen: true });
+    await getStore().updateProfile(v.userId, { onboardingStep: "genres", displayName: "Disco Comet" });
+    await getStore().updateProfile(v.userId, { onboardingStep: "reveal" }); // a stale tab
+    expect((await getStore().getProfile(v.userId))).toMatchObject({ onboardingStep: "genres", revealSeen: true, displayName: "Disco Comet" });
+    await getStore().updateProfile(v.userId, { onboardingStep: "done", favoriteGenres: ["Techno"] });
+    expect((await me(v.userId))?.profile).toMatchObject({ onboardingStep: "done", favoriteGenres: ["Techno"], displayName: "Disco Comet" });
   });
 
   it("writes an audit log without secrets", async () => {

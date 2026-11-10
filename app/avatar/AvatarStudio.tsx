@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx, useTx } from "@/components/i18n/Tx";
+import { type Tu } from "@/lib/i18n/tu";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/lib/auth/client";
@@ -17,21 +19,21 @@ import type { Accessory, AlienLook, Outfit } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useDaoQuery } from "@/lib/dao/client";
 
-const OUTFITS: { id: Outfit; label: string; lv: number }[] = [
-  { id: "none", label: "None", lv: 1 },
-  { id: "hoodie", label: "Hoodie", lv: 1 },
-  { id: "jacket", label: "Jacket", lv: 1 },
-  { id: "vest", label: "Rave vest", lv: 2 },
-  { id: "kimono", label: "Kimono", lv: 3 },
-];
-const ACCESSORIES: { id: Accessory; label: string; lv: number }[] = [
-  { id: "none", label: "None", lv: 1 },
-  { id: "headphones", label: "Headphones", lv: 1 },
-  { id: "cap", label: "Cap", lv: 1 },
-  { id: "shades", label: "Shades", lv: 2 },
-  { id: "antenna", label: "Antenna", lv: 2 },
-  { id: "crown", label: "Crown", lv: 4 },
-];
+const OUTFITS = (tu: Tu): { id: Outfit; label: string; lv: number }[] => ([
+  { id: "none", label: tu("none"), lv: 1 },
+  { id: "hoodie", label: tu("hoodie"), lv: 1 },
+  { id: "jacket", label: tu("jacket"), lv: 1 },
+  { id: "vest", label: tu("raveVest"), lv: 2 },
+  { id: "kimono", label: tu("kimono"), lv: 3 },
+]);
+const ACCESSORIES = (tu: Tu): { id: Accessory; label: string; lv: number }[] => ([
+  { id: "none", label: tu("none"), lv: 1 },
+  { id: "headphones", label: tu("headphones"), lv: 1 },
+  { id: "cap", label: tu("cap"), lv: 1 },
+  { id: "shades", label: tu("shades"), lv: 2 },
+  { id: "antenna", label: tu("antenna"), lv: 2 },
+  { id: "crown", label: tu("crown"), lv: 4 },
+]);
 const SWATCHES = ["#B6F05C", "#FF625C", "#A276E9", "#55BCEB", "#FFAD5B", "#F5F2EA"];
 
 export function AvatarStudio() {
@@ -40,6 +42,8 @@ export function AvatarStudio() {
 }
 
 function Studio() {
+  const tx = useTx();
+  const tu = useTranslations("avatarStudio");
   const profile = useDemo((s) => s.profile);
   const saveLook = useDemo((s) => s.saveLook);
   const [look, setLook] = useState<AlienLook>(profile.look);
@@ -68,13 +72,13 @@ function Studio() {
     const trimmed = name.trim().slice(0, 20) || "NAMELESS";
     saveLook(look, trimmed);
     setName(trimmed);
-    toast({ title: "Avatar saved", body: "Stored in this browser.", tone: "success" });
-    if (!profile.avatarSaved) grantXp(50, "Created your alien");
+    toast({ title: tu("avatarSaved"), body: tu("storedInThisBrowser"), tone: "success" });
+    if (!profile.avatarSaved) grantXp(50, tu("xpCreatedYourAlien"));
   };
 
   return (
     <div className="mx-auto max-w-5xl md:px-6">
-      <PageTitle kicker="Alien World" title="Make your alien" sub="キャラクターを選んで、名前・衣装・アクセサリーをカスタマイズ。" />
+      <PageTitle kicker={tu("alienWorld")} title={tu("makeYourAlien")} sub={tu("text")} />
       <IdentityNotice />
       <div className="md:grid md:grid-cols-[1fr_1.1fr] md:gap-8">
         {/* Preview */}
@@ -84,74 +88,74 @@ function Studio() {
             <svg viewBox="0 0 200 200" className="absolute inset-0 h-full w-full opacity-50" aria-hidden>
               {Array.from({ length: 12 }).map((_, i) => <path key={i} d={`M100 100 L${100 + Math.cos((i / 12) * Math.PI * 2) * 200} ${100 + Math.sin((i / 12) * Math.PI * 2) * 200} L${100 + Math.cos(((i + 0.5) / 12) * Math.PI * 2) * 200} ${100 + Math.sin(((i + 0.5) / 12) * Math.PI * 2) * 200} Z`} fill="#F5F2EA" opacity="0.35" />)}
             </svg>
-            <Alien look={look} className="relative mx-auto aspect-square w-[78%] py-4" title={`Preview of ${name}`} bob />
+            <Alien look={look} className="relative mx-auto aspect-square w-[78%] py-4" title={tu("previewOfName", { name })} bob />
             <div className="relative flex items-center justify-between gap-2 border-t-[3px] border-ink bg-ink px-4 py-3">
-              <div className="min-w-0 truncate font-display text-xl">{name || "NAMELESS"}</div>
+              <div className="min-w-0 truncate font-display text-xl">{name || tu("nameless")}</div>
               <span className="shrink-0 rounded-full bg-purple px-2.5 py-1 font-display text-sm text-ink">LV.{lv.level}</span>
             </div>
           </div>
           <div className="mt-3">
-            <div className="mb-1 flex justify-between text-sm font-bold"><span>XP</span><span className="text-mute">{profile.xp} total · {lv.intoLevel}/{lv.need} to LV.{lv.level + 1}</span></div>
-            <Progress value={lv.pct} color="#A276E9" label="XP progress" />
+            <div className="mb-1 flex justify-between text-sm font-bold"><span>XP</span><span className="text-mute">{tu("xpTotalIntolevelNeedTo", { xp: profile.xp, intoLevel: lv.intoLevel, need: lv.need, value: lv.level + 1 })}</span></div>
+            <Progress value={lv.pct} color="#A276E9" label={tu("xpProgress")} />
           </div>
         </div>
 
         {/* Controls */}
         <div className="mt-6 space-y-7 px-4 md:mt-0 md:px-0">
           <fieldset>
-            <legend className="text-xl uppercase font-display">Character</legend>
-            <div className="mt-3 grid grid-cols-2 gap-3" role="radiogroup" aria-label="Starter character">
+            <legend className="text-xl uppercase font-display">{tu("character")}</legend>
+            <div className="mt-3 grid grid-cols-2 gap-3" role="radiogroup" aria-label={tu("starterCharacter")}>
               {STARTERS.map((s) => (
                 <button key={s.id} type="button" role="radio" aria-checked={starter === s.id} onClick={() => pick(s.id)} className={cn("rounded-3xl border-[3px] p-2 text-left transition-transform active:scale-[0.98]", starter === s.id ? "border-acid bg-surface-2" : "border-line bg-surface")}>
                   <div className="rounded-2xl" style={{ background: s.look.accent }}><Alien look={s.look} className="mx-auto aspect-square w-[80%]" /></div>
                   <div className="mt-2 px-1 font-display text-base leading-tight">{s.name}</div>
-                  <div className="px-1 pb-1 text-xs text-mute">{s.blurb}</div>
+                  <div className="px-1 pb-1 text-xs text-mute">{tu(s.blurb)}</div>
                 </button>
               ))}
             </div>
           </fieldset>
 
-          <Field id="av-name" label="Name" hint="20文字まで">
+          <Field id="av-name" label={tu("name")} hint={tu("n20")}>
             <Input id="av-name" maxLength={20} value={name} onChange={(e) => setName(e.target.value.toUpperCase())} />
           </Field>
 
-          <Swatches label="Body colour" value={look.body} onChange={(c) => setLook({ ...look, body: c })} />
-          <Swatches label="Accent colour" value={look.accent} onChange={(c) => setLook({ ...look, accent: c })} />
+          <Swatches label={tu("bodyColour")} value={look.body} onChange={(c) => setLook({ ...look, body: c })} />
+          <Swatches label={tu("accentColour")} value={look.accent} onChange={(c) => setLook({ ...look, accent: c })} />
 
           <fieldset>
-            <legend className="font-display text-xl uppercase">Outfit</legend>
+            <legend className="font-display text-xl uppercase">{tu("outfit")}</legend>
             <div className="mt-2 flex flex-wrap gap-2">
-              {OUTFITS.map((o) => {
+              {OUTFITS(tu).map((o) => {
                 const locked = lv.level < o.lv;
                 return (
-                  <Chip key={o.id} active={look.outfit === o.id} disabled={locked} onClick={() => setLook({ ...look, outfit: o.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? `${o.label}, unlocks at level ${o.lv}` : o.label}>
-                    {locked && <Lock className="size-3.5" aria-hidden />}{o.label}{locked && <span className="text-xs">LV.{o.lv}</span>}
+                  <Chip key={o.id} active={look.outfit === o.id} disabled={locked} onClick={() => setLook({ ...look, outfit: o.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? tu("labelUnlocksAtLevelLv", { label: o.label, lv: o.lv }) : o.label}>
+                    {locked && <Lock className="size-3.5" aria-hidden />}<Tx>{o.label}</Tx>{locked && <span className="text-xs">LV.{o.lv}</span>}
                   </Chip>
                 );
               })}
             </div>
           </fieldset>
-          {look.outfit !== "none" && <Swatches label="Outfit colour" value={look.outfitColor} onChange={(c) => setLook({ ...look, outfitColor: c })} />}
+          {look.outfit !== "none" && <Swatches label={tu("outfitColour")} value={look.outfitColor} onChange={(c) => setLook({ ...look, outfitColor: c })} />}
 
           <fieldset>
-            <legend className="font-display text-xl uppercase">Accessory</legend>
+            <legend className="font-display text-xl uppercase">{tu("accessory")}</legend>
             <div className="mt-2 flex flex-wrap gap-2">
-              {[...ACCESSORIES, { id: "dao_antenna" as Accessory, label: "DAO Antenna", lv: 1 }].map((a) => {
+              {[...ACCESSORIES(tu), { id: "dao_antenna" as Accessory, label: tu("daoAntenna"), lv: 1 }].map((a) => {
                 const daoItem = a.id === "dao_antenna";
                 const locked = daoItem ? !daoAntenna : lv.level < a.lv;
                 return (
-                  <Chip key={a.id} active={look.accessory === a.id} disabled={locked} onClick={() => setLook({ ...look, accessory: a.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? `${a.label}, ${daoItem ? "unlocks at 100 DAO XP" : `unlocks at level ${a.lv}`}` : a.label} data-testid={daoItem ? "dao-cosmetic" : undefined}>
-                    {locked && <Lock className="size-3.5" aria-hidden />}{a.label}{locked && <span className="text-xs">{daoItem ? "100 DAO XP" : `LV.${a.lv}`}</span>}
+                  <Chip key={a.id} active={look.accessory === a.id} disabled={locked} onClick={() => setLook({ ...look, accessory: a.id })} className={locked ? "opacity-50" : ""} aria-label={locked ? `${tx(a.label)}, ${daoItem ? tu("unlocksAt100DaoXp") : tu("unlocksAtLevelLv", { lv: a.lv })}` : a.label} data-testid={daoItem ? "dao-cosmetic" : undefined}>
+                    {locked && <Lock className="size-3.5" aria-hidden />}<Tx>{a.label}</Tx>{locked && <span className="text-xs">{daoItem ? tu("n100DaoXp") : `LV.${a.lv}`}</span>}
                   </Chip>
                 );
               })}
             </div>
-            <p className="ja mt-2 text-xs text-mute">ロックされたアイテムは、イベントの応援・チケット購入・投票でXPを貯めると解放されます。DAO Antenna は、いずれかのイベントDAOで 100 DAO XP を貯めると解放されます（<a href="/dao" className="underline">Festival DAO</a>）。</p>
+            <p className="mt-2 text-xs text-mute">{tu.rich("lockedItemsHelp", { dao: (c) => <a href="/dao" className="underline">{c}</a> })}</p>
           </fieldset>
 
           <div className="sticky bottom-[calc(var(--nav-h)+env(safe-area-inset-bottom)+12px)] z-30 flex gap-3 rounded-full bg-ink/90 p-1.5 lg:bottom-6">
-            <Button variant="ghost" onClick={() => { setLook(profile.look); setName(profile.avatarName); }} disabled={!dirty} aria-label="Discard changes"><RotateCcw className="size-4" aria-hidden /></Button>
-            <Button className="flex-1" size="lg" onClick={save}><Save className="size-5" aria-hidden /> {dirty ? "Save avatar" : "Saved"}</Button>
+            <Button variant="ghost" onClick={() => { setLook(profile.look); setName(profile.avatarName); }} disabled={!dirty} aria-label={tu("discardChanges")}><RotateCcw className="size-4" aria-hidden /></Button>
+            <Button className="flex-1" size="lg" onClick={save}><Save className="size-5" aria-hidden /> {dirty ? tu("saveAvatar") : tu("saved")}</Button>
           </div>
         </div>
       </div>
@@ -160,6 +164,7 @@ function Studio() {
 }
 
 function Swatches({ label, value, onChange }: { label: string; value: string; onChange: (c: string) => void }) {
+  const tu = useTranslations("avatarStudio");
   return (
     <fieldset>
       <legend className="font-display text-xl uppercase">{label}</legend>
@@ -181,7 +186,7 @@ function IdentityNotice() {
     return (
       <p className="mx-4 mb-4 rounded-2xl border border-line bg-surface p-3 text-sm md:mx-0">
         {t("guest")}{" "}
-        <Link href={href("/auth/signup")} className="font-bold text-acid underline">{t("guestCta")}</Link>
+        <Link href={href("/signup")} className="font-bold text-acid underline">{t("guestCta")}</Link>
       </p>
     );
   }

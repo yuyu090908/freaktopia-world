@@ -1,5 +1,7 @@
 "use client";
 
+import { Tx } from "@/components/i18n/Tx";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { LogOut, Settings2, ShieldCheck, Theater } from "lucide-react";
 import { Button, DemoNotice } from "@/components/ui/primitives";
@@ -24,16 +26,10 @@ interface SettingsDto {
 
 const DEMO_ROLES: DaoRole[] = ["organizer", "treasurer", "moderator", "venue_owner"];
 
-const PROD_CHECKLIST = [
-  "DAO_DATA_MODE=production with a real database (see db/migrations/0002_festival_dao.sql).",
-  "DAO_SESSION_SECRET (32+ chars) and DAO_ALLOWED_CHAIN_IDS set to the real chain.",
-  "Independently audited staking contract deployed; DAO_STAKING_AUDITED=true and DAO_RPC_URL set.",
-  "Image model configured (STAGE_AI_PROVIDER / STAGE_AI_API_KEY) with rights and content checks.",
-  "Payment rail reviewed by legal; DAO_PAYMENTS_ENABLED stays off until then.",
-  "Real people for venue manager and specialist sign-offs (no demo stand-ins).",
-];
+const PROD_CHECKLIST = ["prodDataMode", "prodSessionSecret", "prodStakingAudited", "prodImageModel", "prodPaymentRail", "prodRealPeople"] as const;
 
 export function SettingsView() {
+  const tu = useTranslations("dao");
   const { eventId, home, reload: reloadHome } = useDao();
   const { state, reload } = useDaoQuery<SettingsDto>(`${eventId}/settings`);
   const [form, setForm] = useState<Record<string, string>>({});
@@ -77,7 +73,7 @@ export function SettingsView() {
     });
     setBusy(null);
     if (!r.ok) return setErr(r.error.issues?.length ? `${r.error.message} (${r.error.issues.map((i) => i.path).join(", ")})` : r.error.message);
-    toast({ title: "Settings saved", body: "Open votes keep their snapshot.", tone: "success" });
+    toast({ title: tu("settingsSaved"), body: tu("openVotesKeepTheirSnapshot"), tone: "success" });
     void reload(true);
     void reloadHome(true);
   };
@@ -86,8 +82,8 @@ export function SettingsView() {
     setBusy("role");
     const r = await daoApi(`${eventId}/demo-role`, { method: "POST", json: { roles } });
     setBusy(null);
-    if (!r.ok) return toast({ title: "Not switched", body: r.error.message, tone: "error" });
-    toast({ title: roles.length ? `Demo view: ${roles.map((x) => ROLE_LABEL[x]).join(", ")}` : "Demo view: member", tone: "success" });
+    if (!r.ok) return toast({ title: tu("notSwitched"), body: r.error.message, tone: "error" });
+    toast({ title: roles.length ? tu("demoViewJoin", { join: roles.map((x) => ROLE_LABEL[x]).join(", ") }) : tu("demoViewMember"), tone: "success" });
     void reload(true);
     void reloadHome(true);
   };
@@ -96,8 +92,8 @@ export function SettingsView() {
     setBusy("unstake");
     const r = await daoApi<{ unlockAt: number; note: string }>(`${eventId}/unstake`, { method: "POST" });
     setBusy(null);
-    if (!r.ok) return toast({ title: "Not done", body: r.error.message, tone: "error" });
-    toast({ title: `Unlocking on ${fmtDate(new Date(r.data.unlockAt).toISOString())}`, body: r.data.note, tone: "success" });
+    if (!r.ok) return toast({ title: tu("notDone"), body: r.error.message, tone: "error" });
+    toast({ title: tu("unlockingOnFmtdate", { fmtDate: fmtDate(new Date(r.data.unlockAt).toISOString()) }), body: r.data.note, tone: "success" });
     void reloadHome(true);
   };
 
@@ -106,34 +102,34 @@ export function SettingsView() {
     await daoApi("auth/logout", { method: "POST" });
     forgetDemoWallet();
     setBusy(null);
-    toast({ title: "Signed out", body: "The demo wallet key was removed from this browser.", tone: "success" });
+    toast({ title: tu("signedOut"), body: tu("theDemoWalletKeyWas"), tone: "success" });
     void reloadHome();
   };
 
   const rows: [string, string][] = [
-    ["Network", c.chainId === DEMO_CHAIN.id ? `${DEMO_CHAIN.name} (${c.chainId}) · demo, not connected` : `Chain ${c.chainId}`],
-    ["Token contract", c.tokenContract],
-    ["Staking contract", c.stakingContract],
-    ["Token", c.tokenSymbol],
-    ["Minimum stake", `${c.minimumStake} ${c.tokenSymbol}`],
-    ["Lock period", `${c.lockDurationDays} days`],
-    ["Eligibility snapshot", fmtDate(new Date(c.eligibilitySnapshotAt).toISOString(), { year: "numeric", month: "short", day: "numeric" })],
-    ["Default quorum / threshold", `${Math.round(c.defaultQuorum * 100)}% / ${Math.round(c.defaultThreshold * 100)}%`],
-    ["Discussion / voting", `${c.discussionDays} / ${c.votingDays} days`],
-    ["Vote weight", "1 account = 1 vote (stake never adds weight)"],
+    [tu("network"), c.chainId === DEMO_CHAIN.id ? tu("chainDemoNotConnected", { name: DEMO_CHAIN.name, id: c.chainId }) : tu("chainN", { id: c.chainId })],
+    [tu("tokenContract"), c.tokenContract],
+    [tu("stakingContract"), c.stakingContract],
+    [tu("token"), c.tokenSymbol],
+    [tu("minimumStake"), `${c.minimumStake} ${c.tokenSymbol}`],
+    [tu("lockPeriod"), tu("daysN", { n: c.lockDurationDays })],
+    [tu("eligibilitySnapshot"), fmtDate(new Date(c.eligibilitySnapshotAt).toISOString(), { year: "numeric", month: "short", day: "numeric" })],
+    [tu("defaultQuorumThreshold"), `${Math.round(c.defaultQuorum * 100)}% / ${Math.round(c.defaultThreshold * 100)}%`],
+    [tu("discussionVoting"), tu("daysPair", { a: c.discussionDays, b: c.votingDays })],
+    [tu("voteWeight"), tu("n1Account1VoteStakeNever")],
   ];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">Settings</h1>
-        <p className="mt-2 text-sm text-mute">DAO status: <b className="uppercase text-cream">{s.status}</b></p>
+        <h1 className="text-[34px] uppercase leading-none sm:text-5xl">{tu("settings")}</h1>
+        <p className="mt-2 text-sm text-mute">{tu("daoStatus")} <b className="uppercase text-cream">{s.status}</b></p>
       </div>
 
-      {s.demo && <DemoNotice><b>Demo DAO.</b> Contracts are placeholders on a local demo chain. Nothing here is connected to a real blockchain or payment provider.</DemoNotice>}
+      {s.demo && <DemoNotice><b>{tu("demoDao")}</b> {tu("contractsArePlaceholdersOnA")}</DemoNotice>}
 
       <section aria-labelledby="cfg-h">
-        <SubHead id="cfg-h" title="Configuration" />
+        <SubHead id="cfg-h" title={tu("configuration")} />
         <dl className="divide-y divide-line overflow-hidden rounded-[22px] border border-line bg-surface">
           {rows.map(([k, v]) => (
             <div key={k} className="grid gap-1 p-3 sm:grid-cols-[200px_1fr]">
@@ -142,7 +138,7 @@ export function SettingsView() {
             </div>
           ))}
           <div className="grid gap-1 p-3 sm:grid-cols-[200px_1fr]">
-            <dt className="text-[12px] font-bold uppercase text-mute">Unstaking rules</dt>
+            <dt className="text-[12px] font-bold uppercase text-mute">{tu("unstakingRules")}</dt>
             <dd className="text-sm">{c.unstakingRules}</dd>
           </div>
         </dl>
@@ -150,16 +146,16 @@ export function SettingsView() {
 
       {s.canEdit && (
         <section aria-labelledby="edit-h" className="rounded-[22px] border border-acid/50 bg-surface p-4">
-          <h2 id="edit-h" className="flex items-center gap-2 text-xl uppercase"><Settings2 className="size-5 text-acid" aria-hidden />Edit (organizer)</h2>
-          <p className="mt-1 text-[12px] text-mute">Stake and chain settings are locked while a vote is open. Every change is written to the audit log.</p>
+          <h2 id="edit-h" className="flex items-center gap-2 text-xl uppercase"><Settings2 className="size-5 text-acid" aria-hidden />{tu("editOrganizer")}</h2>
+          <p className="mt-1 text-[12px] text-mute">{tu("stakeAndChainSettingsAre")}</p>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             {([
-              ["minimumStake", `Minimum stake (${c.tokenSymbol})`],
-              ["lockDurationDays", "Lock period (days, 7–365)"],
-              ["defaultQuorum", "Default quorum (%)"],
-              ["defaultThreshold", "Approval threshold (%, 50–100)"],
-              ["discussionDays", "Discussion period (days)"],
-              ["votingDays", "Voting period (days)"],
+              ["minimumStake", tu("minimumStakeSymbol", { symbol: c.tokenSymbol })],
+              ["lockDurationDays", tu("lockPeriodDays7365")],
+              ["defaultQuorum", tu("defaultQuorum")],
+              ["defaultThreshold", tu("approvalThreshold50100")],
+              ["discussionDays", tu("discussionPeriodDays")],
+              ["votingDays", tu("votingPeriodDays")],
             ] as const).map(([k, label]) => (
               <Field key={k} id={`cfg-${k}`} label={label}>
                 <Input id={`cfg-${k}`} inputMode="numeric" value={form[k] ?? ""} onChange={(e) => setForm({ ...form, [k]: e.target.value.replace(/[^\d.]/g, "") })} />
@@ -167,26 +163,26 @@ export function SettingsView() {
             ))}
           </div>
           <div className="mt-3">
-            <Field id="cfg-unstake" label="Unstaking rules">
+            <Field id="cfg-unstake" label={tu("unstakingRules")}>
               <Textarea id="cfg-unstake" rows={3} value={form.unstakingRules ?? ""} onChange={(e) => setForm({ ...form, unstakingRules: e.target.value })} />
             </Field>
           </div>
           {err && <p role="alert" className="mt-2 text-sm text-coral">{err}</p>}
-          <Button className="mt-3 w-full sm:w-auto" disabled={busy !== null} onClick={save}>{busy === "save" ? "Saving…" : "Save settings"}</Button>
+          <Button className="mt-3 w-full sm:w-auto" disabled={busy !== null} onClick={save}>{busy === "save" ? tu("saving") : tu("saveSettings")}</Button>
         </section>
       )}
 
       {signedIn && s.demo && (
         <section aria-labelledby="role-h" className="rounded-[22px] border border-line bg-surface p-4">
-          <h2 id="role-h" className="flex items-center gap-2 text-xl uppercase"><Theater className="size-5 text-purple" aria-hidden />Demo role view</h2>
-          <p className="mt-1 text-sm text-mute">Try the staff tools. This only changes what your demo session can do in this demo DAO; it is not available in production.</p>
+          <h2 id="role-h" className="flex items-center gap-2 text-xl uppercase"><Theater className="size-5 text-purple" aria-hidden />{tu("demoRoleView")}</h2>
+          <p className="mt-1 text-sm text-mute">{tu("tryTheStaffToolsThis")}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" disabled={busy !== null} aria-pressed={s.roles.every((r) => r === "member")} onClick={() => setRoles([])} className={`min-h-11 rounded-full px-4 text-sm font-bold ${s.roles.every((r) => r === "member") ? "bg-acid text-ink" : "border border-line"}`}>Member</button>
+            <button type="button" disabled={busy !== null} aria-pressed={s.roles.every((r) => r === "member")} onClick={() => setRoles([])} className={`min-h-11 rounded-full px-4 text-sm font-bold ${s.roles.every((r) => r === "member") ? "bg-acid text-ink" : "border border-line"}`}>{tu("member")}</button>
             {DEMO_ROLES.map((r) => {
               const on = s.roles.includes(r);
               return (
                 <button key={r} type="button" disabled={busy !== null} aria-pressed={on} onClick={() => setRoles(on ? s.roles.filter((x) => x !== r && x !== "member") : [...s.roles.filter((x) => x !== "member"), r])} className={`min-h-11 rounded-full px-4 text-sm font-bold ${on ? "bg-purple text-ink" : "border border-line"}`}>
-                  {ROLE_LABEL[r]}
+                  <Tx>{ROLE_LABEL[r]}</Tx>
                 </button>
               );
             })}
@@ -196,19 +192,19 @@ export function SettingsView() {
 
       {signedIn && (
         <section aria-labelledby="acct-h" className="rounded-[22px] border border-line bg-surface p-4">
-          <h2 id="acct-h" className="text-xl uppercase">Your account</h2>
+          <h2 id="acct-h" className="text-xl uppercase">{tu("yourAccount")}</h2>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            {home?.me?.staked && <Button variant="ghost" disabled={busy !== null} onClick={unstake}>{busy === "unstake" ? "Requesting…" : "Request unstake"}</Button>}
-            <Button variant="ghost" disabled={busy !== null} onClick={signOut}><LogOut className="size-4" aria-hidden /> Sign out &amp; forget demo wallet</Button>
+            {home?.me?.staked && <Button variant="ghost" disabled={busy !== null} onClick={unstake}>{busy === "unstake" ? tu("requesting") : tu("requestUnstake")}</Button>}
+            <Button variant="ghost" disabled={busy !== null} onClick={signOut}><LogOut className="size-4" aria-hidden /> {tu("signOutForgetDemoWallet")}</Button>
           </div>
-          <p className="mt-2 text-[12px] text-mute">Unstaking starts the unlock period. Votes already open keep their snapshot; new posts and votes need a locked stake.</p>
+          <p className="mt-2 text-[12px] text-mute">{tu("unstakingStartsTheUnlockPeriod")}</p>
         </section>
       )}
 
       <section aria-labelledby="prod-h" className="rounded-[22px] border border-line p-4">
-        <h2 id="prod-h" className="flex items-center gap-2 text-xl uppercase"><ShieldCheck className="size-5 text-acid" aria-hidden />Before going live</h2>
+        <h2 id="prod-h" className="flex items-center gap-2 text-xl uppercase"><ShieldCheck className="size-5 text-acid" aria-hidden />{tu("beforeGoingLive")}</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-mute">
-          {PROD_CHECKLIST.map((x) => <li key={x}>{x}</li>)}
+          {PROD_CHECKLIST.map((x) => <li key={x}>{tu(x)}</li>)}
         </ul>
       </section>
     </div>

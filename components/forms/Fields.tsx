@@ -16,7 +16,7 @@ export function Field({ label, hint, error, children, id, optional }: { label: s
         {optional && <span className="text-xs font-semibold text-mute">{t("optional")}</span>}
       </label>
       {children}
-      {hint && !error && <p id={`${id}-hint`} className="ja text-xs text-mute">{hint}</p>}
+      {hint && !error && <p id={`${id}-hint`} className="text-xs text-mute">{hint}</p>}
       {error && (
         <p id={`${id}-error`} role="alert" className="text-sm font-semibold text-coral">
           {error}
@@ -39,15 +39,16 @@ export const Select = forwardRef<HTMLSelectElement, ComponentProps<"select">>(fu
 });
 
 export function StepProgress({ step, total, labels }: { step: number; total: number; labels: string[] }) {
+  const tu = useTranslations("ui");
   return (
     <div className="px-4 md:px-0">
       <div className="flex items-center justify-between text-sm font-bold">
         <span>
-          Step {step + 1} <span className="text-mute">/ {total}</span>
+          {tu("stepValue", { value: step + 1 })} <span className="text-mute">/ {total}</span>
         </span>
         <span className="text-acid">{labels[step]}</span>
       </div>
-      <div className="mt-2 flex gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={step + 1} aria-label={`Step ${step + 1} of ${total}: ${labels[step]}`}>
+      <div className="mt-2 flex gap-1.5" role="progressbar" aria-valuemin={1} aria-valuemax={total} aria-valuenow={step + 1} aria-label={tu("stepValueOfTotalValue2", { value: step + 1, total, value2: labels[step] })}>
         {Array.from({ length: total }).map((_, i) => (
           <span key={i} className={cn("h-2 flex-1 rounded-full transition-colors", i <= step ? "bg-acid" : "bg-line")} />
         ))}
@@ -61,7 +62,7 @@ export function ToggleRow({ checked, onChange, label, sub }: { checked: boolean;
     <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)} className="flex min-h-14 w-full items-center justify-between gap-4 rounded-2xl border-2 border-line bg-surface px-4 py-2 text-left">
       <span className="min-w-0">
         <span className="block font-bold">{label}</span>
-        {sub && <span className="ja block text-xs text-mute">{sub}</span>}
+        {sub && <span className="block text-xs text-mute">{sub}</span>}
       </span>
       <span className={cn("relative h-8 w-14 shrink-0 rounded-full border-2 border-ink transition-colors", checked ? "bg-acid" : "bg-line")}>
         <span className={cn("absolute top-0.5 size-6 rounded-full bg-cream shadow transition-transform", checked ? "translate-x-[26px]" : "translate-x-0.5")} />
