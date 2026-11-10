@@ -27,6 +27,7 @@ export function ProfileView() {
 function Inner() {
   const tu = useTranslations("profile");
   const tp = useTranslations("profile");
+  const to = useTranslations("ops");
   const signedIn = useAuth((x) => x.status === "signedIn");
   const s = useDemo();
   const p = s.profile;
@@ -110,6 +111,16 @@ function Inner() {
               </Link>
             );
           })}
+        </div>
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          <Link href="/profile/work" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-work">
+            <span className="inline-flex items-center gap-2"><Package className="size-5 text-acid" aria-hidden /> {to("workTitle")}</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <Link href="/events/manage" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-manage">
+            <span className="inline-flex items-center gap-2"><CalendarDays className="size-5 text-acid" aria-hidden /> {to("manageTitle")}</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
         </div>
       </section>
 

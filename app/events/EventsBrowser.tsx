@@ -19,6 +19,7 @@ type Sort = "popular" | "soonest" | "level";
 
 export function EventsBrowser() {
   const tu = useTranslations("events");
+  const to = useTranslations("ops");
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
   const support = useDemo((s) => s.support);
@@ -43,6 +44,7 @@ export function EventsBrowser() {
       <div className="mt-4 flex flex-wrap items-center gap-2 px-4 md:px-0">
         <span className="text-sm font-bold" aria-live="polite">{tu("lengthEvents", { length: list.length })}</span>
         <DemoBadge label={tu("sampleData")} />
+        <Link href="/events/manage" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-acid/60 px-4 text-xs font-extrabold uppercase text-acid" data-testid="link-manage">{to("manageTitle")}</Link>
         <label className="ml-auto flex items-center gap-2 text-sm">
           <span className="text-mute">{tu("sort")}</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-full border-2 border-line bg-surface px-3 font-bold">

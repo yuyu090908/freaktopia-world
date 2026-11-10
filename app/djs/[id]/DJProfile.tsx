@@ -12,6 +12,7 @@ import { Field, Input, Textarea } from "@/components/forms/Fields";
 import { EVENTS } from "@/lib/data";
 import { grantXp, toast, uid, useDemo } from "@/lib/store";
 import { compact, money } from "@/lib/utils";
+import { DjOffer } from "@/components/ops/DjOffer";
 
 export function DJProfile({ dj }: { dj: DJ }) {
   const tu = useTranslations("djs");
@@ -128,6 +129,7 @@ export function DJProfile({ dj }: { dj: DJ }) {
 
       <BottomSheet open={book} onClose={() => setBook(false)} title={tu("bookingRequest")} footer={<Button className="mb-1 w-full" onClick={submitBooking}>{tu("sendRequestDemo")}</Button>}>
         <div className="space-y-4">
+          <DjOffer djId={dj.id} budget={dj.bookingFrom} />
           <Field id="bk-event" label={tu("eventName")} error={err && !form.eventName ? err : undefined}>
             <Input id="bk-event" value={form.eventName} onChange={(e) => setForm({ ...form, eventName: e.target.value })} />
           </Field>

@@ -94,6 +94,17 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - Machine translation of user content is cached and always labelled; without `DEEPL_API_KEY` nothing is presented as translated.
 - `db/migrations/0006_identity_onboarding.sql`: additive and re-runnable (public ids back-filled, onboarding progress, translation cache, RLS).
 
+## 8.2: event operations, staff matching, equipment sourcing
+- Plan an event at `/events/manage/new`. Size levels L1–L6 come from attendance and can be overridden. A **rule-based** planner suggests requirements and is labelled as a suggestion; no AI model is connected.
+- The event workspace `/events/manage/[id]` has Overview, Planning, Resources, Operations, Budget and Safety. On desktop they are a side navigation; on phones they are tabs. Each person sees only what their role and the event size allow.
+- Matching scores candidates on 8 criteria and applies hard exclusions, such as unavailable, fully booked, or an unverified credential for safety jobs. Recruiting supports open calls, direct offers, quote requests and packages; you compare applications before hiring.
+- Contracts, bookings, payment records and safety approvals all need an explicit confirmation and are logged. Double booking is blocked on the server.
+- Work profiles live at `/profile/work`: one profile per account for every role (DJ, crew, gear owner, company), with listings, opportunities and your jobs. Reviews come only from completed agreements and are separate from rankings.
+- `/djs/[id]` adds "Offer a gig from a managed event" to the existing booking sheet.
+- `db/migrations/0007_event_ops.sql` adds 22 `ops_*` tables. It is additive and re-runnable.
+- **Payments (Phase 4) are not built.** "Paid" is a record only. Identity and business KYC are not connected.
+- Details are in `docs/EVENT_OPS.md`.
+
 ## Backend plan (Phase 2)
 1. **Auth and DB:** Supabase (Postgres, Auth, RLS) or Postgres with Auth.js. Replace `lib/data.ts` getters with server queries. Keep the same types as in `lib/types.ts`.
 2. **Store migration:** Move the Zustand actions (`supportEvent`, `publishEvent`, `addOrder`, `addApplication`…) into Server Actions or API routes. Keep Zustand for UI state only.
@@ -110,5 +121,6 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - `tests/live.spec.ts`: 21 Playwright tests for the LIVE FESTIVAL (15 flows, upcoming-event check, 375–1440 px layout and tap targets).
 - `tests/world.spec.ts`: 19 Playwright tests for the WORLD MAP 7.0 (search, filters + URL, Map/List, LIVE, DAO, ranking, mobile sheet, camera, clusters, lite renderer, level admin, 375–1440 px).
 - `tests/identity.spec.ts`: 27 Playwright tests for 8.0/8.1 (12-language switching, switcher keeps URL params and map camera, account language on another device, SEO alternates, missing keys, per-language page check, sign-up, Google demo, logout, reset, Reveal, Alien ID, onboarding resume, same alien after re-login, map/LIVE/DAO identity, 375–1440 px with CJK/Thai/Cyrillic/Vietnamese fonts).
+- `tests/ops.spec.ts`: 7 Playwright flows for event operations at 390 px: small event, 2,000-person festival, quote request to a sound company, DJ application + equipment rental + double booking + budget overrun, staff shortage, permissions, and phone layout + language switching. `tests/integration/ops-service.test.ts` runs the same service on the memory and the Postgres store (10 scenarios each).
 - `tests/unit` and `tests/integration`: i18n dictionaries and formatting, alien generation, the account service (memory and Postgres), vitest tests for the world map (growth levels, landmarks, search, URL state, `/api/map`), the ranking engine, ranking API, DAO domain logic, DAO API, live domain logic (time zones, energy, quests, check-in) and live API.
 - See `docs/TEST_REPORT.md` for screenshots and Lighthouse results.

@@ -107,3 +107,41 @@ Fixed during this round: the page rename had also rewritten four API paths in th
 | 375 / 390 / 430 / 768 / 1440 px, incl. `/login`, `/forgot-password`, `/onboarding`, `/settings` | `identity.spec › 18.` |
 
 Not measured this round: Lighthouse.
+
+## 8.2: event operations, staff matching, equipment sourcing (2026-11-10)
+
+The production build was tested with `npm run build && npm run start`, in demo configuration: no `DATABASE_URL`, so the ops memory store with its DEMO seed is used. The Postgres checks ran against local PostgreSQL 16. A fresh database got migrations 0005, 0006 and 0007, and 0007 was then applied a second time to confirm it can be re-run.
+
+| Suite | Result |
+|---|---|
+| `node scripts/check-i18n.mjs` | 11 translations × 3,592 keys: 0 missing |
+| `node scripts/find-hardcoded.mjs` | 182 files, **0 hardcoded UI strings**, coverage 100.0 % |
+| `tsc --noEmit` | clean |
+| vitest (unit + integration; memory and Postgres store) | 207 / 207 passed |
+| `tests/integration/ops-service.test.ts` | 20 / 20 (10 scenarios × memory and Postgres) |
+| `tests/ops.spec.ts` (390 px phone context) | 7 / 7, passed twice in a row against the same server |
+| Playwright full suite (111 tests, 2 workers, fresh server) | **111 / 111 passed** (an earlier 4-worker run had 4 timing failures in older specs, which passed when re-run alone, and 2 name collisions in `ops.spec`, which are now fixed with per-run names) |
+
+STEP 5 scenarios and where they are tested:
+
+| Scenario | Playwright (`tests/ops.spec.ts`) | Integration (`ops-service.test.ts`) |
+|---|---|---|
+| Small event: L1, only small-event items, safety separate from readiness | small event | small event |
+| 2,000-person festival: L5, safety items need verified credentials, expert confirmation, approval with confirmation | festival | festival, stale version → 409 |
+| Quote request to a sound company (DEMO + real), quote with file, hire with confirmation, provider accepts | quote request | quote → hire → accept, payments, change log |
+| DJ application to an open call, compared and hired | DJ application | DJ open call |
+| Equipment rental, booking conflict (UI exclusion + API 409 `BOOKING_CONFLICT`) | DJ application… | concurrent double booking: exactly one of two succeeds |
+| Staff shortage: warning, incident by staff, licensed-only replacements, contact needs approval | staff shortage | staff shortage + cancellation |
+| Budget overrun → cheaper alternatives (safety same-spec only) | DJ application… | budget overrun |
+| Out-of-permission access: 404 outsiders, staff see no money, can't recruit, contracts hidden, CSRF 403, 401 | permissions | permissions, cross-event incident reference refused |
+| Phone use (390 px, no horizontal scroll on every tab) | every test + phone layout | – |
+| Language switching (ja, de on the workspace) | phone layout | – |
+
+Fixed during this round:
+
+- The Operations tab crashed in Chromium. `scrollIntoView` now returns a Promise there, and the chat's effect returned that Promise as its cleanup.
+- Staff could not link an incident to the item it affects. The view now has `incidentTargets`, which carry ids and names only. The server rejects references to other events.
+- The planner and list grids sized themselves to the template chip row on phones.
+- Candidates and alternatives now show the provider's name.
+
+Not measured this round: Lighthouse.
