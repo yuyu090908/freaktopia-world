@@ -69,8 +69,9 @@
       "explore": "Explore",
       "play": "Play",
       "create": "Create",
-      "info": "Info",
-      "account": "Account"
+      "info": "Information",
+      "account": "Account",
+      "myWorld": "My World"
     },
     "pages": {
       "worldMap": "World Map",
@@ -99,8 +100,18 @@
       "terms": "Terms",
       "privacy": "Privacy",
       "settings": "Account & privacy",
-      "myAlien": "My Alien"
-    }
+      "myAlien": "My Alien",
+      "myWorld": "My World",
+      "plannerName": "AI Event Planner",
+      "nftName": "NFT Market"
+    },
+    "badge": {
+      "demo": "Demo",
+      "preview": "Preview"
+    },
+    "quickAccess": "Quick access",
+    "signInForMyWorld": "Sign in to open your world",
+    "legal": "Legal"
   },
   "footer": {
     "disclaimer": "Prototype. Events, DJs, venues, tickets and collectibles are fictional demo data. No payments, live streams, wallets or NFT minting are connected.",

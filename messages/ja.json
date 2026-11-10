@@ -70,7 +70,8 @@
       "play": "遊ぶ",
       "create": "つくる",
       "info": "情報",
-      "account": "アカウント"
+      "account": "アカウント",
+      "myWorld": "マイページ"
     },
     "pages": {
       "worldMap": "ワールドマップ",
@@ -99,8 +100,18 @@
       "terms": "利用規約",
       "privacy": "プライバシー",
       "settings": "アカウントとプライバシー",
-      "myAlien": "マイエイリアン"
-    }
+      "myAlien": "マイエイリアン",
+      "myWorld": "マイワールド",
+      "plannerName": "AIイベントプランナー",
+      "nftName": "NFTマーケット"
+    },
+    "badge": {
+      "demo": "デモ",
+      "preview": "プレビュー"
+    },
+    "quickAccess": "クイックアクセス",
+    "signInForMyWorld": "ログインするとあなたのワールドが開きます",
+    "legal": "規約"
   },
   "footer": {
     "disclaimer": "プロトタイプです。イベント、DJ、会場、チケット、コレクティブルはすべて架空のデモデータです。決済・ライブ配信・ウォレット・NFT発行は接続されていません。",

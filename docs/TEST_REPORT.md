@@ -240,3 +240,19 @@ The 3D mode itself was not measured by Lighthouse after the change (it is no lon
 ### Not tested
 - Real phones, including camera scanning with jsQR on iPhone Safari.
 - Email through Resend: no API key is configured here. Only the demo mailbox path was tested.
+
+## 9.2: Mobile menu redesign (2026-11-10)
+- **Playwright: 124 of 124 pass** (production build, 2 workers). This includes the 10 new tests in `tests/menu.spec.ts`. That file was also run 3 times in a row with 4 workers, 60 of 60 passing.
+  - Two failures in the first runs were in the test, not the menu:
+    - a tap before hydration;
+    - a check that saw the closing sheet.
+  - The test now retries the tap and only counts an open, accessible dialog.
+- **vitest: 232 of 232** (with Postgres).
+- **i18n:** 9 new keys, in all 11 languages: 3947/3947. `find-hardcoded`: 0.
+- **Checked by the tests:**
+  - every menu link returns 200;
+  - text contrast is at least 4.5:1;
+  - every tap target is at least 44 px;
+  - no cut labels and no sideways scroll in en/ja/de/th/ru from 320 to 1440 px.
+- **Screenshots:** `docs/screenshots/menu-ja-390.png`, `menu-ja-390-full.png`, `menu-en-320.png`, `menu-ja-768.png`, `menu-en-1440.png`.
+- **Not tested:** real phones (iOS Safari safe areas and the scroll lock in particular). Lighthouse was not run for this change, because the menu is not part of the first page load.

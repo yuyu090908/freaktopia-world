@@ -128,6 +128,34 @@ Full details: `docs/I18N_AUTH_ALIEN.md`.
 - **Not built:** paid tickets or payments, AI highlights, and push notifications.
 - Details are in `docs/PARTY_UNIVERSE.md`.
 
+## 9.2: Mobile menu ("cosmic control panel")
+- The menu (☰ in the header) is redesigned. It has no new pages and no new routes, and every existing page is still in it.
+- **Quick access, 2×2:** World, Events, Create event (the one pink action panel) and My World.
+- **Five panels, one column on phones and two from 768 px:**
+  - EXPLORE (lime)
+  - CREATE (pink)
+  - PLAY (cyan)
+  - MY WORLD (purple): my world, tickets, dashboard, alerts
+  - INFORMATION (orange)
+  - Terms and privacy are small links at the bottom.
+- **Panel style:** each panel has a coloured heading with an icon and a left rail. Rows have white text, a coloured icon and a chevron. The current page gets an accent border and a soft glow. A row shrinks slightly when pressed.
+- **Status labels:**
+  - Demo and preview pages carry a small badge (planner: demo; quests and NFT: preview).
+  - "My World" opens the person's own party world when signed in. Signed out, it goes to My parties, which asks to sign in, and the row says so.
+- **Opening and closing:**
+  - The sheet slides in and out (about 200 ms, instant with reduced motion) over a dimmed backdrop.
+  - It closes by the close button, a backdrop tap or Escape.
+  - Focus moves to the close button and returns to the menu button.
+  - The page behind can't scroll, and the menu scrolls on its own. Safe areas are respected.
+- **Unchanged:** the desktop header and bottom tab bar. The closing slide applies to every bottom sheet on the site.
+- `tests/menu.spec.ts`, 10 tests:
+  - groups, quick access and the current page;
+  - every link returns 200, and each page appears once;
+  - WCAG AA contrast of rows and headings;
+  - close by button, backdrop and Escape, with focus return, scroll lock, menu-only scrolling, and a link that navigates;
+  - no cut labels, no sideways scroll and 44 px targets in en/ja/de/th/ru at 320, 375, 390, 430, 768 and 1440 px;
+  - a signed-in My World that opens the person's own world.
+
 ## Backend plan (Phase 2)
 1. **Auth and DB:** Supabase (Postgres, Auth, RLS) or Postgres with Auth.js. Replace `lib/data.ts` getters with server queries. Keep the same types as in `lib/types.ts`.
 2. **Store migration:** Move the Zustand actions (`supportEvent`, `publishEvent`, `addOrder`, `addApplication`…) into Server Actions or API routes. Keep Zustand for UI state only.

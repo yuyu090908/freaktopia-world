@@ -7,7 +7,8 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, Menu, Search, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { AlertsBell } from "./AlertsBell";
-import { ALL_PAGES, MAIN_NAV, isTopLevel, parentOf } from "./nav";
+import { MAIN_NAV, isTopLevel, parentOf } from "./nav";
+import { MenuDrawer } from "./MenuDrawer";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { DemoBadge } from "@/components/ui/primitives";
 import { DJS, EVENTS, VENUES } from "@/lib/data";
@@ -80,7 +81,7 @@ export function Header() {
               <AlertsBell />
             </span>
             <AccountButton />
-            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} aria-haspopup="dialog" data-testid="menu-open" className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
               <Menu className="size-5" />
             </button>
           </div>
@@ -188,30 +189,5 @@ function ResultLink({ href, title, sub }: { href: string; title: string; sub: st
         <span className="text-sm text-mute">{sub}</span>
       </Link>
     </li>
-  );
-}
-
-function MenuDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const t = useTranslations("nav");
-  const href = useLocalHref();
-  return (
-    <BottomSheet open={open} onClose={onClose} title={t("menu")} className="md:max-w-2xl">
-      <nav aria-label={t("allPages")} className="grid grid-cols-2 gap-x-4 gap-y-5 pb-2 md:grid-cols-4">
-        {ALL_PAGES.map((g) => (
-          <div key={g.group} className="min-w-0">
-            <div className="mb-1 text-xs font-extrabold uppercase tracking-widest text-acid">{t(`groups.${g.group}`)}</div>
-            <ul>
-              {g.items.map((i) => (
-                <li key={i.href}>
-                  <Link href={href(i.href)} className="flex min-h-11 items-center text-[15px] font-semibold leading-tight text-cream/90 hover:text-cream">
-                    {t(`pages.${i.key}`)}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </nav>
-    </BottomSheet>
   );
 }

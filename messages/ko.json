@@ -70,7 +70,8 @@
       "play": "놀기",
       "create": "만들기",
       "info": "정보",
-      "account": "계정"
+      "account": "계정",
+      "myWorld": "마이페이지"
     },
     "pages": {
       "worldMap": "월드 맵",
@@ -99,8 +100,18 @@
       "terms": "이용약관",
       "privacy": "개인정보",
       "settings": "계정 및 개인정보",
-      "myAlien": "내 외계인"
-    }
+      "myAlien": "내 외계인",
+      "myWorld": "마이 월드",
+      "plannerName": "AI 이벤트 플래너",
+      "nftName": "NFT 마켓"
+    },
+    "badge": {
+      "demo": "데모",
+      "preview": "미리보기"
+    },
+    "quickAccess": "빠른 이동",
+    "signInForMyWorld": "로그인하면 내 월드가 열립니다",
+    "legal": "약관"
   },
   "footer": {
     "disclaimer": "프로토타입입니다. 이벤트, DJ, 공연장, 티켓, 수집품은 모두 가상의 데모 데이터입니다. 결제, 라이브 스트리밍, 지갑, NFT 발행은 연결되어 있지 않습니다.",

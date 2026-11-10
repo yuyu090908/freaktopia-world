@@ -70,7 +70,8 @@
       "play": "Spielen",
       "create": "Erstellen",
       "info": "Info",
-      "account": "Konto"
+      "account": "Konto",
+      "myWorld": "Meine Welt"
     },
     "pages": {
       "worldMap": "Weltkarte",
@@ -99,8 +100,18 @@
       "terms": "Nutzungsbedingungen",
       "privacy": "Datenschutz",
       "settings": "Konto & Privatsphäre",
-      "myAlien": "Mein Alien"
-    }
+      "myAlien": "Mein Alien",
+      "myWorld": "Meine Welt",
+      "plannerName": "KI-Eventplaner",
+      "nftName": "NFT-Markt"
+    },
+    "badge": {
+      "demo": "Demo",
+      "preview": "Vorschau"
+    },
+    "quickAccess": "Schnellzugriff",
+    "signInForMyWorld": "Melde dich an, um deine Welt zu öffnen",
+    "legal": "Rechtliches"
   },
   "footer": {
     "disclaimer": "Prototyp. Events, DJs, Locations, Tickets und Sammelobjekte sind fiktive Demodaten. Es sind keine Zahlungen, Streams, Wallets oder NFT-Minting angebunden.",

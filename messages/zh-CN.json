@@ -70,7 +70,8 @@
       "play": "玩",
       "create": "创建",
       "info": "信息",
-      "account": "账户"
+      "account": "账户",
+      "myWorld": "我的"
     },
     "pages": {
       "worldMap": "世界地图",
@@ -99,8 +100,18 @@
       "terms": "条款",
       "privacy": "隐私",
       "settings": "账户与隐私",
-      "myAlien": "我的外星人"
-    }
+      "myAlien": "我的外星人",
+      "myWorld": "我的世界",
+      "plannerName": "AI 活动策划",
+      "nftName": "NFT 市场"
+    },
+    "badge": {
+      "demo": "演示",
+      "preview": "预览"
+    },
+    "quickAccess": "快捷入口",
+    "signInForMyWorld": "登录后打开你的世界",
+    "legal": "条款"
   },
   "footer": {
     "disclaimer": "原型版本。活动、DJ、场地、门票和收藏品均为虚构的演示数据。未连接任何支付、直播、钱包或 NFT 铸造服务。",

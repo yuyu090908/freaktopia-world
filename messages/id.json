@@ -70,7 +70,8 @@
       "play": "Main",
       "create": "Buat",
       "info": "Info",
-      "account": "Akun"
+      "account": "Akun",
+      "myWorld": "Milikku"
     },
     "pages": {
       "worldMap": "Peta dunia",
@@ -99,8 +100,18 @@
       "terms": "Ketentuan",
       "privacy": "Privasi",
       "settings": "Akun & privasi",
-      "myAlien": "Alien saya"
-    }
+      "myAlien": "Alien saya",
+      "myWorld": "Duniaku",
+      "plannerName": "Perencana Acara AI",
+      "nftName": "Pasar NFT"
+    },
+    "badge": {
+      "demo": "Demo",
+      "preview": "Pratinjau"
+    },
+    "quickAccess": "Akses cepat",
+    "signInForMyWorld": "Masuk untuk membuka duniamu",
+    "legal": "Legal"
   },
   "footer": {
     "disclaimer": "Prototipe. Acara, DJ, venue, tiket, dan koleksi adalah data demo fiktif. Tidak ada pembayaran, siaran langsung, dompet, atau minting NFT yang terhubung.",

@@ -70,7 +70,8 @@
       "play": "Chơi",
       "create": "Tạo",
       "info": "Thông tin",
-      "account": "Tài khoản"
+      "account": "Tài khoản",
+      "myWorld": "Của tôi"
     },
     "pages": {
       "worldMap": "Bản đồ thế giới",
@@ -99,8 +100,18 @@
       "terms": "Điều khoản",
       "privacy": "Quyền riêng tư",
       "settings": "Tài khoản & quyền riêng tư",
-      "myAlien": "Alien của tôi"
-    }
+      "myAlien": "Alien của tôi",
+      "myWorld": "Thế giới của tôi",
+      "plannerName": "Trợ lý lên kế hoạch sự kiện AI",
+      "nftName": "Chợ NFT"
+    },
+    "badge": {
+      "demo": "Demo",
+      "preview": "Xem trước"
+    },
+    "quickAccess": "Truy cập nhanh",
+    "signInForMyWorld": "Đăng nhập để mở thế giới của bạn",
+    "legal": "Pháp lý"
   },
   "footer": {
     "disclaimer": "Bản mẫu. Sự kiện, DJ, địa điểm, vé và vật phẩm sưu tầm đều là dữ liệu demo hư cấu. Không có thanh toán, phát trực tiếp, ví hay đúc NFT nào được kết nối.",
