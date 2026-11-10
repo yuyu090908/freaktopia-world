@@ -27,6 +27,29 @@ export function Header() {
   const [menu, setMenu] = useState(false);
   const top = isTopLevel(path);
 
+  // Desktop links that don't fit in one row wrap onto a hidden second row instead of running under the buttons
+  // on the right. Wrapped links are also taken out of the tab order; every page is in the menu anyway.
+  const navRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const fit = () => {
+      const links = [...nav.querySelectorAll<HTMLElement>("a")];
+      const first = links[0]?.offsetTop ?? 0;
+      for (const a of links) {
+        const out = a.offsetTop > first + 4;
+        a.style.visibility = out ? "hidden" : "";
+        if (out) a.setAttribute("tabindex", "-1");
+        else a.removeAttribute("tabindex");
+      }
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(nav);
+    void document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [path, t]); // t changes with the language, and so do the label widths
+
   // Count in-app navigations so "back" never leaves the site on a fresh deep link.
   const visits = useRef(0);
   useEffect(() => {
@@ -54,7 +77,7 @@ export function Header() {
           )}
           <Logo />
           <span className="ml-1 hidden min-[400px]:inline-flex"><DemoBadge /></span>
-          <nav aria-label={t("main")} className="ml-6 hidden min-w-0 flex-1 items-center gap-1 lg:flex">
+          <nav ref={navRef} aria-label={t("main")} className="ml-3 hidden h-11 min-w-0 flex-1 flex-wrap items-center gap-x-0.5 overflow-hidden xl:ml-5 lg:flex">
             {[...MAIN_NAV.slice(1), { href: "/rankings", key: "ranking" }, { href: "/djs", key: "djArena" }].map((n) => {
               const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
               return (
@@ -62,7 +85,7 @@ export function Header() {
                   key={n.href}
                   href={href(n.href)}
                   aria-current={active ? "page" : undefined}
-                  className={cn("whitespace-nowrap rounded-full px-3 py-2.5 text-sm font-bold uppercase tracking-wide xl:px-3.5", active ? "bg-acid text-ink" : "text-cream/80 hover:text-cream")}
+                  className={cn("inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2.5 text-sm font-bold uppercase xl:px-3", active ? "bg-acid text-ink" : "text-cream/80 hover:text-cream")}
                 >
                   {t(n.key)}
                 </Link>

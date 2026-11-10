@@ -256,3 +256,10 @@ The 3D mode itself was not measured by Lighthouse after the change (it is no lon
   - no cut labels and no sideways scroll in en/ja/de/th/ru from 320 to 1440 px.
 - **Screenshots:** `docs/screenshots/menu-ja-390.png`, `menu-ja-390-full.png`, `menu-en-320.png`, `menu-ja-768.png`, `menu-en-1440.png`.
 - **Not tested:** real phones (iOS Safari safe areas and the scroll lock in particular). Lighthouse was not run for this change, because the menu is not part of the first page load.
+
+## 9.2.1: Desktop header overlap fix (2026-11-10)
+- **Problem:** between about 1024 and 1440 px, the header links (Ranking, DJ Arena) ran under "Create event" and the language switcher. The links could not wrap or shrink, and the row had no overflow handling.
+- **Fix:** the link row wraps onto a hidden second row. A link that doesn't fit is hidden as a whole and taken out of the tab order. Every page is still in the menu. Link spacing is a little tighter.
+- **Checked:** in all 12 languages, every 16 px from 1024 to 1600 px, no visible link overlaps the right-hand buttons and none is cut. Each width shows 3 to 6 links, depending on how long the language's labels are.
+- New regression test in `tests/menu.spec.ts`. **Playwright: 125 of 125 pass.**
+- Screenshot: `docs/screenshots/header-ja-1366.png`.

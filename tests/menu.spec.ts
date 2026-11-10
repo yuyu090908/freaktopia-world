@@ -126,3 +126,25 @@ test("signed in: My World opens the person's own world", async ({ browser }) => 
   await tile.click();
   await expect(page.getByTestId("world-title")).toBeVisible();
 });
+
+test("desktop header: links never run under Create event and the buttons (1024–1600px, long languages)", async ({ page }) => {
+  for (const loc of ["/ja", "/de", "/ru", "/fr", "/pt"]) {
+    await page.setViewportSize({ width: 1024, height: 800 });
+    await page.goto(`${loc}/events`);
+    await page.waitForLoadState("networkidle");
+    for (let w = 1024; w <= 1600; w += 48) {
+      await page.setViewportSize({ width: w, height: 800 });
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const nav = document.querySelector("header nav")!;
+            const right = nav.nextElementSibling!.getBoundingClientRect().left;
+            const shown = [...nav.querySelectorAll("a")].filter((a) => getComputedStyle(a).visibility !== "hidden");
+            return shown.length >= 3 && shown.every((a) => a.getBoundingClientRect().right <= right && a.getBoundingClientRect().bottom <= nav.getBoundingClientRect().bottom + 1);
+          }),
+          { message: `${loc} at ${w}px` },
+        )
+        .toBe(true);
+    }
+  }
+});
