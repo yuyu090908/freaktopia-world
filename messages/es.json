@@ -556,7 +556,9 @@
       "buyTicket": "Comprar entrada",
       "viewDao": "Ver DAO",
       "applyDj": "Postularse como DJ",
-      "viewEvent": "Ver evento"
+      "viewEvent": "Ver evento",
+      "officialEvent": "Ver página oficial",
+      "getTickets": "Conseguir entradas"
     },
     "count": "{count, plural, one {# evento} other {# eventos}}",
     "legendNote": "Los niveles son del juego del mapa, no el aforo del local. TOP 1–3 = los más populares (histórico). Las etiquetas DAO moradas indican DAOs de la comunidad.",
@@ -565,7 +567,10 @@
       "any": "Cualquier fecha",
       "30d": "Próximos 30 días",
       "90d": "Próximos 3 meses",
-      "2027": "2027"
+      "2027": "2027",
+      "today": "Hoy",
+      "weekend": "Este fin de semana",
+      "7d": "Próximos 7 días"
     },
     "kinds": {
       "event": "Festival",
@@ -698,7 +703,45 @@
         "london": "Clubs, naves y raíces de radio pirata."
       }
     },
-    "communityNote": "Una fiesta que un organizador publicó en FREAKTOPIA. El cartel, las entradas y los detalles están en su página dentro del mundo del organizador."
+    "communityNote": "Una fiesta que un organizador publicó en FREAKTOPIA. El cartel, las entradas y los detalles están en su página dentro del mundo del organizador.",
+    "externalAria": "{name}, {city} · {kind}, fuente: {source}",
+    "openInEvents": "Misma búsqueda en EVENTS",
+    "legendExternalNote": "Los pines con forma son eventos de fuentes externas (Ticketmaster, etc.). Un tallo discontinuo indica que solo se conoce el centro de la ciudad.",
+    "external": {
+      "opensNewTab": "se abre en una pestaña nueva",
+      "notFreaktopia": "Este evento no lo organiza FREAKTOPIA. Las entradas las vende el organizador o la ticketera en su propio sitio.",
+      "source": "Fuente",
+      "sourceType": {
+        "external": "Fuente externa",
+        "partner": "Socio",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "Verificación",
+      "verified": {
+        "source_verified": "De los datos oficiales de la fuente",
+        "partner_verified": "Verificado por un socio",
+        "unverified": "Sin verificar"
+      },
+      "lastVerified": "Última verificación",
+      "staleNote": "Información a {time}. Consulta la página oficial para lo último.",
+      "statusLabel": "Estado",
+      "status": {
+        "scheduled": "Programado",
+        "rescheduled": "Reprogramado",
+        "postponed": "Aplazado",
+        "cancelled": "Cancelado",
+        "unknown": "La fuente no lo indica"
+      },
+      "venue": "Lugar",
+      "venueUnknown": "Lugar sin anunciar",
+      "approxLocation": "Se muestra en el centro de la ciudad: la fuente no dio la ubicación exacta.",
+      "lineup": "Cartel",
+      "lineupEmpty": "La fuente no indica el cartel",
+      "price": "Precio",
+      "priceFromSource": "{min}–{max} {currency} (según la fuente)",
+      "timeTbd": "Hora por anunciar",
+      "localTime": "hora local"
+    }
   },
   "ranking": {
     "title": "Ranking mundial",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "Zona exterior",
     "green_room": "Camerino",
     "step_free_access": "Acceso sin escalones",
-    "coat_check": "Guardarropa"
+    "coat_check": "Guardarropa",
+    "major_festival": "Gran festival",
+    "dj_show": "Show de DJ",
+    "club_event": "Evento de club",
+    "music_event": "Evento musical"
   },
   "ops": {
     "manageKicker": "Operaciones de eventos",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "Ya no se venden entradas. La página del evento conserva el cartel y los recuerdos.",
     "notOnSaleYet": "Las entradas aún no están a la venta",
     "notOnSaleYetBody": "Las entradas salen a la venta cuando se confirma el evento. Mientras tanto, puedes apoyarlo en su página.",
-    "backToEvent": "Volver al evento"
+    "backToEvent": "Volver al evento",
+    "breakdownExternal": "· Externos {count}",
+    "kind": "Tipo de evento",
+    "kindHint": "Cualquiera. Festival, show de DJ y club solo salen de los datos de la propia fuente.",
+    "kinds": {
+      "festival": "Grandes festivales",
+      "djs": "Shows de DJ",
+      "club": "Eventos de club",
+      "freaktopia": "Solo FREAKTOPIA"
+    },
+    "openOnMap": "Misma búsqueda en el mapa"
+  },
+  "discovery": {
+    "title": "Eventos del mundo",
+    "sub": "De fuentes externas aprobadas. FREAKTOPIA no vende estas entradas.",
+    "asOf": "a {time}",
+    "notConnected": "Aún no hay ninguna fuente externa de eventos conectada, así que solo se listan los eventos de FREAKTOPIA. No se rellena con datos de ejemplo.",
+    "loadError": "No se pudieron cargar los eventos del mundo. Los eventos de FREAKTOPIA no se ven afectados.",
+    "artistsTitle": "Artistas",
+    "artistSub": "{source} · {count} próximos · {cities}",
+    "artistActive": "Eventos con {name} ({source})",
+    "artistClear": "Quitar artista",
+    "noMatches": "Ningún evento del mundo coincide con estos filtros.",
+    "from": "De {source}",
+    "status": {
+      "postponed": "Aplazado",
+      "rescheduled": "Reprogramado"
+    },
+    "timeTbd": "hora por anunciar",
+    "localTime": "hora local",
+    "approx": "centro de la ciudad, aproximado",
+    "verified": "Verificado {time}",
+    "official": "Página oficial",
+    "tickets": "Entradas",
+    "newTab": "se abre en una pestaña nueva",
+    "onMap": "Ver en el mapa"
+  },
+  "discoveryAdmin": {
+    "title": "Fuentes de eventos",
+    "sub": "Estado de conexión de cada fuente externa, intervalos de actualización y calidad de datos. Solo administradores.",
+    "forbidden": "Solo administradores",
+    "forbiddenBody": "Esta página es para cuentas de operadores con correo verificado.",
+    "err": "No se pudo completar ({code})",
+    "syncFailed": "Falló la sincronización: {error}",
+    "skipped": {
+      "not_configured": "No sincronizado: falta la clave de API.",
+      "unapproved": "No sincronizado: términos o aprobación sin confirmar.",
+      "paused": "No sincronizado: la fuente está en pausa."
+    },
+    "sources": "Fuentes",
+    "state": {
+      "connected": "Conectada",
+      "not_configured": "Sin configurar",
+      "unapproved": "Sin aprobar",
+      "paused": "En pausa",
+      "error": "Error"
+    },
+    "stateHelp": {
+      "connected": "Clave configurada y términos confirmados. Sus eventos se muestran en WORLD y EVENTS.",
+      "not_configured": "No hay clave de API, así que no se obtiene ni se muestra nada.",
+      "unapproved": "Puede haber clave, pero los términos o la aprobación del proveedor no están confirmados. Sigue apagada hasta entonces.",
+      "paused": "Pausada por un admin: ni se actualiza ni se muestra.",
+      "error": "La última sincronización falló. Los eventos en caché se muestran con su hora de verificación hasta que funcione."
+    },
+    "terms": "Términos",
+    "needs": "Para activarla, define:",
+    "lastSync": "Última sincronización",
+    "lastSuccess": "Último éxito",
+    "events": "Eventos",
+    "regions": "Regiones",
+    "lastError": "Error ×{count}",
+    "saved": "Guardado",
+    "synced": "Sincronizado",
+    "syncing": "Sincronizando…",
+    "syncNow": "Sincronizar ahora",
+    "resume": "Reanudar",
+    "pause": "Pausar",
+    "resumed": "Reanudada",
+    "pausedOk": "En pausa",
+    "purge": "Borrar caché",
+    "purgeConfirm": "¿Borrar todos los eventos en caché de {name} y pausarla? Escribe DELETE para confirmar.",
+    "purged": "Caché borrada",
+    "quality": "Calidad de eventos",
+    "q": {
+      "none": "Ninguno",
+      "duplicates": "Posibles duplicados (sin fusionar)",
+      "cancelled": "Cancelados o aplazados",
+      "timeTbd": "Hora sin anunciar",
+      "noVenue": "Sin lugar",
+      "noLocation": "Sin ubicación (solo lista, no en el mapa)",
+      "approximateLocation": "Ubicación aproximada (centro)",
+      "hidden": "Ocultados por un admin",
+      "changes": "Cambios recientes (fecha, lugar, cartel, estado, entradas)"
+    },
+    "field": {
+      "date": "fecha",
+      "venue": "lugar",
+      "lineup": "cartel",
+      "status": "estado",
+      "tickets": "entradas"
+    },
+    "intervals": "Intervalos de actualización",
+    "interval": {
+      "within48h": "En 48 h",
+      "within30d": "En 30 días",
+      "later": "Más adelante"
+    },
+    "hours": "h",
+    "save": "Guardar",
+    "hide": "Ocultar",
+    "unhide": "Volver a mostrar",
+    "hiddenOk": "Oculto en WORLD y EVENTS",
+    "shownOk": "Visible de nuevo"
   }
 }

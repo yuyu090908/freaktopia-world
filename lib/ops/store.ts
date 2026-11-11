@@ -17,7 +17,9 @@ export type Table =
   // 9.0 PERSONAL PARTY UNIVERSE (db/migrations/0008_party_universe.sql)
   | "attendance" | "checkins" | "guests" | "event_reviews" | "media" | "follows" | "blocks" | "world_privacy" | "world_settings" | "party_audit" | "party_settings"
   // FREAK ID & LOYALTY (db/migrations/0010_freak_loyalty.sql)
-  | "loyalty_rules" | "loyalty_exclusions";
+  | "loyalty_rules" | "loyalty_exclusions"
+  // 11.0 GLOBAL DISCOVERY (db/migrations/0011_global_discovery.sql)
+  | "discovery_sources" | "discovery_events" | "discovery_changes";
 
 type Row = Record<string, unknown>;
 export type Where = Record<string, string | number | boolean | null>;
@@ -158,6 +160,9 @@ const COLS: Record<Table, Record<string, string>> = {
   party_audit: { id: "id", eventId: "event_id", actorId: "actor_id" },
   loyalty_rules: { id: "id" },
   loyalty_exclusions: { eventId: "event_id" },
+  discovery_sources: { id: "id" },
+  discovery_events: { id: "id", sourceName: "source_name", startsAtUtc: "starts_at_utc" },
+  discovery_changes: { id: "id", eventId: "event_id" },
 };
 /** Primary-key fields of composite-key tables when they differ from all key columns (extra indexed columns). */
 const KEY_FIELDS: Partial<Record<Table, string[]>> = { attendance: ["eventId", "userId"] };

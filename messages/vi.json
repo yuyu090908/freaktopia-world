@@ -556,7 +556,9 @@
       "buyTicket": "Mua vé",
       "viewDao": "Xem DAO",
       "applyDj": "Ứng tuyển làm DJ",
-      "viewEvent": "Xem sự kiện"
+      "viewEvent": "Xem sự kiện",
+      "officialEvent": "Xem trang chính thức",
+      "getTickets": "Mua vé"
     },
     "count": "{count, plural, other {# sự kiện}}",
     "legendNote": "Cấp là cấp trong trò chơi bản đồ, không phải sức chứa địa điểm. TOP 1–3 = phổ biến nhất (mọi thời đại). Nhãn DAO màu tím đánh dấu DAO cộng đồng.",
@@ -565,7 +567,10 @@
       "any": "Bất kỳ ngày nào",
       "30d": "30 ngày tới",
       "90d": "3 tháng tới",
-      "2027": "2027"
+      "2027": "2027",
+      "today": "Hôm nay",
+      "weekend": "Cuối tuần này",
+      "7d": "7 ngày tới"
     },
     "kinds": {
       "event": "Lễ hội",
@@ -698,7 +703,45 @@
         "london": "Club, nhà kho và cội nguồn radio lậu."
       }
     },
-    "communityNote": "Bữa tiệc do nhà tổ chức đăng trên FREAKTOPIA. Đội hình, vé và chi tiết có trên trang của bữa tiệc trong thế giới của nhà tổ chức."
+    "communityNote": "Bữa tiệc do nhà tổ chức đăng trên FREAKTOPIA. Đội hình, vé và chi tiết có trên trang của bữa tiệc trong thế giới của nhà tổ chức.",
+    "externalAria": "{name}, {city} · {kind}, nguồn: {source}",
+    "openInEvents": "Cùng tìm kiếm trong EVENTS",
+    "legendExternalNote": "Ghim có hình là sự kiện từ nguồn bên ngoài (Ticketmaster…). Thân nét đứt nghĩa là chỉ biết trung tâm thành phố.",
+    "external": {
+      "opensNewTab": "mở trong thẻ mới",
+      "notFreaktopia": "Sự kiện này không do FREAKTOPIA tổ chức. Vé được bán bởi ban tổ chức hoặc đơn vị bán vé trên trang của họ.",
+      "source": "Nguồn",
+      "sourceType": {
+        "external": "Nguồn bên ngoài",
+        "partner": "Đối tác",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "Xác minh",
+      "verified": {
+        "source_verified": "Từ dữ liệu chính thức của nguồn",
+        "partner_verified": "Đối tác đã xác minh",
+        "unverified": "Chưa xác minh"
+      },
+      "lastVerified": "Xác minh lần cuối",
+      "staleNote": "Thông tin tính đến {time}. Xem trang chính thức để cập nhật.",
+      "statusLabel": "Trạng thái",
+      "status": {
+        "scheduled": "Theo lịch",
+        "rescheduled": "Đổi lịch",
+        "postponed": "Hoãn",
+        "cancelled": "Đã hủy",
+        "unknown": "Nguồn không ghi"
+      },
+      "venue": "Địa điểm",
+      "venueUnknown": "Chưa công bố địa điểm",
+      "approxLocation": "Hiển thị ở trung tâm thành phố: nguồn không cho vị trí chính xác.",
+      "lineup": "Đội hình",
+      "lineupEmpty": "Nguồn không cung cấp đội hình",
+      "price": "Giá",
+      "priceFromSource": "{min}–{max} {currency} (theo nguồn)",
+      "timeTbd": "Chưa công bố giờ",
+      "localTime": "giờ địa phương"
+    }
   },
   "ranking": {
     "title": "Xếp hạng thế giới",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "Khu ngoài trời",
     "green_room": "Phòng chờ nghệ sĩ",
     "step_free_access": "Lối đi không bậc",
-    "coat_check": "Quầy gửi áo khoác"
+    "coat_check": "Quầy gửi áo khoác",
+    "major_festival": "Lễ hội lớn",
+    "dj_show": "DJ show",
+    "club_event": "Sự kiện câu lạc bộ",
+    "music_event": "Sự kiện âm nhạc"
   },
   "ops": {
     "manageKicker": "Vận hành sự kiện",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "Đã ngừng bán vé. Trang sự kiện vẫn giữ đội hình và kỷ niệm.",
     "notOnSaleYet": "Vé chưa mở bán",
     "notOnSaleYetBody": "Vé được bán khi sự kiện được xác nhận. Trước đó bạn có thể ủng hộ trên trang sự kiện.",
-    "backToEvent": "Quay lại sự kiện"
+    "backToEvent": "Quay lại sự kiện",
+    "breakdownExternal": "· Bên ngoài {count}",
+    "kind": "Loại sự kiện",
+    "kindHint": "Bất kỳ. Lễ hội, DJ show và câu lạc bộ chỉ lấy từ dữ liệu của chính nguồn.",
+    "kinds": {
+      "festival": "Lễ hội lớn",
+      "djs": "DJ show",
+      "club": "Sự kiện câu lạc bộ",
+      "freaktopia": "Chỉ FREAKTOPIA"
+    },
+    "openOnMap": "Cùng tìm kiếm trên bản đồ"
+  },
+  "discovery": {
+    "title": "Sự kiện thế giới",
+    "sub": "Từ nguồn bên ngoài đã được phê duyệt. FREAKTOPIA không bán các vé này.",
+    "asOf": "tính đến {time}",
+    "notConnected": "Chưa kết nối nguồn sự kiện bên ngoài nào, nên chỉ liệt kê sự kiện của FREAKTOPIA. Không dùng dữ liệu mẫu để lấp chỗ.",
+    "loadError": "Không tải được sự kiện thế giới. Sự kiện FREAKTOPIA bên dưới không bị ảnh hưởng.",
+    "artistsTitle": "Nghệ sĩ",
+    "artistSub": "{source} · {count} sắp tới · {cities}",
+    "artistActive": "Sự kiện có {name} ({source})",
+    "artistClear": "Bỏ nghệ sĩ",
+    "noMatches": "Không có sự kiện thế giới nào khớp bộ lọc này.",
+    "from": "Từ {source}",
+    "status": {
+      "postponed": "Hoãn",
+      "rescheduled": "Đổi lịch"
+    },
+    "timeTbd": "chưa có giờ",
+    "localTime": "giờ địa phương",
+    "approx": "trung tâm thành phố, gần đúng",
+    "verified": "Xác minh {time}",
+    "official": "Trang chính thức",
+    "tickets": "Vé",
+    "newTab": "mở trong thẻ mới",
+    "onMap": "Xem trên bản đồ"
+  },
+  "discoveryAdmin": {
+    "title": "Nguồn sự kiện",
+    "sub": "Trạng thái kết nối của từng nguồn bên ngoài, chu kỳ cập nhật và chất lượng dữ liệu. Chỉ quản trị viên.",
+    "forbidden": "Chỉ quản trị viên",
+    "forbiddenBody": "Trang này dành cho tài khoản vận hành đã xác minh email.",
+    "err": "Không thể hoàn tất ({code})",
+    "syncFailed": "Đồng bộ thất bại: {error}",
+    "skipped": {
+      "not_configured": "Chưa đồng bộ: chưa đặt khóa API.",
+      "unapproved": "Chưa đồng bộ: chưa xác nhận điều khoản hoặc phê duyệt.",
+      "paused": "Chưa đồng bộ: nguồn đang tạm dừng."
+    },
+    "sources": "Nguồn",
+    "state": {
+      "connected": "Đã kết nối",
+      "not_configured": "Chưa cấu hình",
+      "unapproved": "Chưa phê duyệt",
+      "paused": "Tạm dừng",
+      "error": "Lỗi"
+    },
+    "stateHelp": {
+      "connected": "Đã đặt khóa và xác nhận điều khoản. Sự kiện từ nguồn này hiển thị ở WORLD và EVENTS.",
+      "not_configured": "Chưa có khóa API nên không lấy và không hiển thị gì.",
+      "unapproved": "Có thể đã có khóa, nhưng chưa xác nhận điều khoản hoặc phê duyệt của nhà cung cấp. Vẫn tắt cho đến khi xác nhận.",
+      "paused": "Quản trị viên tạm dừng: không cập nhật và không hiển thị.",
+      "error": "Lần đồng bộ trước thất bại. Sự kiện trong bộ nhớ đệm hiển thị kèm thời điểm xác minh cho đến khi đồng bộ thành công."
+    },
+    "terms": "Điều khoản",
+    "needs": "Để bật, hãy đặt:",
+    "lastSync": "Đồng bộ gần nhất",
+    "lastSuccess": "Thành công gần nhất",
+    "events": "Sự kiện",
+    "regions": "Khu vực",
+    "lastError": "Lỗi ×{count}",
+    "saved": "Đã lưu",
+    "synced": "Đã đồng bộ",
+    "syncing": "Đang đồng bộ…",
+    "syncNow": "Đồng bộ ngay",
+    "resume": "Tiếp tục",
+    "pause": "Tạm dừng",
+    "resumed": "Đã tiếp tục",
+    "pausedOk": "Đã tạm dừng",
+    "purge": "Xóa dữ liệu đệm",
+    "purgeConfirm": "Xóa mọi sự kiện đệm từ {name} và tạm dừng? Gõ DELETE để xác nhận.",
+    "purged": "Đã xóa dữ liệu đệm",
+    "quality": "Chất lượng sự kiện",
+    "q": {
+      "none": "Không có",
+      "duplicates": "Có thể trùng (chưa gộp)",
+      "cancelled": "Đã hủy hoặc hoãn",
+      "timeTbd": "Chưa công bố giờ",
+      "noVenue": "Không có địa điểm",
+      "noLocation": "Không có vị trí (chỉ danh sách, không lên bản đồ)",
+      "approximateLocation": "Vị trí gần đúng (trung tâm)",
+      "hidden": "Quản trị viên đã ẩn",
+      "changes": "Thay đổi gần đây (ngày, địa điểm, đội hình, trạng thái, vé)"
+    },
+    "field": {
+      "date": "ngày",
+      "venue": "địa điểm",
+      "lineup": "đội hình",
+      "status": "trạng thái",
+      "tickets": "vé"
+    },
+    "intervals": "Chu kỳ cập nhật",
+    "interval": {
+      "within48h": "Trong 48 giờ",
+      "within30d": "Trong 30 ngày",
+      "later": "Sau đó"
+    },
+    "hours": "giờ",
+    "save": "Lưu",
+    "hide": "Ẩn",
+    "unhide": "Hiện lại",
+    "hiddenOk": "Đã ẩn khỏi WORLD và EVENTS",
+    "shownOk": "Đã hiện lại"
   }
 }

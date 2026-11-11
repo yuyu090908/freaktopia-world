@@ -556,7 +556,9 @@
       "buyTicket": "Beli tiket",
       "viewDao": "Lihat DAO",
       "applyDj": "Daftar sebagai DJ",
-      "viewEvent": "Lihat acara"
+      "viewEvent": "Lihat acara",
+      "officialEvent": "Lihat halaman resmi",
+      "getTickets": "Dapatkan tiket"
     },
     "count": "{count, plural, other {# acara}}",
     "legendNote": "Level adalah level permainan peta, bukan kapasitas venue. TOP 1–3 = paling populer (sepanjang masa). Label DAO ungu menandai DAO komunitas.",
@@ -565,7 +567,10 @@
       "any": "Tanggal apa saja",
       "30d": "30 hari ke depan",
       "90d": "3 bulan ke depan",
-      "2027": "2027"
+      "2027": "2027",
+      "today": "Hari ini",
+      "weekend": "Akhir pekan ini",
+      "7d": "7 hari ke depan"
     },
     "kinds": {
       "event": "Festival",
@@ -698,7 +703,45 @@
         "london": "Klub, gudang, dan akar radio bajakan."
       }
     },
-    "communityNote": "Pesta yang dipublikasikan penyelenggara di FREAKTOPIA. Lineup, tiket, dan detail ada di halamannya dalam dunia penyelenggara."
+    "communityNote": "Pesta yang dipublikasikan penyelenggara di FREAKTOPIA. Lineup, tiket, dan detail ada di halamannya dalam dunia penyelenggara.",
+    "externalAria": "{name}, {city} · {kind}, sumber: {source}",
+    "openInEvents": "Pencarian sama di EVENTS",
+    "legendExternalNote": "Pin berbentuk adalah acara dari sumber luar (Ticketmaster dll.). Tangkai putus-putus berarti hanya pusat kota yang diketahui.",
+    "external": {
+      "opensNewTab": "dibuka di tab baru",
+      "notFreaktopia": "Acara ini tidak diselenggarakan oleh FREAKTOPIA. Tiket dijual oleh penyelenggara atau penjual tiket di situs mereka sendiri.",
+      "source": "Sumber",
+      "sourceType": {
+        "external": "Sumber eksternal",
+        "partner": "Mitra",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "Verifikasi",
+      "verified": {
+        "source_verified": "Dari data resmi sumber",
+        "partner_verified": "Diverifikasi mitra",
+        "unverified": "Belum diverifikasi"
+      },
+      "lastVerified": "Terakhir diverifikasi",
+      "staleNote": "Informasi per {time}. Cek halaman resmi untuk yang terbaru.",
+      "statusLabel": "Status",
+      "status": {
+        "scheduled": "Terjadwal",
+        "rescheduled": "Dijadwal ulang",
+        "postponed": "Ditunda",
+        "cancelled": "Dibatalkan",
+        "unknown": "Tidak disebutkan sumber"
+      },
+      "venue": "Tempat",
+      "venueUnknown": "Tempat belum diumumkan",
+      "approxLocation": "Ditampilkan di pusat kota: sumber tidak memberi posisi tempat yang tepat.",
+      "lineup": "Line-up",
+      "lineupEmpty": "Line-up tidak diberikan sumber",
+      "price": "Harga",
+      "priceFromSource": "{min}–{max} {currency} (menurut sumber)",
+      "timeTbd": "Waktu menyusul",
+      "localTime": "waktu setempat"
+    }
   },
   "ranking": {
     "title": "Peringkat dunia",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "Area luar ruangan",
     "green_room": "Ruang artis",
     "step_free_access": "Akses tanpa tangga",
-    "coat_check": "Penitipan mantel"
+    "coat_check": "Penitipan mantel",
+    "major_festival": "Festival besar",
+    "dj_show": "Pertunjukan DJ",
+    "club_event": "Acara klub",
+    "music_event": "Acara musik"
   },
   "ops": {
     "manageKicker": "Operasional acara",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "Tiket tidak lagi dijual. Halaman acara tetap menampilkan lineup dan kenangan.",
     "notOnSaleYet": "Tiket belum dijual",
     "notOnSaleYetBody": "Tiket dijual setelah acara dikonfirmasi. Sebelum itu Anda bisa mendukungnya di halaman acara.",
-    "backToEvent": "Kembali ke acara"
+    "backToEvent": "Kembali ke acara",
+    "breakdownExternal": "· Eksternal {count}",
+    "kind": "Jenis acara",
+    "kindHint": "Salah satu. Festival, pertunjukan DJ dan klub hanya dari data sumber itu sendiri.",
+    "kinds": {
+      "festival": "Festival besar",
+      "djs": "Pertunjukan DJ",
+      "club": "Acara klub",
+      "freaktopia": "Hanya FREAKTOPIA"
+    },
+    "openOnMap": "Pencarian sama di peta"
+  },
+  "discovery": {
+    "title": "Acara dunia",
+    "sub": "Dari sumber luar yang disetujui. FREAKTOPIA tidak menjual tiket ini.",
+    "asOf": "per {time}",
+    "notConnected": "Belum ada sumber acara luar yang terhubung, jadi hanya acara FREAKTOPIA yang ditampilkan. Tidak diisi data contoh.",
+    "loadError": "Acara dunia gagal dimuat. Acara FREAKTOPIA di bawah tidak terpengaruh.",
+    "artistsTitle": "Artis",
+    "artistSub": "{source} · {count} mendatang · {cities}",
+    "artistActive": "Acara dengan {name} ({source})",
+    "artistClear": "Hapus artis",
+    "noMatches": "Tidak ada acara dunia yang cocok dengan filter ini.",
+    "from": "Dari {source}",
+    "status": {
+      "postponed": "Ditunda",
+      "rescheduled": "Dijadwal ulang"
+    },
+    "timeTbd": "waktu menyusul",
+    "localTime": "waktu setempat",
+    "approx": "pusat kota, perkiraan",
+    "verified": "Diverifikasi {time}",
+    "official": "Halaman resmi",
+    "tickets": "Tiket",
+    "newTab": "dibuka di tab baru",
+    "onMap": "Lihat di peta"
+  },
+  "discoveryAdmin": {
+    "title": "Sumber acara",
+    "sub": "Status koneksi tiap sumber luar, interval pembaruan, dan kualitas data. Khusus admin.",
+    "forbidden": "Khusus admin",
+    "forbiddenBody": "Halaman ini untuk akun operator dengan email terverifikasi.",
+    "err": "Gagal ({code})",
+    "syncFailed": "Sinkronisasi gagal: {error}",
+    "skipped": {
+      "not_configured": "Tidak disinkronkan: kunci API belum diatur.",
+      "unapproved": "Tidak disinkronkan: syarat atau persetujuan belum dikonfirmasi.",
+      "paused": "Tidak disinkronkan: sumber dijeda."
+    },
+    "sources": "Sumber",
+    "state": {
+      "connected": "Terhubung",
+      "not_configured": "Belum dikonfigurasi",
+      "unapproved": "Belum disetujui",
+      "paused": "Dijeda",
+      "error": "Galat"
+    },
+    "stateHelp": {
+      "connected": "Kunci diatur dan syarat dikonfirmasi. Acara dari sumber ini tampil di WORLD dan EVENTS.",
+      "not_configured": "Kunci API belum ada, jadi tidak ada yang diambil atau ditampilkan.",
+      "unapproved": "Kunci mungkin sudah ada, tetapi syarat atau persetujuan penyedia belum dikonfirmasi. Tetap mati sampai dikonfirmasi.",
+      "paused": "Dijeda admin: tidak diperbarui dan tidak ditampilkan.",
+      "error": "Sinkronisasi terakhir gagal. Acara tersimpan tetap tampil dengan waktu verifikasi terakhir sampai berhasil."
+    },
+    "terms": "Ketentuan",
+    "needs": "Untuk menyalakan, atur:",
+    "lastSync": "Sinkron terakhir",
+    "lastSuccess": "Sukses terakhir",
+    "events": "Acara",
+    "regions": "Wilayah",
+    "lastError": "Galat ×{count}",
+    "saved": "Tersimpan",
+    "synced": "Tersinkron",
+    "syncing": "Menyinkronkan…",
+    "syncNow": "Sinkronkan sekarang",
+    "resume": "Lanjutkan",
+    "pause": "Jeda",
+    "resumed": "Dilanjutkan",
+    "pausedOk": "Dijeda",
+    "purge": "Hapus cache",
+    "purgeConfirm": "Hapus semua acara tersimpan dari {name} dan jeda? Ketik DELETE untuk konfirmasi.",
+    "purged": "Cache dihapus",
+    "quality": "Kualitas acara",
+    "q": {
+      "none": "Tidak ada",
+      "duplicates": "Kemungkinan duplikat (tidak digabung)",
+      "cancelled": "Dibatalkan atau ditunda",
+      "timeTbd": "Waktu belum diumumkan",
+      "noVenue": "Tanpa tempat",
+      "noLocation": "Tanpa lokasi (hanya daftar, tidak di peta)",
+      "approximateLocation": "Lokasi perkiraan (pusat kota)",
+      "hidden": "Disembunyikan admin",
+      "changes": "Perubahan terbaru (tanggal, tempat, line-up, status, tiket)"
+    },
+    "field": {
+      "date": "tanggal",
+      "venue": "tempat",
+      "lineup": "line-up",
+      "status": "status",
+      "tickets": "tiket"
+    },
+    "intervals": "Interval pembaruan",
+    "interval": {
+      "within48h": "Dalam 48 jam",
+      "within30d": "Dalam 30 hari",
+      "later": "Setelahnya"
+    },
+    "hours": "jam",
+    "save": "Simpan",
+    "hide": "Sembunyikan",
+    "unhide": "Tampilkan lagi",
+    "hiddenOk": "Disembunyikan dari WORLD dan EVENTS",
+    "shownOk": "Ditampilkan lagi"
   }
 }

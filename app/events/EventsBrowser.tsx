@@ -18,6 +18,10 @@ import { UpcomingParties, type Upcoming } from "@/components/party/Directory";
 import { useParty } from "@/components/party/shared";
 import { HomeFeatured } from "@/app/HomeFeatured";
 import { distinctCovers } from "@/lib/art";
+import { WorldEventsSection } from "@/components/event/WorldEventsSection";
+import { useLocalHref } from "@/components/i18n/LocaleContext";
+import { EMPTY_MAP_FILTERS, writeWorldUrl } from "@/lib/map/view";
+import { MapPin } from "lucide-react";
 
 type Sort = EventSort;
 
@@ -26,6 +30,7 @@ export function EventsBrowser() {
   const to = useTranslations("ops");
   const tp = useTranslations("party");
   const tf = useTranslations("eventFilters");
+  const lhref = useLocalHref();
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
   // Filters live in the URL: reload, a shared link and the back button keep them.
@@ -88,6 +93,13 @@ export function EventsBrowser() {
           <b key={total} className="count-flash text-base">{tu("lengthEvents", { length: total })}</b>
           <span className="ml-2 text-mute">{tf("breakdown", { community: community.length, sample: list.length })}</span>
         </p>
+        <Link
+          href={lhref(`/world${writeWorldUrl({ filters: { ...EMPTY_MAP_FILTERS, q: filters.q, genres: filters.genres, date: filters.date, kinds: filters.kinds }, view: "map", event: null, city: null })}`)}
+          className="inline-flex min-h-11 items-center gap-1 text-sm font-bold text-acid"
+          data-testid="events-to-world"
+        >
+          <MapPin className="size-4" aria-hidden /> {tf("openOnMap")}
+        </Link>
         <label className="ml-auto flex items-center gap-2 text-sm">
           <span className="text-mute">{tu("sort")}</span>
           <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-full border border-line bg-surface px-3 font-bold">
@@ -106,6 +118,8 @@ export function EventsBrowser() {
         <p className="mb-3 text-[13px] text-mute">{tf("communitySub")}</p>
         {communityError ? <p className="text-sm text-danger" role="alert">{tf("communityError")}</p> : communityData ? <UpcomingParties limit={50} parties={community} /> : <div className="h-24 animate-pulse rounded-2xl bg-surface-2" />}
       </section>
+
+      <WorldEventsSection filters={filters} />
 
       {created.length > 0 && (
         <div className="mx-4 mt-4 rounded-3xl border-2 border-acid/50 bg-acid/5 p-4 md:mx-0">

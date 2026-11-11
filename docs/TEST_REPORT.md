@@ -1,3 +1,38 @@
+# WORLD 11.0: Global discovery (2026-11-11)
+
+Local production build in a cloud container; clock pinned to 2026-11-09 14:00 UTC. **No outside source is connected** (no API keys; `app.ticketmaster.com` and `rest.bandsintown.com` are blocked from the container). Every test of source data uses **mock data** (`tests/fixtures/ticketmaster-mock.json`, `tests/fixtures/map-external-mock.json`, both marked MOCK). There are no real-connection tests.
+
+- **vitest:** 258 of 258 pass. New `tests/unit/discovery.test.ts` (26 tests):
+  - Normalisation keeps source_type / source_name / source_event_id / source_url / last_synced_at / verification_status; invalid items are dropped.
+  - Venue-local time to UTC.
+  - Festival only when the source says so.
+  - Location priority venue → city centre (approximate) → list only; no map entry without coordinates.
+  - XSS and URL sanitising (scripts, `javascript:`, http images, lookalike hosts, credentials); keys masked.
+  - Dedupe merges only the same night, keeps another night apart; FREAKTOPIA outranks an external copy.
+  - "Today" differs between Tokyo and New York; "this weekend".
+  - A key without `TICKETMASTER_TERMS_ACCEPTED=1` is "unapproved" and fetches nothing; Bandsintown without approval makes no request; status shows env var names, never values.
+  - Sync: cancelled hidden, postponed kept, change detection, admin hide survives a refresh, source error keeps the last cache, the world map still loads FREAKTOPIA events when the source is down, purge.
+  - Retry on 429, give up on 4xx.
+  - External map entries have no FREAKTOPIA tickets, DAO, live, DJ call or level growth.
+  - Two artists with the same name stay two (by id).
+  - Kind filter and the WORLD ↔ EVENTS URL round trip.
+- **PostgreSQL 16:** migrations 0005–0011 applied to a fresh database, 0011 applied twice (re-runnable). `tests/integration/discovery-store.test.ts` (sync → public → change → hide → purge) passes twice in a row with `TEST_DATABASE_URL`. 0001–0004 need the base schema that is not in this repo (unchanged from earlier releases).
+- **Playwright (mobile 390 px project, 2 workers):** full suite 163 of 164 pass; the one failure is `world.spec` "clusters open into landmarks", flaky under two workers since 9.x and not touched here (3 of 3 pass when re-run alone). The earlier full run also passed apart from two new tests that were then made robust (admin account re-use, waiting for hydration before a click). New `tests/discovery.spec.ts` (8 tests):
+  - Sources listed as not configured, no events, bad query → 400, no external entries in `/api/map`.
+  - Cron without `CRON_SECRET` → 401; admin API → 401 signed out, 403 for members and cross-origin.
+  - EVENTS says no source is connected (also in Japanese) and shows no world-event cards.
+  - Filters carry WORLD → EVENTS → WORLD through the URL.
+  - "Major festivals" gives 0 on both pages (nothing invented).
+  - `/admin/sources`: closed to members; an admin (`E2E_ADMIN_EMAIL` in `OPS_ADMIN_EMAILS`) sees Ticketmaster "Not configured" with `TICKETMASTER_API_KEY`, Bandsintown needing `BANDSINTOWN_APPROVED=1`, and Sync disabled.
+  - With mocked `/api/map` data: external events show the source badge and last verified time, the only buttons are the official page and tickets (new tab, `noopener noreferrer`), no FREAKTOPIA ticket/DAO/DJ links; the approximate-location note; postponed events have no ticket link; the kind filter.
+- **Fixed while testing:**
+  - WORLD list and empty state sat under the search overlay when the overlay grew (fixed `pt-[150px]` / centred box); both now follow the measured overlay height.
+  - At 1440 px the overlay row ran under the open event panel; it now leaves room for the panel.
+  - The map legend could run off the bottom of the screen; it now scrolls.
+- **i18n:** 131 new keys in all 12 locales (4,321 keys each); every literal `t()` key exists.
+- **Screenshots:** `docs/screenshots/world11/` (390 px Japanese and 1440 px; external events shown with MOCK data injected in the browser only).
+- **Not tested:** real Ticketmaster or Bandsintown responses, Vercel Cron, Lighthouse, real devices, the deployed site.
+
 # WORLD 10.0 (2026-11-11)
 
 These were run on a local production build in a cloud container. The deployed site could not be reached, so nothing here is measured on production or on a real phone. All tests are **mock tests** (in-memory demo store, clock pinned to 2026-11-09 14:00 UTC). No external service is connected, so there are no real-connection tests.

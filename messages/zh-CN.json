@@ -556,7 +556,9 @@
       "buyTicket": "购买门票",
       "viewDao": "查看 DAO",
       "applyDj": "申请成为 DJ",
-      "viewEvent": "查看活动"
+      "viewEvent": "查看活动",
+      "officialEvent": "查看官方页面",
+      "getTickets": "获取门票"
     },
     "count": "{count, plural, other {# 个活动}}",
     "legendNote": "等级是地图游戏等级，不是场地容量。TOP 1–3 = 最受欢迎（历史累计）。紫色 DAO 标签代表社区 DAO。",
@@ -565,7 +567,10 @@
       "any": "任意日期",
       "30d": "未来 30 天",
       "90d": "未来 3 个月",
-      "2027": "2027 年"
+      "2027": "2027 年",
+      "today": "今天",
+      "weekend": "本周末",
+      "7d": "未来 7 天"
     },
     "kinds": {
       "event": "音乐节",
@@ -698,7 +703,45 @@
         "london": "俱乐部、仓库与海盗电台的根源。"
       }
     },
-    "communityNote": "由组织者在 FREAKTOPIA 发布的派对。阵容、门票和详情请见组织者世界中的页面。"
+    "communityNote": "由组织者在 FREAKTOPIA 发布的派对。阵容、门票和详情请见组织者世界中的页面。",
+    "externalAria": "{name}，{city} · {kind}，来源：{source}",
+    "openInEvents": "在 EVENTS 中查看相同条件",
+    "legendExternalNote": "形状图钉表示来自外部数据源（如 Ticketmaster）的活动。虚线表示位置仅为城市中心。",
+    "external": {
+      "opensNewTab": "在新标签页中打开",
+      "notFreaktopia": "此活动并非由 FREAKTOPIA 主办。门票由主办方或售票方在其网站出售。",
+      "source": "来源",
+      "sourceType": {
+        "external": "外部数据源",
+        "partner": "合作伙伴",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "核实状态",
+      "verified": {
+        "source_verified": "来自数据源的官方数据",
+        "partner_verified": "经合作伙伴核实",
+        "unverified": "未核实"
+      },
+      "lastVerified": "最后核实",
+      "staleNote": "信息截至 {time}。最新信息请查看官方页面。",
+      "statusLabel": "状态",
+      "status": {
+        "scheduled": "按计划",
+        "rescheduled": "已改期",
+        "postponed": "已延期",
+        "cancelled": "已取消",
+        "unknown": "来源未说明"
+      },
+      "venue": "场地",
+      "venueUnknown": "场地未公布",
+      "approxLocation": "显示在城市中心：来源未提供场地的确切位置。",
+      "lineup": "阵容",
+      "lineupEmpty": "来源未提供阵容",
+      "price": "价格",
+      "priceFromSource": "{min}–{max} {currency}（来源数据）",
+      "timeTbd": "时间待定",
+      "localTime": "当地时间"
+    }
   },
   "ranking": {
     "title": "世界排行榜",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "户外区域",
     "green_room": "休息室",
     "step_free_access": "无障碍通道",
-    "coat_check": "衣帽寄存"
+    "coat_check": "衣帽寄存",
+    "major_festival": "大型音乐节",
+    "dj_show": "DJ 演出",
+    "club_event": "俱乐部活动",
+    "music_event": "音乐活动"
   },
   "ops": {
     "manageKicker": "活动运营",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "门票已停止销售。活动页面保留了阵容与回忆。",
     "notOnSaleYet": "门票尚未开售",
     "notOnSaleYetBody": "活动确认后才开始售票。在此之前可在活动页面支持它。",
-    "backToEvent": "返回活动"
+    "backToEvent": "返回活动",
+    "breakdownExternal": "· 外部 {count}",
+    "kind": "活动类型",
+    "kindHint": "匹配任一项。音乐节、DJ 演出和俱乐部类型仅依据来源自身的数据判断。",
+    "kinds": {
+      "festival": "大型音乐节",
+      "djs": "DJ 演出",
+      "club": "俱乐部活动",
+      "freaktopia": "仅 FREAKTOPIA"
+    },
+    "openOnMap": "在地图上查看相同条件"
+  },
+  "discovery": {
+    "title": "全球活动",
+    "sub": "来自已批准的外部数据源。FREAKTOPIA 不出售这些门票。",
+    "asOf": "截至 {time}",
+    "notConnected": "尚未连接任何外部活动数据源，因此仅列出 FREAKTOPIA 自己的活动。此处不会用示例数据填充。",
+    "loadError": "无法加载全球活动。下方的 FREAKTOPIA 活动不受影响。",
+    "artistsTitle": "艺人",
+    "artistSub": "{source} · 即将 {count} 场 · {cities}",
+    "artistActive": "{name}（{source}）的活动",
+    "artistClear": "清除艺人",
+    "noMatches": "没有符合这些条件的全球活动。",
+    "from": "来源：{source}",
+    "status": {
+      "postponed": "已延期",
+      "rescheduled": "已改期"
+    },
+    "timeTbd": "时间待定",
+    "localTime": "当地时间",
+    "approx": "城市中心，大致位置",
+    "verified": "最后核实 {time}",
+    "official": "官方页面",
+    "tickets": "门票",
+    "newTab": "在新标签页中打开",
+    "onMap": "在地图上查看"
+  },
+  "discoveryAdmin": {
+    "title": "活动数据源",
+    "sub": "各外部数据源的连接状态、刷新间隔和数据质量。仅限管理员。",
+    "forbidden": "仅限管理员",
+    "forbiddenBody": "此页面仅供已登记为运营者且邮箱已验证的账户使用。",
+    "err": "无法完成（{code}）",
+    "syncFailed": "同步失败：{error}",
+    "skipped": {
+      "not_configured": "未同步：未设置 API 密钥。",
+      "unapproved": "未同步：条款或授权尚未确认。",
+      "paused": "未同步：数据源已暂停。"
+    },
+    "sources": "数据源",
+    "state": {
+      "connected": "已连接",
+      "not_configured": "未配置",
+      "unapproved": "未批准",
+      "paused": "已暂停",
+      "error": "错误"
+    },
+    "stateHelp": {
+      "connected": "已设置密钥并确认条款。该来源的活动会显示在 WORLD 和 EVENTS。",
+      "not_configured": "未设置 API 密钥，因此不获取也不显示。",
+      "unapproved": "即使已设置密钥，条款或提供方授权尚未确认。确认前保持关闭。",
+      "paused": "管理员已暂停：不刷新也不显示。",
+      "error": "上次同步失败。在同步成功前，缓存的活动会带着最后核实时间显示。"
+    },
+    "terms": "使用条款",
+    "needs": "启用需设置：",
+    "lastSync": "上次同步",
+    "lastSuccess": "上次成功",
+    "events": "活动数",
+    "regions": "地区",
+    "lastError": "错误 ×{count}",
+    "saved": "已保存",
+    "synced": "已同步",
+    "syncing": "同步中…",
+    "syncNow": "立即同步",
+    "resume": "恢复",
+    "pause": "暂停",
+    "resumed": "已恢复",
+    "pausedOk": "已暂停",
+    "purge": "删除缓存数据",
+    "purgeConfirm": "删除 {name} 的所有缓存活动并暂停？输入 DELETE 确认。",
+    "purged": "已删除缓存数据",
+    "quality": "活动质量",
+    "q": {
+      "none": "无",
+      "duplicates": "可能重复（未合并）",
+      "cancelled": "已取消或延期",
+      "timeTbd": "时间未公布",
+      "noVenue": "无场地",
+      "noLocation": "无位置（仅列表，不在地图上）",
+      "approximateLocation": "大致位置（城市中心）",
+      "hidden": "管理员已隐藏",
+      "changes": "最近变更（日期、场地、阵容、状态、门票）"
+    },
+    "field": {
+      "date": "日期",
+      "venue": "场地",
+      "lineup": "阵容",
+      "status": "状态",
+      "tickets": "门票"
+    },
+    "intervals": "刷新间隔",
+    "interval": {
+      "within48h": "48 小时内",
+      "within30d": "30 天内",
+      "later": "更晚"
+    },
+    "hours": "小时",
+    "save": "保存",
+    "hide": "隐藏",
+    "unhide": "重新显示",
+    "hiddenOk": "已从 WORLD 和 EVENTS 隐藏",
+    "shownOk": "已重新显示"
   }
 }

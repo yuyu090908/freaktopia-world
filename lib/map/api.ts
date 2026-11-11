@@ -15,6 +15,8 @@ import { landmarkTypeFor, type MapStatus } from "./landmarks";
 import type { MapEventDto, RankBadge, WorldMapResponse } from "./types";
 import { upcomingParties } from "@/lib/party/service";
 import { appNow } from "@/lib/clock";
+import { publicEvents } from "@/lib/discovery/service";
+import type { UnifiedEvent } from "@/lib/discovery/types";
 import type { Genre } from "@/lib/types";
 
 type Community = Awaited<ReturnType<typeof upcomingParties>>[number];
@@ -53,6 +55,74 @@ export function communityDto(p: Community, asOf: string): MapEventDto {
     href: `/u/${p.handle ?? ""}/world/${p.id}`,
     organizer: { name: p.organizer ?? "", handle: p.handle, demo: p.demo },
   };
+}
+
+const EXTERNAL_PALETTE: [string, string, string] = ["#66DFFF", "#F2EBDD", "#3A4A5E"];
+const genreOf = (g: string): Genre | null => (GENRES as string[]).find((x) => x.toLowerCase() === g.toLowerCase()) as Genre | undefined ?? null;
+
+/**
+ * An external event as a map entry. Only what the source said: no level growth, ranking, DAO, live,
+ * FREAKTOPIA tickets or DJ calls. Events without coordinates are not drawn (they stay in the EVENTS list).
+ */
+export function externalDto(e: UnifiedEvent): MapEventDto | null {
+  if (e.latitude == null || e.longitude == null || !e.city) return null;
+  const genres = e.genres.map(genreOf).filter((g): g is Genre => !!g);
+  return {
+    id: e.id,
+    name: e.title,
+    city: e.city,
+    country: e.countryCode ? regionNames.of(e.countryCode) ?? e.countryCode : "",
+    venue: e.venueName,
+    location: { lat: e.latitude, lng: e.longitude, precision: e.locationPrecision === "venue" ? "exact" : "city" },
+    startsAt: e.startsAtUtc,
+    endsAt: e.endsAtUtc ?? e.startsAtUtc,
+    genres,
+    lineup: e.lineup.map((a) => ({ id: a.id, name: a.name })),
+    palette: EXTERNAL_PALETTE,
+    status: "confirmed",
+    growth: { supporters: 0, stakers: 0, fundingUsd: 0, venueContract: false, approvals: 0 },
+    goalUsd: 0,
+    level: 1,
+    landmark: { type: landmarkTypeFor(genres), theme: "event", approvedDesign: null },
+    ranking: { rank: null, badge: null, category: "popular", period: "all", trendingRank: null, trendingGrowth: null, trendingPeriod: "7d", asOf: e.lastSyncedAt },
+    dao: null,
+    live: null,
+    tickets: { onSale: false, remaining: 0, fromUsd: null, demo: true },
+    djRecruiting: false,
+    afterParty: null,
+    updatedAt: e.lastSyncedAt,
+    isDemo: !!e.demo,
+    source: "external",
+    external: {
+      sourceType: e.sourceType,
+      sourceName: e.sourceName,
+      sourceEventId: e.sourceEventId,
+      sourceUrl: e.sourceUrl,
+      officialUrl: e.officialUrl,
+      ticketUrl: e.ticketUrl,
+      category: e.category,
+      verificationStatus: e.verificationStatus,
+      externalStatus: e.externalStatus,
+      lastVerifiedAt: e.lastVerifiedAt,
+      lastSyncedAt: e.lastSyncedAt,
+      venueTimezone: e.venueTimezone,
+      timeTbd: e.timeTbd,
+      imageUrl: e.imageUrl,
+      genres: e.genres,
+      priceRange: e.priceRange,
+    },
+  };
+}
+
+/** External events for the map. A source failure never breaks the map: FREAKTOPIA's own events still load. */
+async function externalForMap(now: number): Promise<MapEventDto[]> {
+  try {
+    const { events } = await publicEvents({ limit: 1000 }, now);
+    return events.map(externalDto).filter((x): x is MapEventDto => !!x);
+  } catch (err) {
+    console.error("[map] external events unavailable", (err as Error).message);
+    return [];
+  }
 }
 
 export const mapMode = () => (process.env.MAP_DATA_MODE === "production" ? "production" : "demo");
@@ -159,11 +229,13 @@ export async function buildWorldMap(now = appNow()): Promise<WorldMapResponse> {
     .filter((p) => p.handle && p.lat != null && p.lng != null)
     .map((p) => communityDto(p, popular.asOf));
 
+  const external = await externalForMap(now);
+
   return {
     mode: "demo",
     asOf: new Date(now).toISOString(),
     growthConfig: DEFAULT_GROWTH_CONFIG,
-    events: [...events, ...community],
+    events: [...events, ...community, ...external],
     notes: [
       "Sample events. Festival level is a visual game level, not venue capacity.",
       "Staking is escrowed separately and never counted as event budget.",

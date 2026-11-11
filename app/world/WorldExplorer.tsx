@@ -19,13 +19,15 @@ import { EventBottomSheet, EventSidePanel, LevelPill, StatusPill } from "@/compo
 import { LiteWorldMap } from "@/components/world/LiteWorldMap";
 import type { CameraPadding, FestivalWorldMapHandle } from "@/components/world/FestivalWorldMap";
 import { GENRES } from "@/lib/data";
-import type { DateRange } from "@/lib/filters";
+import { DATE_RANGES, KIND_VALUES, type DateRange } from "@/lib/filters";
 
-const DATE_KEYS: DateRange[] = ["any", "30d", "90d", "2027"];
+const DATE_KEYS: DateRange[] = DATE_RANGES;
 import { DEFAULT_GROWTH_CONFIG, LEVEL_COLORS, normalizeConfig } from "@/lib/map/growth";
-import { STATUS_META, landmarkSvg, type MapStatus } from "@/lib/map/landmarks";
+import { EXTERNAL_MARKER_LABEL, STATUS_META, externalMarkerKind, externalMarkerSvg, landmarkSvg, type MapStatus } from "@/lib/map/landmarks";
+import { labelKey } from "@/lib/i18n/labels";
+import { useLocalHref } from "@/components/i18n/LocaleContext";
 import type { WorldMapResponse } from "@/lib/map/types";
-import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, QUICK_FLAGS, STATUS_FLAGS, filterCount, filterWorld, readWorldUrl, suggest, suggestRegions, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
+import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, QUICK_FLAGS, STATUS_FLAGS, eventsHrefFor, filterCount, filterWorld, readWorldUrl, suggest, suggestRegions, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
 import { buildCities, cityKeyOf } from "@/lib/map/cities";
 import { REGION_COLOR, REGION_KEYS, REGION_VIEW, type RegionKey } from "@/lib/map/regions";
 import { CityPreview } from "@/components/world/CityPreview";
@@ -106,6 +108,7 @@ export function WorldExplorer() {
   const t = useTranslations("world");
   const tf = useTranslations("eventFilters");
   const tc = useTranslations("common");
+  const lhref = useLocalHref();
   const [load, setLoad] = useState<Load>({ status: "loading" });
   const [filters, setFilters] = useState<MapFilters>(EMPTY_MAP_FILTERS);
   const [view, setView] = useState<"map" | "list">("map");
@@ -347,7 +350,8 @@ export function WorldExplorer() {
       {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} globe={globe} locale={locale} lowPower={!!device.lowPower} autoSpin={device.spin} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} me={meProp} selectedCity={city?.key ?? null} onSelectCity={openCity} onReady={onMapReady} />)}
       {(load.status === "loading" || !device) && <MapLoading />}
       {load.status === "error" && (
-        <div className="absolute inset-x-4 top-1/2 z-10 mx-auto max-w-sm -translate-y-1/2">
+        // Placed under the measured overlay and clear of the map controls, so neither covers it at 320px.
+        <div className={cn("absolute z-10 mx-auto max-w-sm", desktop ? "inset-x-4" : "left-3 right-16")} style={{ top: overlayBottom + 8 }} data-testid="world-empty">
           <EmptyState title={t("loadFailed")} body={load.message} className="bg-ink/90" />
           <button type="button" onClick={() => setRetry((n) => n + 1)} className="mx-auto mt-3 flex min-h-11 items-center rounded-full bg-acid px-5 font-extrabold uppercase text-ink">
             {tc("retry")}
@@ -356,7 +360,7 @@ export function WorldExplorer() {
       )}
 
       {/* top: search + chips */}
-      <div ref={overlayRef} className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5">
+      <div ref={overlayRef} className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5" style={desktop && (sel || city) && view === "map" ? { paddingRight: 424 } : undefined}>
         <div className="pointer-events-auto mx-auto flex max-w-3xl items-center gap-2 px-3 md:px-4">
           <SearchBox events={all} regionNames={regionNames} value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} onPick={onSuggestion} onSubmit={() => flyTo(results.map((r) => r.id))} />
           <button type="button" onClick={() => setFiltersOpen(true)} className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-line bg-[#0D121B]/90 backdrop-blur" aria-label={`${t("filters")}${filterCount(filters) ? ` (${filterCount(filters)})` : ""}`}>
@@ -380,8 +384,12 @@ export function WorldExplorer() {
         <div className="pointer-events-auto mx-auto mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-2 px-3 md:px-4">
           <span className="rounded-full bg-ink/85 px-3 py-1 text-xs font-bold" aria-live="polite">
             <span key={results.length} className="count-flash" data-testid="world-count">{t("count", { count: results.length })}</span>
-            <span className="ml-1.5 font-semibold text-mute" data-testid="world-breakdown">{tf("breakdown", { community: results.filter((r) => r.source === "community").length, sample: results.filter((r) => r.source !== "community").length })}</span>
+            <span className="ml-1.5 font-semibold text-mute" data-testid="world-breakdown">{tf("breakdown", { community: results.filter((r) => r.source === "community").length, sample: results.filter((r) => r.source !== "community" && r.source !== "external").length })}</span>
+            {results.some((r) => r.source === "external") && <span className="ml-1.5 font-semibold text-[#66DFFF]" data-testid="world-breakdown-external">{tf("breakdownExternal", { count: results.filter((r) => r.source === "external").length })}</span>}
           </span>
+          {filterCount(filters) + (filters.q ? 1 : 0) > 0 && <Link href={lhref(eventsHrefFor(filters))} className="inline-flex min-h-11 items-center gap-1 rounded-full bg-ink/85 px-3 text-xs font-bold text-acid" data-testid="world-to-events">
+            <List className="size-3.5" aria-hidden /> {t("openInEvents")}
+          </Link>}
           <DemoBadge label={tc("sampleEvents")} className="bg-ink/85" />
           {filters.region && (
             <button type="button" onClick={() => focusRegion(null)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold" style={{ borderColor: REGION_COLOR[filters.region], color: REGION_COLOR[filters.region], background: "rgba(13,18,27,.85)" }} data-testid="region-active" aria-label={t("regionClear", { region: tReg(filters.region) })}>
@@ -429,13 +437,14 @@ export function WorldExplorer() {
 
       {/* empty */}
       {load.status === "ok" && results.length === 0 && (
-        <div className="absolute inset-x-4 top-1/2 z-10 mx-auto max-w-sm -translate-y-1/2">
+        // Placed under the measured overlay and clear of the map controls, so neither covers it at 320px.
+        <div className={cn("absolute z-10 mx-auto max-w-sm", desktop ? "inset-x-4" : "left-3 right-16")} style={{ top: overlayBottom + 8 }} data-testid="world-empty">
           <EmptyState title={t("emptyTitle")} body={t("emptyBody")} className="bg-ink/90" />
         </div>
       )}
 
       {/* list view */}
-      {view === "list" && load.status === "ok" && <ListView events={results} onPick={(id) => select(id)} />}
+      {view === "list" && load.status === "ok" && <ListView top={overlayBottom} events={results} onPick={(id) => select(id)} />}
 
       {/* bottom: Map/List toggle */}
       {!((sel || city) && !desktop) && load.status === "ok" && (
@@ -567,22 +576,28 @@ function SearchBox({ events, regionNames, value, onChange, onPick, onSubmit }: {
   );
 }
 
-function ListView({ events, onPick }: { events: WorldEvent[]; onPick: (id: string) => void }) {
+function ListView({ events, onPick, top }: { events: WorldEvent[]; onPick: (id: string) => void; top: number }) {
   const tu = useTranslations("world");
   const t = useTranslations("world");
   const locale = useLocale() as Locale;
   const sorted = [...events].sort((a, b) => (b.live ? 1 : 0) - (a.live ? 1 : 0) || Date.parse(a.startsAt) - Date.parse(b.startsAt));
   return (
-    <div className="absolute inset-0 z-10 overflow-y-auto bg-[#070A12]/96 px-3 pb-28 pt-[150px] md:px-4" data-testid="world-list">
+    <div className="absolute inset-0 z-10 overflow-y-auto bg-[#070A12]/96 px-3 pb-28 md:px-4" style={{ paddingTop: top + 8 }} data-testid="world-list">
       <ul className="mx-auto max-w-3xl space-y-2">
         {sorted.map((e) => (
           <li key={e.id}>
             <button type="button" onClick={() => onPick(e.id)} className="flex w-full items-center gap-3 rounded-2xl border-2 border-line bg-[#0D121B] p-2.5 text-left hover:border-cream/40">
-              <span className="size-16 shrink-0" aria-hidden dangerouslySetInnerHTML={{ __html: landmarkSvg({ type: e.landmark.type, level: e.level, status: e.status, palette: e.palette, fundingPct: e.goalUsd ? e.growth.fundingUsd / e.goalUsd : 0, animate: false, rank: e.ranking.badge ? (e.ranking.rank as 1 | 2 | 3) : null }) }} />
+              <span className="size-16 shrink-0" aria-hidden dangerouslySetInnerHTML={{ __html: e.external ? externalMarkerSvg(externalMarkerKind(e.external.category), e.location.precision === "city") : landmarkSvg({ type: e.landmark.type, level: e.level, status: e.status, palette: e.palette, fundingPct: e.goalUsd ? e.growth.fundingUsd / e.goalUsd : 0, animate: false, rank: e.ranking.badge ? (e.ranking.rank as 1 | 2 | 3) : null }) }} />
               <span className="min-w-0 flex-1">
                 <span className="flex flex-wrap items-center gap-1.5">
-                  <StatusPill status={e.status} />
-                  <LevelPill e={e} />
+                  {e.external ? (
+                    <span className="rounded-full border-2 border-[#66DFFF] px-2 py-0.5 text-[11px] font-extrabold uppercase text-[#66DFFF]" data-testid="list-source">{e.external.sourceName}</span>
+                  ) : (
+                    <>
+                      <StatusPill status={e.status} />
+                      <LevelPill e={e} />
+                    </>
+                  )}
                   {e.ranking.badge && <span className="rounded-full bg-[#E8C66A] px-2 py-0.5 text-[11px] font-extrabold text-ink">{tu("top")} {e.ranking.rank}</span>}
                 </span>
                 <span className="mt-1 block truncate font-display text-lg uppercase leading-tight">{e.name}</span>
@@ -606,12 +621,13 @@ const STATUS_ORDER: MapStatus[] = ["planning", "funding", "confirmed", "live", "
 
 function Legend({ onClose, desktop, top }: { onClose: () => void; desktop: boolean; top: number }) {
   const cfg = DEFAULT_GROWTH_CONFIG;
+  const tlab = useTranslations("labels");
   const t = useTranslations("world");
   const ts = useTranslations("status");
   const tl = useTranslations("levels");
   const tp = useTranslations("party");
   return (
-    <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px]" : "right-16 max-w-[calc(100%-80px)]")} style={{ top }}>
+    <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px]" : "right-16 max-w-[calc(100%-80px)]")} style={{ top, maxHeight: `calc(100% - ${top + 16}px)`, overflowY: "auto" }}>
       <div className="flex items-center justify-between">
         <h2 className="text-[14px] font-extrabold uppercase">{t("legendTitle")}</h2>
         <button type="button" onClick={onClose} aria-label={t("closeLegend")} className="inline-flex size-9 items-center justify-center rounded-full bg-surface-2">
@@ -637,6 +653,15 @@ function Legend({ onClose, desktop, top }: { onClose: () => void; desktop: boole
             <b>{tl(String(l.level))}</b>
           </li>
         ))}
+      </ul>
+      <ul className="mt-3 space-y-1 text-[12px]" data-testid="legend-external">
+        {(["major_festival", "dj_show", "club_event", "other"] as const).map((k) => (
+          <li key={k} className="flex items-center gap-2">
+            <span className="size-6 shrink-0" aria-hidden dangerouslySetInnerHTML={{ __html: externalMarkerSvg(k, false) }} />
+            <b>{tlab(labelKey(EXTERNAL_MARKER_LABEL[k]))}</b>
+          </li>
+        ))}
+        <li className="text-[11px] text-mute">{t("legendExternalNote")}</li>
       </ul>
       <p className="mt-2 text-[11px] text-mute">{t("legendNote")}</p>
       <p className="mt-1 text-[11px] text-mute" data-testid="legend-city-note">{t("legendCityNote")}</p>
@@ -675,6 +700,17 @@ function FilterSheet({ open, onClose, filters, setFilters, count, onRegion }: { 
       }
     >
       <div className="space-y-5">
+        <fieldset data-testid="kind-filter">
+          <legend className="text-[13px] font-extrabold uppercase">{tf("kind")}</legend>
+          <p className="mb-2 text-[12px] text-mute">{tf("kindHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            {KIND_VALUES.map((k) => (
+              <Chip key={k} active={(filters.kinds ?? []).includes(k)} onClick={() => setFilters((f) => ({ ...f, kinds: toggle(f.kinds ?? [], k) }))}>
+                {tf(`kinds.${k}`)}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
         <fieldset>
           <legend className="text-[13px] font-extrabold uppercase">{tf("status")}</legend>
           <p className="mb-2 text-[12px] text-mute">{tf("anyOf")}</p>

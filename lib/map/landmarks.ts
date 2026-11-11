@@ -319,3 +319,29 @@ export function orbSvg(level: EventLevel, status: MapStatus, color: string): str
 <circle cx="31" cy="9" r="6.5" fill="${m.color}" stroke="${INK}" stroke-width="1.6"/><text x="31" y="12" text-anchor="middle" font-size="8" font-weight="900" fill="${INK}" font-family="system-ui,sans-serif">${m.glyph}</text>
 </svg>`;
 }
+
+/**
+ * External events (lib/discovery) are not FREAKTOPIA festivals, so they get no landmark or level:
+ * a map pin whose head SHAPE says the kind (never colour alone):
+ * major festival = star, DJ show = disc, club = square, other music = triangle.
+ */
+export type ExternalMarkerKind = "major_festival" | "dj_show" | "club_event" | "other";
+export const EXTERNAL_MARKER_LABEL: Record<ExternalMarkerKind, string> = { major_festival: "Major festival", dj_show: "DJ show", club_event: "Club event", other: "Music event" };
+export const externalMarkerKind = (category: string): ExternalMarkerKind => (category === "major_festival" || category === "dj_show" || category === "club_event" ? category : "other");
+
+export function externalMarkerSvg(kind: ExternalMarkerKind, approximate: boolean): string {
+  const c = { major_festival: "#E8C66A", dj_show: "#66DFFF", club_event: "#B78BFF", other: "#F2EBDD" }[kind];
+  const head =
+    kind === "major_festival"
+      ? `<path d="M60 18l9.4 19 21 3-15.2 14.8 3.6 20.9L60 65.8 41.2 75.7l3.6-20.9L29.6 40l21-3z" fill="${c}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/>`
+      : kind === "dj_show"
+        ? `<circle cx="60" cy="46" r="26" fill="${c}" stroke="${INK}" stroke-width="4"/><circle cx="60" cy="46" r="9" fill="${INK}"/><circle cx="60" cy="46" r="3" fill="${c}"/>`
+        : kind === "club_event"
+          ? `<rect x="36" y="22" width="48" height="48" rx="8" fill="${c}" stroke="${INK}" stroke-width="4"/><path d="M46 56V36l14 10 14-10v20" fill="none" stroke="${INK}" stroke-width="5" stroke-linejoin="round"/>`
+          : `<path d="M60 20l28 48H32z" fill="${c}" stroke="${INK}" stroke-width="4" stroke-linejoin="round"/><circle cx="60" cy="54" r="5" fill="${INK}"/>`;
+  // Approximate (city-centre) locations get a dashed stem and no ground dot: never drawn as a venue pin.
+  const stem = approximate
+    ? `<path d="M60 74v34" stroke="${c}" stroke-width="4" stroke-dasharray="5 5"/>`
+    : `<path d="M60 74v32" stroke="${c}" stroke-width="5"/><ellipse cx="60" cy="110" rx="12" ry="4" fill="${c}" opacity=".55"/>`;
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${stem}${head}</svg>`;
+}

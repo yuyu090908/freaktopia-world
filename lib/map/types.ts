@@ -1,6 +1,7 @@
 import type { EventLevel, Genre } from "@/lib/types";
 import type { GrowthConfig, GrowthInputs } from "./growth";
 import type { LandmarkType, MapStatus } from "./landmarks";
+import type { EventCategory, ExternalStatus, SourceType, VerificationStatus } from "@/lib/discovery/types";
 
 export type LocationPrecision = "exact" | "city";
 export type RankBadge = "champion" | "runner_up" | "featured";
@@ -69,10 +70,35 @@ export interface MapEventDto {
   isDemo: boolean;
   /** Who runs the event. `handle` links to their party world; sample events have fictional organizers without one. */
   organizer?: { name: string; handle: string | null; demo: boolean };
-  /** "sample" = fictional demo listing; "community" = a party an organizer published (lib/party). */
-  source?: "sample" | "community";
+  /**
+   * "sample" = fictional demo listing; "community" = a party an organizer published (lib/party);
+   * "external" = an event from a connected, approved outside source (lib/discovery). External events link out only.
+   */
+  source?: "sample" | "community" | "external";
+  /** Provenance of an external event (shown in the panel: source, last verified, approximate location). */
+  external?: ExternalInfo;
   /** Where "view event" goes when it is not /events/[id] (community parties open in their organizer's world). */
   href?: string;
+}
+
+export interface ExternalInfo {
+  sourceType: SourceType;
+  sourceName: string;
+  sourceEventId: string;
+  sourceUrl: string | null;
+  officialUrl: string | null;
+  ticketUrl: string | null;
+  category: EventCategory;
+  verificationStatus: VerificationStatus;
+  externalStatus: ExternalStatus;
+  lastVerifiedAt: string;
+  lastSyncedAt: string;
+  venueTimezone: string | null;
+  timeTbd: boolean;
+  imageUrl: string | null;
+  /** The source's own genre words (the map's genre list is FREAKTOPIA's). */
+  genres: string[];
+  priceRange: { min: number; max: number; currency: string } | null;
 }
 
 export interface WorldMapResponse {

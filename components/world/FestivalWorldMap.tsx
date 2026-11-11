@@ -14,7 +14,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 
 import maplibregl, { type LngLatBoundsLike, type StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { LEVEL_COLORS } from "@/lib/map/growth";
-import { LANDMARK_LABEL, STATUS_META, landmarkSvg, orbSvg } from "@/lib/map/landmarks";
+import { EXTERNAL_MARKER_LABEL, LANDMARK_LABEL, STATUS_META, externalMarkerKind, externalMarkerSvg, landmarkSvg, orbSvg } from "@/lib/map/landmarks";
 import { ariaFor, type WorldEvent } from "@/lib/map/view";
 import { OCEAN, REGION_COLOR, mix, type RegionKey } from "@/lib/map/regions";
 import { buildCities, cityScale, citySvg, type PartyCity } from "@/lib/map/cities";
@@ -260,7 +260,17 @@ interface MarkerText {
   live: string;
 }
 
+/** External events: a shaped pin with the source name, no level, ranking or status of FREAKTOPIA's own. */
+function externalHtml(e: WorldEvent, tier: Tier, selected: boolean) {
+  const x = e.external!;
+  const art = externalMarkerSvg(externalMarkerKind(x.category), e.location.precision === "city");
+  const name = tier === "near" || selected ? `<span class="wm-name">${esc(e.name)}</span>` : "";
+  const chip = tier !== "far" || selected ? `<span class="wm-chip" style="--c:#66DFFF"><b aria-hidden="true">↗</b>${esc(x.sourceName)}</span>` : "";
+  return `<span class="wm-art">${art}</span>${chip}${name}`;
+}
+
 function eventHtml(e: WorldEvent, tier: Tier, selected: boolean, animate: boolean, L: MarkerText) {
+  if (e.external) return externalHtml(e, tier, selected);
   const s = STATUS_META[e.status];
   const pct = e.goalUsd ? e.growth.fundingUsd / e.goalUsd : 0;
   // Single festivals are always drawn as landmarks; only groups collapse into orbs.
@@ -427,7 +437,7 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
           el.className = `wm-mk wm-${tier}${selected ? " wm-sel" : ""} wm-st-${g.lead.status}${g.lead.live ? " wm-live" : ""}`;
           el.setAttribute("aria-label", aria(g.lead));
           el.setAttribute("aria-pressed", String(selected));
-          el.title = `${g.lead.name} · ${tx(LANDMARK_LABEL[g.lead.landmark.type])}`;
+          el.title = `${g.lead.name} · ${g.lead.external ? `${tx(EXTERNAL_MARKER_LABEL[externalMarkerKind(g.lead.external.category)])} · ${g.lead.external.sourceName}` : tx(LANDMARK_LABEL[g.lead.landmark.type])}`;
           el.innerHTML = eventHtml(g.lead, tier, selected, anim, markerText.current) + (here && mine ? `<span class="wm-me" data-testid="map-my-alien" title="${mine.label}">${mine.svg}</span>` : "");
           if (here && mine) el.setAttribute("aria-label", `${aria(g.lead)}. ${mine.label}`);
         } else {
@@ -439,7 +449,7 @@ const FestivalWorldMap = forwardRef<FestivalWorldMapHandle, Props>(function Fest
           el.setAttribute("aria-label", `${g.members.length} festivals near ${cities.slice(0, 3).join(", ")}${live ? " (one is demo live)" : ""}. Zoom in`);
           el.title = g.members.map((m) => m.name).join(" · ");
           const lead = g.lead;
-          el.innerHTML = `<span class="wm-art">${tier === "far" ? orbSvg(lead.level, lead.status, LEVEL_COLORS[lead.level]) : landmarkSvg({ type: lead.landmark.type, level: lead.level, status: lead.status, palette: lead.palette, daoTier: 0, animate: false })}</span><span class="wm-count">+${g.members.length - 1}</span>${dao ? `<span class="fk-dao wm-dao" aria-hidden="true">DAO</span>` : ""}${live ? `<span class="wm-chip" style="--c:#FF625C"><b aria-hidden="true">●</b>DEMO LIVE</span>` : ""}`;
+          el.innerHTML = `<span class="wm-art">${lead.external && tier !== "far" ? externalMarkerSvg(externalMarkerKind(lead.external.category), lead.location.precision === "city") : tier === "far" ? orbSvg(lead.level, lead.status, LEVEL_COLORS[lead.level]) : landmarkSvg({ type: lead.landmark.type, level: lead.level, status: lead.status, palette: lead.palette, daoTier: 0, animate: false })}</span><span class="wm-count">+${g.members.length - 1}</span>${dao ? `<span class="fk-dao wm-dao" aria-hidden="true">DAO</span>` : ""}${live ? `<span class="wm-chip" style="--c:#FF625C"><b aria-hidden="true">●</b>DEMO LIVE</span>` : ""}`;
         }
       }
       rec.m.setLngLat([g.lead.location.lng, g.lead.location.lat]);

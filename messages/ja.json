@@ -556,7 +556,9 @@
       "buyTicket": "チケットを買う",
       "viewDao": "DAOを見る",
       "applyDj": "DJとして応募",
-      "viewEvent": "イベントを見る"
+      "viewEvent": "イベントを見る",
+      "officialEvent": "公式ページを見る",
+      "getTickets": "チケットを入手"
     },
     "count": "{count}件のイベント",
     "legendNote": "レベルはマップ上のゲームレベルで、会場の収容人数ではありません。TOP 1〜3 = 累計人気。紫のDAOタグはコミュニティDAOの印です。",
@@ -565,7 +567,10 @@
       "any": "すべての日程",
       "30d": "30日以内",
       "90d": "3か月以内",
-      "2027": "2027年"
+      "2027": "2027年",
+      "today": "今日",
+      "weekend": "今週末",
+      "7d": "7日以内"
     },
     "kinds": {
       "event": "フェス",
@@ -698,7 +703,45 @@
         "london": "クラブ、倉庫、海賊ラジオのルーツ。"
       }
     },
-    "communityNote": "オーガナイザーがFREAKTOPIAで公開したパーティーです。出演者・チケット・詳細はオーガナイザーのワールド内のページにあります。"
+    "communityNote": "オーガナイザーがFREAKTOPIAで公開したパーティーです。出演者・チケット・詳細はオーガナイザーのワールド内のページにあります。",
+    "externalAria": "{name}、{city}・{kind}（出典：{source}）",
+    "openInEvents": "EVENTS で同じ条件を見る",
+    "legendExternalNote": "形のピンは外部データソース（Ticketmaster など）のイベントです。点線の軸は位置が市の中心のみであることを示します。",
+    "external": {
+      "opensNewTab": "新しいタブで開きます",
+      "notFreaktopia": "このイベントは FREAKTOPIA の主催ではありません。チケットは主催者またはチケット販売元のサイトで販売されています。",
+      "source": "出典",
+      "sourceType": {
+        "external": "外部データソース",
+        "partner": "パートナー",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "確認状況",
+      "verified": {
+        "source_verified": "データソースの公式データより",
+        "partner_verified": "パートナー確認済み",
+        "unverified": "未確認"
+      },
+      "lastVerified": "最終確認",
+      "staleNote": "{time} 時点の情報です。最新情報は公式ページで確認してください。",
+      "statusLabel": "状態",
+      "status": {
+        "scheduled": "予定どおり",
+        "rescheduled": "日程変更",
+        "postponed": "延期",
+        "cancelled": "中止",
+        "unknown": "データソースに記載なし"
+      },
+      "venue": "会場",
+      "venueUnknown": "会場未発表",
+      "approxLocation": "市の中心に表示しています。データソースに会場の正確な位置がありません。",
+      "lineup": "出演",
+      "lineupEmpty": "データソースに出演者の情報がありません",
+      "price": "価格",
+      "priceFromSource": "{min}〜{max} {currency}（データソースの情報）",
+      "timeTbd": "時間未定",
+      "localTime": "現地時間"
+    }
   },
   "ranking": {
     "title": "ワールドランキング",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "屋外エリア",
     "green_room": "グリーンルーム",
     "step_free_access": "段差のないアクセス",
-    "coat_check": "クローク"
+    "coat_check": "クローク",
+    "major_festival": "大型フェス",
+    "dj_show": "DJ公演",
+    "club_event": "クラブイベント",
+    "music_event": "音楽イベント"
   },
   "ops": {
     "manageKicker": "イベント運営",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "チケットの販売は終了しました。イベントページで出演者や記録を見られます。",
     "notOnSaleYet": "チケットはまだ販売していません",
     "notOnSaleYetBody": "イベントの開催が決定するとチケットの販売が始まります。それまではイベントページから支援できます。",
-    "backToEvent": "イベントに戻る"
+    "backToEvent": "イベントに戻る",
+    "breakdownExternal": "・外部 {count}",
+    "kind": "イベントの種類",
+    "kindHint": "いずれかに一致。フェス・DJ公演・クラブの種類はデータソース自身の情報だけで判定します。",
+    "kinds": {
+      "festival": "大型フェス",
+      "djs": "DJ公演",
+      "club": "クラブイベント",
+      "freaktopia": "FREAKTOPIA のみ"
+    },
+    "openOnMap": "同じ条件を地図で見る"
+  },
+  "discovery": {
+    "title": "世界のイベント",
+    "sub": "承認済みの外部データソースの情報です。チケットは FREAKTOPIA では販売しません。",
+    "asOf": "{time} 時点",
+    "notConnected": "外部のイベントデータソースはまだ接続されていないため、FREAKTOPIA 自身のイベントだけを表示しています。サンプルデータで埋めることはしていません。",
+    "loadError": "世界のイベントを読み込めませんでした。下の FREAKTOPIA のイベントには影響ありません。",
+    "artistsTitle": "アーティスト",
+    "artistSub": "{source}・今後 {count} 件・{cities}",
+    "artistActive": "{name}（{source}）のイベント",
+    "artistClear": "アーティストを解除",
+    "noMatches": "この条件に合う世界のイベントはありません。",
+    "from": "出典：{source}",
+    "status": {
+      "postponed": "延期",
+      "rescheduled": "日程変更"
+    },
+    "timeTbd": "時間未定",
+    "localTime": "現地時間",
+    "approx": "市の中心・おおよその位置",
+    "verified": "最終確認 {time}",
+    "official": "公式ページ",
+    "tickets": "チケット",
+    "newTab": "新しいタブで開きます",
+    "onMap": "地図で見る"
+  },
+  "discoveryAdmin": {
+    "title": "イベントデータソース",
+    "sub": "各外部データソースの接続状態、更新間隔、データ品質。管理者専用です。",
+    "forbidden": "管理者専用",
+    "forbiddenBody": "このページは運営者として登録され、メール確認済みのアカウント専用です。",
+    "err": "完了できませんでした（{code}）",
+    "syncFailed": "同期に失敗しました：{error}",
+    "skipped": {
+      "not_configured": "同期していません：API キーが未設定です。",
+      "unapproved": "同期していません：規約確認または承認が済んでいません。",
+      "paused": "同期していません：データソースは一時停止中です。"
+    },
+    "sources": "データソース",
+    "state": {
+      "connected": "接続済み",
+      "not_configured": "未設定",
+      "unapproved": "未承認",
+      "paused": "一時停止中",
+      "error": "エラー"
+    },
+    "stateHelp": {
+      "connected": "キー設定と規約確認が済んでいます。このデータソースのイベントは WORLD と EVENTS に表示されます。",
+      "not_configured": "API キーが未設定のため、取得も表示もしていません。",
+      "unapproved": "キーがあっても、規約確認または提供元の承認が済んでいません。確認できるまで無効のままです。",
+      "paused": "管理者が一時停止中：更新も表示もしません。",
+      "error": "前回の同期に失敗しました。同期に成功するまで、キャッシュ済みのイベントを最終確認日時つきで表示します。"
+    },
+    "terms": "利用規約",
+    "needs": "有効にするには次を設定：",
+    "lastSync": "最終同期",
+    "lastSuccess": "最終成功",
+    "events": "イベント数",
+    "regions": "対象地域",
+    "lastError": "エラー ×{count}",
+    "saved": "保存しました",
+    "synced": "同期しました",
+    "syncing": "同期中…",
+    "syncNow": "今すぐ同期",
+    "resume": "再開",
+    "pause": "一時停止",
+    "resumed": "再開しました",
+    "pausedOk": "一時停止しました",
+    "purge": "キャッシュを削除",
+    "purgeConfirm": "{name} のキャッシュ済みイベントをすべて削除し、一時停止しますか？確認のため DELETE と入力してください。",
+    "purged": "キャッシュを削除しました",
+    "quality": "イベント品質",
+    "q": {
+      "none": "なし",
+      "duplicates": "重複の可能性（統合していません）",
+      "cancelled": "中止・延期",
+      "timeTbd": "時間未発表",
+      "noVenue": "会場なし",
+      "noLocation": "位置なし（一覧のみ・地図には表示しない）",
+      "approximateLocation": "おおよその位置（市の中心）",
+      "hidden": "管理者が非表示にしたもの",
+      "changes": "最近の変更（日時・会場・出演・状態・チケット）"
+    },
+    "field": {
+      "date": "日時",
+      "venue": "会場",
+      "lineup": "出演",
+      "status": "状態",
+      "tickets": "チケット"
+    },
+    "intervals": "更新間隔",
+    "interval": {
+      "within48h": "48時間以内",
+      "within30d": "30日以内",
+      "later": "それ以降"
+    },
+    "hours": "時間",
+    "save": "保存",
+    "hide": "非表示",
+    "unhide": "再表示",
+    "hiddenOk": "WORLD と EVENTS から非表示にしました",
+    "shownOk": "再表示しました"
   }
 }

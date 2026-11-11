@@ -8,10 +8,10 @@ import { Tx } from "@/components/i18n/Tx";
  */
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, CalendarDays, ChevronDown, ChevronUp, Crown, Disc3, HandHeart, Landmark, MapPin, Mic2, PartyPopper, Radio, Ticket, TrendingUp, UserRound, Users, Vote, X } from "lucide-react";
+import { ArrowRight, CalendarDays, ExternalLink, ShieldCheck, Clock, ChevronDown, ChevronUp, Crown, Disc3, HandHeart, Landmark, MapPin, Mic2, PartyPopper, Radio, Ticket, TrendingUp, UserRound, Users, Vote, X } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
 import { LEVEL_COLORS } from "@/lib/map/growth";
-import { LANDMARK_LABEL, STATUS_META, landmarkSvg } from "@/lib/map/landmarks";
+import { EXTERNAL_MARKER_LABEL, LANDMARK_LABEL, STATUS_META, externalMarkerKind, externalMarkerSvg, landmarkSvg } from "@/lib/map/landmarks";
 import type { WorldEvent } from "@/lib/map/view";
 import { cn } from "@/lib/utils";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,6 +21,7 @@ import { Alien } from "@/components/art/Alien";
 import { useAuth } from "@/lib/auth/client";
 import { useDemo } from "@/lib/store";
 import { useLocalHref } from "@/components/i18n/LocaleContext";
+import { labelKey } from "@/lib/i18n/labels";
 
 /** Numbers and money in the visitor's locale (USD stays USD: it is the event's currency). */
 function useFmt() {
@@ -49,13 +50,21 @@ export function LevelPill({ e }: { e: WorldEvent }) {
   );
 }
 
-type Action = { key: string; label: string; href: string; icon: React.ReactNode; tone: "primary" | "live" | "ghost"; testId?: string };
+type Action = { key: string; label: string; href: string; icon: React.ReactNode; tone: "primary" | "live" | "ghost"; testId?: string; external?: boolean };
 
-const ACTION_EN: Record<string, string> = { enterDemoLive: "Enter festival (demo live)", watchLive: "Watch live", support: "Support event", buyTicket: "Buy ticket", viewDao: "View DAO", applyDj: "Apply as DJ", viewEvent: "View event" };
+const ACTION_EN: Record<string, string> = { officialEvent: "View official event", getTickets: "Get tickets", enterDemoLive: "Enter festival (demo live)", watchLive: "Watch live", support: "Support event", buyTicket: "Buy ticket", viewDao: "View DAO", applyDj: "Apply as DJ", viewEvent: "View event" };
 
 /** Actions by status. `label` translates a key under world.actions (English by default). */
 export function actionsFor(e: WorldEvent, label: (k: string) => string = (k) => ACTION_EN[k]): Action[] {
   const a: Action[] = [];
+  // External events only link out: the official page and the seller's ticket page. Never a FREAKTOPIA ticket, support or DJ button.
+  if (e.external) {
+    const x = e.external;
+    const official = x.officialUrl ?? x.sourceUrl;
+    if (official) a.push({ key: "official", label: label("officialEvent"), href: official, icon: <ExternalLink className="size-4" aria-hidden />, tone: "primary", external: true, testId: "map-official" });
+    if (x.ticketUrl && x.externalStatus !== "postponed") a.push({ key: "tickets", label: label("getTickets"), href: x.ticketUrl, icon: <Ticket className="size-4" aria-hidden />, tone: a.length ? "ghost" : "primary", external: true, testId: "map-external-tickets" });
+    return a;
+  }
   // A community party has no sample funding, tickets, DAO or DJ calls: only its page in the organizer's world.
   if (e.source === "community" && e.href) return [{ key: "view", label: label("viewEvent"), href: e.href, icon: <ArrowRight className="size-4" aria-hidden />, tone: "primary" }];
   const ev = `/events/${e.id}`;
@@ -70,6 +79,21 @@ export function actionsFor(e: WorldEvent, label: (k: string) => string = (k) => 
 
 function ActionButton({ a, compact }: { a: Action; compact?: boolean }) {
   const href = useLocalHref();
+  const tw = useTranslations("world.external");
+  const cls = cn(
+    "flex min-h-12 items-center justify-center gap-2 rounded-full px-4 text-[13px] font-extrabold uppercase",
+    a.tone === "primary" && "bg-acid text-ink shadow-[0_4px_0_0_#5f8a22]",
+    a.tone === "ghost" && "border-2 border-line bg-surface-2 text-cream",
+    compact && "min-h-11",
+  );
+  if (a.external)
+    return (
+      <a href={a.href} target="_blank" rel="noopener noreferrer" data-testid={a.testId} className={cls}>
+        {a.icon}
+        <span>{a.label}</span>
+        <span className="sr-only"> ({tw("opensNewTab")})</span>
+      </a>
+    );
   return (
     <Link
       href={href(a.href)}
@@ -120,7 +144,56 @@ function MyAlienHere({ e }: { e: WorldEvent }) {
   );
 }
 
+/** An external event: provenance first (source, verification, last verified), then only what the source said. */
+function ExternalDetails({ e }: { e: WorldEvent }) {
+  const t = useTranslations("world.external");
+  const { locale } = useFmt();
+  const x = e.external!;
+  const when = (iso: string) => formatEventDate(locale, iso, "UTC", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit", timeZoneName: "short" });
+  const stale = Date.now() - Date.parse(x.lastSyncedAt) > 24 * 36e5;
+  return (
+    <div className="space-y-4" data-testid="map-external">
+      <p className="rounded-2xl border border-line bg-surface p-3 text-[13px] text-mute">{t("notFreaktopia")}</p>
+      <section aria-label={t("source")}>
+        <Row icon={<ExternalLink className="size-4" />} label={t("source")}>
+          <span data-testid="map-source">{x.sourceName}</span>
+          <span className="block text-[11px] text-mute">{t(`sourceType.${x.sourceType}`)} · ID {x.sourceEventId}</span>
+        </Row>
+        <Row icon={<ShieldCheck className="size-4" />} label={t("verification")}>
+          {t(`verified.${x.verificationStatus}`)}
+        </Row>
+        <Row icon={<Clock className="size-4" />} label={t("lastVerified")}>
+          <span data-testid="map-last-verified">{when(x.lastVerifiedAt)}</span>
+          {stale && <span className="block text-[11px] text-mute">{t("staleNote", { time: when(x.lastSyncedAt) })}</span>}
+        </Row>
+        {x.externalStatus !== "scheduled" && (
+          <Row icon={<CalendarDays className="size-4" />} label={t("statusLabel")}>
+            {t(`status.${x.externalStatus}`)}
+          </Row>
+        )}
+        <Row icon={<MapPin className="size-4" />} label={t("venue")}>
+          {e.venue ?? t("venueUnknown")}
+          {e.location.precision === "city" && <span className="block text-[11px] text-mute" data-testid="map-approx">{t("approxLocation")}</span>}
+        </Row>
+        <Row icon={<Mic2 className="size-4" />} label={t("lineup")}>
+          {e.lineup.length ? e.lineup.map((d) => d.name).join(", ") : t("lineupEmpty")}
+        </Row>
+        {x.priceRange && (
+          <Row icon={<Ticket className="size-4" />} label={t("price")}>
+            {t("priceFromSource", { min: x.priceRange.min, max: x.priceRange.max, currency: x.priceRange.currency })}
+          </Row>
+        )}
+      </section>
+    </div>
+  );
+}
+
 function Details({ e }: { e: WorldEvent }) {
+  if (e.external) return <ExternalDetails e={e} />;
+  return <FreakDetails e={e} />;
+}
+
+function FreakDetails({ e }: { e: WorldEvent }) {
   const tu = useTranslations("world");
   const g = e.growthResult;
   const t = useTranslations("world");
@@ -281,17 +354,37 @@ function Details({ e }: { e: WorldEvent }) {
 function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?: boolean }) {
   const t = useTranslations("world");
   const ts = useTranslations("status");
+  const tx = useTranslations("world.external");
+  const tl = useTranslations("labels");
   const { locale } = useFmt();
+  const x = e.external;
   return (
     <div className="flex gap-3">
-      <div className={cn("relative shrink-0 overflow-hidden rounded-2xl border-2 border-line", big ? "size-24" : "size-[72px]")}>
-        <EventCover id={e.id} sizes="96px" />
-        <span className="absolute -bottom-1 -right-1 size-11 drop-shadow" aria-hidden dangerouslySetInnerHTML={{ __html: landmarkSvg({ type: e.landmark.type, level: e.level, status: e.status, palette: e.palette, animate: false }) }} />
+      <div className={cn("relative shrink-0 overflow-hidden rounded-2xl border-2 border-line", big ? "size-24" : "size-[72px]", x && "bg-surface-2 p-2")}>
+        {x ? (
+          <span className="block size-full" aria-hidden dangerouslySetInnerHTML={{ __html: externalMarkerSvg(externalMarkerKind(x.category), e.location.precision === "city") }} />
+        ) : (
+          <>
+            <EventCover id={e.id} sizes="96px" />
+            <span className="absolute -bottom-1 -right-1 size-11 drop-shadow" aria-hidden dangerouslySetInnerHTML={{ __html: landmarkSvg({ type: e.landmark.type, level: e.level, status: e.status, palette: e.palette, animate: false }) }} />
+          </>
+        )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
-          <StatusPill status={e.status} />
-          <LevelPill e={e} />
+          {x ? (
+            <>
+              <span className="inline-flex items-center gap-1 rounded-full border-2 border-[#66DFFF] px-2 py-0.5 text-[11px] font-extrabold uppercase text-[#66DFFF]" data-testid="map-source-badge">
+                <ExternalLink className="size-3" aria-hidden /> {x.sourceName}
+              </span>
+              <span className="inline-flex rounded-full bg-surface-2 px-2 py-0.5 text-[11px] font-extrabold uppercase">{tl(labelKey(EXTERNAL_MARKER_LABEL[externalMarkerKind(x.category)]))}</span>
+            </>
+          ) : (
+            <>
+              <StatusPill status={e.status} />
+              <LevelPill e={e} />
+            </>
+          )}
         </div>
         <h2 className="mt-1.5 text-[22px] uppercase leading-none">{e.name}</h2>
         <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[12px] text-mute">
@@ -302,10 +395,12 @@ function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?:
           </span>
           <span className="inline-flex items-center gap-1">
             <CalendarDays className="size-3.5" aria-hidden />
-            {formatEventDate(locale, e.startsAt, "UTC", { month: "short", day: "numeric", year: "numeric" })}
+            {x
+              ? `${formatEventDate(locale, e.startsAt, x.venueTimezone ?? "UTC", x.timeTbd ? { month: "short", day: "numeric", year: "numeric" } : { month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit" })}${x.timeTbd ? ` · ${tx("timeTbd")}` : ` (${tx("localTime")})`}`
+              : formatEventDate(locale, e.startsAt, "UTC", { month: "short", day: "numeric", year: "numeric" })}
           </span>
         </div>
-        <div className="mt-1 truncate text-[12px] text-mute">{e.genres.join(" / ")}</div>
+        <div className="mt-1 truncate text-[12px] text-mute">{(x ? x.genres : e.genres).join(" / ")}</div>
       </div>
       <button type="button" onClick={onClose} aria-label={t("closeDetails")} className="-mr-1 -mt-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-surface-2">
         <X className="size-5" />
@@ -315,6 +410,11 @@ function Header({ e, onClose, big }: { e: WorldEvent; onClose: () => void; big?:
 }
 
 function KeyNumbers({ e }: { e: WorldEvent }) {
+  if (e.external) return null; // no FREAKTOPIA numbers exist for an outside event
+  return <FreakNumbers e={e} />;
+}
+
+function FreakNumbers({ e }: { e: WorldEvent }) {
   const t = useTranslations("world.facts");
   const tk = useTranslations("world.keys");
   const { num } = useFmt();
@@ -355,13 +455,13 @@ export function EventSidePanel({ e, onClose }: { e: WorldEvent; onClose: () => v
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
         <Details e={e} />
       </div>
-      <div className="grid grid-cols-2 gap-2 border-t border-line p-3">
+      {actions.length > 0 && <div className="grid grid-cols-2 gap-2 border-t border-line p-3">
         {actions.map((a, i) => (
           <div key={a.key} className={cn(i === 0 && "col-span-2")}>
             <ActionButton a={a} compact={i > 0} />
           </div>
         ))}
-      </div>
+      </div>}
     </section>
   );
 }
@@ -424,12 +524,14 @@ export function EventBottomSheet({ e, onClose, expanded, setExpanded, onHeight }
       </div>
       <div className={cn("min-h-0 flex-1 px-4", expanded ? "overflow-y-auto overscroll-contain" : "overflow-hidden")}>
         <KeyNumbers e={e} />
-        <div className="mt-3">
-          <ActionButton a={primary} />
-        </div>
+        {primary && (
+          <div className="mt-3">
+            <ActionButton a={primary} />
+          </div>
+        )}
         {!expanded && (
           <button type="button" onClick={() => setExpanded(true)} className="mx-auto my-1 flex min-h-11 items-center gap-1 text-[13px] font-bold text-mute">
-            <ChevronUp className="size-4" aria-hidden /> {tw("moreDetails")}
+            <ChevronUp className="size-4" aria-hidden /> {e.external ? tw("showAll") : tw("moreDetails")}
           </button>
         )}
         {expanded && (

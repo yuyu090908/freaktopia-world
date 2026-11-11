@@ -556,7 +556,9 @@
       "buyTicket": "Buy ticket",
       "viewDao": "View DAO",
       "applyDj": "Apply as DJ",
-      "viewEvent": "View event"
+      "viewEvent": "View event",
+      "officialEvent": "View official event",
+      "getTickets": "Get tickets"
     },
     "count": "{count, plural, one {# event} other {# events}}",
     "legendNote": "Levels are a map game level, not venue capacity. TOP 1–3 = most popular (all time). Purple DAO tags mark community DAOs.",
@@ -565,7 +567,10 @@
       "2027": "2027",
       "any": "Any date",
       "30d": "Next 30 days",
-      "90d": "Next 3 months"
+      "90d": "Next 3 months",
+      "today": "Today",
+      "weekend": "This weekend",
+      "7d": "Next 7 days"
     },
     "kinds": {
       "event": "Festival",
@@ -698,7 +703,45 @@
         "london": "Clubs, warehouses and pirate-radio roots."
       }
     },
-    "communityNote": "A party an organizer published on FREAKTOPIA. Lineup, tickets and details are on its page in the organizer's world."
+    "communityNote": "A party an organizer published on FREAKTOPIA. Lineup, tickets and details are on its page in the organizer's world.",
+    "externalAria": "{name}, {city} · {kind}, from {source}",
+    "openInEvents": "Same search in EVENTS",
+    "legendExternalNote": "Shaped pins are events from outside sources (Ticketmaster etc.). A dashed stem means the location is only the city centre.",
+    "external": {
+      "opensNewTab": "opens in a new tab",
+      "notFreaktopia": "This event is not run by FREAKTOPIA. Tickets are sold by the organizer or ticket seller on their own site.",
+      "source": "Source",
+      "sourceType": {
+        "external": "External source",
+        "partner": "Partner",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "Verification",
+      "verified": {
+        "source_verified": "From the source's official data",
+        "partner_verified": "Verified by a partner",
+        "unverified": "Unverified"
+      },
+      "lastVerified": "Last verified",
+      "staleNote": "Information as of {time}. Check the official page for the latest.",
+      "statusLabel": "Status",
+      "status": {
+        "scheduled": "Scheduled",
+        "rescheduled": "Rescheduled",
+        "postponed": "Postponed",
+        "cancelled": "Cancelled",
+        "unknown": "Not stated by the source"
+      },
+      "venue": "Venue",
+      "venueUnknown": "Venue not announced",
+      "approxLocation": "Shown at the city centre: the source gave no exact venue position.",
+      "lineup": "Lineup",
+      "lineupEmpty": "Lineup not provided by the source",
+      "price": "Price",
+      "priceFromSource": "{min}–{max} {currency} (according to the source)",
+      "timeTbd": "Time to be announced",
+      "localTime": "local time"
+    }
   },
   "ranking": {
     "title": "World Ranking",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "Outdoor Area",
     "green_room": "Green Room",
     "step_free_access": "Step-free Access",
-    "coat_check": "Coat Check"
+    "coat_check": "Coat Check",
+    "major_festival": "Major festival",
+    "dj_show": "DJ show",
+    "club_event": "Club event",
+    "music_event": "Music event"
   },
   "ops": {
     "manageKicker": "Event operations",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "Tickets are no longer sold. The event page keeps its lineup and memories.",
     "notOnSaleYet": "Tickets are not on sale yet",
     "notOnSaleYetBody": "Tickets go on sale once the event is confirmed. Until then you can support it on the event page.",
-    "backToEvent": "Back to the event"
+    "backToEvent": "Back to the event",
+    "breakdownExternal": "· World {count}",
+    "kind": "Event type",
+    "kindHint": "Any of them. Festival, DJ show and club types come only from the source's own data.",
+    "kinds": {
+      "festival": "Major festivals",
+      "djs": "DJ shows",
+      "club": "Club events",
+      "freaktopia": "FREAKTOPIA only"
+    },
+    "openOnMap": "Same search on the map"
+  },
+  "discovery": {
+    "title": "World events",
+    "sub": "From approved outside sources. FREAKTOPIA does not sell these tickets.",
+    "asOf": "as of {time}",
+    "notConnected": "No outside event source is connected yet, so only FREAKTOPIA's own events are listed. Nothing here is filled with sample data.",
+    "loadError": "World events could not be loaded. FREAKTOPIA events below are unaffected.",
+    "artistsTitle": "Artists",
+    "artistSub": "{source} · {count} upcoming · {cities}",
+    "artistActive": "Events with {name} ({source})",
+    "artistClear": "Clear artist",
+    "noMatches": "No world events match these filters.",
+    "from": "From {source}",
+    "status": {
+      "postponed": "Postponed",
+      "rescheduled": "Rescheduled"
+    },
+    "timeTbd": "time TBA",
+    "localTime": "local time",
+    "approx": "city centre, approximate",
+    "verified": "Last verified {time}",
+    "official": "Official page",
+    "tickets": "Tickets",
+    "newTab": "opens in a new tab",
+    "onMap": "View on map"
+  },
+  "discoveryAdmin": {
+    "title": "Event sources",
+    "sub": "Connection state of each outside source, refresh intervals and data quality. Admins only.",
+    "forbidden": "Admins only",
+    "forbiddenBody": "This page is for accounts listed as operators, with a verified email.",
+    "err": "Could not complete ({code})",
+    "syncFailed": "Sync failed: {error}",
+    "skipped": {
+      "not_configured": "Not synced: the API key is not set.",
+      "unapproved": "Not synced: terms or approval are not confirmed.",
+      "paused": "Not synced: the source is paused."
+    },
+    "sources": "Sources",
+    "state": {
+      "connected": "Connected",
+      "not_configured": "Not configured",
+      "unapproved": "Not approved",
+      "paused": "Paused",
+      "error": "Error"
+    },
+    "stateHelp": {
+      "connected": "Key set and terms confirmed. Events from this source are shown on WORLD and EVENTS.",
+      "not_configured": "No API key is set, so nothing is fetched or shown.",
+      "unapproved": "A key may be set, but the terms or the provider's approval are not confirmed. It stays off until they are.",
+      "paused": "Paused by an admin: not refreshed and not shown.",
+      "error": "The last sync failed. Cached events stay with their last-verified time until a sync succeeds."
+    },
+    "terms": "Terms",
+    "needs": "To turn on, set:",
+    "lastSync": "Last sync",
+    "lastSuccess": "Last success",
+    "events": "Events",
+    "regions": "Regions",
+    "lastError": "Error ×{count}",
+    "saved": "Saved",
+    "synced": "Synced",
+    "syncing": "Syncing…",
+    "syncNow": "Sync now",
+    "resume": "Resume",
+    "pause": "Pause",
+    "resumed": "Resumed",
+    "pausedOk": "Paused",
+    "purge": "Delete cached data",
+    "purgeConfirm": "Delete every cached event from {name} and pause it? Type DELETE to confirm.",
+    "purged": "Cached data deleted",
+    "quality": "Event quality",
+    "q": {
+      "none": "None",
+      "duplicates": "Possible duplicates (not merged)",
+      "cancelled": "Cancelled or postponed",
+      "timeTbd": "Time not announced",
+      "noVenue": "No venue",
+      "noLocation": "No location (list only, not on the map)",
+      "approximateLocation": "Approximate location (city centre)",
+      "hidden": "Hidden by an admin",
+      "changes": "Recent changes (date, venue, lineup, status, tickets)"
+    },
+    "field": {
+      "date": "date",
+      "venue": "venue",
+      "lineup": "lineup",
+      "status": "status",
+      "tickets": "tickets"
+    },
+    "intervals": "Refresh intervals",
+    "interval": {
+      "within48h": "Within 48h",
+      "within30d": "Within 30 days",
+      "later": "Later"
+    },
+    "hours": "h",
+    "save": "Save",
+    "hide": "Hide",
+    "unhide": "Show again",
+    "hiddenOk": "Hidden from WORLD and EVENTS",
+    "shownOk": "Shown again"
   }
 }

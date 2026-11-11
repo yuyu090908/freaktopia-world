@@ -132,11 +132,11 @@ describe("world search, filters and URL", () => {
   });
 
   it("round-trips filters through the URL and drops junk", () => {
-    const st = { filters: { q: "tokyo", flags: ["live", "dao"] as const, levels: [3, 5], genres: ["Techno"], date: "30d", region: "as" }, view: "list", event: "bassmutant-tokyo", city: null } as never;
+    const st = { filters: { q: "tokyo", flags: ["live", "dao"] as const, levels: [3, 5], genres: ["Techno"], date: "30d", region: "as", kinds: ["club"] }, view: "list", event: "bassmutant-tokyo", city: null } as never;
     const qs = writeWorldUrl(st);
     expect(readWorldUrl(new URLSearchParams(qs))).toEqual(st);
-    const bad = readWorldUrl(new URLSearchParams("f=live,hack&lv=9,2&g=Polka&date=x&view=grid"));
-    expect(bad.filters).toMatchObject({ flags: ["live"], levels: [2], genres: [], date: "any" });
+    const bad = readWorldUrl(new URLSearchParams("f=live,hack&lv=9,2&g=Polka&date=x&view=grid&kind=club,bogus"));
+    expect(bad.filters).toMatchObject({ flags: ["live"], levels: [2], genres: [], date: "any", kinds: ["club"] });
     expect(bad.view).toBe("map");
     expect(readWorldUrl(new URLSearchParams("rg=mars")).filters.region).toBeNull();
     // A city preview is kept in the URL only while no festival is open.

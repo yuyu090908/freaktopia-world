@@ -10,11 +10,11 @@ import { FilterGroup, FilterSheet } from "@/components/ui/FilterSheet";
 import { FilterChips, type ActiveFilter } from "@/components/ui/FilterChips";
 import { GENRES } from "@/lib/data";
 import { LEVELS } from "@/lib/levels";
-import { EMPTY_FILTERS, activeFilterCount, type DateRange, type EventFilters, type PriceFilter, type StatusFilter } from "@/lib/filters";
+import { DATE_RANGES, EMPTY_FILTERS, KIND_VALUES, activeFilterCount, type DateRange, type EventFilters, type PriceFilter, type StatusFilter } from "@/lib/filters";
 import type { EventLevel } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-const DATES: DateRange[] = ["any", "30d", "90d", "2027"];
+const DATES: DateRange[] = DATE_RANGES;
 const STATUSES: StatusFilter[] = ["live", "confirmed", "funding"];
 const PRICES: PriceFilter[] = ["any", "free", "u30", "u60"];
 
@@ -36,6 +36,7 @@ export function FilterBar({ filters, setFilters, cities, countFor }: { filters: 
   const active: ActiveFilter[] = [
     ...(filters.place ? [{ key: "place", label: filters.place, onRemove: () => setFilters({ ...filters, place: "" }) }] : []),
     ...(filters.date !== "any" ? [{ key: "date", label: tw(`dates.${filters.date}`), onRemove: () => setFilters({ ...filters, date: "any" }) }] : []),
+    ...filters.kinds.map((k) => ({ key: `k-${k}`, label: tf(`kinds.${k}`), onRemove: () => setFilters({ ...filters, kinds: filters.kinds.filter((x) => x !== k) }) })),
     ...filters.genres.map((g) => ({ key: `g-${g}`, label: g, onRemove: () => setFilters({ ...filters, genres: filters.genres.filter((x) => x !== g) }) })),
     ...filters.statuses.map((s) => ({ key: `s-${s}`, label: statusLabel(s), onRemove: () => setFilters({ ...filters, statuses: filters.statuses.filter((x) => x !== s) }) })),
     ...filters.levels.map((l) => ({ key: `l-${l}`, label: `LV.${l}`, onRemove: () => setFilters({ ...filters, levels: filters.levels.filter((x) => x !== l) }) })),
@@ -82,6 +83,11 @@ export function FilterBar({ filters, setFilters, cities, countFor }: { filters: 
             <option value="">{tf("anywhere")}</option>
             {cities.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
+        </FilterGroup>
+        <FilterGroup title={tf("kind")} hint={tf("kindHint")}>
+          {KIND_VALUES.map((k) => (
+            <Chip key={k} active={draft.kinds.includes(k)} onClick={() => set({ kinds: toggle(draft.kinds, k) })}>{tf(`kinds.${k}`)}</Chip>
+          ))}
         </FilterGroup>
         <FilterGroup title={tw("date")}>
           {DATES.map((d) => (

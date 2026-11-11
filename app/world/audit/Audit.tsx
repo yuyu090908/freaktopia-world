@@ -16,10 +16,12 @@ interface Review {
 export function Audit() {
   const t = useTranslations("party");
   const tl = useTranslations("loyalty");
+  const td = useTranslations("discoveryAdmin");
   return (
     <div className="mx-auto max-w-5xl pb-24 md:px-6">
       <PageTitle kicker={t("kicker")} title={t("auditTitle")} sub={t("auditSub")}>
         <Link href="/admin/loyalty" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-acid underline">{tl("admin.title")}</Link>
+        <Link href="/admin/sources" className="ml-4 mt-3 inline-flex min-h-11 items-center text-sm font-bold text-acid underline">{td("title")}</Link>
       </PageTitle>
       <div className="px-4 md:px-0">
         <SignInGate returnTo="/world/audit">

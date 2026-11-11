@@ -1,0 +1,80 @@
+{
+  "_MOCK": "MOCK DATA FOR TESTS ONLY. Fictional events shaped like Ticketmaster Discovery API v2 responses. Never served by the app.",
+  "page": { "totalPages": 1 },
+  "_embedded": {
+    "events": [
+      {
+        "id": "MOCK-FEST-1",
+        "name": "MOCK Neon Fest",
+        "url": "https://www.ticketmaster.de/event/mock-fest-1",
+        "images": [{ "url": "https://s1.ticketm.net/dam/mock/fest.jpg", "width": 1024, "ratio": "16_9" }],
+        "dates": { "start": { "localDate": "2026-11-13", "localTime": "22:00:00", "dateTime": "2026-11-13T21:00:00Z" }, "timezone": "Europe/Berlin", "status": { "code": "onsale" } },
+        "classifications": [{ "segment": { "name": "Music" }, "genre": { "name": "Dance/Electronic" }, "subGenre": { "name": "Techno" }, "subType": { "name": "Festival" } }],
+        "priceRanges": [{ "min": 59, "max": 129, "currency": "EUR" }],
+        "_embedded": {
+          "venues": [{ "id": "V1", "name": "Mock Hall", "city": { "name": "Berlin" }, "country": { "countryCode": "DE" }, "location": { "latitude": "52.5", "longitude": "13.45" }, "timezone": "Europe/Berlin" }],
+          "attractions": [{ "id": "K-MOCK-A", "name": "DJ Mockingbird", "url": "https://www.ticketmaster.de/artist/mock-a", "classifications": [{ "genre": { "name": "Dance/Electronic" }, "subGenre": { "name": "Techno" } }] }]
+        }
+      },
+      {
+        "id": "MOCK-CLUB-2",
+        "name": "MOCK Tokyo Club Night",
+        "url": "https://www.ticketmaster.com/event/mock-club-2",
+        "dates": { "start": { "localDate": "2026-11-14", "localTime": "23:00:00" }, "timezone": "Asia/Tokyo", "status": { "code": "onsale" } },
+        "classifications": [{ "segment": { "name": "Music" }, "genre": { "name": "Dance/Electronic" }, "subGenre": { "name": "House" } }],
+        "_embedded": {
+          "venues": [{ "id": "V2", "name": "Mock Basement", "city": { "name": "Tokyo" }, "country": { "countryCode": "JP" } }],
+          "attractions": [{ "id": "K-MOCK-B", "name": "DJ Mockingbird", "classifications": [{ "genre": { "name": "Dance/Electronic" } }] }]
+        }
+      },
+      {
+        "id": "MOCK-CANCEL-3",
+        "name": "MOCK Cancelled Rave",
+        "url": "https://www.ticketmaster.de/event/mock-cancel-3",
+        "dates": { "start": { "dateTime": "2026-11-20T20:00:00Z" }, "timezone": "Europe/Berlin", "status": { "code": "canceled" } },
+        "_embedded": { "venues": [{ "name": "Mock Hall", "city": { "name": "Berlin" }, "location": { "latitude": "52.5", "longitude": "13.45" } }] }
+      },
+      {
+        "id": "MOCK-POSTPONED-4",
+        "name": "MOCK Postponed Night",
+        "url": "https://www.ticketmaster.de/event/mock-postponed-4",
+        "dates": { "start": { "dateTime": "2026-11-21T20:00:00Z" }, "timezone": "Europe/Berlin", "status": { "code": "postponed" } },
+        "_embedded": { "venues": [{ "name": "Mock Hall", "city": { "name": "Berlin" }, "location": { "latitude": "52.5", "longitude": "13.45" } }] }
+      },
+      {
+        "id": "MOCK-XSS-5",
+        "name": "<script>alert(1)</script>MOCK <b>Bold</b> Night",
+        "url": "javascript:alert(1)",
+        "info": "<img src=x onerror=alert(1)>Doors &amp; bar",
+        "images": [{ "url": "http://evil.example/x.png", "width": 600 }],
+        "dates": { "start": { "dateTime": "2026-11-22T20:00:00Z" }, "status": { "code": "onsale" } },
+        "_embedded": { "venues": [{ "name": "Mock Hall", "city": { "name": "Berlin" }, "location": { "latitude": "52.5", "longitude": "13.45" } }] }
+      },
+      {
+        "id": "MOCK-NOLOC-6",
+        "name": "MOCK Somewhere Party",
+        "url": "https://www.ticketmaster.com/event/mock-noloc-6",
+        "dates": { "start": { "localDate": "2026-11-25" }, "status": { "code": "onsale" } },
+        "_embedded": { "venues": [{ "name": "Unknown Barn", "city": { "name": "Nowhereville" } }] }
+      },
+      {
+        "id": "MOCK-INVALID-7",
+        "name": "MOCK Missing Dates"
+      },
+      {
+        "id": "MOCK-FEST-DUP-8",
+        "name": "Mock Neon Fest",
+        "url": "https://www.ticketmaster.de/event/mock-fest-dup-8",
+        "dates": { "start": { "dateTime": "2026-11-13T21:30:00Z" }, "timezone": "Europe/Berlin", "status": { "code": "onsale" } },
+        "_embedded": { "venues": [{ "name": "Mock Hall", "city": { "name": "Berlin" }, "location": { "latitude": "52.5", "longitude": "13.45" }, "timezone": "Europe/Berlin" }] }
+      },
+      {
+        "id": "MOCK-FEST-NIGHT2-9",
+        "name": "MOCK Neon Fest",
+        "url": "https://www.ticketmaster.de/event/mock-fest-night2-9",
+        "dates": { "start": { "dateTime": "2026-11-14T21:00:00Z" }, "timezone": "Europe/Berlin", "status": { "code": "onsale" } },
+        "_embedded": { "venues": [{ "name": "Mock Hall", "city": { "name": "Berlin" }, "location": { "latitude": "52.5", "longitude": "13.45" }, "timezone": "Europe/Berlin" }] }
+      }
+    ]
+  }
+}

@@ -556,7 +556,9 @@
       "buyTicket": "티켓 구매",
       "viewDao": "DAO 보기",
       "applyDj": "DJ로 지원",
-      "viewEvent": "이벤트 보기"
+      "viewEvent": "이벤트 보기",
+      "officialEvent": "공식 페이지 보기",
+      "getTickets": "티켓 구매"
     },
     "count": "이벤트 {count}개",
     "legendNote": "레벨은 지도 게임 레벨이며 공연장 수용 인원이 아닙니다. TOP 1–3 = 누적 인기. 보라색 DAO 태그는 커뮤니티 DAO를 뜻합니다.",
@@ -565,7 +567,10 @@
       "any": "모든 날짜",
       "30d": "30일 이내",
       "90d": "3개월 이내",
-      "2027": "2027년"
+      "2027": "2027년",
+      "today": "오늘",
+      "weekend": "이번 주말",
+      "7d": "7일 이내"
     },
     "kinds": {
       "event": "페스티벌",
@@ -698,7 +703,45 @@
         "london": "클럽, 창고, 해적 라디오의 뿌리."
       }
     },
-    "communityNote": "오거나이저가 FREAKTOPIA에 공개한 파티입니다. 라인업, 티켓, 상세 정보는 오거나이저 월드의 페이지에 있습니다."
+    "communityNote": "오거나이저가 FREAKTOPIA에 공개한 파티입니다. 라인업, 티켓, 상세 정보는 오거나이저 월드의 페이지에 있습니다.",
+    "externalAria": "{name}, {city} · {kind}, 출처: {source}",
+    "openInEvents": "EVENTS에서 같은 조건 보기",
+    "legendExternalNote": "모양 핀은 외부 데이터 소스(Ticketmaster 등)의 이벤트입니다. 점선 막대는 위치가 도시 중심뿐임을 뜻합니다.",
+    "external": {
+      "opensNewTab": "새 탭에서 열림",
+      "notFreaktopia": "이 이벤트는 FREAKTOPIA가 운영하지 않습니다. 티켓은 주최자나 판매처의 사이트에서 판매됩니다.",
+      "source": "출처",
+      "sourceType": {
+        "external": "외부 데이터 소스",
+        "partner": "파트너",
+        "freaktopia": "FREAKTOPIA"
+      },
+      "verification": "확인 상태",
+      "verified": {
+        "source_verified": "데이터 소스의 공식 데이터",
+        "partner_verified": "파트너 확인 완료",
+        "unverified": "미확인"
+      },
+      "lastVerified": "마지막 확인",
+      "staleNote": "{time} 기준 정보입니다. 최신 정보는 공식 페이지에서 확인하세요.",
+      "statusLabel": "상태",
+      "status": {
+        "scheduled": "예정대로",
+        "rescheduled": "일정 변경",
+        "postponed": "연기",
+        "cancelled": "취소",
+        "unknown": "출처에 명시 없음"
+      },
+      "venue": "장소",
+      "venueUnknown": "장소 미발표",
+      "approxLocation": "도시 중심에 표시합니다. 출처에 정확한 장소 위치가 없습니다.",
+      "lineup": "라인업",
+      "lineupEmpty": "출처에 라인업 정보가 없습니다",
+      "price": "가격",
+      "priceFromSource": "{min}–{max} {currency} (출처 기준)",
+      "timeTbd": "시간 미정",
+      "localTime": "현지 시간"
+    }
   },
   "ranking": {
     "title": "월드 랭킹",
@@ -3247,7 +3290,11 @@
     "outdoor_area": "야외 구역",
     "green_room": "그린룸",
     "step_free_access": "단차 없는 출입",
-    "coat_check": "물품 보관소"
+    "coat_check": "물품 보관소",
+    "major_festival": "대형 페스티벌",
+    "dj_show": "DJ 공연",
+    "club_event": "클럽 이벤트",
+    "music_event": "음악 이벤트"
   },
   "ops": {
     "manageKicker": "이벤트 운영",
@@ -4453,6 +4500,118 @@
     "notOnSaleEndedBody": "티켓 판매가 종료되었습니다. 이벤트 페이지에서 라인업과 기록을 볼 수 있습니다.",
     "notOnSaleYet": "티켓은 아직 판매 전입니다",
     "notOnSaleYetBody": "이벤트가 확정되면 티켓 판매가 시작됩니다. 그 전까지는 이벤트 페이지에서 후원할 수 있습니다.",
-    "backToEvent": "이벤트로 돌아가기"
+    "backToEvent": "이벤트로 돌아가기",
+    "breakdownExternal": "· 외부 {count}",
+    "kind": "이벤트 종류",
+    "kindHint": "하나라도 일치. 페스티벌·DJ 공연·클럽 종류는 출처 자체 정보로만 판단합니다.",
+    "kinds": {
+      "festival": "대형 페스티벌",
+      "djs": "DJ 공연",
+      "club": "클럽 이벤트",
+      "freaktopia": "FREAKTOPIA만"
+    },
+    "openOnMap": "같은 조건을 지도에서 보기"
+  },
+  "discovery": {
+    "title": "세계 이벤트",
+    "sub": "승인된 외부 데이터 소스의 정보입니다. 티켓은 FREAKTOPIA에서 판매하지 않습니다.",
+    "asOf": "{time} 기준",
+    "notConnected": "외부 이벤트 데이터 소스가 아직 연결되지 않아 FREAKTOPIA 자체 이벤트만 표시합니다. 샘플 데이터로 채우지 않습니다.",
+    "loadError": "세계 이벤트를 불러오지 못했습니다. 아래 FREAKTOPIA 이벤트에는 영향이 없습니다.",
+    "artistsTitle": "아티스트",
+    "artistSub": "{source} · 예정 {count}건 · {cities}",
+    "artistActive": "{name}({source})의 이벤트",
+    "artistClear": "아티스트 해제",
+    "noMatches": "이 조건에 맞는 세계 이벤트가 없습니다.",
+    "from": "출처: {source}",
+    "status": {
+      "postponed": "연기",
+      "rescheduled": "일정 변경"
+    },
+    "timeTbd": "시간 미정",
+    "localTime": "현지 시간",
+    "approx": "도시 중심, 대략적 위치",
+    "verified": "마지막 확인 {time}",
+    "official": "공식 페이지",
+    "tickets": "티켓",
+    "newTab": "새 탭에서 열림",
+    "onMap": "지도에서 보기"
+  },
+  "discoveryAdmin": {
+    "title": "이벤트 데이터 소스",
+    "sub": "각 외부 데이터 소스의 연결 상태, 갱신 주기, 데이터 품질. 관리자 전용.",
+    "forbidden": "관리자 전용",
+    "forbiddenBody": "이 페이지는 운영자로 등록되고 이메일이 확인된 계정 전용입니다.",
+    "err": "완료하지 못했습니다({code})",
+    "syncFailed": "동기화 실패: {error}",
+    "skipped": {
+      "not_configured": "동기화 안 됨: API 키가 설정되지 않았습니다.",
+      "unapproved": "동기화 안 됨: 약관 확인 또는 승인이 되지 않았습니다.",
+      "paused": "동기화 안 됨: 소스가 일시 중지되었습니다."
+    },
+    "sources": "데이터 소스",
+    "state": {
+      "connected": "연결됨",
+      "not_configured": "미설정",
+      "unapproved": "미승인",
+      "paused": "일시 중지",
+      "error": "오류"
+    },
+    "stateHelp": {
+      "connected": "키 설정과 약관 확인이 완료되었습니다. 이 소스의 이벤트가 WORLD와 EVENTS에 표시됩니다.",
+      "not_configured": "API 키가 없어 가져오거나 표시하지 않습니다.",
+      "unapproved": "키가 있어도 약관 확인 또는 제공자 승인이 되지 않았습니다. 확인될 때까지 꺼져 있습니다.",
+      "paused": "관리자가 일시 중지: 갱신·표시하지 않습니다.",
+      "error": "마지막 동기화가 실패했습니다. 성공할 때까지 캐시된 이벤트를 마지막 확인 시각과 함께 표시합니다."
+    },
+    "terms": "이용 약관",
+    "needs": "켜려면 설정:",
+    "lastSync": "마지막 동기화",
+    "lastSuccess": "마지막 성공",
+    "events": "이벤트 수",
+    "regions": "대상 지역",
+    "lastError": "오류 ×{count}",
+    "saved": "저장했습니다",
+    "synced": "동기화했습니다",
+    "syncing": "동기화 중…",
+    "syncNow": "지금 동기화",
+    "resume": "재개",
+    "pause": "일시 중지",
+    "resumed": "재개했습니다",
+    "pausedOk": "일시 중지했습니다",
+    "purge": "캐시 삭제",
+    "purgeConfirm": "{name}의 캐시된 이벤트를 모두 삭제하고 일시 중지할까요? 확인하려면 DELETE를 입력하세요.",
+    "purged": "캐시를 삭제했습니다",
+    "quality": "이벤트 품질",
+    "q": {
+      "none": "없음",
+      "duplicates": "중복 가능성(병합 안 함)",
+      "cancelled": "취소·연기",
+      "timeTbd": "시간 미발표",
+      "noVenue": "장소 없음",
+      "noLocation": "위치 없음(목록만, 지도 미표시)",
+      "approximateLocation": "대략적 위치(도시 중심)",
+      "hidden": "관리자가 숨김",
+      "changes": "최근 변경(일시·장소·라인업·상태·티켓)"
+    },
+    "field": {
+      "date": "일시",
+      "venue": "장소",
+      "lineup": "라인업",
+      "status": "상태",
+      "tickets": "티켓"
+    },
+    "intervals": "갱신 주기",
+    "interval": {
+      "within48h": "48시간 이내",
+      "within30d": "30일 이내",
+      "later": "그 이후"
+    },
+    "hours": "시간",
+    "save": "저장",
+    "hide": "숨기기",
+    "unhide": "다시 표시",
+    "hiddenOk": "WORLD와 EVENTS에서 숨겼습니다",
+    "shownOk": "다시 표시했습니다"
   }
 }

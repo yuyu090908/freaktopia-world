@@ -2,8 +2,31 @@ import { appNow } from "./clock";
 import type { EventLevel, FreakEvent, Genre } from "./types";
 import { levelFor } from "./levels";
 import { fromPrice } from "./event-status";
+import { findCity } from "./ops/geo";
+import { inWhen } from "./discovery/time";
+import type { EventCategory } from "./discovery/types";
 
-export type DateRange = "any" | "30d" | "90d" | "2027";
+/** today / weekend / 7d / 30d are judged in the venue's own time zone (lib/discovery/time). */
+export type DateRange = "any" | "today" | "weekend" | "7d" | "30d" | "90d" | "2027";
+export const DATE_RANGES: DateRange[] = ["any", "today", "weekend", "7d", "30d", "90d", "2027"];
+
+/**
+ * What kind of event (shared by WORLD and EVENTS). Several = any of them (OR).
+ * festival / djs / club come only from verified external source data; FREAKTOPIA's own listings are "freaktopia".
+ */
+export type KindFilter = "festival" | "djs" | "club" | "freaktopia";
+export const KIND_VALUES: KindFilter[] = ["festival", "djs", "club", "freaktopia"];
+const KIND_CATEGORY: Record<Exclude<KindFilter, "freaktopia">, EventCategory> = { festival: "major_festival", djs: "dj_show", club: "club_event" };
+
+/** Does a listing of this category (null = a FREAKTOPIA listing) pass the kind filter? */
+export function kindMatches(kinds: readonly KindFilter[], category: EventCategory | null) {
+  if (!kinds.length) return true;
+  if (category === null || category === "freaktopia_event") return kinds.includes("freaktopia");
+  return kinds.some((k) => k !== "freaktopia" && KIND_CATEGORY[k] === category);
+}
+
+/** Venue time zone of a FREAKTOPIA city (UTC when the city is not in the list). */
+export const cityTz = (city: string) => findCity(city)?.tz ?? null;
 
 export type StatusFilter = "live" | "confirmed" | "funding";
 export type PriceFilter = "any" | "free" | "u30" | "u60";
@@ -22,6 +45,8 @@ export interface EventFilters {
   price: PriceFilter;
   djWanted: boolean;
   afterParty: boolean;
+  /** Event kinds (OR). */
+  kinds: KindFilter[];
 }
 
 export const EMPTY_FILTERS: EventFilters = {
@@ -34,6 +59,7 @@ export const EMPTY_FILTERS: EventFilters = {
   price: "any",
   djWanted: false,
   afterParty: false,
+  kinds: [],
 };
 
 /** "Today" for date filters: the app clock (real time unless pinned for tests, see lib/clock). */
@@ -41,10 +67,10 @@ export const DEMO_NOW = new Date(appNow());
 
 type Stats = (e: FreakEvent) => { supporters: number; raised: number };
 
-const inDate = (startsAt: string, endsAt: string, d: DateRange, now = DEMO_NOW.getTime()) => {
+export const inDate = (startsAt: string, endsAt: string | null, d: DateRange, now = DEMO_NOW.getTime(), tz: string | null = null) => {
   const t = Date.parse(startsAt);
-  const end = Date.parse(endsAt);
-  if (d === "30d") return t <= now + 30 * 864e5 && end >= now;
+  const end = Date.parse(endsAt ?? startsAt);
+  if (d === "today" || d === "weekend" || d === "7d" || d === "30d") return inWhen(startsAt, endsAt, tz, d, now);
   if (d === "90d") return t <= now + 90 * 864e5 && end >= now;
   if (d === "2027") return startsAt.startsWith("2027");
   return true;
@@ -63,7 +89,8 @@ export function filterEvents(events: FreakEvent[], f: EventFilters, stats?: Stat
       const s = stats ? stats(e) : e;
       if (!f.levels.includes(levelFor(s.supporters, s.raised))) return false;
     }
-    if (!inDate(e.startsAt, e.endsAt, f.date)) return false;
+    if (!inDate(e.startsAt, e.endsAt, f.date, undefined, cityTz(e.city))) return false;
+    if (!kindMatches(f.kinds, null)) return false;
     if (f.statuses.length && !f.statuses.includes(e.status as StatusFilter)) return false;
     if (f.price !== "any") {
       const p = fromPrice(e);
@@ -83,23 +110,23 @@ export interface CommunityListing { id: string; name: string; city: string; star
  * so any of those filters leaves them out instead of guessing. Their status is "confirmed" (published).
  */
 export function filterCommunity<T extends CommunityListing>(parties: T[], f: EventFilters): T[] {
-  if (f.levels.length || f.price !== "any" || f.djWanted || f.afterParty) return [];
+  if (f.levels.length || f.price !== "any" || f.djWanted || f.afterParty || !kindMatches(f.kinds, null)) return [];
   if (f.statuses.length && !f.statuses.includes("confirmed")) return [];
   const q = f.q.trim().toLowerCase();
   return parties.filter((p) => {
     if (q && ![p.name, p.city, ...p.genres].join(" ").toLowerCase().includes(q)) return false;
     if (f.place && p.city !== f.place) return false;
     if (f.genres.length && !p.genres.some((g) => (f.genres as string[]).includes(g))) return false;
-    return inDate(p.startAt, p.endAt, f.date);
+    return inDate(p.startAt, p.endAt, f.date, undefined, cityTz(p.city));
   });
 }
 
 export const activeFilterCount = (f: EventFilters) =>
-  (f.place ? 1 : 0) + f.genres.length + f.levels.length + (f.date !== "any" ? 1 : 0) + f.statuses.length + (f.price !== "any" ? 1 : 0) + [f.djWanted, f.afterParty].filter(Boolean).length;
+  (f.place ? 1 : 0) + f.genres.length + f.levels.length + (f.date !== "any" ? 1 : 0) + f.statuses.length + (f.price !== "any" ? 1 : 0) + [f.djWanted, f.afterParty].filter(Boolean).length + f.kinds.length;
 
 /* ---------- URL sync (EVENTS): filters survive reload, sharing and the back button ---------- */
 
-const DATE_VALUES: DateRange[] = ["any", "30d", "90d", "2027"];
+const DATE_VALUES = DATE_RANGES;
 const STATUS_VALUES: StatusFilter[] = ["live", "confirmed", "funding"];
 const PRICE_VALUES: PriceFilter[] = ["any", "free", "u30", "u60"];
 export type EventSort = "popular" | "soonest" | "level";
@@ -117,13 +144,15 @@ export function readEventsUrl(search: string, genres: readonly string[]): { filt
     filters: {
       q: (p.get("q") ?? "").slice(0, 80),
       place: (p.get("city") ?? "").slice(0, 80),
-      genres: [...new Set(csv(p, "genre").filter((g) => genres.includes(g)))] as Genre[],
+      // "genre" (EVENTS) or repeated "g" (WORLD): a link from one page opens the other with the same search.
+      genres: [...new Set([...csv(p, "genre"), ...p.getAll("g")].filter((g) => genres.includes(g)))] as Genre[],
       levels: [...new Set(csv(p, "lv").map(Number).filter((n) => Number.isInteger(n) && n >= 1 && n <= 5))] as EventLevel[],
       date: date && DATE_VALUES.includes(date) ? date : "any",
       statuses: [...new Set(csv(p, "status").filter((s): s is StatusFilter => (STATUS_VALUES as string[]).includes(s)))],
       price: price && PRICE_VALUES.includes(price) ? price : "any",
       djWanted: p.get("dj") === "1",
       afterParty: p.get("after") === "1",
+      kinds: [...new Set(csv(p, "kind").filter((k): k is KindFilter => (KIND_VALUES as string[]).includes(k)))],
     },
     sort: sort && SORT_VALUES.includes(sort) ? sort : "soonest",
   };
@@ -141,6 +170,7 @@ export function writeEventsUrl(f: EventFilters, sort: EventSort): string {
   if (f.price !== "any") p.set("price", f.price);
   if (f.djWanted) p.set("dj", "1");
   if (f.afterParty) p.set("after", "1");
+  if (f.kinds.length) p.set("kind", f.kinds.join(","));
   if (sort !== "soonest") p.set("sort", sort);
   const s = p.toString();
   return s ? `?${s}` : "";

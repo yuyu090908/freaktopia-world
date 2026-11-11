@@ -2,9 +2,9 @@
  * Client view model for the world map: search, filters, URL state. Pure functions (unit tested).
  */
 import type { EventLevel, Genre } from "@/lib/types";
-import { DEMO_NOW, type DateRange } from "@/lib/filters";
+import { DATE_RANGES, DEMO_NOW, EMPTY_FILTERS, KIND_VALUES, cityTz, inDate, kindMatches, writeEventsUrl, type DateRange, type KindFilter } from "@/lib/filters";
 import { computeFestivalLevel, type GrowthConfig, type GrowthResult } from "./growth";
-import { STATUS_META } from "./landmarks";
+import { EXTERNAL_MARKER_LABEL, STATUS_META, externalMarkerKind } from "./landmarks";
 import type { MapEventDto } from "./types";
 import { isRegionKey, regionOfCountry, type RegionKey } from "./regions";
 
@@ -38,9 +38,14 @@ export interface MapFilters {
   date: DateRange;
   /** Region focus (display region of the event's country). */
   region?: Exclude<RegionKey, "an"> | null;
+  /** Event kinds (OR), shared with EVENTS. */
+  kinds?: KindFilter[];
 }
 
-export const EMPTY_MAP_FILTERS: MapFilters = { q: "", flags: [], levels: [], genres: [], date: "any", region: null };
+export const EMPTY_MAP_FILTERS: MapFilters = { q: "", flags: [], levels: [], genres: [], date: "any", region: null, kinds: [] };
+
+/** Venue time zone of a map entry (external sources give one; FREAKTOPIA cities come from the city list). */
+export const tzOf = (e: MapEventDto) => e.external?.venueTimezone ?? cityTz(e.city);
 
 export function toWorldEvents(events: MapEventDto[], cfg: GrowthConfig, local?: (id: string) => { supporters: number; fundingUsd: number } | undefined): WorldEvent[] {
   return events.map((e) => {
@@ -54,7 +59,7 @@ export function toWorldEvents(events: MapEventDto[], cfg: GrowthConfig, local?: 
 const norm = (s: string) => s.normalize("NFKD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
 
 export function searchText(e: MapEventDto) {
-  return norm([e.name, e.city, e.country, e.venue ?? "", ...e.genres, ...e.lineup.map((d) => d.name)].join(" "));
+  return norm([e.name, e.city, e.country, e.venue ?? "", ...e.genres, ...(e.external?.genres ?? []), ...e.lineup.map((d) => d.name)].join(" "));
 }
 
 export function matchFlag(e: MapEventDto, k: FlagKey, now = DEMO_NOW.getTime()) {
@@ -90,16 +95,12 @@ export function filterWorld<T extends MapEventDto>(events: T[], f: MapFilters, n
     if (f.levels.length && !f.levels.includes(e.level)) return false;
     if (f.genres.length && !e.genres.some((g) => f.genres.includes(g))) return false;
     if (f.region && regionOfCountry(e.country) !== f.region) return false;
-    const t = Date.parse(e.startsAt);
-    const end = Date.parse(e.endsAt);
-    if (f.date === "30d" && (t > now + 30 * 864e5 || end < now)) return false;
-    if (f.date === "90d" && (t > now + 90 * 864e5 || end < now)) return false;
-    if (f.date === "2027" && !e.startsAt.startsWith("2027")) return false;
-    return true;
+    if (!kindMatches(f.kinds ?? [], e.external?.category ?? null)) return false;
+    return inDate(e.startsAt, e.endsAt, f.date, now, tzOf(e));
   });
 }
 
-export const filterCount = (f: MapFilters) => f.flags.length + f.levels.length + f.genres.length + (f.date !== "any" ? 1 : 0) + (f.region ? 1 : 0);
+export const filterCount = (f: MapFilters) => f.flags.length + f.levels.length + f.genres.length + (f.date !== "any" ? 1 : 0) + (f.region ? 1 : 0) + (f.kinds?.length ?? 0);
 
 export type SuggestionKind = "event" | "city" | "country" | "dj" | "venue" | "genre" | "region";
 export interface Suggestion {
@@ -163,11 +164,13 @@ export interface WorldUrlState {
 export function readWorldUrl(p: URLSearchParams): WorldUrlState {
   const flags = (p.get("f") ?? "").split(",").filter((x): x is FlagKey => (FLAG_KEYS as readonly string[]).includes(x));
   const levels = (p.get("lv") ?? "").split(",").map(Number).filter((x): x is EventLevel => x >= 1 && x <= 5 && Number.isInteger(x));
-  const genres = p.getAll("g").filter((g): g is Genre => GENRE_SET.has(g));
-  const d = p.get("date");
-  const date: DateRange = d === "30d" || d === "90d" || d === "2027" ? d : "any";
+  // Repeated "g" (WORLD) or "genre" csv (EVENTS): the same search opens on either page.
+  const genres = [...p.getAll("g"), ...(p.get("genre") ?? "").split(",")].filter((g): g is Genre => GENRE_SET.has(g));
+  const d = p.get("date") as DateRange | null;
+  const date: DateRange = d && DATE_RANGES.includes(d) ? d : "any";
+  const kinds = (p.get("kind") ?? "").split(",").filter((k): k is KindFilter => (KIND_VALUES as string[]).includes(k));
   return {
-    filters: { q: (p.get("q") ?? "").slice(0, 80), flags: [...new Set(flags)], levels: [...new Set(levels)], genres: [...new Set(genres)], date, region: isRegionKey(p.get("rg")) ? (p.get("rg") as Exclude<RegionKey, "an">) : null },
+    filters: { q: (p.get("q") ?? "").slice(0, 80), flags: [...new Set(flags)], levels: [...new Set(levels)], genres: [...new Set(genres)], date, region: isRegionKey(p.get("rg")) ? (p.get("rg") as Exclude<RegionKey, "an">) : null, kinds: [...new Set(kinds)] },
     view: p.get("view") === "list" ? "list" : "map",
     event: p.get("event")?.slice(0, 80) || null,
     city: p.get("city")?.slice(0, 120) || null,
@@ -182,11 +185,17 @@ export function writeWorldUrl(s: WorldUrlState): string {
   for (const g of s.filters.genres) p.append("g", g);
   if (s.filters.date !== "any") p.set("date", s.filters.date);
   if (s.filters.region) p.set("rg", s.filters.region);
+  if (s.filters.kinds?.length) p.set("kind", s.filters.kinds.join(","));
   if (s.view === "list") p.set("view", "list");
   if (s.event) p.set("event", s.event);
   else if (s.city) p.set("city", s.city);
   const str = p.toString();
   return str ? `?${str}` : "";
+}
+
+/** The same search on EVENTS (search words, genres, dates and kinds carry over; map-only filters stay on WORLD). */
+export function eventsHrefFor(f: MapFilters, city?: string | null): string {
+  return `/events${writeEventsUrl({ ...EMPTY_FILTERS, q: f.q, place: city ?? "", genres: f.genres, date: f.date, kinds: f.kinds ?? [] }, "soonest")}`;
 }
 
 /** Accessible name for a landmark: name and city first, then level and status in words. */
@@ -198,6 +207,11 @@ type Translate = (key: string, values?: Record<string, string | number>) => stri
  */
 export function ariaFor(e: WorldEvent, t?: Translate, tx?: (english: string) => string) {
   const s = STATUS_META[e.status];
+  if (e.external) {
+    const kind = EXTERNAL_MARKER_LABEL[externalMarkerKind(e.external.category)];
+    if (t && tx) return t("externalAria", { name: e.name, city: e.city, kind: tx(kind), source: e.external.sourceName }) + (e.location.precision === "city" ? t("markerAriaApprox") : "");
+    return `${e.name}, ${e.city} · ${kind}, from ${e.external.sourceName}${e.location.precision === "city" ? ", approximate city location" : ""}`;
+  }
   if (t && tx) {
     return [
       t("markerAria", { name: e.name, city: e.city, level: e.level, levelName: tx(e.growthResult.name), status: tx(s.label) }),
