@@ -279,7 +279,7 @@ Spec: WORLD MAP 3D VISUAL UPGRADE. Details in docs/WORLD_MAP_GLOBE.md.
 
 Details in docs/VISUAL_SYSTEM.md.
 
-- Unit (vitest): 127 passed, including the new `tests/unit/art-rules.test.ts` (registry, city lookup, cover rules, no adjacent duplicates).
+- Unit (vitest): 212 passed in 18 files, including the new `tests/unit/art-rules.test.ts` (registry, city lookup, cover rules, no adjacent duplicates).
 - E2E (Playwright, production build, 390 px project): 132 passed, 1 flaky. New `tests/visual.spec.ts` (home city cards and links, alt text, no sideways scroll, city preview image; events featured card and no adjacent duplicate images at 1280 px; ticket grades, selection, alt text, note). The flaky one is `flows.spec` "home → world map → landmark → bottom sheet → event": under two workers the "View event" link sometimes does not navigate. It passes alone (3 of 3), failed once in 9.3 too, and could not be reproduced with 4× CPU throttling. Cause not found; the test now waits for the sheet to open and retries the click.
 - Fixed while testing: the ticket page scrolled sideways at 390 px (fieldset min width); `.rail` overrode `md:grid` (new `.rail.rail-grid` rule); an English search placeholder was hardcoded.
 - i18n: 4017 keys in all 12 dictionaries, 0 hardcoded strings.
