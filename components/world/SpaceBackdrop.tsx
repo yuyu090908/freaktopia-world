@@ -125,3 +125,14 @@ export const SpaceBackdrop = memo(function SpaceBackdrop({ calm, compact }: { ca
     </div>
   );
 });
+
+/** The static sky alone (no aliens or motion). Painted while the globe's map engine is still loading, so the page shows its real backdrop at once instead of a blank skeleton. */
+export function SpaceSky() {
+  return (
+    <div className="wm-space" aria-hidden data-testid="space-sky">
+      <div className="wm-nebula" />
+      <div className="wm-stars" style={{ backgroundImage: STARS_FAR }} />
+      <div className="wm-stars wm-stars-near" style={{ backgroundImage: STARS_NEAR }} />
+    </div>
+  );
+}

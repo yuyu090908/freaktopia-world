@@ -71,7 +71,10 @@
       "create": "Créer",
       "info": "Infos",
       "account": "Compte",
-      "myWorld": "Mon monde"
+      "myWorld": "Mon monde",
+      "discover": "Découvrir",
+      "join": "Participer",
+      "manage": "Gérer"
     },
     "pages": {
       "worldMap": "Carte du monde",
@@ -1246,7 +1249,8 @@
     "paused": "en pause",
     "watching": "regardent",
     "festivalsCount": "{n, plural, one {# festival} other {# festivals}}",
-    "emptyBody": "Seuls les événements avec un flux sous licence connecté apparaissent ici. Les festivals à venir sont listés plus bas."
+    "emptyBody": "Seuls les événements avec un flux sous licence connecté apparaissent ici. Les festivals à venir sont listés plus bas.",
+    "browseUpcoming": "Événements à venir"
   },
   "dao": {
     "title": "DAO du festival",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Où sont mes données ?",
     "qaDataA": "Les données du compte (profil, alien, paramètres) sont enregistrées avec votre compte. L’activité démo invité reste dans votre navigateur. Gérez-les dans Profil → Paramètres.",
     "qaVenueQ": "Puis-je proposer mon lieu ?",
-    "qaVenueA": "Oui — cinq étapes avec photos, prix, équipement et dates."
+    "qaVenueA": "Oui — cinq étapes avec photos, prix, équipement et dates.",
+    "errName": "Indiquez votre nom",
+    "errEmail": "Saisissez un e-mail valide",
+    "errMessage": "Le message doit faire au moins 10 caractères"
   },
   "seo": {
     "aboutTitle": "À propos",

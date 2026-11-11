@@ -71,7 +71,10 @@
       "create": "Criar",
       "info": "Info",
       "account": "Conta",
-      "myWorld": "Meu mundo"
+      "myWorld": "Meu mundo",
+      "discover": "Descobrir",
+      "join": "Participar",
+      "manage": "Gerir"
     },
     "pages": {
       "worldMap": "Mapa-múndi",
@@ -1246,7 +1249,8 @@
     "paused": "pausado",
     "watching": "assistindo",
     "festivalsCount": "{n, plural, one {# festival} other {# festivais}}",
-    "emptyBody": "Aqui só aparecem eventos com uma transmissão licenciada conectada. Os próximos festivais estão abaixo."
+    "emptyBody": "Aqui só aparecem eventos com uma transmissão licenciada conectada. Os próximos festivais estão abaixo.",
+    "browseUpcoming": "Próximos eventos"
   },
   "dao": {
     "title": "DAO do festival",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Onde estão meus dados?",
     "qaDataA": "Os dados da conta (perfil, alien, configurações) ficam salvos na sua conta. A atividade demo de visitante fica no seu navegador. Gerencie em Perfil → Configurações.",
     "qaVenueQ": "Posso anunciar meu local?",
-    "qaVenueA": "Sim — cinco etapas com fotos, preço, equipamentos e datas."
+    "qaVenueA": "Sim — cinco etapas com fotos, preço, equipamentos e datas.",
+    "errName": "Escreva o seu nome",
+    "errEmail": "Escreva um e-mail válido",
+    "errMessage": "A mensagem deve ter 10 caracteres ou mais"
   },
   "seo": {
     "aboutTitle": "Sobre",

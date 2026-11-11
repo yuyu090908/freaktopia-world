@@ -136,12 +136,13 @@ export function LanguageSwitcher() {
         onClick={() => setOpen((v) => !v)}
         aria-haspopup={desktop ? "true" : "dialog"}
         aria-expanded={open}
-        aria-label={t("button", { name: LOCALE_META[locale].native })}
         data-testid="lang-switcher"
-        className="inline-flex h-11 items-center gap-1 rounded-full px-2.5 text-xs font-extrabold uppercase hover:bg-surface"
+        className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-1 rounded-full px-2.5 text-xs font-extrabold uppercase hover:bg-surface"
       >
         <Globe className="size-5" aria-hidden />
+        {/* The accessible name starts with the visible text (WCAG 2.5.3 Label in Name), then says what the button does. */}
         <span className="hidden min-[360px]:inline">{toLocale(locale) === "zh-CN" ? "中文" : locale}</span>{/* i18n-ignore: language names are always shown in their own script */}
+        <span className="sr-only"> {t("button", { name: LOCALE_META[locale].native })}</span>
       </button>
       {desktop && open && (
         <div ref={pop} className="absolute right-0 top-[calc(100%+8px)] z-[70] w-72 rounded-2xl border-2 border-line bg-[#0D121B] shadow-[0_16px_40px_rgba(0,0,0,.6)]">

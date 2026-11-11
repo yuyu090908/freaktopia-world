@@ -7,7 +7,6 @@ import Image from "next/image";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, GitCompareArrows, Landmark, List, Map as MapIcon, RefreshCw, Search, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
-import { RankingArt } from "@/components/ranking/RankingArt";
 import { RankingRow, TopOneCard, TopSmallCard } from "@/components/ranking/RankingCards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, DemoNotice } from "@/components/ui/primitives";
@@ -18,7 +17,7 @@ import { ART } from "@/lib/art";
 import { EVENTS, ARCHIVE_EVENTS, GENRES, getEvent } from "@/lib/data";
 import { useDemo, useIsHydrated } from "@/lib/store";
 import { CATEGORY_META, PERIOD_LABEL, PUBLIC_CATEGORIES } from "@/lib/ranking/meta";
-import { activeFilterCount, readUrlState, toSearchParams, type UrlState } from "@/lib/ranking/query";
+import { activeFilterCount, apiParams, readUrlState, toSearchParams, type UrlState } from "@/lib/ranking/query";
 import { REWARDS, earnedRewards } from "@/lib/ranking/rewards";
 import type { RankingCategory, RankingResult } from "@/lib/ranking/types";
 import { RANKING_PERIODS } from "@/lib/ranking/types";
@@ -31,23 +30,8 @@ const CITIES = Array.from(new Set(ALL.map((e) => `${e.country}|${e.city}`))).sor
 
 type Load = { status: "loading" } | { status: "error"; message: string; code?: string } | { status: "ok"; data: RankingResult };
 
-/** Build the API query string for a URL state (+ personalization for FOR YOU). */
-function apiParams(s: UrlState, page: number, pers?: { genres: string[]; city: string; djs: string[]; follows: string[] }) {
-  const p = toSearchParams(s);
-  p.delete("view");
-  p.set("category", s.category);
-  p.set("page", String(page));
-  p.set("pageSize", "20");
-  if (s.category === "for_you" && pers) {
-    if (pers.genres.length) p.set("pg", pers.genres.join(","));
-    if (pers.city) p.set("pc", pers.city);
-    if (pers.djs.length) p.set("pd", pers.djs.join(","));
-    if (pers.follows.length) p.set("pf", pers.follows.join(","));
-  }
-  return p.toString();
-}
-
-export function RankingsView() {
+/** `initial`: the first page, rendered on the server for the same query, so the list is in the HTML instead of waiting for a client fetch. */
+export function RankingsView({ initial }: { initial?: { query: string; data: RankingResult } | null } = {}) {
   const tx = useTx();
   const tu = useTranslations("ranking");
   const params = useSearchParams();
@@ -65,7 +49,8 @@ export function RankingsView() {
   const clearCompare = useDemo((s) => s.clearCompare);
   const support = useDemo((s) => s.support);
 
-  const [load, setLoad] = useState<Load>({ status: "loading" });
+  const firstQuery = useRef(initial?.query ?? null);
+  const [load, setLoad] = useState<Load>(() => (initial ? { status: "ok", data: initial.data } : { status: "loading" }));
   const [extra, setExtra] = useState<RankingResult["items"]>([]);
   const [page, setPage] = useState(1);
   const [moreLoading, setMoreLoading] = useState(false);
@@ -105,6 +90,9 @@ export function RankingsView() {
   const query = apiParams(state, 1, pers);
   useEffect(() => {
     if (state.category === "for_you" && !hydrated) return;
+    // The server already rendered this exact query: keep it until the query changes or the user refreshes.
+    if (firstQuery.current === query && !refreshKey) return;
+    firstQuery.current = null;
     const ctl = new AbortController();
     setLoad({ status: "loading" });
     setExtra([]);
@@ -192,20 +180,8 @@ export function RankingsView() {
 
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      {/* TITLE + ART */}
-      <header className="px-4 pt-4 md:px-0 md:pt-8">
-        <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid">{tu("festivalDiscoveryEngine")}</p>
-        <h1 className="mt-1 text-[46px] uppercase leading-[0.88] sm:text-7xl">
-          {tu("world")} <span className="text-acid glow-text">{tu("ranking")}</span>
-        </h1>
-        <p className="mt-2 max-w-xl text-sm text-mute">{tu("text")}</p>
-      </header>
-      <div className="mx-4 mt-4 overflow-hidden rounded-[28px] border-2 border-purple/50 bg-ink/60 shadow-[0_0_36px_-12px_rgba(162,118,233,0.7)] md:mx-0">
-        <RankingArt className="block h-auto w-full" />
-      </div>
-
       {/* CATEGORIES */}
-      <nav aria-label={tu("rankingCategories")} className="rail mt-5 !gap-2 md:!px-0">
+      <nav aria-label={tu("rankingCategories")} className="rail !gap-2 md:!px-0">
         {cats.map((c) => (
           <button key={c} type="button" aria-pressed={state.category === c} onClick={() => update({ category: c })} className={chip(state.category === c)}>
             {c === "for_you" && <Sparkles className="size-4" aria-hidden />}
@@ -255,7 +231,7 @@ export function RankingsView() {
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2 px-4 md:px-0">
         <div className="inline-flex rounded-full border-2 border-line p-1" role="group" aria-label={tu("view")}>
           {(["list", "map"] as const).map((v) => (
-            <button key={v} type="button" aria-pressed={state.view === v} onClick={() => update({ view: v })} className={cn("inline-flex min-h-10 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", state.view === v ? "bg-cream text-ink" : "text-cream/80")}>
+            <button key={v} type="button" aria-pressed={state.view === v} onClick={() => update({ view: v })} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", state.view === v ? "bg-cream text-ink" : "text-cream/80")}>
               {v === "list" ? <List className="size-4" aria-hidden /> : <MapIcon className="size-4" aria-hidden />} {v === "list" ? tu("list") : tu("mapView")}
             </button>
           ))}

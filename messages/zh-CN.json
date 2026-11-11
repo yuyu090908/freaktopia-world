@@ -71,7 +71,10 @@
       "create": "创建",
       "info": "信息",
       "account": "账户",
-      "myWorld": "我的"
+      "myWorld": "我的",
+      "discover": "探索",
+      "join": "参与",
+      "manage": "管理"
     },
     "pages": {
       "worldMap": "世界地图",
@@ -1246,7 +1249,8 @@
     "paused": "已暂停",
     "watching": "正在观看",
     "festivalsCount": "{n} 个音乐节",
-    "emptyBody": "只有接入了正版授权直播的活动才会显示在这里。即将举办的节日列在下方。"
+    "emptyBody": "只有接入了正版授权直播的活动才会显示在这里。即将举办的节日列在下方。",
+    "browseUpcoming": "即将举行的活动"
   },
   "dao": {
     "title": "音乐节 DAO",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "我的数据在哪里？",
     "qaDataA": "账户数据（资料、外星人、设置）随你的账户保存。访客演示活动留在你的浏览器中。可在 个人资料 → 设置 中管理。",
     "qaVenueQ": "我可以登记我的场地吗？",
-    "qaVenueA": "可以——五个步骤，包括照片、价格、设备和日期。"
+    "qaVenueA": "可以——五个步骤，包括照片、价格、设备和日期。",
+    "errName": "请填写你的名字",
+    "errEmail": "请输入有效的邮箱",
+    "errMessage": "留言至少需要 10 个字符"
   },
   "seo": {
     "aboutTitle": "关于",

@@ -150,3 +150,47 @@ test("MY: FREAK ID / Activity / Settings tabs, and reset asks first in a dialog"
   await expect(dialog).toBeHidden();
   await noSideways(page);
 });
+
+/* ---------- 10.0 ---------- */
+
+test("events: filters live in the URL and survive reload and the back button", async ({ page }) => {
+  await page.goto("/events");
+  await expect(page.getByTestId("events-count")).toHaveAttribute("data-ready", "true");
+  await page.getByTestId("filters-open").click();
+  const sheet = page.getByRole("dialog", { name: "Filters" });
+  await sheet.getByRole("button", { name: "Funding", exact: true }).click();
+  await sheet.getByTestId("filter-apply").click();
+  await expect(page).toHaveURL(/status=funding/);
+  const shown = await page.getByTestId("events-count").locator("b").textContent();
+  await page.reload();
+  await expect(page.getByTestId("events-count")).toHaveAttribute("data-ready", "true");
+  await expect(page.getByTestId("events-count").locator("b")).toHaveText(shown!);
+  await expect(page.getByTestId("active-filters")).toContainText("Funding");
+  // Open an event, then come back: the filter is still on.
+  await page.locator('[data-testid="event-row"]:not([data-testid="events-completed"] *)').first().getByRole("link").first().click();
+  await expect(page).toHaveURL(/\/events\/[^/?]+$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/status=funding/);
+  await expect(page.getByTestId("active-filters")).toContainText("Funding");
+});
+
+test("rankings: the list is in the server HTML (no client fetch needed for the first page)", async ({ request }) => {
+  const html = await (await request.get("/rankings")).text();
+  expect(html).toMatch(/data-testid="ranking-(row|top)/);
+});
+
+test("contact form: translated errors, focus moves to the first field with an error", async ({ page }) => {
+  await page.goto("/ja/contact");
+  await page.getByRole("button", { name: "送信" }).click();
+  await expect(page.getByText("名前を入力してください")).toBeVisible();
+  await expect(page.locator("#c-name")).toBeFocused();
+});
+
+test("world at 320px in Japanese: the Map/List toggle stays on one line", async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await page.goto("/ja/world");
+  const group = page.getByRole("group", { name: "表示" });
+  await expect(group).toBeVisible({ timeout: 20_000 });
+  for (const b of await group.getByRole("button").all()) expect((await b.boundingBox())!.height).toBeLessThanOrEqual(46);
+  await noSideways(page);
+});

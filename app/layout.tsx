@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
-import { Noto_Sans, Noto_Sans_JP, Noto_Sans_KR, Noto_Sans_SC, Noto_Sans_Thai } from "next/font/google";
 import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
@@ -15,6 +14,7 @@ import { Footer } from "@/components/layout/Footer";
 import { FooterGate } from "@/components/layout/FooterGate";
 import { Toaster } from "@/components/ui/Toaster";
 import { KeyboardWatcher } from "@/components/layout/KeyboardWatcher";
+import { LocaleFont } from "@/components/i18n/LocaleFont";
 import { SITE_URL } from "@/lib/utils";
 
 const bowlby = localFont({
@@ -33,13 +33,7 @@ const inter = localFont({
   weight: "100 900",
 });
 
-// Script fonts for the non-Latin locales. Not preloaded: the browser downloads only the unicode-range
-// slices a page actually uses, and only for the language being shown (see :lang() rules in globals.css).
-const notoJP = Noto_Sans_JP({ subsets: ["latin"], variable: "--font-noto-jp", display: "swap", preload: false });
-const notoKR = Noto_Sans_KR({ subsets: ["latin"], variable: "--font-noto-kr", display: "swap", preload: false });
-const notoSC = Noto_Sans_SC({ subsets: ["latin"], variable: "--font-noto-sc", display: "swap", preload: false });
-const notoThai = Noto_Sans_Thai({ subsets: ["thai"], variable: "--font-noto-thai", display: "swap", preload: false });
-const noto = Noto_Sans({ subsets: ["cyrillic", "vietnamese", "latin-ext"], variable: "--font-noto", display: "swap", preload: false });
+// Script fonts for the non-Latin locales are loaded on demand for the active locale only (LocaleFont).
 
 export async function generateMetadata(): Promise<Metadata> {
   const { locale } = await currentLocale();
@@ -70,7 +64,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { locale, prefixed } = await currentLocale();
   const messages = await getMessages();
-  const fonts = [bowlby, inter, notoJP, notoKR, notoSC, notoThai, noto].map((f) => f.variable).join(" ");
+  const fonts = [bowlby, inter].map((f) => f.variable).join(" ");
   return (
     <html lang={LOCALE_META[locale].hreflang} dir={LOCALE_META[locale].dir} className={fonts}>
       <body>
@@ -87,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <MobileBottomNav />
         <Toaster />
         <KeyboardWatcher />
+        <LocaleFont locale={locale} />
         </LocaleProvider>
         </NextIntlClientProvider>
       </body>

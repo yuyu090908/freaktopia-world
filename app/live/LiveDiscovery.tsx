@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useNearViewport } from "@/lib/useNearViewport";
 import { ArrowRight, Bell, BellRing, CalendarDays, Disc3, Eye, MapPin, Mic2, PartyPopper, Radio, Search, Users, X } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
 import { Chip, DemoBadge, DemoNotice, Tag } from "@/components/ui/primitives";
@@ -71,6 +72,7 @@ export function LiveDiscovery() {
   const [sort, setSort] = useState<SortKey>("soon");
   const [mapKind, setMapKind] = useState<MapKind | "ALL">("ALL");
   const [selected, setSelected] = useState<string | null>(null);
+  const [mapBox, mapNear] = useNearViewport<HTMLDivElement>();
   const data = q.state.status === "ok" ? q.state.data : null;
 
   const list = useMemo(() => {
@@ -146,7 +148,7 @@ export function LiveDiscovery() {
                   </div>
                 ) : (
                   <div data-testid="no-real-live">
-                    <EmptyState title={tu("noFestivalIsStreamingLive")} body={tu("emptyBody")} />
+                    <EmptyState title={tu("noFestivalIsStreamingLive")} body={tu("emptyBody")} action={<Link href="/events" className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-4 text-sm font-extrabold uppercase hover:border-cream/50" data-testid="live-empty-events">{tu("browseUpcoming")} <ArrowRight className="size-4" aria-hidden /></Link>} />
                   </div>
                 )}
                 {demo.map((e) => <FeaturedCard key={e.id} e={e} />)}
@@ -209,8 +211,9 @@ export function LiveDiscovery() {
                 </Chip>
               ))}
             </div>
-            <div className="relative mt-3 h-[380px] overflow-hidden border-y-2 border-line md:h-[460px] md:rounded-[28px] md:border-2" data-testid="live-world-map">
-              <WorldMap points={points} selectedId={selected} onSelect={setSelected} focus={0} />
+            <div ref={mapBox} className="relative mt-3 h-[380px] overflow-hidden border-y-2 border-line md:h-[460px] md:rounded-[28px] md:border-2" data-testid="live-world-map">
+              {/* The map engine (~1 MB of JS) loads only when the map is about to scroll into view. */}
+              {mapNear ? <WorldMap points={points} selectedId={selected} onSelect={setSelected} focus={0} /> : <LoadingSkeleton variant="map" />}
               {sel && <MapSheet e={sel} onClose={() => setSelected(null)} />}
             </div>
             <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tu("pinsWithAnUnconfirmedVenue")}</p>

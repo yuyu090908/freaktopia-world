@@ -126,3 +126,20 @@ export function toSearchParams(s: UrlState) {
 
 export const activeFilterCount = (s: UrlState) =>
   [s.country, s.city, s.genre, s.status, s.price, s.level, s.dj, s.ap, s.dao].filter(Boolean).length + (s.period !== "all" ? 1 : 0);
+
+/** Build the API query string for a URL state (+ personalization for FOR YOU). */
+export function apiParams(s: UrlState, page: number, pers?: { genres: string[]; city: string; djs: string[]; follows: string[] }) {
+  const p = toSearchParams(s);
+  p.delete("view");
+  p.set("category", s.category);
+  p.set("page", String(page));
+  p.set("pageSize", "20");
+  if (s.category === "for_you" && pers) {
+    if (pers.genres.length) p.set("pg", pers.genres.join(","));
+    if (pers.city) p.set("pc", pers.city);
+    if (pers.djs.length) p.set("pd", pers.djs.join(","));
+    if (pers.follows.length) p.set("pf", pers.follows.join(","));
+  }
+  return p.toString();
+}
+

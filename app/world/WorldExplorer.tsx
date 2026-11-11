@@ -29,6 +29,7 @@ import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, QUICK_FLAGS, STATUS_FLAGS, fi
 import { buildCities, cityKeyOf } from "@/lib/map/cities";
 import { REGION_COLOR, REGION_KEYS, REGION_VIEW, type RegionKey } from "@/lib/map/regions";
 import { CityPreview } from "@/components/world/CityPreview";
+import { SpaceSky } from "@/components/world/SpaceBackdrop";
 import { useDemo } from "@/lib/store";
 import type { EventLevel, Genre } from "@/lib/types";
 import { cn, fmtDate } from "@/lib/utils";
@@ -40,12 +41,18 @@ import { useAuth } from "@/lib/auth/client";
 
 const FestivalWorldMap = dynamic(() => import("@/components/world/FestivalWorldMap"), {
   ssr: false,
-  loading: () => (
-    <div className="absolute inset-0 bg-[#070A12]">
-      <LoadingSkeleton variant="map" />
-    </div>
-  ),
+  loading: () => <MapLoading />,
 });
+
+/** While data or the map engine load: the real space backdrop with a status, not a blank grey block. */
+function MapLoading() {
+  return (
+    <div className="absolute inset-0">
+      <SpaceSky />
+      <LoadingSkeleton variant="map" className="!bg-transparent opacity-40" />
+    </div>
+  );
+}
 
 type Load = { status: "loading" } | { status: "error"; message: string } | { status: "ok"; data: WorldMapResponse };
 
@@ -338,11 +345,7 @@ export function WorldExplorer() {
 
       {/* map */}
       {device && load.status === "ok" && (lite ? <LiteWorldMap events={results} selectedId={selected} onSelect={select} zoomRef={liteRef as never} /> : <FestivalWorldMap ref={mapRef} events={results} selectedId={selected} onSelect={select} rich={rich} globe={globe} locale={locale} lowPower={!!device.lowPower} autoSpin={device.spin} animate={rich && !device.reducedMotion} reducedMotion={device.reducedMotion} padding={padding} remoteTiles={device.remoteTiles} me={meProp} selectedCity={city?.key ?? null} onSelectCity={openCity} onReady={onMapReady} />)}
-      {(load.status === "loading" || !device) && (
-        <div className="absolute inset-0">
-          <LoadingSkeleton variant="map" />
-        </div>
-      )}
+      {(load.status === "loading" || !device) && <MapLoading />}
       {load.status === "error" && (
         <div className="absolute inset-x-4 top-1/2 z-10 mx-auto max-w-sm -translate-y-1/2">
           <EmptyState title={t("loadFailed")} body={load.message} className="bg-ink/90" />
@@ -376,7 +379,7 @@ export function WorldExplorer() {
         </div>
         <div className="pointer-events-auto mx-auto mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-2 px-3 md:px-4">
           <span className="rounded-full bg-ink/85 px-3 py-1 text-xs font-bold" aria-live="polite">
-            <span data-testid="world-count">{t("count", { count: results.length })}</span>
+            <span key={results.length} className="count-flash" data-testid="world-count">{t("count", { count: results.length })}</span>
             <span className="ml-1.5 font-semibold text-mute" data-testid="world-breakdown">{tf("breakdown", { community: results.filter((r) => r.source === "community").length, sample: results.filter((r) => r.source !== "community").length })}</span>
           </span>
           <DemoBadge label={tc("sampleEvents")} className="bg-ink/85" />
@@ -436,8 +439,8 @@ export function WorldExplorer() {
 
       {/* bottom: Map/List toggle */}
       {!((sel || city) && !desktop) && load.status === "ok" && (
-        <div className="absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 rounded-full border-2 border-line bg-[#0D121B]/92 p-1 shadow-[0_8px_30px_rgba(0,0,0,.5)] backdrop-blur" role="group" aria-label={t("view")}>
-          <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")} className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", view === "map" && "bg-acid text-ink")}>
+        <div className="absolute bottom-4 left-1/2 z-20 flex w-max -translate-x-1/2 rounded-full border-2 border-line bg-[#0D121B]/92 p-1 shadow-[0_8px_30px_rgba(0,0,0,.5)] backdrop-blur" role="group" aria-label={t("view")}>
+          <button type="button" aria-pressed={view === "map"} onClick={() => setView("map")} className={cn("inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-extrabold uppercase", view === "map" && "bg-acid text-ink")}>
             <MapIcon className="size-4" aria-hidden /> {t("mapView")}
           </button>
           <button
@@ -447,7 +450,7 @@ export function WorldExplorer() {
               setView("list");
               setSelected(null);
             }}
-            className={cn("inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-extrabold uppercase", view === "list" && "bg-acid text-ink")}
+            className={cn("inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full px-4 text-sm font-extrabold uppercase", view === "list" && "bg-acid text-ink")}
           >
             <List className="size-4" aria-hidden /> {t("listView")}
           </button>

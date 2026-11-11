@@ -35,13 +35,13 @@ const contrastOf = (p: Page, sel: string) =>
   });
 
 test.describe("mobile menu", () => {
-  test("five colour-coded groups, quick access, every link opens a real page", async ({ page }) => {
+  test("five colour-coded groups (discover, join, create, manage, info), quick access, every link opens a real page", async ({ page }) => {
     await page.goto("/events");
     await open(page);
-    for (const g of ["explore", "create", "play", "myWorld", "info"]) await expect(page.getByTestId(`menu-group-${g}`)).toBeVisible();
+    for (const g of ["discover", "join", "create", "manage", "info"]) await expect(page.getByTestId(`menu-group-${g}`)).toBeVisible();
     await expect(page.getByTestId("menu-quick")).toHaveCount(4);
     // The current page is marked.
-    await expect(page.getByTestId("menu-group-explore").locator('[aria-current="page"]')).toHaveText(/Events/);
+    await expect(page.getByTestId("menu-group-discover").locator('[aria-current="page"]')).toHaveText(/Events/);
     const links = await page.getByTestId("menu").locator("a").evaluateAll((as) => [...new Set(as.map((a) => a.getAttribute("href")!))]);
     expect(links.length).toBeGreaterThanOrEqual(26);
     // Each page appears once in the groups (quick access is the only shortcut layer).
@@ -83,7 +83,7 @@ test.describe("mobile menu", () => {
 
     // A menu link navigates and the menu closes.
     await open(page);
-    await page.getByTestId("menu-group-explore").getByRole("link", { name: "DJ Arena" }).click();
+    await page.getByTestId("menu-group-discover").getByRole("link", { name: "DJ Arena" }).click();
     await expect(page).toHaveURL(/\/djs$/);
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
@@ -122,7 +122,7 @@ test("signed in: My World opens the person's own world", async ({ browser }) => 
   await open(page);
   const tile = page.getByTestId("menu-quick").filter({ hasText: "My World" });
   await expect(tile).toHaveAttribute("href", `/u/${me.alien.publicId}/world`);
-  await expect(page.getByTestId("menu-group-myWorld")).not.toContainText("Sign in to open your world");
+  await expect(page.getByTestId("menu-group-manage")).not.toContainText("Sign in to open your world");
   await tile.click();
   await expect(page.getByTestId("world-title")).toBeVisible();
 });

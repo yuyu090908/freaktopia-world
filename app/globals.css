@@ -3,11 +3,11 @@
 @theme {
   /* Design system 2026 (docs/DESIGN_SYSTEM.md). Background → surface → card; status colours never double as actions. */
   --color-ink: #0b0910; /* page background */
-  --color-surface: #15111d; /* secondary background */
-  --color-surface-2: #211b2b; /* cards */
-  --color-line: #3b3048; /* borders */
+  --color-surface: #17121f; /* secondary background */
+  --color-surface-2: #241c2e; /* cards */
+  --color-line: #40334e; /* borders */
   --color-cream: #ffffff; /* main text */
-  --color-mute: #bdb5c8; /* secondary text */
+  --color-mute: #c0b8cb; /* secondary text */
   --color-acid: #c1ff53; /* primary action (one per screen) */
   --color-pink: #ff79cd; /* accent */
   --color-blue: #66dfff; /* accent (cyan) */
@@ -17,8 +17,8 @@
   --color-success: #58db9b; /* status: success */
   --color-orange: #ffad5b;
 
-  --font-display: var(--font-bowlby), "Arial Black", var(--font-noto), "Hiragino Sans", "Noto Sans JP", sans-serif;
-  --font-sans: var(--font-inter), var(--font-noto), "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
+  --font-display: var(--font-bowlby), "Arial Black", var(--font-noto, "Noto Sans"), "Hiragino Sans", "Noto Sans JP", sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto, "Noto Sans"), "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", "Meiryo", system-ui, sans-serif;
 
   --radius-4xl: 2rem;
   --animate-blink: blink 5s infinite;
@@ -76,23 +76,23 @@ body {
 /* Script fonts per language (Inter and Bowlby One are Latin-only). Latin text keeps the brand fonts;
    Japanese, Korean, Chinese and Thai fall through to their Noto family; Cyrillic and Vietnamese to Noto Sans. */
 html:lang(ja) {
-  --font-sans: var(--font-inter), var(--font-noto-jp), "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
-  --font-display: var(--font-bowlby), var(--font-noto-jp), "Hiragino Sans", sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto-jp, "Noto Sans JP"), "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-display: var(--font-bowlby), var(--font-noto-jp, "Noto Sans JP"), "Hiragino Sans", sans-serif;
 }
 html:lang(ko) {
-  --font-sans: var(--font-inter), var(--font-noto-kr), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
-  --font-display: var(--font-bowlby), var(--font-noto-kr), sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto-kr, "Noto Sans KR"), "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-display: var(--font-bowlby), var(--font-noto-kr, "Noto Sans KR"), sans-serif;
 }
 html:lang(zh-CN) {
-  --font-sans: var(--font-inter), var(--font-noto-sc), "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-display: var(--font-bowlby), var(--font-noto-sc), sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto-sc, "Noto Sans SC"), "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-display: var(--font-bowlby), var(--font-noto-sc, "Noto Sans SC"), sans-serif;
 }
 html:lang(th) {
-  --font-sans: var(--font-inter), var(--font-noto-thai), "Thonburi", "Leelawadee UI", system-ui, sans-serif;
-  --font-display: var(--font-bowlby), var(--font-noto-thai), sans-serif;
+  --font-sans: var(--font-inter), var(--font-noto-thai, "Noto Sans Thai"), "Thonburi", "Leelawadee UI", system-ui, sans-serif;
+  --font-display: var(--font-bowlby), var(--font-noto-thai, "Noto Sans Thai"), sans-serif;
 }
 html:lang(ru), html:lang(vi) {
-  --font-display: var(--font-bowlby), var(--font-noto), sans-serif;
+  --font-display: var(--font-bowlby), var(--font-noto, "Noto Sans"), sans-serif;
 }
 /* Display headings are uppercase, tight and heavy: give non-Latin scripts room to breathe. */
 html:lang(ja) :is(h1, h2, h3, .font-display), html:lang(ko) :is(h1, h2, h3, .font-display),
@@ -472,3 +472,8 @@ input[type="range"].fk-range::-moz-range-thumb {
 .lm-still .wm-city-live { animation: none; }
 @media (prefers-reduced-motion: reduce) { .wm-city-live { animation: none !important; } }
 .wm-city .wm-dao { top: auto; bottom: 6px; left: calc(50% - 46px); }
+
+/* A result count that just changed flashes once, so a filter change visibly updates the list. */
+@keyframes count-flash { from { color: var(--color-acid); } to { color: inherit; } }
+.count-flash { animation: count-flash .8s ease-out; }
+@media (prefers-reduced-motion: reduce) { .count-flash { animation: none; } }

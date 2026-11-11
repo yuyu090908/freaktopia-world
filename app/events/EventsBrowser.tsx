@@ -1,15 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { FilterBar } from "@/components/event/FilterBar";
 import { EventCard, EventRow } from "@/components/cards/Cards";
 import { EmptyState } from "@/components/ui/States";
 import { Button, DemoBadge } from "@/components/ui/primitives";
-import { ARCHIVE_EVENTS, EVENTS } from "@/lib/data";
-import { EMPTY_FILTERS, filterCommunity, filterEvents, type EventFilters } from "@/lib/filters";
+import { ARCHIVE_EVENTS, EVENTS, GENRES } from "@/lib/data";
+import { EMPTY_FILTERS, filterCommunity, filterEvents, readEventsUrl, writeEventsUrl, type EventFilters, type EventSort } from "@/lib/filters";
 import { levelFor } from "@/lib/levels";
 import { useDemo } from "@/lib/store";
 import type { FreakEvent } from "@/lib/types";
@@ -19,7 +19,7 @@ import { useParty } from "@/components/party/shared";
 import { HomeFeatured } from "@/app/HomeFeatured";
 import { distinctCovers } from "@/lib/art";
 
-type Sort = "popular" | "soonest" | "level";
+type Sort = EventSort;
 
 export function EventsBrowser() {
   const tu = useTranslations("events");
@@ -28,6 +28,28 @@ export function EventsBrowser() {
   const tf = useTranslations("eventFilters");
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
+  // Filters live in the URL: reload, a shared link and the back button keep them.
+  const [urlReady, setUrlReady] = useState(false);
+  useEffect(() => {
+    const read = () => {
+      const u = readEventsUrl(window.location.search, GENRES);
+      setFilters(u.filters);
+      setSort(u.sort);
+    };
+    read();
+    setUrlReady(true);
+    window.addEventListener("popstate", read);
+    return () => window.removeEventListener("popstate", read);
+  }, []);
+  useEffect(() => {
+    if (!urlReady) return;
+    // Typing in the search box updates the list at once; the URL follows after a short pause.
+    const id = setTimeout(() => {
+      const qs = writeEventsUrl(filters, sort);
+      if (qs !== window.location.search && !(qs === "" && window.location.search === "")) window.history.replaceState(window.history.state, "", `${window.location.pathname}${qs}${window.location.hash}`);
+    }, 300);
+    return () => clearTimeout(id);
+  }, [filters, sort, urlReady]);
   const support = useDemo((s) => s.support);
   const sim = useDemo((s) => s.sim);
   const created = useDemo((s) => s.createdEvents);
@@ -63,7 +85,7 @@ export function EventsBrowser() {
       <FilterBar filters={filters} setFilters={setFilters} cities={cities} countFor={countFor} />
       <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 md:px-0">
         <p className="min-w-0 text-sm" aria-live="polite" data-testid="events-count" data-ready={communityData || communityError ? "true" : "false"}>
-          <b className="text-base">{tu("lengthEvents", { length: total })}</b>
+          <b key={total} className="count-flash text-base">{tu("lengthEvents", { length: total })}</b>
           <span className="ml-2 text-mute">{tf("breakdown", { community: community.length, sample: list.length })}</span>
         </p>
         <label className="ml-auto flex items-center gap-2 text-sm">

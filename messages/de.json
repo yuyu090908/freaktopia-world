@@ -71,7 +71,10 @@
       "create": "Erstellen",
       "info": "Info",
       "account": "Konto",
-      "myWorld": "Meine Welt"
+      "myWorld": "Meine Welt",
+      "discover": "Entdecken",
+      "join": "Mitmachen",
+      "manage": "Verwalten"
     },
     "pages": {
       "worldMap": "Weltkarte",
@@ -1246,7 +1249,8 @@
     "paused": "pausiert",
     "watching": "schauen zu",
     "festivalsCount": "{n, plural, one {# Festival} other {# Festivals}}",
-    "emptyBody": "Hier erscheinen nur Events mit einem verbundenen, lizenzierten Stream. Kommende Festivals stehen unten."
+    "emptyBody": "Hier erscheinen nur Events mit einem verbundenen, lizenzierten Stream. Kommende Festivals stehen unten.",
+    "browseUpcoming": "Kommende Events"
   },
   "dao": {
     "title": "Festival-DAO",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Wo sind meine Daten?",
     "qaDataA": "Kontodaten (Profil, Alien, Einstellungen) werden mit deinem Konto gespeichert. Gast-Demo-Aktivität bleibt in deinem Browser. Verwalte sie unter Profil → Einstellungen.",
     "qaVenueQ": "Kann ich meine Venue anbieten?",
-    "qaVenueA": "Ja — fünf Schritte mit Fotos, Preis, Equipment und Terminen."
+    "qaVenueA": "Ja — fünf Schritte mit Fotos, Preis, Equipment und Terminen.",
+    "errName": "Bitte gib deinen Namen ein",
+    "errEmail": "Gib eine gültige E-Mail-Adresse ein",
+    "errMessage": "Die Nachricht muss mindestens 10 Zeichen haben"
   },
   "seo": {
     "aboutTitle": "Über uns",

@@ -71,7 +71,10 @@
       "create": "Buat",
       "info": "Info",
       "account": "Akun",
-      "myWorld": "Milikku"
+      "myWorld": "Milikku",
+      "discover": "Temukan",
+      "join": "Ikut",
+      "manage": "Kelola"
     },
     "pages": {
       "worldMap": "Peta dunia",
@@ -1246,7 +1249,8 @@
     "paused": "dijeda",
     "watching": "menonton",
     "festivalsCount": "{n} festival",
-    "emptyBody": "Hanya acara dengan siaran berlisensi yang terhubung yang tampil di sini. Festival mendatang ada di bawah."
+    "emptyBody": "Hanya acara dengan siaran berlisensi yang terhubung yang tampil di sini. Festival mendatang ada di bawah.",
+    "browseUpcoming": "Acara mendatang"
   },
   "dao": {
     "title": "DAO festival",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Di mana dataku?",
     "qaDataA": "Data akun (profil, alien, pengaturan) disimpan bersama akunmu. Aktivitas demo tamu tetap di browsermu. Kelola dari Profil → Pengaturan.",
     "qaVenueQ": "Bisakah aku mendaftarkan venue?",
-    "qaVenueA": "Bisa — lima langkah dengan foto, harga, peralatan, dan tanggal."
+    "qaVenueA": "Bisa — lima langkah dengan foto, harga, peralatan, dan tanggal.",
+    "errName": "Masukkan nama Anda",
+    "errEmail": "Masukkan email yang valid",
+    "errMessage": "Pesan minimal 10 karakter"
   },
   "seo": {
     "aboutTitle": "Tentang",

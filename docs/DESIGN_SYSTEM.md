@@ -1,4 +1,4 @@
-# FREAKTOPIA design system 2026
+# FREAKTOPIA design system (COSMIC UI 2.0)
 
 This file is the source of truth for tokens, type, spacing, components and page rules. The tokens live in `app/globals.css` (`@theme`). The components live in `components/ui`, `components/cards` and `components/layout`.
 
@@ -7,11 +7,11 @@ This file is the source of truth for tokens, type, spacing, components and page 
 | Token | Value | Use |
 |---|---|---|
 | `ink` | `#0B0910` | Page background |
-| `surface` | `#15111D` | Secondary background, inputs, sections |
-| `surface-2` | `#211B2B` | Cards |
-| `line` | `#3B3048` | Borders and dividers |
+| `surface` | `#17121F` | Secondary background, inputs, sections |
+| `surface-2` | `#241C2E` | Cards |
+| `line` | `#40334E` | Borders and dividers |
 | `cream` | `#FFFFFF` | Main text |
-| `mute` | `#BDB5C8` | Secondary text (AA on `ink`, `surface` and `surface-2`) |
+| `mute` | `#C0B8CB` | Secondary text (AA on `ink`, `surface` and `surface-2`) |
 | `acid` | `#C1FF53` | **Primary action only**, plus the active nav item and focus |
 | `pink` | `#FF79CD` | Accent |
 | `blue` | `#66DFFF` | Accent (cyan); also the "funding" status |

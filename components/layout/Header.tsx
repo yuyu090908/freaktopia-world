@@ -97,14 +97,14 @@ export function Header() {
               {t("createEvent")}
             </Link>
             <LanguageSwitcher />
-            <button type="button" onClick={() => setSearch(true)} aria-label={t("searchLabel")} className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={() => setSearch(true)} aria-label={t("searchLabel")} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
               <Search className="size-5" />
             </button>
             <span className="hidden sm:contents">
               <AlertsBell />
             </span>
             <AccountButton />
-            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} aria-haspopup="dialog" data-testid="menu-open" className="inline-flex size-11 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} aria-haspopup="dialog" data-testid="menu-open" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
               <Menu className="size-5" />
             </button>
           </div>

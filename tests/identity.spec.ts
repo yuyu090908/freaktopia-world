@@ -98,7 +98,9 @@ test.describe("languages", () => {
     for (const l of LOCALES.filter((x) => x !== "en").concat("en")) {
       await switchLanguage(page, l);
       await expect(page).toHaveURL(new RegExp(`/${l.toLowerCase()}/events$`));
-      await expect(page.getByTestId("lang-switcher").first()).toHaveAttribute("aria-label", dict(l).language.button.replace("{name}", NATIVE[l]));
+      // The accessible name is the visible code followed by this sentence (WCAG 2.5.3 Label in Name).
+      const label = dict(l).language.button.replace("{name}", NATIVE[l]);
+      await expect(page.getByTestId("lang-switcher").first()).toHaveAccessibleName(new RegExp(`${label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
     }
   });
 
@@ -411,11 +413,17 @@ test.describe("18. mobile and desktop widths with non-Latin scripts", () => {
           await page.goto(`/${l.toLowerCase()}${p}`);
           await noHorizontalScroll(page);
         }
-        const loaded = await page.evaluate(async () => {
-          await document.fonts.ready;
-          return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family);
-        });
-        expect(loaded.join("|"), `${l} @${w}`).toMatch(FONT[l]);
+        // Script fonts load on demand for the active language, just after first paint.
+        await expect
+          .poll(
+            () =>
+              page.evaluate(async () => {
+                await document.fonts.ready;
+                return [...document.fonts].filter((f) => f.status === "loaded").map((f) => f.family).join("|");
+              }),
+            { message: `${l} @${w}`, timeout: 15_000 },
+          )
+          .toMatch(FONT[l]);
       }
       await page.goto("/ja");
       await page.getByTestId("lang-switcher").first().click();

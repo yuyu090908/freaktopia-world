@@ -71,7 +71,10 @@
       "create": "Create",
       "info": "Information",
       "account": "Account",
-      "myWorld": "My World"
+      "myWorld": "My World",
+      "discover": "Discover",
+      "join": "Join",
+      "manage": "Manage"
     },
     "pages": {
       "worldMap": "World Map",
@@ -1246,7 +1249,8 @@
     "paused": "paused",
     "watching": "watching",
     "festivalsCount": "{n, plural, one {# festival} other {# festivals}}",
-    "emptyBody": "Only events with a connected, licensed stream appear here. Upcoming festivals are listed below."
+    "emptyBody": "Only events with a connected, licensed stream appear here. Upcoming festivals are listed below.",
+    "browseUpcoming": "Upcoming events"
   },
   "dao": {
     "title": "Festival DAO",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Where is my data?",
     "qaDataA": "Account data (profile, alien, settings) is stored with your account. Guest demo activity stays in your browser. Manage it from Profile → Settings.",
     "qaVenueQ": "Can I list my venue?",
-    "qaVenueA": "Yes — five steps with photos, price, equipment and dates."
+    "qaVenueA": "Yes — five steps with photos, price, equipment and dates.",
+    "errName": "Please add your name",
+    "errEmail": "Enter a valid email",
+    "errMessage": "Message should be 10+ characters"
   },
   "seo": {
     "aboutTitle": "About",

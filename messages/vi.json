@@ -71,7 +71,10 @@
       "create": "Tạo",
       "info": "Thông tin",
       "account": "Tài khoản",
-      "myWorld": "Của tôi"
+      "myWorld": "Của tôi",
+      "discover": "Khám phá",
+      "join": "Tham gia",
+      "manage": "Quản lý"
     },
     "pages": {
       "worldMap": "Bản đồ thế giới",
@@ -1246,7 +1249,8 @@
     "paused": "tạm dừng",
     "watching": "đang xem",
     "festivalsCount": "{n} lễ hội",
-    "emptyBody": "Chỉ sự kiện có luồng phát được cấp phép và đã kết nối mới hiện ở đây. Lễ hội sắp tới ở bên dưới."
+    "emptyBody": "Chỉ sự kiện có luồng phát được cấp phép và đã kết nối mới hiện ở đây. Lễ hội sắp tới ở bên dưới.",
+    "browseUpcoming": "Sự kiện sắp tới"
   },
   "dao": {
     "title": "DAO lễ hội",
@@ -2873,7 +2877,10 @@
     "qaDataQ": "Dữ liệu của tôi ở đâu?",
     "qaDataA": "Dữ liệu tài khoản (hồ sơ, người ngoài hành tinh, cài đặt) được lưu cùng tài khoản. Hoạt động demo của khách nằm trong trình duyệt. Quản lý tại Hồ sơ → Cài đặt.",
     "qaVenueQ": "Tôi có thể đăng địa điểm không?",
-    "qaVenueA": "Có — năm bước với ảnh, giá, thiết bị và ngày."
+    "qaVenueA": "Có — năm bước với ảnh, giá, thiết bị và ngày.",
+    "errName": "Vui lòng nhập tên của bạn",
+    "errEmail": "Nhập email hợp lệ",
+    "errMessage": "Tin nhắn cần ít nhất 10 ký tự"
   },
   "seo": {
     "aboutTitle": "Giới thiệu",

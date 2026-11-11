@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useLeaveWarning } from "@/lib/useLeaveWarning";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -36,11 +37,12 @@ export function DJApplyForm() {
   const [sent, setSent] = useState(false);
   const recruiting = EVENTS.filter((e) => e.djRecruiting);
   const pre = params.get("event");
-  const { register, control, handleSubmit, trigger, formState: { errors }, getValues } = useForm<V>({
+  const { register, control, handleSubmit, trigger, formState: { errors, isDirty }, getValues } = useForm<V>({
     resolver: zodResolver(schema),
     defaultValues: { djName: "", city: "", genres: [], bpm: 128, eventId: pre && EVENTS.some((e) => e.id === pre) ? pre : "", mixUrl: "", message: "" },
     mode: "onTouched",
   });
+  useLeaveWarning(isDirty && !sent);
 
   const submit = handleSubmit((v) => {
     add({ id: uid("app"), eventId: v.eventId, djName: v.djName, genres: v.genres as Genre[], bpm: Number(v.bpm), city: v.city, mixUrl: v.mixUrl, message: v.message, createdAt: new Date().toISOString(), status: "pending" });

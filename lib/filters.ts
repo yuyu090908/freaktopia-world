@@ -96,3 +96,52 @@ export function filterCommunity<T extends CommunityListing>(parties: T[], f: Eve
 
 export const activeFilterCount = (f: EventFilters) =>
   (f.place ? 1 : 0) + f.genres.length + f.levels.length + (f.date !== "any" ? 1 : 0) + f.statuses.length + (f.price !== "any" ? 1 : 0) + [f.djWanted, f.afterParty].filter(Boolean).length;
+
+/* ---------- URL sync (EVENTS): filters survive reload, sharing and the back button ---------- */
+
+const DATE_VALUES: DateRange[] = ["any", "30d", "90d", "2027"];
+const STATUS_VALUES: StatusFilter[] = ["live", "confirmed", "funding"];
+const PRICE_VALUES: PriceFilter[] = ["any", "free", "u30", "u60"];
+export type EventSort = "popular" | "soonest" | "level";
+const SORT_VALUES: EventSort[] = ["popular", "soonest", "level"];
+
+const csv = (p: URLSearchParams, k: string) => (p.get(k) ?? "").split(",").map((x) => x.trim()).filter(Boolean);
+
+/** Reads EVENTS filters from a query string. Unknown values are dropped, never guessed. */
+export function readEventsUrl(search: string, genres: readonly string[]): { filters: EventFilters; sort: EventSort } {
+  const p = new URLSearchParams(search);
+  const date = p.get("date") as DateRange | null;
+  const price = p.get("price") as PriceFilter | null;
+  const sort = p.get("sort") as EventSort | null;
+  return {
+    filters: {
+      q: (p.get("q") ?? "").slice(0, 80),
+      place: (p.get("city") ?? "").slice(0, 80),
+      genres: [...new Set(csv(p, "genre").filter((g) => genres.includes(g)))] as Genre[],
+      levels: [...new Set(csv(p, "lv").map(Number).filter((n) => Number.isInteger(n) && n >= 1 && n <= 5))] as EventLevel[],
+      date: date && DATE_VALUES.includes(date) ? date : "any",
+      statuses: [...new Set(csv(p, "status").filter((s): s is StatusFilter => (STATUS_VALUES as string[]).includes(s)))],
+      price: price && PRICE_VALUES.includes(price) ? price : "any",
+      djWanted: p.get("dj") === "1",
+      afterParty: p.get("after") === "1",
+    },
+    sort: sort && SORT_VALUES.includes(sort) ? sort : "soonest",
+  };
+}
+
+/** The query string for EVENTS filters (empty values are left out, so a clean page has a clean URL). */
+export function writeEventsUrl(f: EventFilters, sort: EventSort): string {
+  const p = new URLSearchParams();
+  if (f.q.trim()) p.set("q", f.q.trim());
+  if (f.place) p.set("city", f.place);
+  if (f.genres.length) p.set("genre", f.genres.join(","));
+  if (f.levels.length) p.set("lv", f.levels.join(","));
+  if (f.date !== "any") p.set("date", f.date);
+  if (f.statuses.length) p.set("status", f.statuses.join(","));
+  if (f.price !== "any") p.set("price", f.price);
+  if (f.djWanted) p.set("dj", "1");
+  if (f.afterParty) p.set("after", "1");
+  if (sort !== "soonest") p.set("sort", sort);
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}

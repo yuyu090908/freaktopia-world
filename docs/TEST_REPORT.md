@@ -1,3 +1,27 @@
+# WORLD 10.0 (2026-11-11)
+
+These were run on a local production build in a cloud container. The deployed site could not be reached, so nothing here is measured on production or on a real phone. All tests are **mock tests** (in-memory demo store, clock pinned to 2026-11-09 14:00 UTC). No external service is connected, so there are no real-connection tests.
+
+- **vitest:** 232 of 232 pass.
+- **i18n:** 4,190 keys in all 12 locales. Every literal `t()` key exists in its own namespace.
+- **Playwright, full suite (mobile 390px project, 2 workers):** 155 of 155 pass.
+  - Four 10.0 tests run on top of the full run:
+    - EVENTS filters survive reload and the back button.
+    - The RANKINGS list is in the server HTML.
+    - Contact errors are translated and focus moves to the first field with an error.
+    - The Map/List toggle stays on one line at 320px in Japanese.
+  - The tests for the language button name and the on-demand script fonts were updated to match the new behaviour.
+- **Real-browser audit (Chromium, ja-JP, real clock) at 320, 375, 390, 430, 768, 1024 and 1440px:**
+  - Covered `/`, `/world`, `/events`, `/live`, `/rankings`, `/tickets`, `/dashboard`, `/events/create` and `/profile`.
+  - **0 pages with sideways scroll** (63 page × width checks).
+  - All header buttons are now at least 44px.
+  - Below 44px, only these remain:
+    - LIVE card title links (34px). Each card also has a 48px button.
+    - The map attribution link.
+- **Screenshots:** `docs/screenshots/world10/`, with phones at 320–430 side by side, plus 768, 1024 and 1440.
+- **Found by the screenshots and fixed:** at 320px in Japanese, the WORLD Map/List toggle wrapped onto two lines. The cause was a centred absolute box that could shrink to half the width.
+- **Lighthouse before → after:** see `docs/WORLD_10_UPGRADE.md`, section E.
+
 # UI/UX redesign 2026 (2026-11-11)
 
 ## How these were run

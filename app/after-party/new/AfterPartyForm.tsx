@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLeaveWarning } from "@/lib/useLeaveWarning";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,11 +35,12 @@ export function AfterPartyForm() {
   const add = useDemo((s) => s.addAfterParty);
   const pre = params.get("event") ?? "";
   const preEv = getEvent(pre);
-  const { register, control, handleSubmit, formState: { errors } } = useForm<V>({
+  const { register, control, handleSubmit, formState: { errors, isDirty, isSubmitSuccessful } } = useForm<V>({
     resolver: zodResolver(schema),
     defaultValues: { eventId: preEv ? pre : "", name: "", venueName: "", date: preEv ? preEv.endsAt.slice(0, 10) : "", start: "05:00", end: "11:00", price: 15, capacity: 150, djIds: [], description: "" },
     mode: "onTouched",
   });
+  useLeaveWarning(isDirty && !isSubmitSuccessful);
 
   const submit = handleSubmit((v) => {
     const ev = getEvent(v.eventId)!;
