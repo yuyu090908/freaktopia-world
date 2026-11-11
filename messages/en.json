@@ -2281,7 +2281,10 @@
         "cape-town": "Coastal Festival",
         "sydney": "Harbour Festival"
       }
-    }
+    },
+    "heroVideoPlay": "Play background video",
+    "heroVideoPause": "Pause background video",
+    "heroVideoAlt": "Three alien friends walk toward the FREAKTOPIA festival stage at sunset."
   },
   "djs": {
     "whoRulesTheBooth": "Who rules the booth?",

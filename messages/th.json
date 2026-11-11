@@ -2656,7 +2656,10 @@
         "cape-town": "เทศกาลริมชายฝั่ง",
         "sydney": "เทศกาลริมอ่าว"
       }
-    }
+    },
+    "heroVideoPlay": "เล่นวิดีโอพื้นหลัง",
+    "heroVideoPause": "หยุดวิดีโอพื้นหลังชั่วคราว",
+    "heroVideoAlt": "เพื่อนเอเลี่ยนสามตัวเดินไปยังเวทีเทศกาล FREAKTOPIA ยามพระอาทิตย์ตก"
   },
   "afterParty": {
     "lengthAfterParties": "{length} อาฟเตอร์ปาร์ตี้",

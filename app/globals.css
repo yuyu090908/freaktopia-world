@@ -112,6 +112,9 @@ h1, h2, h3, .font-display {
   overflow-wrap: normal;
   word-break: keep-all;
 }
+/* The home hero title must wrap on phones in every language (keep-all never breaks Japanese/Chinese lines). */
+.hero-title { word-break: normal; overflow-wrap: anywhere; }
+@supports (word-break: auto-phrase) { :lang(ja) .hero-title { word-break: auto-phrase; overflow-wrap: normal; } }
 
 /* Space backdrop: purple/pink smoke + starfield, fixed behind everything.
    Pure CSS so it costs no network and composites once. */

@@ -6,6 +6,8 @@ import type { StaticImageData } from "next/image";
 import logo from "@/assets/art/logo.webp";
 import heroPoster from "@/assets/art/hero-poster.webp";
 import heroWide from "@/assets/art/hero-wide.webp";
+import heroVideoWide from "@/assets/art/hero-video-wide.webp";
+import heroVideoTall from "@/assets/art/hero-video-tall.webp";
 import posterCity from "@/assets/art/poster-city.webp";
 import worldMap from "@/assets/art/world-map.webp";
 import panelUniverse from "@/assets/art/panel-universe.webp";
@@ -49,6 +51,8 @@ export const ART = {
   logo,
   heroPoster,
   heroWide,
+  heroVideoWide,
+  heroVideoTall,
   posterCity,
   worldMap,
   panelUniverse,
@@ -196,3 +200,12 @@ export function distinctCovers<T extends { id: string; city?: string | null; gen
 
 export const afterPartyArt = (id: string): ArtPick =>
   hash(id) % 2 ? { src: panelAfterparty, pos: "50% 40%" } : { src: panelAfterparty, pos: "30% 60%" };
+
+/**
+ * Home background video (official FREAKTOPIA clips, joined and trimmed: the title card at the end of the second clip is cut
+ * so it never competes with the HTML title). No audio. The poster is the first frame, so nothing jumps when playback starts.
+ */
+export const HERO_VIDEO = {
+  wide: { src: "/video/hero-wide.mp4", poster: heroVideoWide, width: 1280, height: 720 },
+  tall: { src: "/video/hero-tall.mp4", poster: heroVideoTall, width: 576, height: 720 },
+} as const;

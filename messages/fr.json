@@ -2656,7 +2656,10 @@
         "cape-town": "Festival côtier",
         "sydney": "Festival du port"
       }
-    }
+    },
+    "heroVideoPlay": "Lire la vidéo d'arrière-plan",
+    "heroVideoPause": "Mettre en pause la vidéo d'arrière-plan",
+    "heroVideoAlt": "Trois amis extraterrestres marchent vers la scène du festival FREAKTOPIA au coucher du soleil."
   },
   "afterParty": {
     "lengthAfterParties": "{length} afters",

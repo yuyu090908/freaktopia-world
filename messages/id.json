@@ -2656,7 +2656,10 @@
         "cape-town": "Festival pesisir",
         "sydney": "Festival pelabuhan"
       }
-    }
+    },
+    "heroVideoPlay": "Putar video latar",
+    "heroVideoPause": "Jeda video latar",
+    "heroVideoAlt": "Tiga sahabat alien berjalan menuju panggung festival FREAKTOPIA saat matahari terbenam."
   },
   "afterParty": {
     "lengthAfterParties": "{length} after party",

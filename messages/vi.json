@@ -2656,7 +2656,10 @@
         "cape-town": "Lễ hội ven biển",
         "sydney": "Lễ hội bến cảng"
       }
-    }
+    },
+    "heroVideoPlay": "Phát video nền",
+    "heroVideoPause": "Tạm dừng video nền",
+    "heroVideoAlt": "Ba người bạn ngoài hành tinh đi về phía sân khấu lễ hội FREAKTOPIA lúc hoàng hôn."
   },
   "afterParty": {
     "lengthAfterParties": "{length} tiệc sau",

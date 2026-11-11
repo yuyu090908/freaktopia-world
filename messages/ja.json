@@ -2656,7 +2656,10 @@
         "cape-town": "海辺のフェスティバル",
         "sydney": "ハーバー・フェスティバル"
       }
-    }
+    },
+    "heroVideoPlay": "背景動画を再生",
+    "heroVideoPause": "背景動画を一時停止",
+    "heroVideoAlt": "夕暮れのFREAKTOPIAフェスのステージへ歩いていく3人のエイリアン。"
   },
   "afterParty": {
     "lengthAfterParties": "{length}件のアフターパーティー",

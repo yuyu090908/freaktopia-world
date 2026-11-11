@@ -2656,7 +2656,10 @@
         "cape-town": "海岸音乐节",
         "sydney": "港湾音乐节"
       }
-    }
+    },
+    "heroVideoPlay": "播放背景视频",
+    "heroVideoPause": "暂停背景视频",
+    "heroVideoAlt": "三个外星朋友在日落时分走向 FREAKTOPIA 音乐节舞台。"
   },
   "afterParty": {
     "lengthAfterParties": "{length} 场余兴派对",

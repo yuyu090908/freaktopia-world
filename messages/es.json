@@ -2656,7 +2656,10 @@
         "cape-town": "Festival costero",
         "sydney": "Festival del puerto"
       }
-    }
+    },
+    "heroVideoPlay": "Reproducir video de fondo",
+    "heroVideoPause": "Pausar video de fondo",
+    "heroVideoAlt": "Tres amigos alienígenas caminan hacia el escenario del festival FREAKTOPIA al atardecer."
   },
   "afterParty": {
     "lengthAfterParties": "{length} after parties",

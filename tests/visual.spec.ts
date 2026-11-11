@@ -44,3 +44,48 @@ test("tickets: each sold kind shows its pass design, selection is marked, no dum
   await tiers.nth(3).getByRole("button", { name: /Add one/ }).click();
   await expect(tiers.nth(3)).toHaveAttribute("data-selected", "true");
 });
+
+test.describe("home background video", () => {
+  test("phone: portrait cut plays muted behind a readable title; the pause button stops it", async ({ page }) => {
+    await page.goto("/");
+    const video = page.getByTestId("hero-video");
+    await expect(video).toHaveAttribute("src", "/video/hero-tall.mp4");
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.muted && !v.paused && v.currentTime > 0), { timeout: 15_000 }).toBe(true);
+    await expect(page.locator("#hero-title")).toBeVisible();
+    const toggle = page.getByTestId("hero-video-toggle");
+    await expect(toggle).toHaveAttribute("aria-label", "Pause background video");
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-pressed", "true");
+    await expect.poll(() => video.evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+    await noSideways(page);
+  });
+
+  test("wide screens get the 16:9 cut", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    await expect(page.getByTestId("hero-video")).toHaveAttribute("src", "/video/hero-wide.mp4");
+  });
+
+  test("reduce motion: poster only, the video is never downloaded", async ({ browser }) => {
+    const ctx = await browser.newContext({ reducedMotion: "reduce", viewport: { width: 390, height: 844 } });
+    const page = await ctx.newPage();
+    const videos: string[] = [];
+    page.on("request", (r) => r.url().includes("/video/") && videos.push(r.url()));
+    await page.goto(new URL("/", test.info().project.use.baseURL ?? "http://localhost:3000").toString());
+    await expect(page.getByTestId("home-hero").locator("img")).toBeVisible();
+    await page.waitForTimeout(1000);
+    await expect(page.getByTestId("hero-video")).toHaveCount(0);
+    expect(videos).toEqual([]);
+    await ctx.close();
+  });
+
+  for (const locale of ["ja", "de", "ru", "th"]) {
+    test(`hero title fits at 320 px (${locale})`, async ({ page }) => {
+      await page.setViewportSize({ width: 320, height: 700 });
+      await page.goto(`/${locale}`);
+      const fits = await page.locator("#hero-title").evaluate((h) => h.scrollWidth <= h.clientWidth + 1);
+      expect(fits).toBe(true);
+      await noSideways(page);
+    });
+  }
+});

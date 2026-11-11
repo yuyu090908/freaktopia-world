@@ -25,10 +25,10 @@ test("home → world map → landmark → bottom sheet → event", async ({ page
   await sheet.getByRole("button", { name: "Show all details" }).click();
   // Wait for the sheet to finish expanding, so the tap lands on the link and not where it was a frame earlier.
   await expect(page.getByTestId("event-sheet")).toHaveAttribute("data-expanded", "true");
-  await expect(async () => {
-    await sheet.getByRole("link", { name: /view event/i }).click();
-    await expect(page).toHaveURL(/\/events\/neon-slime-summit$/, { timeout: 3_000 });
-  }).toPass({ timeout: 15_000 });
+  await sheet.getByRole("link", { name: /view event/i }).click();
+  // Check the real address bar: Playwright's own URL tracking sometimes lags behind Next's client-side pushState.
+  await expect(page.getByRole("heading", { level: 1, name: "NEON SLIME SUMMIT" })).toBeVisible({ timeout: 15_000 });
+  await expect.poll(() => page.evaluate(() => location.pathname), { timeout: 15_000 }).toBe("/events/neon-slime-summit");
 });
 
 test("world map filters reduce results", async ({ page }) => {

@@ -285,3 +285,11 @@ Details in docs/VISUAL_SYSTEM.md.
 - i18n: 4017 keys in all 12 dictionaries, 0 hardcoded strings.
 - Screenshots: docs/screenshots/visual94/ (home, events, tickets, Berlin city preview, DJ Arena; 1440 and 390).
 - Not measured: Lighthouse, real devices.
+
+## 9.4.1: Home background video (2026-11-11)
+- New in `tests/visual.spec.ts`: phone gets the 4:5 cut and it plays muted; the pause button stops it; wide screens get the 16:9 cut; with "reduce motion" no video is requested; the hero title fits at 320 px in ja/de/ru/th. 10 of 10 pass.
+- Fixed: the Japanese hero title did not wrap on phones (headings use `word-break: keep-all`); the hero title now uses `auto-phrase` in Japanese and normal breaking elsewhere.
+- Screenshots: docs/screenshots/visual94/hero-video-{pc,tab,sp,sp-reduce}.jpg.
+- Not measured: Lighthouse, real devices (iOS Low Power Mode blocks autoplay; the poster stays).
+- `flows.spec` "home → world map → … → event" (flaky since 9.3): logging `history.pushState` showed the app always navigates to `/events/neon-slime-summit`; the old retry loop re-clicked a link that was already gone and reported Playwright's lagging URL. The test now waits for the event page heading and reads `location.pathname`. 6 of 6 repeats passed with two workers.
+- Full run after the change: **Playwright 140 of 140 pass** (two workers), vitest 212 of 212.

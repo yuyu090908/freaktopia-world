@@ -2656,7 +2656,10 @@
         "cape-town": "Küstenfestival",
         "sydney": "Hafenfestival"
       }
-    }
+    },
+    "heroVideoPlay": "Hintergrundvideo abspielen",
+    "heroVideoPause": "Hintergrundvideo pausieren",
+    "heroVideoAlt": "Drei Alien-Freunde gehen bei Sonnenuntergang zur Bühne des FREAKTOPIA-Festivals."
   },
   "afterParty": {
     "lengthAfterParties": "{length} Afterpartys",

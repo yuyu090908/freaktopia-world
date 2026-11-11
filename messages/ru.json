@@ -2656,7 +2656,10 @@
         "cape-town": "Фестиваль на побережье",
         "sydney": "Фестиваль в гавани"
       }
-    }
+    },
+    "heroVideoPlay": "Включить фоновое видео",
+    "heroVideoPause": "Остановить фоновое видео",
+    "heroVideoAlt": "Три друга-инопланетянина идут к сцене фестиваля FREAKTOPIA на закате."
   },
   "afterParty": {
     "lengthAfterParties": "Афтепати: {length}",

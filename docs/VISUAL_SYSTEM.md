@@ -35,3 +35,12 @@ Every image has alt text from the i18n dictionaries; important info (name, price
 - Profile / personal world, AI planner and venue page image layouts.
 - A full migration of every colour to the spec's tokens (the existing palette is close; new parts use the spec accents).
 - Ticket names and perks are English sample data (already so before 9.4).
+
+## Home background video (9.4.1)
+- Source: the two official FREAKTOPIA clips (10 s each, 1080p, with audio) from 2026-11-09. They are joined with a 0.6 s cross-fade; the last 2 s of the second clip (a baked-in "FREAKTOPIA WORLD" title card) are cut so the picture never competes with the HTML title. Sound removed.
+- Files: `public/video/hero-wide.mp4` (1280×720, H.264, 17.4 s, 3.5 MB, for ≥768 px) and `public/video/hero-tall.mp4` (4:5 centre crop 576×720, 1.6 MB, for phones). Originals were 25 MB each. A VP9 WebM was tried and came out larger, so only MP4 is shipped.
+- Poster: the first frame (`assets/art/hero-video-wide.webp` / `-tall.webp`) through next/image with priority, so the first paint and the LCP are an image and nothing jumps when the video starts (fixed 4:5 / 16:9 box).
+- `app/HeroVideo.tsx`: not loaded at all for "reduce motion", Data Saver or 2G (poster only); muted, inline, looping; pauses when scrolled out of view or the tab is hidden; a visible pause/play button (translated label, `aria-pressed`). The video is `aria-hidden`; the poster carries the alt text.
+- Readability: dark gradient scrims (bottom on phones, left + bottom on wider screens) and a text shadow under the HTML title; buttons stay HTML.
+- The illustrated key art that used to be the hero (`hero-wide.webp`, `hero-poster.webp`) is no longer shown on the home page; the files are kept.
+- `/video/*` is cached for a day with background revalidation.

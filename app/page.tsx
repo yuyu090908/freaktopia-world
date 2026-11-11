@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio, Trophy, CalendarDays, Headphones, Building2, Moon, MapPin } from "lucide-react";
 import Image, { getImageProps } from "next/image";
-import { ART, CITY_ART } from "@/lib/art";
+import { ART, CITY_ART, HERO_VIDEO } from "@/lib/art";
+import { HeroVideo } from "./HeroVideo";
 import { CityCard, DJCard, EventCard, IllustratedCard } from "@/components/cards/Cards";
 import { ButtonLink, SectionHeader } from "@/components/ui/primitives";
 import { DJS, EVENTS } from "@/lib/data";
@@ -43,15 +44,15 @@ const MAP_CHIPS = (tu: Tu) => ([
   { href: "/after-party", label: tu("afterParty2"), icon: Moon },
 ]);
 
-function HeroPicture() {
-  const common = { alt: "FREAKTOPIA WORLD: a crowd of aliens raving around a slime DJ. The world is your dancefloor.", priority: true, fetchPriority: "high" as const };
-  const { props: { srcSet: wide } } = getImageProps({ ...common, src: ART.heroWide, sizes: "(min-width:1152px) 1152px, 100vw", quality: 72 });
-  const { props: mobile } = getImageProps({ ...common, src: ART.heroPoster, sizes: "100vw", quality: 70 });
+function HeroPoster({ alt }: { alt: string }) {
+  const common = { alt, priority: true, fetchPriority: "high" as const };
+  const { props: { srcSet: wide } } = getImageProps({ ...common, src: HERO_VIDEO.wide.poster, sizes: "(min-width:1152px) 1104px, 100vw", quality: 70 });
+  const { props: tall } = getImageProps({ ...common, src: HERO_VIDEO.tall.poster, sizes: "100vw", quality: 68 });
   return (
     <picture>
-      <source media="(min-width: 768px)" srcSet={wide} sizes="(min-width:1152px) 1152px, 100vw" />
+      <source media="(min-width: 768px)" srcSet={wide} sizes="(min-width:1152px) 1104px, 100vw" />
       {/* eslint-disable-next-line jsx-a11y/alt-text */}
-      <img {...mobile} className="block h-auto w-full" />
+      <img {...tall} className="absolute inset-0 size-full object-cover" />
     </picture>
   );
 }
@@ -72,21 +73,33 @@ export default function HomePage() {
   const spotlight = featured.find((e) => e.status !== "live" && e.djRecruiting) ?? featured[0];
   return (
     <div className="mx-auto max-w-6xl">
-      {/* HERO: key art supplied by the FREAKTOPIA team */}
-      <section aria-labelledby="hero-title" className="relative">
-        <div className="relative overflow-hidden md:mx-6 md:mt-6 md:rounded-[32px] md:border-2 md:border-purple/50 md:shadow-[0_0_40px_-10px_rgba(162,118,233,0.7)]">
-          <HeroPicture />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-ink to-transparent" aria-hidden />
-        </div>
-        <div className="relative z-10 -mt-2 px-4 md:mt-0 md:flex md:items-end md:justify-between md:gap-8 md:px-6 md:pt-8">
-          <div className="min-w-0">
-            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid">{tu("discoverSupportCreateRave")}</p>
-            <h1 id="hero-title" className="sr-only md:not-sr-only md:mt-3 md:text-6xl md:uppercase md:leading-[0.9]">
+      {/* HERO: official FREAKTOPIA video as a background (poster first, video only where motion and data allow) */}
+      <section aria-labelledby="hero-title" className="relative" data-testid="home-hero">
+        <div className="relative aspect-[4/5] overflow-hidden md:mx-6 md:mt-6 md:aspect-video md:rounded-[32px] md:border-2 md:border-purple/50 md:shadow-[0_0_40px_-10px_rgba(162,118,233,0.7)]">
+          <HeroPoster alt={tu("heroVideoAlt")} />
+          <HeroVideo />
+          {/* Scrims keep the title readable on every frame: bottom on phones, bottom-left on wider screens. */}
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink via-ink/45 via-35% to-transparent to-65% md:bg-gradient-to-r md:from-ink/90 md:via-ink/40 md:via-45% md:to-transparent md:to-75%" aria-hidden />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 hidden h-1/2 bg-gradient-to-t from-ink/80 to-transparent md:block" aria-hidden />
+          <div className="absolute inset-x-0 bottom-0 z-10 px-4 pb-3 md:max-w-[62%] md:px-10 md:pb-9 lg:max-w-[56%]">
+            <p className="text-xs font-extrabold uppercase tracking-[0.22em] text-acid [text-shadow:0_1px_8px_rgba(0,0,0,.8)]">{tu("discoverSupportCreateRave")}</p>
+            <h1 id="hero-title" className="hero-title mt-2 text-[34px] uppercase leading-[0.95] sm:text-[40px] [text-shadow:0_2px_18px_rgba(0,0,0,.75)] md:mt-3 md:text-5xl lg:text-6xl">
               {tu.rich("heroTitle", { hl: (c) => <span className="text-acid glow-text">{c}</span> })}
             </h1>
-            <p className="mt-2 max-w-md text-[15px] leading-relaxed text-cream/85">{tu("dj")}</p>
+            <p className="mt-3 hidden max-w-md text-[15px] leading-relaxed text-cream/90 [text-shadow:0_1px_8px_rgba(0,0,0,.8)] md:block">{tu("dj")}</p>
+            <div className="mt-6 hidden gap-3 md:flex">
+              <ButtonLink href="/world" size="lg" className="whitespace-nowrap px-5">
+                {tu("explore")} <ArrowRight className="size-5" aria-hidden />
+              </ButtonLink>
+              <ButtonLink href="/events/create" variant="coral" size="lg" className="whitespace-nowrap px-5 text-[15px]">
+                {tu("createEvent")}
+              </ButtonLink>
+            </div>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-3 md:mt-0 md:flex md:shrink-0">
+        </div>
+        <div className="relative z-10 px-4 md:hidden">
+          <p className="mt-1 max-w-md text-[15px] leading-relaxed text-cream/85">{tu("dj")}</p>
+          <div className="mt-5 grid grid-cols-2 gap-3">
             <ButtonLink href="/world" size="lg" className="whitespace-nowrap px-3">
               {tu("explore")} <ArrowRight className="size-5" aria-hidden />
             </ButtonLink>

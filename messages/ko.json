@@ -2656,7 +2656,10 @@
         "cape-town": "해안 페스티벌",
         "sydney": "하버 페스티벌"
       }
-    }
+    },
+    "heroVideoPlay": "배경 영상 재생",
+    "heroVideoPause": "배경 영상 일시정지",
+    "heroVideoAlt": "해 질 녘 FREAKTOPIA 페스티벌 무대로 걸어가는 외계인 친구 세 명."
   },
   "afterParty": {
     "lengthAfterParties": "애프터 파티 {length}개",
