@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} người ủng hộ",
     "ofMoneyGoal": "trên mục tiêu {money}",
     "lengthEvents": "{length} sự kiện",
-    "ticketsCount": "{n, plural, other {# vé}}"
+    "ticketsCount": "{n, plural, other {# vé}}",
+    "featuredEvent": "Sự kiện nổi bật",
+    "ticketDesignAlt": "Thiết kế vé: {tier}",
+    "selected": "Đã chọn",
+    "ticketArtNote": "Hình vé là mẫu thiết kế. Ngày, mã QR và ID của vé thật do FREAKTOPIA tạo sau khi thanh toán, không lấy từ hình.",
+    "searchCityOrEvent": "Tìm thành phố hoặc sự kiện"
   },
   "states": {
     "emptyTitle": "Chưa có gì ở đây",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% mục tiêu gây quỹ",
     "supportJoin": "Ủng hộ & tham gia",
     "heroTitle": "Thế giới là sàn <hl>nhảy</hl> của bạn.",
-    "tolocalestringSupporters": "{toLocaleString} người ủng hộ"
+    "tolocalestringSupporters": "{toLocaleString} người ủng hộ",
+    "createArtAlt": "Đám đông người ngoài hành tinh trước sân khấu chính FREAKTOPIA",
+    "cities": {
+      "title": "Khám phá thành phố",
+      "sub": "Thủ đô tiệc tùng của hành tinh FREAKTOPIA",
+      "events": "{count} sự kiện",
+      "none": "Chưa có sự kiện",
+      "cta": "Xem sự kiện",
+      "noneCta": "Tổ chức sự kiện đầu tiên",
+      "note": "Số sự kiện và thể loại lấy từ các sự kiện mẫu trên trang này.",
+      "theme": {
+        "berlin": "Techno công nghiệp",
+        "ibiza": "Bãi biển hoàng hôn",
+        "bangkok": "Lễ hội neon Thái",
+        "tokyo": "Hoa anh đào & thành phố cyber",
+        "miami": "Đêm biển neon",
+        "rio": "Lễ hội carnival nhiệt đới",
+        "amsterdam": "Kênh đào & tiệc thành phố",
+        "dubai": "Xa hoa tương lai",
+        "cape-town": "Lễ hội ven biển",
+        "sydney": "Lễ hội bến cảng"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} tiệc sau",

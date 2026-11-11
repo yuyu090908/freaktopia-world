@@ -16,6 +16,8 @@ import { STATUS_META } from "@/lib/map/landmarks";
 import { REGION_COLOR } from "@/lib/map/regions";
 import { formatEventDate } from "@/lib/i18n/format";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
+import { cityArt } from "@/lib/art";
 import { StatusPill } from "./EventPanel";
 
 interface CommunityParty {
@@ -68,6 +70,7 @@ export function CityPreview({ city, desktop, onClose, onPickEvent, onSeeEvents, 
   }, [onHeight]);
 
   const c = city.counts;
+  const poster = cityArt(city.city);
   const accent = city.region ? REGION_COLOR[city.region] : "#C1FF53";
   const stats: { key: string; n: number; color?: string }[] = [
     { key: "upcoming", n: c.upcoming },
@@ -90,7 +93,13 @@ export function CityPreview({ city, desktop, onClose, onPickEvent, onSeeEvents, 
       )}
       style={{ borderColor: `${accent}66` }}
     >
-      <div className="flex items-start gap-3 border-b border-line p-4 pb-3">
+      {poster && (
+        <div className={cn("relative shrink-0 overflow-hidden", desktop ? "h-[150px]" : "h-[96px]")} data-testid="city-preview-image">
+          <Image src={poster.scene} alt="" fill sizes="(min-width:1024px) 400px, 100vw" className="object-cover" style={{ objectPosition: poster.focal }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0D121B] via-[#0D121B]/30 to-transparent" aria-hidden />
+        </div>
+      )}
+      <div className={cn("flex items-start gap-3 border-b border-line p-4 pb-3", poster && "-mt-10 relative")}>
         <span className="size-16 shrink-0" aria-hidden dangerouslySetInnerHTML={{ __html: citySvg({ signature: city.signature, region: city.region, live: c.live > 0, count: c.total, animate: false }) }} />
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-extrabold uppercase tracking-[.14em]" style={{ color: accent }}>

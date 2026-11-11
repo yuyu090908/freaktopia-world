@@ -15,6 +15,8 @@ import { useDemo } from "@/lib/store";
 import type { FreakEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { UpcomingParties } from "@/components/party/Directory";
+import { HomeFeatured } from "@/app/HomeFeatured";
+import { distinctCovers } from "@/lib/art";
 
 type Sort = "popular" | "soonest" | "level";
 
@@ -39,6 +41,11 @@ export function EventsBrowser() {
       return a.startsAt.localeCompare(b.startsAt);
     });
   }, [filters, sort, stats]);
+  // Featured: the most supported upcoming event that still needs people, shown big above the grid (only without filters).
+  const unfiltered = JSON.stringify(filters) === JSON.stringify(EMPTY_FILTERS);
+  const featured = useMemo(() => (unfiltered ? [...list].filter((e) => e.status !== "ended" && e.status !== "live").sort((a, b) => stats(b).supporters - stats(a).supporters)[0] ?? null : null), [list, unfiltered, stats]);
+  const rest = featured ? list.filter((e) => e.id !== featured.id) : list;
+  const covers = useMemo(() => distinctCovers(rest), [rest]);
 
   return (
     <div>
@@ -91,18 +98,23 @@ export function EventsBrowser() {
         />
       ) : (
         <>
+          {featured && (
+            <section aria-label={tu("featuredEvent")} className="mt-4 px-4 md:px-0" data-testid="events-featured">
+              <HomeFeatured event={featured} />
+            </section>
+          )}
           <h2 className="sr-only">{tu("eventResults")}</h2>
           <ul className="mt-4 space-y-3 px-4 md:hidden">
-            {list.map((e) => (
+            {rest.map((e) => (
               <li key={e.id} className="cv-auto [contain-intrinsic-size:auto_130px]">
-                <EventRow event={e} />
+                <EventRow event={e} art={covers.get(e.id)} />
               </li>
             ))}
           </ul>
           <ul className={cn("mt-6 hidden gap-4 md:grid md:grid-cols-2 lg:grid-cols-3")}>
-            {list.map((e) => (
+            {rest.map((e) => (
               <li key={e.id} className="flex">
-                <EventCard event={e} wide />
+                <EventCard event={e} wide art={covers.get(e.id)} />
               </li>
             ))}
           </ul>

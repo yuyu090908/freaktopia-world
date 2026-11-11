@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} seguidores",
     "ofMoneyGoal": "de un objetivo de {money}",
     "lengthEvents": "{length} eventos",
-    "ticketsCount": "{n, plural, one {# entrada} other {# entradas}}"
+    "ticketsCount": "{n, plural, one {# entrada} other {# entradas}}",
+    "featuredEvent": "Evento destacado",
+    "ticketDesignAlt": "Diseño de entrada: {tier}",
+    "selected": "Seleccionado",
+    "ticketArtNote": "El arte del pase es una plantilla de diseño. La fecha, el QR y el ID de la entrada real los crea FREAKTOPIA tras la compra, nunca se toman del arte.",
+    "searchCityOrEvent": "Busca una ciudad o un evento"
   },
   "states": {
     "emptyTitle": "Aquí no hay nada todavía",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% del objetivo de financiación",
     "supportJoin": "Apoyar y unirse",
     "heroTitle": "El mundo es tu pista de <hl>baile</hl>.",
-    "tolocalestringSupporters": "{toLocaleString} seguidores"
+    "tolocalestringSupporters": "{toLocaleString} seguidores",
+    "createArtAlt": "Una multitud alienígena frente al escenario principal de FREAKTOPIA",
+    "cities": {
+      "title": "Descubre ciudades",
+      "sub": "Capitales de la fiesta del planeta FREAKTOPIA",
+      "events": "{count, plural, one {# evento} other {# eventos}}",
+      "none": "Aún no hay eventos",
+      "cta": "Ver eventos",
+      "noneCta": "Organiza el primero",
+      "note": "El número de eventos y los géneros salen de los eventos de ejemplo de este sitio.",
+      "theme": {
+        "berlin": "Techno industrial",
+        "ibiza": "Playa al atardecer",
+        "bangkok": "Festival neón tailandés",
+        "tokyo": "Sakura y ciudad cíber",
+        "miami": "Noches de playa neón",
+        "rio": "Carnaval tropical",
+        "amsterdam": "Canales y fiesta urbana",
+        "dubai": "Lujo futurista",
+        "cape-town": "Festival costero",
+        "sydney": "Festival del puerto"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} after parties",

@@ -2104,7 +2104,12 @@
     "compactSupporters": "ผู้สนับสนุน {compact} คน",
     "ofMoneyGoal": "จากเป้า {money}",
     "lengthEvents": "{length} อีเวนต์",
-    "ticketsCount": "{n, plural, other {ตั๋ว # ใบ}}"
+    "ticketsCount": "{n, plural, other {ตั๋ว # ใบ}}",
+    "featuredEvent": "อีเวนต์แนะนำ",
+    "ticketDesignAlt": "ดีไซน์ตั๋ว: {tier}",
+    "selected": "เลือกแล้ว",
+    "ticketArtNote": "ลายบัตรเป็นเทมเพลตดีไซน์ วันที่ QR โค้ด และรหัสของตั๋วจริง FREAKTOPIA จะสร้างหลังชำระเงิน ไม่ได้ใช้ข้อมูลจากภาพ",
+    "searchCityOrEvent": "ค้นหาเมืองหรืออีเวนต์"
   },
   "states": {
     "emptyTitle": "ยังไม่มีอะไรที่นี่",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% ของเป้าหมายระดมทุน",
     "supportJoin": "สนับสนุนและเข้าร่วม",
     "heroTitle": "โลกทั้งใบคือ<hl>ฟลอร์</hl>เต้นของคุณ",
-    "tolocalestringSupporters": "ผู้สนับสนุน {toLocaleString} คน"
+    "tolocalestringSupporters": "ผู้สนับสนุน {toLocaleString} คน",
+    "createArtAlt": "ฝูงเอเลี่ยนหน้าเวทีหลักของ FREAKTOPIA",
+    "cities": {
+      "title": "สำรวจเมือง",
+      "sub": "เมืองหลวงแห่งปาร์ตี้บนดาว FREAKTOPIA",
+      "events": "{count} อีเวนต์",
+      "none": "ยังไม่มีอีเวนต์",
+      "cta": "ดูอีเวนต์",
+      "noneCta": "จัดอีเวนต์แรก",
+      "note": "จำนวนอีเวนต์และแนวเพลงนับจากอีเวนต์ตัวอย่างบนเว็บไซต์นี้",
+      "theme": {
+        "berlin": "อินดัสเทรียลเทคโน",
+        "ibiza": "ชายหาดยามอาทิตย์ตก",
+        "bangkok": "เทศกาลนีออนไทย",
+        "tokyo": "ซากุระและไซเบอร์ซิตี้",
+        "miami": "ค่ำคืนนีออนริมหาด",
+        "rio": "คาร์นิวัลทรอปิคอล",
+        "amsterdam": "ปาร์ตี้คลองและเมือง",
+        "dubai": "ความหรูหราแห่งอนาคต",
+        "cape-town": "เทศกาลริมชายฝั่ง",
+        "sydney": "เทศกาลริมอ่าว"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} อาฟเตอร์ปาร์ตี้",

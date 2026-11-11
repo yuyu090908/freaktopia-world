@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} supporters",
     "ofMoneyGoal": "of {money} goal",
     "lengthEvents": "{length} events",
-    "ticketsCount": "{n, plural, one {# ticket} other {# tickets}}"
+    "ticketsCount": "{n, plural, one {# ticket} other {# tickets}}",
+    "featuredEvent": "Featured event",
+    "ticketDesignAlt": "Ticket design: {tier}",
+    "selected": "Selected",
+    "ticketArtNote": "Pass artwork is a design template. Dates, QR codes and IDs on real tickets are created by FREAKTOPIA after checkout, never taken from the artwork.",
+    "searchCityOrEvent": "Search city or event"
   },
   "states": {
     "emptyTitle": "Nothing here yet",
@@ -2254,7 +2259,29 @@
     "pctOfFundingGoal": "{pct}% of funding goal",
     "supportJoin": "Support & join",
     "heroTitle": "The world is your <hl>dance</hl>floor.",
-    "tolocalestringSupporters": "{toLocaleString} supporters"
+    "tolocalestringSupporters": "{toLocaleString} supporters",
+    "createArtAlt": "An alien crowd in front of the FREAKTOPIA main stage",
+    "cities": {
+      "title": "Discover cities",
+      "sub": "Party capitals of the FREAKTOPIA planet",
+      "events": "{count, plural, one {# event} other {# events}}",
+      "none": "No events yet",
+      "cta": "See events",
+      "noneCta": "Host the first one",
+      "note": "Event counts and genres come from the sample events listed on this site.",
+      "theme": {
+        "berlin": "Industrial Techno",
+        "ibiza": "Sunset Beach",
+        "bangkok": "Thai Neon Festival",
+        "tokyo": "Sakura & Cyber City",
+        "miami": "Neon Beach Nights",
+        "rio": "Tropical Carnival",
+        "amsterdam": "Canal & City Party",
+        "dubai": "Futuristic Luxury",
+        "cape-town": "Coastal Festival",
+        "sydney": "Harbour Festival"
+      }
+    }
   },
   "djs": {
     "whoRulesTheBooth": "Who rules the booth?",

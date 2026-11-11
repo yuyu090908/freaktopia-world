@@ -174,6 +174,8 @@ body::before {
 }
 .rail::-webkit-scrollbar { display: none; }
 .rail > * { scroll-snap-align: start; flex-shrink: 0; }
+/* A rail on phones that becomes a grid from 768 px (columns from md:grid-cols-*). */
+@media (min-width: 768px) { .rail.rail-grid { display: grid; overflow: visible; padding-inline: 0; scroll-snap-type: none; } }
 
 /* Main content clears fixed bottom nav + safe area */
 .app-main {

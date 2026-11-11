@@ -17,7 +17,7 @@ type Panel = null | "genre" | "date" | "level";
 export function FilterBar({
   filters,
   setFilters,
-  placeholder = "Search city or event",
+  placeholder: placeholderProp,
   onSubmit,
   floating = false,
 }: {
@@ -28,6 +28,7 @@ export function FilterBar({
   floating?: boolean;
 }) {
   const tu = useTranslations("events");
+  const placeholder = placeholderProp ?? tu("searchCityOrEvent");
   const [panel, setPanel] = useState<Panel>(null);
   const set = (p: Partial<EventFilters>) => setFilters({ ...filters, ...p });
   const count = activeFilterCount(filters);

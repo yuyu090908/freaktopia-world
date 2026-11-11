@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} apoiadores",
     "ofMoneyGoal": "de uma meta de {money}",
     "lengthEvents": "{length} eventos",
-    "ticketsCount": "{n, plural, one {# ingresso} other {# ingressos}}"
+    "ticketsCount": "{n, plural, one {# ingresso} other {# ingressos}}",
+    "featuredEvent": "Evento em destaque",
+    "ticketDesignAlt": "Design do ingresso: {tier}",
+    "selected": "Selecionado",
+    "ticketArtNote": "A arte do passe é um modelo de design. Data, QR code e ID do ingresso real são criados pela FREAKTOPIA após a compra, nunca tirados da arte.",
+    "searchCityOrEvent": "Busque uma cidade ou evento"
   },
   "states": {
     "emptyTitle": "Nada por aqui ainda",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% da meta de financiamento",
     "supportJoin": "Apoiar e participar",
     "heroTitle": "O mundo é a sua pista de <hl>dança</hl>.",
-    "tolocalestringSupporters": "{toLocaleString} apoiadores"
+    "tolocalestringSupporters": "{toLocaleString} apoiadores",
+    "createArtAlt": "Uma multidão alienígena diante do palco principal da FREAKTOPIA",
+    "cities": {
+      "title": "Descubra cidades",
+      "sub": "Capitais da festa do planeta FREAKTOPIA",
+      "events": "{count, plural, one {# evento} other {# eventos}}",
+      "none": "Ainda sem eventos",
+      "cta": "Ver eventos",
+      "noneCta": "Organize o primeiro",
+      "note": "Número de eventos e gêneros vêm dos eventos de exemplo deste site.",
+      "theme": {
+        "berlin": "Techno industrial",
+        "ibiza": "Praia ao pôr do sol",
+        "bangkok": "Festival neon tailandês",
+        "tokyo": "Sakura e cidade cyber",
+        "miami": "Noites neon na praia",
+        "rio": "Carnaval tropical",
+        "amsterdam": "Canais e festa na cidade",
+        "dubai": "Luxo futurista",
+        "cape-town": "Festival costeiro",
+        "sydney": "Festival do porto"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} after parties",

@@ -35,7 +35,7 @@ export function DJArena() {
 
   return (
     <div className="mx-auto max-w-6xl md:px-6">
-      <PageTitle art={{ src: ART.mapIsland, pos: "40% 78%" }} kicker={tu("djArena")} title={tu("whoRulesTheBooth")} sub={tu("dj")} />
+      <PageTitle art={{ src: ART.panelUniverse, pos: "88% 78%" }} kicker={tu("djArena")} title={tu("whoRulesTheBooth")} sub={tu("dj")} />
 
       {/* On-air audition banner */}
       <div className="px-4 md:px-0">

@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} soutiens",
     "ofMoneyGoal": "sur un objectif de {money}",
     "lengthEvents": "{length} événements",
-    "ticketsCount": "{n, plural, one {# billet} other {# billets}}"
+    "ticketsCount": "{n, plural, one {# billet} other {# billets}}",
+    "featuredEvent": "Événement à la une",
+    "ticketDesignAlt": "Design du billet : {tier}",
+    "selected": "Sélectionné",
+    "ticketArtNote": "Le visuel du pass est un modèle de design. La date, le QR code et l’identifiant du vrai billet sont créés par FREAKTOPIA après l’achat, jamais repris du visuel.",
+    "searchCityOrEvent": "Rechercher une ville ou un événement"
   },
   "states": {
     "emptyTitle": "Rien ici pour l’instant",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct} % de l’objectif de financement",
     "supportJoin": "Soutenir et rejoindre",
     "heroTitle": "Le monde est votre <hl>dance</hl>floor.",
-    "tolocalestringSupporters": "{toLocaleString} soutiens"
+    "tolocalestringSupporters": "{toLocaleString} soutiens",
+    "createArtAlt": "Une foule d’aliens devant la grande scène de FREAKTOPIA",
+    "cities": {
+      "title": "Découvrir les villes",
+      "sub": "Les capitales de la fête de la planète FREAKTOPIA",
+      "events": "{count, plural, one {# événement} other {# événements}}",
+      "none": "Pas encore d’événement",
+      "cta": "Voir les événements",
+      "noneCta": "Organiser le premier",
+      "note": "Le nombre d’événements et les genres viennent des événements d’exemple de ce site.",
+      "theme": {
+        "berlin": "Techno industrielle",
+        "ibiza": "Plage au coucher du soleil",
+        "bangkok": "Festival néon thaï",
+        "tokyo": "Sakura et cyber-ville",
+        "miami": "Nuits néon à la plage",
+        "rio": "Carnaval tropical",
+        "amsterdam": "Canaux et fête en ville",
+        "dubai": "Luxe futuriste",
+        "cape-town": "Festival côtier",
+        "sydney": "Festival du port"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} afters",

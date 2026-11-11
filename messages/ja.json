@@ -2104,7 +2104,12 @@
     "compactSupporters": "サポーター {compact}人",
     "ofMoneyGoal": "目標{money}のうち",
     "lengthEvents": "{length}件のイベント",
-    "ticketsCount": "{n, plural, other {チケット#枚}}"
+    "ticketsCount": "{n, plural, other {チケット#枚}}",
+    "featuredEvent": "注目イベント",
+    "ticketDesignAlt": "チケットデザイン:{tier}",
+    "selected": "選択中",
+    "ticketArtNote": "パスの絵柄はデザインテンプレートです。実際のチケットの日付・QRコード・IDは購入後にFREAKTOPIAが発行し、絵柄の情報は使いません。",
+    "searchCityOrEvent": "都市やイベントを検索"
   },
   "states": {
     "emptyTitle": "まだ何もありません",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "資金目標の{pct}%",
     "supportJoin": "支援して参加",
     "heroTitle": "世界は君の<hl>ダンス</hl>フロア。",
-    "tolocalestringSupporters": "サポーター {toLocaleString}人"
+    "tolocalestringSupporters": "サポーター {toLocaleString}人",
+    "createArtAlt": "FREAKTOPIAのメインステージ前で盛り上がるエイリアンたち",
+    "cities": {
+      "title": "都市を探す",
+      "sub": "FREAKTOPIA惑星のパーティー首都",
+      "events": "{count}件のイベント",
+      "none": "まだイベントはありません",
+      "cta": "イベントを見る",
+      "noneCta": "最初のイベントを開く",
+      "note": "イベント数とジャンルは、このサイトに掲載中のサンプルイベントから数えています。",
+      "theme": {
+        "berlin": "インダストリアル・テクノ",
+        "ibiza": "サンセット・ビーチ",
+        "bangkok": "タイのネオンフェス",
+        "tokyo": "桜とサイバーシティ",
+        "miami": "ネオンのビーチナイト",
+        "rio": "トロピカル・カーニバル",
+        "amsterdam": "運河とシティパーティー",
+        "dubai": "近未来ラグジュアリー",
+        "cape-town": "海辺のフェスティバル",
+        "sydney": "ハーバー・フェスティバル"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length}件のアフターパーティー",

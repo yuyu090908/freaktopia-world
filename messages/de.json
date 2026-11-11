@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} Unterstützer:innen",
     "ofMoneyGoal": "von {money} Ziel",
     "lengthEvents": "{length} Events",
-    "ticketsCount": "{n, plural, one {# Ticket} other {# Tickets}}"
+    "ticketsCount": "{n, plural, one {# Ticket} other {# Tickets}}",
+    "featuredEvent": "Highlight-Event",
+    "ticketDesignAlt": "Ticketdesign: {tier}",
+    "selected": "Ausgewählt",
+    "ticketArtNote": "Das Pass-Motiv ist eine Designvorlage. Datum, QR-Code und ID echter Tickets erstellt FREAKTOPIA nach dem Kauf, nie aus dem Motiv.",
+    "searchCityOrEvent": "Stadt oder Event suchen"
   },
   "states": {
     "emptyTitle": "Hier ist noch nichts",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct} % des Finanzierungsziels",
     "supportJoin": "Unterstützen & mitmachen",
     "heroTitle": "Die Welt ist dein <hl>Dance</hl>floor.",
-    "tolocalestringSupporters": "{toLocaleString} Unterstützer:innen"
+    "tolocalestringSupporters": "{toLocaleString} Unterstützer:innen",
+    "createArtAlt": "Eine Alien-Menge vor der FREAKTOPIA-Hauptbühne",
+    "cities": {
+      "title": "Städte entdecken",
+      "sub": "Partyhauptstädte des Planeten FREAKTOPIA",
+      "events": "{count, plural, one {# Event} other {# Events}}",
+      "none": "Noch keine Events",
+      "cta": "Events ansehen",
+      "noneCta": "Das erste veranstalten",
+      "note": "Eventzahlen und Genres stammen aus den Beispiel-Events dieser Seite.",
+      "theme": {
+        "berlin": "Industrial Techno",
+        "ibiza": "Strand bei Sonnenuntergang",
+        "bangkok": "Thailändisches Neon-Festival",
+        "tokyo": "Sakura & Cyber-City",
+        "miami": "Neon-Strandnächte",
+        "rio": "Tropischer Karneval",
+        "amsterdam": "Kanäle & City-Party",
+        "dubai": "Futuristischer Luxus",
+        "cape-town": "Küstenfestival",
+        "sydney": "Hafenfestival"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} Afterpartys",

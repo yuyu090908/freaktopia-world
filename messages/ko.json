@@ -2104,7 +2104,12 @@
     "compactSupporters": "서포터 {compact}명",
     "ofMoneyGoal": "목표 {money} 중",
     "lengthEvents": "이벤트 {length}개",
-    "ticketsCount": "{n, plural, other {티켓 #장}}"
+    "ticketsCount": "{n, plural, other {티켓 #장}}",
+    "featuredEvent": "추천 이벤트",
+    "ticketDesignAlt": "티켓 디자인: {tier}",
+    "selected": "선택됨",
+    "ticketArtNote": "패스 그림은 디자인 템플릿입니다. 실제 티켓의 날짜·QR 코드·ID는 결제 후 FREAKTOPIA가 발급하며 그림의 정보는 사용하지 않습니다.",
+    "searchCityOrEvent": "도시나 이벤트 검색"
   },
   "states": {
     "emptyTitle": "아직 아무것도 없어요",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "펀딩 목표의 {pct}%",
     "supportJoin": "후원하고 참가",
     "heroTitle": "세상은 너의 <hl>댄스</hl>플로어.",
-    "tolocalestringSupporters": "서포터 {toLocaleString}명"
+    "tolocalestringSupporters": "서포터 {toLocaleString}명",
+    "createArtAlt": "FREAKTOPIA 메인 스테이지 앞의 외계인 관객",
+    "cities": {
+      "title": "도시 둘러보기",
+      "sub": "FREAKTOPIA 행성의 파티 수도",
+      "events": "이벤트 {count}개",
+      "none": "아직 이벤트가 없습니다",
+      "cta": "이벤트 보기",
+      "noneCta": "첫 이벤트 열기",
+      "note": "이벤트 수와 장르는 이 사이트에 올라온 샘플 이벤트 기준입니다.",
+      "theme": {
+        "berlin": "인더스트리얼 테크노",
+        "ibiza": "선셋 비치",
+        "bangkok": "태국 네온 페스티벌",
+        "tokyo": "벚꽃과 사이버 시티",
+        "miami": "네온 비치 나이트",
+        "rio": "트로피컬 카니발",
+        "amsterdam": "운하와 시티 파티",
+        "dubai": "미래형 럭셔리",
+        "cape-town": "해안 페스티벌",
+        "sydney": "하버 페스티벌"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "애프터 파티 {length}개",

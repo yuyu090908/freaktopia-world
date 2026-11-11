@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} 名支持者",
     "ofMoneyGoal": "目标 {money}",
     "lengthEvents": "{length} 个活动",
-    "ticketsCount": "{n, plural, other {# 张门票}}"
+    "ticketsCount": "{n, plural, other {# 张门票}}",
+    "featuredEvent": "精选活动",
+    "ticketDesignAlt": "票券设计：{tier}",
+    "selected": "已选择",
+    "ticketArtNote": "通行证图案只是设计模板。真实门票的日期、二维码和编号由 FREAKTOPIA 在结账后生成，不取自图案。",
+    "searchCityOrEvent": "搜索城市或活动"
   },
   "states": {
     "emptyTitle": "这里还什么都没有",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "筹资目标的 {pct}%",
     "supportJoin": "支持并加入",
     "heroTitle": "世界是你的<hl>舞</hl>池。",
-    "tolocalestringSupporters": "{toLocaleString} 名支持者"
+    "tolocalestringSupporters": "{toLocaleString} 名支持者",
+    "createArtAlt": "FREAKTOPIA 主舞台前的外星人人群",
+    "cities": {
+      "title": "探索城市",
+      "sub": "FREAKTOPIA 星球的派对之都",
+      "events": "{count} 场活动",
+      "none": "暂无活动",
+      "cta": "查看活动",
+      "noneCta": "举办第一场",
+      "note": "活动数量和曲风来自本站列出的示例活动。",
+      "theme": {
+        "berlin": "工业 Techno",
+        "ibiza": "日落海滩",
+        "bangkok": "泰式霓虹音乐节",
+        "tokyo": "樱花与赛博城市",
+        "miami": "霓虹海滩之夜",
+        "rio": "热带狂欢节",
+        "amsterdam": "运河与城市派对",
+        "dubai": "未来奢华",
+        "cape-town": "海岸音乐节",
+        "sydney": "港湾音乐节"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} 场余兴派对",

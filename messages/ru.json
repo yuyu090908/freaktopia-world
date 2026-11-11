@@ -2104,7 +2104,12 @@
     "compactSupporters": "Сторонников: {compact}",
     "ofMoneyGoal": "из цели {money}",
     "lengthEvents": "Событий: {length}",
-    "ticketsCount": "{n, plural, one {# билет} few {# билета} many {# билетов} other {# билета}}"
+    "ticketsCount": "{n, plural, one {# билет} few {# билета} many {# билетов} other {# билета}}",
+    "featuredEvent": "Главное событие",
+    "ticketDesignAlt": "Дизайн билета: {tier}",
+    "selected": "Выбрано",
+    "ticketArtNote": "Рисунок пропуска — это шаблон дизайна. Дату, QR-код и номер настоящего билета FREAKTOPIA создаёт после оформления, а не берёт с рисунка.",
+    "searchCityOrEvent": "Поиск города или события"
   },
   "states": {
     "emptyTitle": "Здесь пока пусто",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% от цели финансирования",
     "supportJoin": "Поддержать и вступить",
     "heroTitle": "Мир — твой <hl>танц</hl>пол.",
-    "tolocalestringSupporters": "Сторонников: {toLocaleString}"
+    "tolocalestringSupporters": "Сторонников: {toLocaleString}",
+    "createArtAlt": "Толпа инопланетян перед главной сценой FREAKTOPIA",
+    "cities": {
+      "title": "Города",
+      "sub": "Столицы вечеринок планеты FREAKTOPIA",
+      "events": "{count, plural, one {# событие} few {# события} many {# событий} other {# события}}",
+      "none": "Событий пока нет",
+      "cta": "Смотреть события",
+      "noneCta": "Провести первое",
+      "note": "Число событий и жанры взяты из примеров событий на этом сайте.",
+      "theme": {
+        "berlin": "Индустриальное техно",
+        "ibiza": "Пляж на закате",
+        "bangkok": "Тайский неоновый фестиваль",
+        "tokyo": "Сакура и киберсити",
+        "miami": "Неоновые пляжные ночи",
+        "rio": "Тропический карнавал",
+        "amsterdam": "Каналы и городские вечеринки",
+        "dubai": "Футуристическая роскошь",
+        "cape-town": "Фестиваль на побережье",
+        "sydney": "Фестиваль в гавани"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "Афтепати: {length}",

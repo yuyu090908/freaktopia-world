@@ -9,6 +9,11 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, DemoBadge, DemoNotice, PageTitle } from "@/components/ui/primitives";
 import { grantXp, uid, useDemo } from "@/lib/store";
 import { cn, fmtDateLong, money } from "@/lib/utils";
+import Image from "next/image";
+import { TICKET_ART, type TicketTier } from "@/lib/art";
+
+/** Which official pass design each ticket kind uses. Only the kinds this event sells are shown. */
+const TIER: Record<TicketKind, TicketTier> = { main: "basic", afterparty: "silver", allnight: "gold", vip: "vip" };
 
 const COLORS: Record<TicketKind, string> = { main: "#B6F05C", afterparty: "#55BCEB", allnight: "#FFAD5B", vip: "#A276E9" };
 const MAX = 6;
@@ -45,43 +50,55 @@ export function TicketSelector({ event }: { event: FreakEvent }) {
         <div className="mt-3"><DemoBadge label={tu("demoCheckoutNoPayment")} /></div>
       </PageTitle>
 
-      <fieldset className="space-y-3 px-4 md:px-0">
+      <fieldset className="min-w-0 md:px-0">
         <legend className="sr-only">{tu("chooseTickets")}</legend>
+        {/* Phones: one big pass at a time (swipe). Wider screens: a comparison grid. */}
+        <div className="rail rail-grid pb-2 md:grid-cols-2" data-testid="ticket-tiers">
         {tickets.map((t) => {
           const n = qty[t.kind];
+          const art = TICKET_ART[TIER[t.kind]];
           return (
-            <div key={t.kind} className={cn("rounded-3xl border-2 bg-surface p-4 transition-colors", n ? "border-acid" : "border-line")}>
-              <div className="flex items-start gap-3">
-                <span className="mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-2xl border-[3px] border-ink text-ink" style={{ background: COLORS[t.kind] }}>
-                  <Ticket className="size-5" aria-hidden />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                    <h2 className="text-xl uppercase">{t.name}</h2>
-                    <span className="font-display text-xl">{money(t.price)}</span>
-                  </div>
-                  <ul className="mt-1.5 space-y-0.5 text-sm text-cream/85">
-                    {t.perks.map((p) => (
-                      <li key={p} className="flex gap-1.5"><Check className="mt-0.5 size-4 shrink-0 text-acid" aria-hidden />{p}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-3 flex items-center justify-between gap-3">
-                    <span className={cn("text-xs font-bold", t.remaining < 60 ? "text-coral" : "text-mute")}>{tu("remainingLeftDemo", { remaining: t.remaining })}</span>
-                    <div className="flex items-center gap-1 rounded-full bg-ink p-1" role="group" aria-label={tu("quantityOf", { name: t.name })}>
-                      <button type="button" onClick={() => set(t.kind, -1)} disabled={!n} aria-label={tu("removeOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-surface-2 disabled:opacity-40">
-                        <Minus className="size-4" />
-                      </button>
-                      <output aria-live="polite" className="w-8 text-center font-display text-lg">{n}</output>
-                      <button type="button" onClick={() => set(t.kind, 1)} disabled={n >= MAX} aria-label={tu("addOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-acid text-ink disabled:opacity-40">
-                        <Plus className="size-4" />
-                      </button>
+            <div key={t.kind} data-testid="ticket-tier" data-selected={n > 0} className={cn("flex w-[82vw] max-w-[360px] shrink-0 snap-center flex-col overflow-hidden rounded-3xl border-2 bg-surface transition-colors md:w-auto md:max-w-none", n ? "border-acid shadow-[0_0_24px_-8px_rgba(193,255,83,0.7)]" : "border-line")}>
+              <div className="relative aspect-[5/4] bg-ink">
+                <Image src={art.src} alt={tu("ticketDesignAlt", { tier: art.label })} fill sizes="(min-width:768px) 360px, 82vw" className="object-contain p-2" />
+                {n > 0 && <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-acid px-2.5 py-1 text-xs font-extrabold uppercase text-ink"><Check className="size-3.5" aria-hidden />{tu("selected")}</span>}
+              </div>
+              <div className="flex flex-1 flex-col p-4">
+                <div className="flex items-start gap-3">
+                  <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl border-[3px] border-ink text-ink" style={{ background: COLORS[t.kind] }}>
+                    <Ticket className="size-4" aria-hidden />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                      <h2 className="text-xl uppercase">{t.name}</h2>
+                      <span className="font-display text-xl">{money(t.price)}</span>
                     </div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-mute">{art.label}</div>
+                  </div>
+                </div>
+                <ul className="mt-2 space-y-0.5 text-sm text-cream/85">
+                  {t.perks.map((p) => (
+                    <li key={p} className="flex gap-1.5"><Check className="mt-0.5 size-4 shrink-0 text-acid" aria-hidden />{p}</li>
+                  ))}
+                </ul>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-3">
+                  <span className={cn("text-xs font-bold", t.remaining < 60 ? "text-coral" : "text-mute")}>{tu("remainingLeftDemo", { remaining: t.remaining })}</span>
+                  <div className="flex items-center gap-1 rounded-full bg-ink p-1" role="group" aria-label={tu("quantityOf", { name: t.name })}>
+                    <button type="button" onClick={() => set(t.kind, -1)} disabled={!n} aria-label={tu("removeOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-surface-2 disabled:opacity-40">
+                      <Minus className="size-4" />
+                    </button>
+                    <output aria-live="polite" className="w-8 text-center font-display text-lg">{n}</output>
+                    <button type="button" onClick={() => set(t.kind, 1)} disabled={n >= MAX} aria-label={tu("addOneName", { name: t.name })} className="inline-flex size-11 items-center justify-center rounded-full bg-acid text-ink disabled:opacity-40">
+                      <Plus className="size-4" />
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
           );
         })}
+        </div>
+        <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tu("ticketArtNote")}</p>
       </fieldset>
 
       <DemoNotice className="mx-4 mt-5 md:mx-0">

@@ -4,23 +4,35 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { ArrowRight, Compass, HandHeart, Sparkles, Ticket, Gamepad2, Radio, Trophy, CalendarDays, Headphones, Building2, Moon, MapPin } from "lucide-react";
 import Image, { getImageProps } from "next/image";
-import { ART } from "@/lib/art";
-import { DJCard, EventCard, IllustratedCard } from "@/components/cards/Cards";
+import { ART, CITY_ART } from "@/lib/art";
+import { CityCard, DJCard, EventCard, IllustratedCard } from "@/components/cards/Cards";
 import { ButtonLink, SectionHeader } from "@/components/ui/primitives";
 import { DJS, EVENTS } from "@/lib/data";
 import { HomePlayerStrip } from "./HomePlayerStrip";
 import { HomeFeatured } from "./HomeFeatured";
 
 const EXPLORE = (tu: Tu) => ([
-  { href: "/world", title: tu("worldMap"), sub: tu("findRavesWorldwide"), kind: "world", color: "#55BCEB", art: { src: ART.panelMap, pos: "50% 50%" } },
-  { href: "/events/create", title: tu("createEvent2"), sub: tu("startANewParty"), kind: "events", color: "#B6F05C", art: { src: ART.panelUniverse, pos: "88% 75%" } },
-  { href: "/venues", title: tu("listVenue2"), sub: tu("bookOrListASpace"), kind: "venues", color: "#A276E9", art: { src: ART.panelMarket, pos: "50% 40%" } },
-  { href: "/djs", title: tu("djAudition"), sub: tu("auditionsRankings"), kind: "dj", color: "#FFAD5B", art: { src: ART.mapIsland, pos: "40% 75%" } },
-  { href: "/after-party", title: tu("afterParty"), sub: tu("theNightContinues"), kind: "afterparty", color: "#FF625C", art: { src: ART.panelAfterparty, pos: "50% 50%" } },
-  { href: "/live", title: tu("liveFestival"), sub: tu("enterTheVenueMap"), kind: "live", color: "#55BCEB", art: { src: ART.mapValley, pos: "50% 40%" } },
-  { href: "/avatar", title: tu("alienWorld"), sub: tu("makeYourAlien"), kind: "alien", color: "#B6F05C", art: { src: ART.posterCity, pos: "75% 100%" } },
-  { href: "/rankings", title: tu("worldRanking"), sub: tu("topFestivalsNow"), kind: "nft", color: "#FFAD5B", art: { src: ART.panelStage, pos: "50% 30%" } },
+  { href: "/world", title: tu("worldMap"), sub: tu("findRavesWorldwide"), kind: "world", color: "#66DFFF", art: { src: ART.panelMap, pos: "50% 50%" }, feature: true },
+  { href: "/events/create", title: tu("createEvent2"), sub: tu("startANewParty"), kind: "events", color: "#C1FF53", art: { src: ART.panelUniverse, pos: "60% 60%" }, feature: true },
+  { href: "/venues", title: tu("listVenue2"), sub: tu("bookOrListASpace"), kind: "venues", color: "#B78BFF", art: { src: ART.panelMarket, pos: "50% 40%" } },
+  { href: "/after-party", title: tu("afterParty"), sub: tu("theNightContinues"), kind: "afterparty", color: "#FF79CD", art: { src: ART.panelAfterparty, pos: "50% 50%" } },
+  { href: "/avatar", title: tu("alienWorld"), sub: tu("makeYourAlien"), kind: "alien", color: "#C1FF53", art: { src: ART.posterCity, pos: "75% 100%" } },
+  { href: "/rankings", title: tu("worldRanking"), sub: tu("topFestivalsNow"), kind: "nft", color: "#FFB45C", art: { src: ART.mapCities, pos: "50% 50%" } },
+  { href: "/djs", title: tu("djAudition"), sub: tu("auditionsRankings"), kind: "dj", color: "#FFB45C", art: { src: ART.mapIsland, pos: "40% 75%" }, feature: true },
+  { href: "/live", title: tu("liveFestival"), sub: tu("enterTheVenueMap"), kind: "live", color: "#66DFFF", art: { src: ART.mapValley, pos: "50% 40%" }, feature: true },
 ] as const);
+
+/** Party cities with an official poster: event counts and genres come from the listed events (sample data). */
+function cityRows() {
+  const upcoming = EVENTS.filter((e) => e.status !== "ended");
+  return CITY_ART.map((art) => {
+    const evs = upcoming.filter((e) => art.names.includes(e.city.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase()));
+    const g = new Map<string, number>();
+    for (const e of evs) for (const x of e.genres) g.set(x, (g.get(x) ?? 0) + 1);
+    const genres = [...g.entries()].sort((a, b) => b[1] - a[1]).slice(0, 2).map(([x]) => x);
+    return { art, count: evs.length, genres, country: evs[0]?.country ?? null };
+  }).sort((a, b) => Number(b.count > 0) - Number(a.count > 0) || a.art.usagePriority - b.art.usagePriority);
+}
 
 const MAP_CHIPS = (tu: Tu) => ([
   { href: "/events", label: tu("allEvents"), icon: CalendarDays, active: true },
@@ -54,6 +66,7 @@ const STEPS = (tu: Tu) => ([
 
 export default function HomePage() {
   const tu = useTranslations("home");
+  const tc = useTranslations("home.cities");
   const featured = [...EVENTS].sort((a, b) => b.supporters - a.supporters).slice(0, 8);
   const live = EVENTS.find((e) => e.status === "live");
   const spotlight = featured.find((e) => e.status !== "live" && e.djRecruiting) ?? featured[0];
@@ -113,6 +126,26 @@ export default function HomePage() {
         </nav>
       </section>
 
+      {/* DISCOVER CITIES: official city posters, numbers from the listed events */}
+      <section aria-labelledby="cities" className="mt-14 md:px-6" data-testid="home-cities">
+        <SectionHeader id="cities" title={tc("title")} sub={tc("sub")} />
+        <ul className="rail rail-grid pb-2 md:grid-cols-5" aria-labelledby="cities">
+          {cityRows().map(({ art, count, genres, country }) => (
+            <li key={art.id} className="flex w-[62vw] max-w-[240px] shrink-0 md:w-auto md:max-w-none">
+              <CityCard
+                art={art}
+                className="w-full"
+                href={count && country ? `/world?city=${encodeURIComponent(`${art.city}|${country}`)}` : "/events/create"}
+                count={count}
+                genres={genres}
+                labels={{ theme: tc(`theme.${art.id}`), events: tc("events", { count }), none: tc("none"), cta: tc("cta"), noneCta: tc("noneCta") }}
+              />
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tc("note")}</p>
+      </section>
+
       {/* SPOTLIGHT */}
       {spotlight && (
         <section aria-labelledby="spotlight" className="mt-10 px-4 md:px-6">
@@ -143,7 +176,7 @@ export default function HomePage() {
         <SectionHeader id="explore" title={tu("explore")} sub={tu("n8Freaktopia")} />
         <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 md:px-0">
           {EXPLORE(tu).map((e) => (
-            <IllustratedCard key={e.href} {...e} art={e.art} />
+            <IllustratedCard key={e.href} {...e} art={e.art} feature={"feature" in e && e.feature} />
           ))}
         </div>
       </section>
@@ -226,13 +259,18 @@ export default function HomePage() {
 
       {/* CREATE */}
       <section aria-labelledby="create" className="mt-14 px-4 md:px-6">
-        <div className="relative overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid p-6 text-ink md:p-10">
+        <div className="relative grid overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid text-ink md:grid-cols-[1.25fr_1fr]">
+          <div className="relative aspect-[16/9] md:order-2 md:aspect-auto">
+            <Image src={ART.panelStage} alt={tu("createArtAlt")} fill sizes="(min-width:1152px) 460px, (min-width:768px) 40vw, 100vw" className="object-cover" style={{ objectPosition: "50% 35%" }} />
+          </div>
+          <div className="p-6 md:p-10">
           <h2 id="create" className="text-[34px] uppercase sm:text-5xl">{tu("startSomethingWeird")}</h2>
           <p className="mt-3 max-w-lg font-medium">{tu("dj2")}</p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          <div className="mt-6 grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1">
             <Link href="/events/create" className="flex min-h-14 items-center justify-between rounded-full bg-ink px-5 font-extrabold uppercase text-cream">{tu("createEvent")} <ArrowRight className="size-5" aria-hidden /></Link>
             <Link href="/djs/apply" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("applyAsDj")} <ArrowRight className="size-5" aria-hidden /></Link>
             <Link href="/venues/new" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("listVenue")} <ArrowRight className="size-5" aria-hidden /></Link>
+          </div>
           </div>
         </div>
       </section>

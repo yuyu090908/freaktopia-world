@@ -23,8 +23,12 @@ test("home → world map → landmark → bottom sheet → event", async ({ page
   await expect(sheet.getByText("LV.5 FREAKTOPIA LEGEND").first()).toBeVisible();
   await expect(page.getByRole("button", { name: /^NEON SLIME SUMMIT, Berlin/ })).toBeVisible();
   await sheet.getByRole("button", { name: "Show all details" }).click();
-  await sheet.getByRole("link", { name: /view event/i }).click();
-  await expect(page).toHaveURL(/\/events\/neon-slime-summit$/);
+  // Wait for the sheet to finish expanding, so the tap lands on the link and not where it was a frame earlier.
+  await expect(page.getByTestId("event-sheet")).toHaveAttribute("data-expanded", "true");
+  await expect(async () => {
+    await sheet.getByRole("link", { name: /view event/i }).click();
+    await expect(page).toHaveURL(/\/events\/neon-slime-summit$/, { timeout: 3_000 });
+  }).toPass({ timeout: 15_000 });
 });
 
 test("world map filters reduce results", async ({ page }) => {

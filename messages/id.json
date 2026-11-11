@@ -2104,7 +2104,12 @@
     "compactSupporters": "{compact} pendukung",
     "ofMoneyGoal": "dari target {money}",
     "lengthEvents": "{length} event",
-    "ticketsCount": "{n, plural, other {# tiket}}"
+    "ticketsCount": "{n, plural, other {# tiket}}",
+    "featuredEvent": "Acara unggulan",
+    "ticketDesignAlt": "Desain tiket: {tier}",
+    "selected": "Dipilih",
+    "ticketArtNote": "Gambar pass adalah templat desain. Tanggal, kode QR, dan ID tiket asli dibuat FREAKTOPIA setelah pembayaran, tidak diambil dari gambar.",
+    "searchCityOrEvent": "Cari kota atau acara"
   },
   "states": {
     "emptyTitle": "Belum ada apa-apa di sini",
@@ -2629,7 +2634,29 @@
     "pctOfFundingGoal": "{pct}% dari target dana",
     "supportJoin": "Dukung & gabung",
     "heroTitle": "Dunia adalah lantai <hl>dansa</hl>-mu.",
-    "tolocalestringSupporters": "{toLocaleString} pendukung"
+    "tolocalestringSupporters": "{toLocaleString} pendukung",
+    "createArtAlt": "Kerumunan alien di depan panggung utama FREAKTOPIA",
+    "cities": {
+      "title": "Jelajahi kota",
+      "sub": "Ibu kota pesta di planet FREAKTOPIA",
+      "events": "{count} acara",
+      "none": "Belum ada acara",
+      "cta": "Lihat acara",
+      "noneCta": "Adakan yang pertama",
+      "note": "Jumlah acara dan genre berasal dari acara contoh di situs ini.",
+      "theme": {
+        "berlin": "Techno industrial",
+        "ibiza": "Pantai senja",
+        "bangkok": "Festival neon Thailand",
+        "tokyo": "Sakura & kota siber",
+        "miami": "Malam pantai neon",
+        "rio": "Karnaval tropis",
+        "amsterdam": "Kanal & pesta kota",
+        "dubai": "Kemewahan futuristis",
+        "cape-town": "Festival pesisir",
+        "sydney": "Festival pelabuhan"
+      }
+    }
   },
   "afterParty": {
     "lengthAfterParties": "{length} after party",

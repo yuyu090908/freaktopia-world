@@ -5,7 +5,7 @@ import { Tx } from "@/components/i18n/Tx";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
-import { afterPartyArt, eventArt, type ArtPick } from "@/lib/art";
+import { afterPartyArt, coverFor, type ArtPick, type CoverHint } from "@/lib/art";
 import { ArrowRight, CalendarDays, Heart, MapPin, Users, Speaker, Clock, Ticket } from "lucide-react";
 import type { AfterParty, DJ, FreakEvent, Venue } from "@/lib/types";
 import { ExploreArt, VenueArt, type ExploreKind } from "@/components/art/Scenes";
@@ -17,19 +17,46 @@ import { useDemo, useEventStats } from "@/lib/store";
 import { cn, compact, fmtDate, fmtTime, money } from "@/lib/utils";
 import { getEvent } from "@/lib/data";
 
+/* ---------------- City card (official city poster + live numbers in HTML) ---------------- */
+export function CityCard({ art, href, count, genres, labels, className }: { art: import("@/lib/art").CityArt; href: string; count: number; genres: string[]; labels: { theme: string; events: string; none: string; cta: string; noneCta: string }; className?: string }) {
+  return (
+    <Link
+      href={href}
+      data-testid="city-card"
+      data-city={art.id}
+      className={cn("group flex flex-col overflow-hidden rounded-[24px] border-2 bg-surface transition-transform active:scale-[0.98]", className)}
+      style={{ borderColor: `${art.accent}99` }}
+    >
+      <span className="relative block aspect-[4/5] overflow-hidden">
+        <Image src={art.poster} alt={`${art.city}: ${labels.theme}`} fill sizes="(min-width:1024px) 230px, (min-width:640px) 30vw, 62vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.04]" />
+      </span>
+      <span className="flex flex-1 flex-col gap-1 p-3">
+        <span className="font-display text-lg uppercase leading-none">{art.city}</span>
+        <span className="text-[11px] font-bold uppercase tracking-wider" style={{ color: art.accent }}>{labels.theme}</span>
+        <span className="mt-1 text-[13px] font-semibold text-cream/90">{count ? labels.events : labels.none}</span>
+        {genres.length > 0 && <span className="truncate text-[12px] text-mute">{genres.join(" / ")}</span>}
+        <span className="mt-auto inline-flex min-h-10 items-center gap-1 pt-1 text-[13px] font-extrabold uppercase text-acid">
+          {count ? labels.cta : labels.noneCta} <ArrowRight className="size-4" aria-hidden />
+        </span>
+      </span>
+    </Link>
+  );
+}
+
 /* ---------------- Explore card ---------------- */
-export function IllustratedCard({ href, title, sub, kind, color, art, big = false }: { href: string; title: string; sub: string; kind: ExploreKind; color: string; art?: ArtPick; big?: boolean }) {
+export function IllustratedCard({ href, title, sub, kind, color, art, big = false, feature = false }: { href: string; title: string; sub: string; kind: ExploreKind; color: string; art?: ArtPick; big?: boolean; feature?: boolean }) {
   if (art) {
     return (
       <Link
         href={href}
         className={cn(
-          "group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-[24px] border-2 text-cream transition-transform active:scale-[0.98] sm:aspect-[4/4.4]",
+          "group relative flex flex-col justify-end overflow-hidden rounded-[24px] border-2 text-cream transition-transform active:scale-[0.98]",
+          feature ? "col-span-2 aspect-[8/5] sm:aspect-[8/4.4]" : "aspect-[4/5] sm:aspect-[4/4.4]",
           big ? "w-[72vw] max-w-[300px] sm:w-[280px]" : "w-full",
         )}
         style={{ borderColor: color, boxShadow: `0 0 22px -8px ${color}` }}
       >
-        <Image src={art.src} alt="" fill sizes="(min-width:1024px) 260px, (min-width:640px) 33vw, 50vw" className="object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: art.pos }} />
+        <Image src={art.src} alt="" fill sizes={feature ? "(min-width:1024px) 540px, (min-width:640px) 66vw, 100vw" : "(min-width:1024px) 260px, (min-width:640px) 33vw, 50vw"} className="object-cover transition-transform duration-500 group-hover:scale-105" style={{ objectPosition: art.pos }} />
         <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/55 to-transparent" aria-hidden />
         <div className="relative p-3 pt-10">
           <div className="font-display text-[18px] uppercase leading-[0.95] drop-shadow-[0_2px_0_#080808] min-[400px]:text-[20px]">{title}</div>
@@ -70,21 +97,23 @@ export function IllustratedCard({ href, title, sub, kind, color, art, big = fals
 }
 
 /** Raster cover for an event, with a soft bottom fade. */
-export function EventCover({ id, sizes, priority = false, className }: { id: string; sizes: string; priority?: boolean; className?: string }) {
-  const a = eventArt(id);
+export function EventCover({ id, sizes, priority = false, className, hint, art }: { id: string; sizes: string; priority?: boolean; className?: string; hint?: CoverHint; art?: ArtPick }) {
+  // Rule: organizer upload → city poster → genre art → shared scene (see lib/art.ts coverFor).
+  const ev = hint ? null : getEvent(id);
+  const a = art ?? coverFor(id, hint ?? (ev ? { city: ev.city, genres: ev.genres } : {}));
   return (
     <Image src={a.src} alt="" fill sizes={sizes} priority={priority} className={cn("object-cover", className)} style={{ objectPosition: a.pos }} />
   );
 }
 
 /* ---------------- Event card ---------------- */
-export function EventCard({ event, className, wide = false }: { event: FreakEvent; className?: string; wide?: boolean }) {
+export function EventCard({ event, className, wide = false, art }: { event: FreakEvent; className?: string; wide?: boolean; art?: ArtPick }) {
   const tu = useTranslations("ui");
   const s = useEventStats(event);
   return (
     <article className={cn("flex flex-col overflow-hidden neon rounded-[26px] border bg-surface", wide ? "w-full" : "w-[80vw] max-w-[330px] sm:w-[320px]", className)}>
-      <Link href={`/events/${event.id}`} className="relative block aspect-[5/3] overflow-hidden" aria-hidden="true" tabIndex={-1}>
-        <EventCover id={event.id} sizes="(min-width:640px) 320px, 80vw" className="transition-transform duration-500 hover:scale-105" />
+      <Link href={`/events/${event.id}`} className="relative block aspect-video overflow-hidden" aria-hidden="true" tabIndex={-1}>
+        <EventCover id={event.id} art={art} sizes="(min-width:1024px) 380px, (min-width:640px) 320px, 80vw" className="transition-transform duration-500 hover:scale-105" />
         <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface to-transparent" aria-hidden />
         {event.djRecruiting && event.status !== "live" && (
           <span className="absolute bottom-3 left-3 -rotate-3 rounded-xl border-2 border-ink bg-coral px-2.5 py-1 font-display text-[13px] uppercase text-ink shadow-[0_3px_0_#080808]">{tu("eventOpen")}</span>
@@ -123,13 +152,13 @@ export function EventCard({ event, className, wide = false }: { event: FreakEven
 }
 
 /* ---------------- Compact event row ---------------- */
-export function EventRow({ event }: { event: FreakEvent }) {
+export function EventRow({ event, art }: { event: FreakEvent; art?: ArtPick }) {
   const tu = useTranslations("ui");
   const s = useEventStats(event);
   return (
     <Link href={`/events/${event.id}`} className="flex gap-3 rounded-3xl border border-line bg-surface p-3 hover:border-cream/30">
       <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl sm:w-28">
-        <EventCover id={event.id} sizes="112px" />
+        <EventCover id={event.id} art={art} sizes="112px" />
       </div>
       <div className="min-w-0 flex-1 py-0.5">
         <div className="flex flex-wrap items-center gap-1.5">
