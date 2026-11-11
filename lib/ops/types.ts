@@ -186,7 +186,8 @@ export interface Opening {
   createdAt: ISODate;
 }
 
-export type ApplicationStatus = "submitted" | "shortlisted" | "accepted" | "rejected" | "withdrawn" | "declined";
+/** submitted = APPLIED; under_review and interview were added in 12.0; accepted = OFFER SENT (agreement proposed). */
+export type ApplicationStatus = "submitted" | "under_review" | "shortlisted" | "interview" | "accepted" | "rejected" | "withdrawn" | "declined";
 
 export interface Application {
   id: string;
@@ -203,6 +204,8 @@ export interface Application {
   availableTo: ISODate | null;
   message: string;
   quoteDocumentId: string | null;
+  /** DJ ARENA tracks attached as audition material (12.0). Reviewers of this event may play them. */
+  trackIds?: string[];
   status: ApplicationStatus;
   createdAt: ISODate;
 }
@@ -282,7 +285,9 @@ export interface Task {
 
 export interface Message {
   id: string;
-  eventId: string;
+  /** Event thread; null for a DJ booking thread (12.0), which sets bookingId instead. */
+  eventId: string | null;
+  bookingId?: string;
   thread: Area;
   authorId: string;
   authorName: string;

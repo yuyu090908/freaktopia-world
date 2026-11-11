@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { ArrowRight, Building2, CalendarDays, Gem, Heart, LayoutDashboard, Mic2, Package, Pencil, Settings, Ticket, Trash2, Trophy, PartyPopper, Orbit } from "lucide-react";
+import { ArrowRight, Building2, CalendarDays, Gem, Heart, LayoutDashboard, Mic2, Package, Pencil, Settings, Ticket, Trash2, Trophy, PartyPopper, Orbit, Headphones, Library } from "lucide-react";
 import { Alien } from "@/components/art/Alien";
 import { AlienAvatar } from "@/components/cards/Cards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
@@ -32,6 +32,7 @@ function Inner() {
   const tp = useTranslations("profile");
   const to = useTranslations("ops");
   const tparty = useTranslations("party");
+  const tmusic = useTranslations("music");
   const myPublicId = useMyAvatar().publicId;
   const signedIn = useAuth((x) => x.status === "signedIn");
   const s = useDemo();
@@ -142,6 +143,14 @@ function Inner() {
           )}
           <Link href="/profile/parties" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-my-parties">
             <span className="inline-flex items-center gap-2"><Ticket className="size-5 text-acid" aria-hidden /> {tparty("myParties")}</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <Link href="/profile/dj" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-dj-studio">
+            <span className="inline-flex items-center gap-2"><Headphones className="size-5 text-acid" aria-hidden /> {tmusic("studioTitle")}</span>
+            <ArrowRight className="size-4" aria-hidden />
+          </Link>
+          <Link href="/music/library" className="flex min-h-14 items-center justify-between gap-2 rounded-2xl border border-acid/40 bg-surface p-3 font-extrabold hover:border-acid" data-testid="link-library">
+            <span className="inline-flex items-center gap-2"><Library className="size-5 text-acid" aria-hidden /> {tmusic("myLibrary")}</span>
             <ArrowRight className="size-4" aria-hidden />
           </Link>
         </div>

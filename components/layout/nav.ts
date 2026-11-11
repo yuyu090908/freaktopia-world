@@ -1,6 +1,6 @@
 import {
   Home, Globe2, CalendarDays, Radio, UserRound, Compass, Trophy, Vote, Disc3, MapPin, MoonStar, Sparkles, PlusCircle, Headphones, Building2,
-  PartyPopper, Wand2, Gamepad2, Gem, Orbit, Ticket, LayoutDashboard, Bell, Info, BookOpen, CircleHelp, Mail, Settings, type LucideIcon,
+  PartyPopper, Wand2, Gamepad2, Gem, Orbit, Ticket, LayoutDashboard, Bell, Info, BookOpen, CircleHelp, Mail, Settings, Library, Mic2, type LucideIcon,
 } from "lucide-react";
 
 /** Labels are message keys under "nav" (messages/<locale>.json). */
@@ -64,12 +64,14 @@ export const MENU_GROUPS: MenuGroup[] = [
   { group: "create", accent: "pink", icon: Sparkles, items: [
     { href: "/events/create", key: "createEvent", icon: PlusCircle },
     { href: "/venues/planner", key: "plannerName", icon: Wand2, badge: "demo" },
+    { href: "/profile/dj", key: "djStudio", icon: Mic2 },
     { href: "/djs/apply", key: "applyDj", icon: Headphones },
     { href: "/venues/new", key: "listVenue", icon: Building2 },
     { href: "/after-party/new", key: "createAfterParty", icon: PartyPopper },
   ]},
   { group: "manage", accent: "purple", icon: Orbit, items: [
     { href: "/profile/parties", key: "myWorld", icon: Orbit, mine: true },
+    { href: "/music/library", key: "musicLibrary", icon: Library },
     { href: "/dashboard", key: "dashboard", icon: LayoutDashboard },
     { href: "/alerts", key: "alerts", icon: Bell },
     { href: "/avatar", key: "alienAvatar", icon: UserRound },

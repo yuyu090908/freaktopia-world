@@ -9,6 +9,7 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { ConfirmSheet, Section, StatusPill, SuggestionBadge, useMoney, useOps, useOpsPost, useWhen } from "@/components/ops/shared";
 import type { Agreement, Application, Listing, OpsEvent, Requirement } from "@/lib/ops/types";
 import type { Candidate, TabProps, View } from "../ctx";
+import { ApplicantAudio, useApplicationAudio } from "@/components/music/ApplicantAudio";
 
 export function Resources(p: TabProps) {
   const { v } = p;
@@ -209,6 +210,7 @@ function Openings({ v, reload, eid }: TabProps) {
   const when = useWhen();
   const post = useOpsPost();
   const [hire, setHire] = useState<Application | null>(null);
+  const audio = useApplicationAudio(eid, v.applications.some((a) => (a as Application & { trackIds?: string[] }).trackIds?.length));
   const listing = (id: string | null) => v.listings.find((l) => l.id === id);
   if (!v.openings.length) return null;
   return (
@@ -239,7 +241,11 @@ function Openings({ v, reload, eid }: TabProps) {
                     <tbody>
                       {apps.map((a) => (
                         <tr key={a.id} className="border-t border-line align-top">
-                          <td className="py-2 pr-2 font-bold">{listing(a.listingId)?.title ?? "—"}</td>
+                          <td className="py-2 pr-2 font-bold">
+                            {audio?.profiles?.[a.id]?.stageName ?? listing(a.listingId)?.title ?? "—"}
+                            {audio?.profiles?.[a.id] && <span className="block text-xs font-normal text-mute">{[audio.profiles[a.id].city, audio.profiles[a.id].genres.slice(0, 3).join(", ")].filter(Boolean).join(" · ")}</span>}
+                            <span className="block text-[11px] font-normal text-mute">{when(a.createdAt, v.event.timezone, false)}</span>
+                          </td>
                           <td className="pr-2 tabular-nums">{money(a.priceUsd)}</td>
                           <td className="pr-2 text-xs">{a.items.map((i) => `${t(`req.${i.key}`)} ×${i.quantity}${i.model ? ` (${i.model})` : ""}`).join(", ")}</td>
                           <td className="max-w-56 pr-2 text-xs">
@@ -247,12 +253,15 @@ function Openings({ v, reload, eid }: TabProps) {
                             {a.portfolio && <p className="text-mute">{a.portfolio}</p>}
                             {a.availableFrom && <p className="text-mute">{when(a.availableFrom, v.event.timezone, false)} – {when(a.availableTo, v.event.timezone, false)}</p>}
                             {a.quoteDocumentId && <a className="font-bold text-acid underline" href={`/api/ops/documents/${a.quoteDocumentId}`}>{t("quoteFile")}</a>}
+                            {audio?.tracks?.[a.id] && <ApplicantAudio tracks={audio.tracks[a.id]} />}
                           </td>
                           <td className="pr-2"><StatusPill status={a.status} label={t(`appStatus.${a.status}`)} /></td>
                           <td className="whitespace-nowrap">
-                            {["submitted", "shortlisted"].includes(a.status) && v.me.can.decide_applications && (
-                              <div className="flex gap-1">
-                                {a.status === "submitted" && <Button size="sm" variant="ghost" onClick={async () => { if (await post(`events/${eid}/applications/${a.id}/status`, { status: "shortlisted" })) await reload(); }}>{t("shortlist")}</Button>}
+                            {["submitted", "under_review", "shortlisted", "interview"].includes(a.status) && v.me.can.decide_applications && (
+                              <div className="flex flex-wrap gap-1">
+                                {a.status === "submitted" && <Button size="sm" variant="ghost" onClick={async () => { if (await post(`events/${eid}/applications/${a.id}/status`, { status: "under_review" })) await reload(); }} data-testid="app-review">{t("markUnderReview")}</Button>}
+                                {["submitted", "under_review"].includes(a.status) && <Button size="sm" variant="ghost" onClick={async () => { if (await post(`events/${eid}/applications/${a.id}/status`, { status: "shortlisted" })) await reload(); }}>{t("shortlist")}</Button>}
+                                {a.status === "shortlisted" && <Button size="sm" variant="ghost" onClick={async () => { if (await post(`events/${eid}/applications/${a.id}/status`, { status: "interview" })) await reload(); }} data-testid="app-interview">{t("markInterview")}</Button>}
                                 <Button size="sm" variant="ghost" aria-label={t("reject")} onClick={async () => { if (await post(`events/${eid}/applications/${a.id}/status`, { status: "rejected" })) await reload(); }}><Ban className="size-4" aria-hidden /></Button>
                                 <Button size="sm" onClick={() => setHire(a)} data-testid="hire">{t("hire")}</Button>
                               </div>

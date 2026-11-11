@@ -16,6 +16,7 @@ import { Toaster } from "@/components/ui/Toaster";
 import { KeyboardWatcher } from "@/components/layout/KeyboardWatcher";
 import { LocaleFont } from "@/components/i18n/LocaleFont";
 import { SITE_URL } from "@/lib/utils";
+import { PlayerProvider } from "@/components/music/PlayerProvider";
 
 const bowlby = localFont({
   src: "./fonts/bowlby-one-latin-400-normal.woff2",
@@ -71,6 +72,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
         <LocaleProvider locale={locale} prefixed={prefixed}>
         <SessionSync />
+        <PlayerProvider>
         <Header />
         <main id="main" className="app-main">
           {children}
@@ -79,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           </FooterGate>
         </main>
         <MobileBottomNav />
+        </PlayerProvider>
         <Toaster />
         <KeyboardWatcher />
         <LocaleFont locale={locale} />

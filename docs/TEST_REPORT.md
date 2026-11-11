@@ -1,3 +1,14 @@
+# DJ ARENA 2.0 / 12.0 (2026-11-11)
+
+Local production build in a cloud container, server started with `MUSIC_STORAGE=local` (test storage: files go to `ops_blobs` through the same signed-URL flow as S3/R2). **No object storage, antivirus, transcoder or audio fingerprinting is connected.** Clock pinned to 2026-11-09 14:00 UTC. Audio fixtures are generated sine tones (`tests/fixtures/audio`). Nothing was measured on production or on a real phone; no Lighthouse/Core Web Vitals numbers are claimed.
+
+- Unit + integration (vitest): 344 passed with PostgreSQL 16 (migration 0012 applied on a database that already held 0005–0011 data), 295 + 1 skipped on the memory store only. New `tests/unit/music.test.ts` (real MP3 CBR/VBR/ID3 accepted, programs/archives/WAV/FLAC/random/truncated/empty rejected, duration limit, AWS SigV4 test vector, access rules incl. AUDITION, play counting, booking state machine ACCEPTED≠CONFIRMED, calendar conflicts and privacy, rankings) and `tests/integration/music-service.test.ts` (12 flows on both stores).
+- E2E (Playwright, 390 px project): new `tests/music.spec.ts`, 7 scenarios covering all 20 required checks (upload in the browser, invalid files, interrupted upload + retry, private tracks, play/pause/seek, player across navigation, likes once, playlists create/edit/reorder, DJ search, booking offer → counter → accept → confirm, conflict warning, apply with tracks, AUDITION access, claim → takedown → counter-notice → restore, mobile playback, mini player above the bottom nav, slow-network message, EVENTS/PROFILE/RANKINGS). Full suite: 170 of 171, then 26 of 26 for music + rankings + ops after the fix below.
+- Fixed while testing: (1) re-uploading to the same key did not replace the stored file on PostgreSQL (`putBlob` ignored conflicts), so a failed upload could not be retried there; (2) the DJ ranking chip "Trending" had the same accessible name as the event ranking button on `/rankings`; DJ board chips are now named "DJ rankings: …"; (3) attaching tracks to an application allowed 5 while the hint said 3; now 3 everywhere.
+- Not covered: real S3/R2 uploads (no credentials), real devices, background queue.
+- i18n: 551 new keys in all 12 dictionaries (4872/4872 each), 0 hardcoded UI strings.
+- Screenshots: docs/screenshots/dj-arena-12/.
+
 # WORLD 11.0: Global discovery (2026-11-11)
 
 Local production build in a cloud container; clock pinned to 2026-11-09 14:00 UTC. **No outside source is connected** (no API keys; `app.ticketmaster.com` and `rest.bandsintown.com` are blocked from the container). Every test of source data uses **mock data** (`tests/fixtures/ticketmaster-mock.json`, `tests/fixtures/map-external-mock.json`, both marked MOCK). There are no real-connection tests.

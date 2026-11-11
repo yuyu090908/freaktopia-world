@@ -47,6 +47,9 @@
 :root {
   --nav-h: 68px;
   --safe-b: env(safe-area-inset-bottom, 0px);
+  /* Music player (components/music/PlayerProvider): height when open, set at runtime; sits above the bottom nav. */
+  --player-h: 0px;
+  --player-bottom: calc(var(--nav-h) + max(var(--safe-b), 6px) - 2px);
   --header-h: 60px;
   color-scheme: dark;
 }
@@ -186,25 +189,26 @@ body::before {
 
 /* Main content clears fixed bottom nav + safe area */
 .app-main {
-  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 24px);
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 24px + var(--player-h));
   min-height: 100dvh;
 }
 .app-main.has-cta {
-  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 104px);
+  padding-bottom: calc(var(--nav-h) + var(--safe-b) + 104px + var(--player-h));
 }
 @media (min-width: 1024px) {
-  .app-main, .app-main.has-cta { padding-bottom: 48px; }
-  .app-main.has-cta { padding-bottom: 120px; }
+  :root { --player-bottom: 8px; }
+  .app-main, .app-main.has-cta { padding-bottom: calc(48px + var(--player-h)); }
+  .app-main.has-cta { padding-bottom: calc(120px + var(--player-h)); }
 }
 
 /* When the soft keyboard is open, hide fixed chrome so inputs stay visible */
 html[data-kb="open"] .hide-on-kb { display: none !important; }
 
 .sticky-cta {
-  bottom: calc(var(--nav-h) + var(--safe-b));
+  bottom: calc(var(--nav-h) + var(--safe-b) + var(--player-h));
 }
 @media (min-width: 1024px) {
-  .sticky-cta { bottom: 0; }
+  .sticky-cta { bottom: var(--player-h); }
 }
 html[data-kb="open"] .sticky-cta { bottom: 0; }
 

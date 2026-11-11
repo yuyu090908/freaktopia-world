@@ -12,6 +12,7 @@ import { Section, SignInGate, StatusPill, fileToBase64, useMoney, useOps, useOps
 import { AgreementAction } from "@/app/events/manage/[id]/tabs/Resources";
 import { CITIES } from "@/lib/ops/geo";
 import { CREDENTIALS, SERVICE_KEYS } from "@/lib/ops/planner";
+import { useMusic } from "@/components/music/shared";
 import { SCALE_LEVELS, type Agreement, type Application, type Listing, type ListingType, type Opening, type ProviderRole, type WorkProfile } from "@/lib/ops/types";
 
 const ROLES: ProviderRole[] = ["attendee", "dj", "organizer", "staff", "equipment_owner", "company"];
@@ -301,6 +302,10 @@ function ApplySheet({ o, listings, onClose, reload }: { o: Opportunity; listings
   const [portfolio, setPortfolio] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+  const tm = useTranslations("music");
+  const isDj = o.requirements.some((r) => r.key === "dj_performer");
+  const attachable = useMusic<{ tracks: { id: string; title: string; genre: string; durationSec: number | null; visibility: string }[] }>(isDj ? "/api/music/me/attachable" : null);
+  const [trackIds, setTrackIds] = useState<string[]>([]);
   useEffect(() => {
     const l = fits.find((x) => x.id === listingId);
     if (l) setPrice(l.priceUsd);
@@ -315,7 +320,7 @@ function ApplySheet({ o, listings, onClose, reload }: { o: Opportunity; listings
       quoteDocumentId = d.document.id;
     }
     const covered = o.requirements.filter((r) => fits.find((l) => l.id === listingId)?.items.some((i) => i.key === r.key)).map((r) => r.id);
-    const r = await post(`openings/${o.opening.id}/apply`, { listingId, requirementIds: covered, priceUsd: price, message, portfolio, quoteDocumentId, availableFrom: o.event.startAt, availableTo: o.event.endAt }, t("applied"));
+    const r = await post(`openings/${o.opening.id}/apply`, { listingId, requirementIds: covered, priceUsd: price, message, portfolio, quoteDocumentId, availableFrom: o.event.startAt, availableTo: o.event.endAt, ...(trackIds.length ? { trackIds } : {}) }, t("applied"));
     setBusy(false);
     if (r) {
       onClose();
@@ -332,6 +337,20 @@ function ApplySheet({ o, listings, onClose, reload }: { o: Opportunity; listings
           <Field id="ap-p" label={t("yourPrice")}><Input id="ap-p" type="number" min={0} value={price} onChange={(e) => setPrice(Math.max(0, Number(e.target.value) || 0))} data-testid="apply-price" /></Field>
           <Field id="ap-m" label={t("proposal")} optional><Textarea id="ap-m" value={message} maxLength={2000} onChange={(e) => setMessage(e.target.value)} data-testid="apply-message" /></Field>
           <Field id="ap-pf" label={t("portfolio")} optional><Input id="ap-pf" value={portfolio} maxLength={2000} onChange={(e) => setPortfolio(e.target.value)} /></Field>
+          {isDj && (
+            <fieldset className="space-y-1" data-testid="attach-tracks">
+              <legend className="text-sm font-bold">{tm("attachTracks")}</legend>
+              <p className="text-xs text-mute">{tm("attachTracksHint")}</p>
+              {attachable.data && attachable.data.tracks.length === 0 && <p className="text-xs text-mute">{tm("noAttachable")}</p>}
+              {attachable.data?.tracks.map((tr) => (
+                <label key={tr.id} className="flex min-h-11 items-center gap-2 rounded-xl bg-surface-2 px-3 text-sm">
+                  <input type="checkbox" className="size-5 accent-[var(--color-acid)]" checked={trackIds.includes(tr.id)} disabled={!trackIds.includes(tr.id) && trackIds.length >= 3} onChange={(e) => setTrackIds(e.target.checked ? [...trackIds, tr.id] : trackIds.filter((x) => x !== tr.id))} data-testid="attach-track" />
+                  <span className="min-w-0 flex-1 truncate font-bold">{tr.title}</span>
+                  <span className="text-xs text-mute">{tr.genre} · {tm(`vis.${tr.visibility}`)}</span>
+                </label>
+              ))}
+            </fieldset>
+          )}
           <Field id="ap-f" label={t("quoteFile")} optional hint={t("quoteFileHint")}><input id="ap-f" type="file" accept=".pdf,.png,.jpg,.jpeg,.docx,.xlsx" className="block w-full text-sm" onChange={(e) => setFile(e.target.files?.[0] ?? null)} /></Field>
         </div>
       )}

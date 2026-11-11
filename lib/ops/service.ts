@@ -485,6 +485,8 @@ export interface ApplyInput {
   availableTo?: string | null;
   message?: string;
   quoteDocumentId?: string | null;
+  /** DJ ARENA tracks to attach (own, reviewed, not private). */
+  trackIds?: string[];
 }
 
 export async function apply(uid: string, openingId: string, input: ApplyInput) {
@@ -503,11 +505,13 @@ export async function apply(uid: string, openingId: string, input: ApplyInput) {
   const reqIds = (input.requirementIds?.length ? input.requirementIds : o.requirementIds).filter((x) => o.requirementIds.includes(x));
   const reqs = (await store().list<Requirement>("requirements", { eventId: e.id })).filter((r) => reqIds.includes(r.id));
   if (!reqs.length || !reqs.every((r) => l.items.some((i) => i.key === r.key))) throw new OpsError(400, "LISTING_DOES_NOT_PROVIDE");
+  const trackIds = [...new Set(input.trackIds ?? [])].slice(0, 3);
+  if (trackIds.length) await (await import("@/lib/music/service")).assertAttachable(uid, trackIds);
   const a: Application = {
     id: id(), eventId: e.id, openingId, applicantId: uid, listingId: l.id, requirementIds: reqIds, priceUsd: Math.max(0, input.priceUsd),
     items: input.items?.length ? input.items : reqs.map((r) => ({ key: r.key, quantity: Math.min(r.quantity, l.items.filter((i) => i.key === r.key).reduce((s, i) => s + i.quantity, 0)), model: l.items.find((i) => i.key === r.key)?.model ?? "" })),
     portfolio: (input.portfolio ?? "").slice(0, 2000), availableFrom: input.availableFrom ?? null, availableTo: input.availableTo ?? null, message: (input.message ?? "").slice(0, 2000),
-    quoteDocumentId: input.quoteDocumentId ?? null, status: "submitted", createdAt: nowIso(),
+    quoteDocumentId: input.quoteDocumentId ?? null, ...(trackIds.length ? { trackIds } : {}), status: "submitted", createdAt: nowIso(),
   };
   await store().insert("applications", a);
   for (const m of await managersOf(e.id)) await notify(m.userId, e.id, "notif.newApplication", { event: e.name }, `application:${a.id}:${m.userId}`);
@@ -524,7 +528,7 @@ export async function withdraw(uid: string, appId: string) {
   return next;
 }
 
-export async function setApplicationStatus(uid: string, eventId: string, appId: string, status: "shortlisted" | "rejected") {
+export async function setApplicationStatus(uid: string, eventId: string, appId: string, status: "under_review" | "shortlisted" | "interview" | "rejected") {
   await access(eventId, uid, "decide_applications");
   const a = await store().get<Application>("applications", appId);
   if (!a || a.eventId !== eventId) throw notFound();
@@ -544,7 +548,7 @@ export async function accept(uid: string, eventId: string, appId: string, input:
   if (!input.confirm) throw new OpsError(400, "CONFIRMATION_REQUIRED");
   const a = await store().get<Application>("applications", appId);
   if (!a || a.eventId !== eventId) throw notFound();
-  if (!["submitted", "shortlisted"].includes(a.status)) throw new OpsError(400, "NOT_OPEN");
+  if (!["submitted", "under_review", "shortlisted", "interview"].includes(a.status)) throw new OpsError(400, "NOT_OPEN");
   const l = a.listingId ? await store().get<Listing>("listings", a.listingId) : null;
   if (!l) throw new OpsError(400, "UNKNOWN_LISTING");
   const reqs = (await store().list<Requirement>("requirements", { eventId })).filter((r) => a.requirementIds.includes(r.id));

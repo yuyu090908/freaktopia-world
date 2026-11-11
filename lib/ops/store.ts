@@ -19,7 +19,10 @@ export type Table =
   // FREAK ID & LOYALTY (db/migrations/0010_freak_loyalty.sql)
   | "loyalty_rules" | "loyalty_exclusions"
   // 11.0 GLOBAL DISCOVERY (db/migrations/0011_global_discovery.sql)
-  | "discovery_sources" | "discovery_events" | "discovery_changes";
+  | "discovery_sources" | "discovery_events" | "discovery_changes"
+  // 12.0 DJ ARENA 2.0 (db/migrations/0012_dj_music.sql)
+  | "dj_profiles" | "audio_tracks" | "playlists" | "playlist_items" | "track_likes" | "saved_tracks" | "track_plays" | "dj_availability"
+  | "dj_booking_requests" | "booking_offers" | "copyright_claims" | "music_reports" | "music_settings" | "music_images";
 
 type Row = Record<string, unknown>;
 export type Where = Record<string, string | number | boolean | null>;
@@ -55,6 +58,10 @@ const KEY: Partial<Record<Table, (r: Row) => string>> = {
   world_settings: (r) => String(r.ownerId),
   party_settings: (r) => String(r.eventId),
   loyalty_exclusions: (r) => String(r.eventId),
+  dj_profiles: (r) => String(r.userId),
+  track_likes: (r) => `${r.trackId}:${r.userId}`,
+  saved_tracks: (r) => `${r.trackId}:${r.userId}`,
+  dj_availability: (r) => `${r.djId}:${r.day}`,
 };
 export const keyOf = (table: Table, r: Row) => (KEY[table] ? KEY[table]!(r) : String(r.id));
 const clone = <T>(v: T): T => (v == null ? v : (JSON.parse(JSON.stringify(v)) as T));
@@ -137,7 +144,7 @@ const COLS: Record<Table, Record<string, string>> = {
   agreements: { id: "id", eventId: "event_id", bookingId: "booking_id", organizerId: "organizer_id", providerId: "provider_id" },
   members: { eventId: "event_id", userId: "user_id" },
   tasks: { id: "id", eventId: "event_id" },
-  messages: { id: "id", eventId: "event_id" },
+  messages: { id: "id", eventId: "event_id", bookingId: "booking_id" },
   documents: { id: "id", eventId: "event_id" },
   schedule: { id: "id", eventId: "event_id" },
   budget: { eventId: "event_id", category: "category" },
@@ -163,9 +170,25 @@ const COLS: Record<Table, Record<string, string>> = {
   discovery_sources: { id: "id" },
   discovery_events: { id: "id", sourceName: "source_name", startsAtUtc: "starts_at_utc" },
   discovery_changes: { id: "id", eventId: "event_id" },
+  dj_profiles: { userId: "user_id", slug: "slug" },
+  audio_tracks: { id: "id", ownerId: "owner_id" },
+  playlists: { id: "id", ownerId: "owner_id" },
+  playlist_items: { id: "id", playlistId: "playlist_id", trackId: "track_id" },
+  track_likes: { trackId: "track_id", userId: "user_id", ownerId: "owner_id" },
+  saved_tracks: { trackId: "track_id", userId: "user_id", ownerId: "owner_id" },
+  track_plays: { id: "id", trackId: "track_id", ownerId: "owner_id", listenerKey: "listener_key" },
+  dj_availability: { djId: "dj_id", day: "day" },
+  dj_booking_requests: { id: "id", djId: "dj_id", requesterId: "requester_id", status: "status" },
+  booking_offers: { id: "id", bookingId: "booking_id" },
+  copyright_claims: { id: "id", trackId: "track_id", ownerId: "owner_id" },
+  music_reports: { id: "id", reporterId: "reporter_id" },
+  music_settings: { id: "id" },
+  music_images: { id: "id", ownerId: "owner_id" },
 };
 /** Primary-key fields of composite-key tables when they differ from all key columns (extra indexed columns). */
-const KEY_FIELDS: Partial<Record<Table, string[]>> = { attendance: ["eventId", "userId"] };
+const KEY_FIELDS: Partial<Record<Table, string[]>> = {
+  attendance: ["eventId", "userId"], dj_profiles: ["userId"], track_likes: ["trackId", "userId"], saved_tracks: ["trackId", "userId"],
+};
 const PK_FIELDS: Record<Table, string[]> = Object.fromEntries(
   (Object.keys(COLS) as Table[]).map((t) => [t, KEY[t] ? KEY_FIELDS[t] ?? Object.keys(COLS[t]) : ["id"]]),
 ) as Record<Table, string[]>;
@@ -304,7 +327,7 @@ export function createPgOpsStore(connectionString: string): OpsStore {
       return (r.rowCount ?? 0) > 0;
     },
     async putBlob(id, eventId, mime, data) {
-      await pool.query(`insert into ops_blobs (id, event_id, mime, data) values ($1, $2, $3, $4) on conflict (id) do nothing`, [id, eventId, mime, data]);
+      await pool.query(`insert into ops_blobs (id, event_id, mime, data) values ($1, $2, $3, $4) on conflict (id) do update set mime = excluded.mime, data = excluded.data`, [id, eventId, mime, data]);
     },
     async getBlob(id) {
       const r = (await pool.query(`select mime, data from ops_blobs where id = $1`, [id])).rows[0];

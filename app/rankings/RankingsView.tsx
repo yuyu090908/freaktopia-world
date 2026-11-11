@@ -1,6 +1,7 @@
 "use client";
 
 import { Tx, useTx } from "@/components/i18n/Tx";
+import { DjRankings } from "@/components/music/DjRankings";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import Image from "next/image";
@@ -330,6 +331,9 @@ export function RankingsView({ initial }: { initial?: { query: string; data: Ran
           </div>
         </section>
       )}
+
+      {/* DJ ARENA 2.0: DJ rankings from measured listening, likes, saves and bookings (30 days) */}
+      <DjRankings />
 
       {/* REWARDS */}
       <section aria-labelledby="rk-rewards" className="mt-12 px-4 md:px-0">

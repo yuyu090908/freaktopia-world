@@ -188,7 +188,7 @@ export async function POST(req: Request, { params }: Params) {
     if (p[0] === "openings" && p.length === 3) {
       if (p[2] === "apply") {
         const r = parse(
-          z.object({ listingId: zId, requirementIds: z.array(zId).max(20).optional(), priceUsd: zMoney, items: z.array(zItem).max(20).optional(), portfolio: zText(2000).optional(), availableFrom: zIso.nullable().optional(), availableTo: zIso.nullable().optional(), message: zText(2000).optional(), quoteDocumentId: zId.nullable().optional() }).strict(),
+          z.object({ listingId: zId, requirementIds: z.array(zId).max(20).optional(), priceUsd: zMoney, items: z.array(zItem).max(20).optional(), portfolio: zText(2000).optional(), availableFrom: zIso.nullable().optional(), availableTo: zIso.nullable().optional(), message: zText(2000).optional(), quoteDocumentId: zId.nullable().optional(), trackIds: z.array(zId).max(3).optional() }).strict(),
           body,
         );
         if ("error" in r) return r.error;
@@ -264,7 +264,7 @@ export async function POST(req: Request, { params }: Params) {
     }
     if (p[2] === "applications" && p.length === 5) {
       if (p[4] === "status") {
-        const r = parse(z.object({ status: z.enum(["shortlisted", "rejected"]) }).strict(), body);
+        const r = parse(z.object({ status: z.enum(["under_review", "shortlisted", "interview", "rejected"]) }).strict(), body);
         if ("error" in r) return r.error;
         return ok({ application: await ops.setApplicationStatus(uid, eid, p[3], r.data.status) });
       }

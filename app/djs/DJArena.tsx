@@ -12,9 +12,11 @@ import { EmptyState } from "@/components/ui/States";
 import { useDemo } from "@/lib/store";
 import { compact } from "@/lib/utils";
 import type { Genre } from "@/lib/types";
+import { MusicArena } from "@/components/music/MusicArena";
 
 export function DJArena() {
   const tu = useTranslations("djs");
+  const tm = useTranslations("music");
   const [q, setQ] = useState("");
   const [genre, setGenre] = useState<Genre | null>(null);
   const [bpm, setBpm] = useState<"any" | "slow" | "mid" | "fast">("any");
@@ -36,6 +38,20 @@ export function DJArena() {
   return (
     <div className="mx-auto max-w-6xl md:px-6">
       <PageTitle art={{ src: ART.panelUniverse, pos: "88% 78%" }} kicker={tu("djArena")} title={tu("whoRulesTheBooth")} sub={tu("dj")} />
+
+      {/* 12.0: real DJs and music first. The sample profiles below stay, clearly marked as DEMO. */}
+      <div className="mb-4 flex flex-wrap gap-2 px-4 md:px-0">
+        <ButtonLink href="/profile/dj" variant="primary"><Mic2 className="size-4" aria-hidden /> {tm("djStudioCta")}</ButtonLink>
+        <ButtonLink href="/music/library" variant="ghost">{tm("myLibrary")}</ButtonLink>
+      </div>
+      <MusicArena />
+
+      <section aria-labelledby="demo-djs" className="mt-14 border-t border-line pt-8">
+        <div className="mb-4 flex flex-wrap items-center gap-2 px-4 md:px-0">
+          <h2 id="demo-djs" className="text-2xl uppercase">{tm("demoSectionTitle")}</h2>
+          <DemoBadge label={tu("sampleProfiles")} />
+        </div>
+        <p className="mb-4 px-4 text-sm text-mute md:px-0">{tm("demoSectionSub")}</p>
 
       {/* On-air audition banner */}
       <div className="px-4 md:px-0">
@@ -104,10 +120,15 @@ export function DJArena() {
         </ol>
       </section>
 
+      </section>
+
       <div className="mx-4 mt-10 rounded-[28px] border-[3px] border-ink bg-purple p-6 text-ink md:mx-0">
         <h2 className="text-3xl uppercase">{tu("areYouADj")}</h2>
-        <p className="mt-2 font-medium">{tu("dj30")}</p>
-        <ButtonLink href="/djs/apply" variant="secondary" className="mt-4"><Mic2 className="size-4" aria-hidden /> {tu("applyAsDj")}</ButtonLink>
+        <p className="mt-2 font-medium">{tm("areYouADjSub")}</p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ButtonLink href="/profile/dj" variant="secondary"><Mic2 className="size-4" aria-hidden /> {tm("djStudioCta")}</ButtonLink>
+          <ButtonLink href="/djs/apply" variant="ghost" className="!text-ink">{tu("applyAsDj")}</ButtonLink>
+        </div>
       </div>
     </div>
   );
