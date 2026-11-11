@@ -111,7 +111,9 @@
     },
     "quickAccess": "クイックアクセス",
     "signInForMyWorld": "ログインするとあなたのワールドが開きます",
-    "legal": "規約"
+    "legal": "規約",
+    "tickets": "チケット",
+    "my": "マイページ"
   },
   "footer": {
     "disclaimer": "プロトタイプです。イベント、DJ、会場、チケット、コレクティブルはすべて架空のデモデータです。決済・ライブ配信・ウォレット・NFT発行は接続されていません。",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "このブラウザからデモチケット、作成したイベント、会場、アバター、XPを削除します。元に戻せません。",
     "organizer": "主催者",
     "venueOwner": "会場オーナー",
-    "fan": "ファン"
+    "fan": "ファン",
+    "tabId": "FREAK ID",
+    "tabActivity": "アクティビティ",
+    "tabSettings": "設定"
   },
   "status": {
     "planning": "計画中",
@@ -689,7 +694,8 @@
         "tokyo": "ネオンサイン、小さなクラブ、大きなサウンドシステム。",
         "london": "クラブ、倉庫、海賊ラジオのルーツ。"
       }
-    }
+    },
+    "communityNote": "オーガナイザーがFREAKTOPIAで公開したパーティーです。出演者・チケット・詳細はオーガナイザーのワールド内のページにあります。"
   },
   "ranking": {
     "title": "ワールドランキング",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName}：通知が受信箱に届きます（デモ、このブラウザのみ）。",
     "eventnameRemovedFromYourFollows": "{eventName}をフォローから外しました。",
     "ranking": "ランキング",
-    "today": "今日"
+    "today": "今日",
+    "categoryRanking": "{label}ランキング",
+    "rowDetails": "{name}の詳細"
   },
   "live": {
     "title": "ライブフェス",
@@ -1237,7 +1245,8 @@
     "ofOf": "／{of}",
     "paused": "一時停止中",
     "watching": "視聴中",
-    "festivalsCount": "{n}件のフェス"
+    "festivalsCount": "{n}件のフェス",
+    "emptyBody": "接続済みの正規ライセンス配信があるイベントだけがここに表示されます。開催予定のフェスは下に一覧があります。"
   },
   "dao": {
     "title": "フェスDAO",
@@ -1885,7 +1894,16 @@
     "none": "なし",
     "emailReceiptRefundsPolicy": "メールの領収書と返金ポリシー",
     "enterLiveMap": "ライブマップに入る",
-    "backToEvent": "イベントに戻る"
+    "backToEvent": "イベントに戻る",
+    "validity": "有効性",
+    "validDemo": "デモ注文: 入場には使えません",
+    "expired": "期限切れ: イベントは終了しました",
+    "entryQr": "入場QR",
+    "qrDemo": "QR: 装飾用のサンプルのみ",
+    "nftNotConnected": "NFT: 未発行(未接続)",
+    "communityPasses": "コミュニティパーティーの無料パス",
+    "communityPassesBody": "オーガナイザーが公開したパーティーの、入場に使えるQRパスは「マイパーティー」の参加登録と一緒に保存されています。",
+    "openMyParties": "マイパーティーを開く"
   },
   "events": {
     "title": "イベント",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "チケットデザイン:{tier}",
     "selected": "選択中",
     "ticketArtNote": "パスの絵柄はデザインテンプレートです。実際のチケットの日付・QRコード・IDは購入後にFREAKTOPIAが発行し、絵柄の情報は使いません。",
-    "searchCityOrEvent": "都市やイベントを検索"
+    "searchCityOrEvent": "都市やイベントを検索",
+    "stepPlaceTime": "場所・日時",
+    "stepSizeBudget": "規模・予算",
+    "stepTicketsRecruit": "チケット・募集",
+    "preview": "プレビュー",
+    "errDateInPast": "今日以降の日付を選んでください。"
   },
   "states": {
     "emptyTitle": "まだ何もありません",
@@ -2339,7 +2362,11 @@
     "alerts": "通知",
     "stageIllustrationLevelLevel": "ステージのイラスト、レベル{level}",
     "compactFollowers": "フォロワー {compact}人",
-    "seatsleftLeft": "残り{seatsLeft}"
+    "seatsleftLeft": "残り{seatsLeft}",
+    "fromPrice": "{price}〜",
+    "supportersCount": "支援者 {count}人",
+    "kpiDefinition": "この数値の定義",
+    "asOf": "{time}時点"
   },
   "dashboard": {
     "soldOf": "{name} の販売数",
@@ -2417,7 +2444,23 @@
     "soundLights": "音響と照明",
     "staffSecurity": "スタッフと警備",
     "sSold": "{s}枚販売",
-    "seatsleftLeft": "残り{seatsLeft}"
+    "seatsleftLeft": "残り{seatsLeft}",
+    "kpi": {
+      "events": "このブラウザで公開したイベントとサンプルイベントの合計。",
+      "djApplicants": "あなたのイベントに届いたDJ応募の数(サンプル応募を含む)。",
+      "ticketsSold": "サンプルイベントのチケット販売数。固定のサンプル値で、実際の販売ではありません。",
+      "raised": "サンプルイベントへの支援額(米ドル)。サンプル値で、実際の入金はありません。",
+      "rank": "サンプルDJのDJアリーナでの順位。",
+      "votes": "サンプルDJのセットへのファン投票数。",
+      "followers": "サンプルDJのプロフィールをフォローしている人数。",
+      "listed": "このブラウザで掲載した会場とサンプル会場1件の合計。",
+      "bookings": "今月の確定予約数。固定のサンプル値です。",
+      "revenue": "今月の予約売上(米ドル)。固定のサンプル値で、実際の収入ではありません。",
+      "level": "下のXPから決まるあなたのファンレベル。",
+      "xp": "このブラウザでの支援・チケット購入・イベント作成で得たポイント。",
+      "tickets": "このブラウザに保存されたチケット注文の数。",
+      "following": "フォローしているDJの数。"
+    }
   },
   "djs": {
     "stars": "{n} つ星",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "背景動画を再生",
     "heroVideoPause": "背景動画を一時停止",
-    "heroVideoAlt": "夕暮れのFREAKTOPIAフェスのステージへ歩いていく3人のエイリアン。"
+    "heroVideoAlt": "夕暮れのFREAKTOPIAフェスのステージへ歩いていく3人のエイリアン。",
+    "exploreEvents": "イベントを探す"
   },
   "afterParty": {
     "lengthAfterParties": "{length}件のアフターパーティー",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "イベントを再び計算に含めた"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "{count}件を表示",
+    "place": "都市",
+    "anywhere": "すべての都市",
+    "anyOf": "選んだ項目のどれかに当てはまるもの",
+    "status": "ステータス",
+    "size": "イベント規模",
+    "sizeHint": "支援者とともに成長するフェスレベルです。会場の収容人数ではありません。",
+    "priceTitle": "価格",
+    "priceHint": "販売中チケットの最安値です。販売中のチケットがないイベントは除外されます。",
+    "price": {
+      "any": "指定なし",
+      "free": "無料",
+      "u30": "$30以下",
+      "u60": "$60以下"
+    },
+    "more": "その他",
+    "breakdown": "コミュニティ {community}・サンプル {sample}",
+    "communitySub": "オーガナイザーがFREAKTOPIAで公開したパーティーです。サンプルのオーガナイザーのパーティーにはDEMOと表示しています。",
+    "communityError": "コミュニティパーティーを読み込めませんでした。下のサンプル一覧は表示できます。",
+    "sampleTitle": "サンプルイベント",
+    "completedTitle": "終了したイベント",
+    "completedSub": "開催日が過ぎたイベントです。開催予定の件数には含めていません。",
+    "show": "表示",
+    "allOf": "選んだ項目すべてに当てはまるもの",
+    "notOnSaleEnded": "このイベントは終了しました",
+    "notOnSaleEndedBody": "チケットの販売は終了しました。イベントページで出演者や記録を見られます。",
+    "notOnSaleYet": "チケットはまだ販売していません",
+    "notOnSaleYetBody": "イベントの開催が決定するとチケットの販売が始まります。それまではイベントページから支援できます。",
+    "backToEvent": "イベントに戻る"
   }
 }

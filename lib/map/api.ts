@@ -5,7 +5,7 @@
  * numbers. MAP_DATA_MODE=production → 503 DATA_SOURCE_NOT_CONFIGURED (demo data is never served
  * as production data).
  */
-import { ARCHIVE_EVENTS, EVENTS, getAfterParty, getDJ, getVenue } from "@/lib/data";
+import { ARCHIVE_EVENTS, EVENTS, GENRES, getAfterParty, getDJ, getVenue, syncEventClock } from "@/lib/data";
 import { allDaoSummaries, approvedStageDesign } from "@/lib/dao/api";
 import { discoveryEvents } from "@/lib/live/api";
 import { getRankings } from "@/lib/ranking/service";
@@ -13,6 +13,47 @@ import type { FreakEvent } from "@/lib/types";
 import { DEFAULT_GROWTH_CONFIG, computeFestivalLevel, type GrowthInputs } from "./growth";
 import { landmarkTypeFor, type MapStatus } from "./landmarks";
 import type { MapEventDto, RankBadge, WorldMapResponse } from "./types";
+import { upcomingParties } from "@/lib/party/service";
+import { appNow } from "@/lib/clock";
+import type { Genre } from "@/lib/types";
+
+type Community = Awaited<ReturnType<typeof upcomingParties>>[number];
+const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+const COMMUNITY_PALETTE: [string, string, string] = ["#C1FF53", "#B78BFF", "#66DFFF"];
+
+/** A published community party as a map entry. Nothing is invented: no level growth, ranking, DAO, live or ticket figures. */
+export function communityDto(p: Community, asOf: string): MapEventDto {
+  const genres = p.genres.filter((g): g is Genre => (GENRES as string[]).includes(g));
+  return {
+    id: `party-${p.id}`,
+    name: p.name,
+    city: p.city,
+    country: regionNames.of(p.country) ?? p.country,
+    venue: p.venueName || null,
+    location: { lat: p.lat as number, lng: p.lng as number, precision: "city" },
+    startsAt: p.startAt,
+    endsAt: p.endAt,
+    genres,
+    lineup: [],
+    palette: COMMUNITY_PALETTE,
+    status: "confirmed",
+    growth: { supporters: 0, stakers: 0, fundingUsd: 0, venueContract: false, approvals: 0 },
+    goalUsd: 0,
+    level: 1,
+    landmark: { type: landmarkTypeFor(genres), theme: "event", approvedDesign: null },
+    ranking: { rank: null, badge: null, category: "popular", period: "all", trendingRank: null, trendingGrowth: null, trendingPeriod: "7d", asOf },
+    dao: null,
+    live: null,
+    tickets: { onSale: false, remaining: 0, fromUsd: null, demo: true },
+    djRecruiting: false,
+    afterParty: null,
+    updatedAt: asOf,
+    isDemo: p.demo,
+    source: "community",
+    href: `/u/${p.handle ?? ""}/world/${p.id}`,
+    organizer: { name: p.organizer ?? "", handle: p.handle, demo: p.demo },
+  };
+}
 
 export const mapMode = () => (process.env.MAP_DATA_MODE === "production" ? "production" : "demo");
 
@@ -26,7 +67,8 @@ export function mapStatusOf(e: FreakEvent): MapStatus {
 
 export const daoTier = (members: number): 0 | 1 | 2 | 3 => (members >= 40 ? 3 : members >= 15 ? 2 : members >= 1 ? 1 : 0);
 
-export async function buildWorldMap(now = Date.now()): Promise<WorldMapResponse> {
+export async function buildWorldMap(now = appNow()): Promise<WorldMapResponse> {
+  syncEventClock(now);
   const [popular, trending, live] = await Promise.all([
     getRankings({ category: "popular", period: "all", page: 1, pageSize: 100 }),
     getRankings({ category: "trending", period: "7d", page: 1, pageSize: 100 }),
@@ -107,15 +149,21 @@ export async function buildWorldMap(now = Date.now()): Promise<WorldMapResponse>
       afterParty: ap ? { id: ap.id, name: ap.name, startsAt: ap.startsAt, venue: ap.venueName } : null,
       updatedAt: popular.asOf,
       isDemo: true,
+      source: "sample",
       organizer: { name: e.organizer, handle: null, demo: true },
     };
   });
+
+  // Community parties (published by organizers) share the map with the samples, so WORLD and EVENTS count the same list.
+  const community: MapEventDto[] = (await upcomingParties(500))
+    .filter((p) => p.handle && p.lat != null && p.lng != null)
+    .map((p) => communityDto(p, popular.asOf));
 
   return {
     mode: "demo",
     asOf: new Date(now).toISOString(),
     growthConfig: DEFAULT_GROWTH_CONFIG,
-    events,
+    events: [...events, ...community],
     notes: [
       "Sample events. Festival level is a visual game level, not venue capacity.",
       "Staking is escrowed separately and never counted as event budget.",

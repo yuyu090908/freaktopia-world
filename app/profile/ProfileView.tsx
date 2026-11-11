@@ -9,6 +9,8 @@ import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, ButtonLink, Card, Chip, DemoBadge, DemoNotice, Progress, Stat } from "@/components/ui/primitives";
 import { Field, Input, Textarea } from "@/components/forms/Fields";
 import { EmptyState } from "@/components/ui/States";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { Tabs } from "@/components/ui/Tabs";
 import { EVENTS, GENRES, PAST_EVENTS, getDJ, getEvent } from "@/lib/data";
 import { userLevel } from "@/lib/levels";
 import { toast, useDemo } from "@/lib/store";
@@ -38,6 +40,7 @@ function Inner() {
   const [edit, setEdit] = useState(false);
   const [draft, setDraft] = useState({ username: p.username, bio: p.bio, city: p.city, favoriteGenres: p.favoriteGenres });
   const [confirmReset, setConfirmReset] = useState(false);
+  const [tab, setTab] = useState<"id" | "activity" | "settings">("id");
   const openEdit = () => {
     setDraft({ username: p.username, bio: p.bio, city: p.city, favoriteGenres: p.favoriteGenres });
     setEdit(true);
@@ -60,9 +63,15 @@ function Inner() {
     <div className="mx-auto max-w-5xl md:px-6">
       <div className="px-4 pt-5 md:px-0 md:pt-8">
         <h1 className="sr-only">{tp("title")}</h1>
-        <AccountCard />
-        <div className="mt-5"><FreakIdCard /></div>
       </div>
+      <Tabs label={tp("title")} tabs={[{ id: "id", label: tp("tabId") }, { id: "activity", label: tp("tabActivity") }, { id: "settings", label: tp("tabSettings") }]} active={tab} onChange={setTab} className="px-4 md:px-0">
+      {tab === "id" && (
+        <div data-testid="profile-tab-id">
+          <AccountCard />
+          <div className="mt-5"><FreakIdCard /></div>
+        </div>
+      )}
+      {tab === "activity" && (<div className="-mx-4 md:mx-0" data-testid="profile-tab-activity">
       {/* Header card: demo progress kept in this browser (tickets, XP, favourites) */}
       <section className="px-4 pt-5 md:px-0" aria-labelledby="pf-name">
         {!signedIn && <p className="mb-2 text-xs font-bold uppercase tracking-wider text-orange">{tp("demoProfile")}</p>}
@@ -203,8 +212,10 @@ function Inner() {
         </Section>
       </div>
 
+      </div>)}
+      {tab === "settings" && (<div className="-mx-4 md:mx-0" data-testid="profile-tab-settings">
       {/* Settings */}
-      <section aria-labelledby="set-h" className="mt-8 px-4 md:px-0">
+      <section aria-labelledby="set-h" className="px-4 md:px-0">
         <h2 id="set-h" className="flex items-center gap-2 text-2xl uppercase"><Settings className="size-5" aria-hidden /> {tu("settings2")}</h2>
         <Card className="mt-3 divide-y divide-line">
           <button type="button" onClick={openEdit} className="flex min-h-14 w-full items-center justify-between px-4 text-left font-bold">{tu("editProfile")} <ArrowRight className="size-4" aria-hidden /></button>
@@ -215,6 +226,8 @@ function Inner() {
         </Card>
         <DemoNotice className="mt-3">{tu("thisProfileAndEverythingYou")}</DemoNotice>
       </section>
+      </div>)}
+      </Tabs>
 
       <BottomSheet open={edit} onClose={() => setEdit(false)} title={tu("editProfile")} footer={<Button className="mb-1 w-full" onClick={saveProfile}>{tu("save")}</Button>}>
         <div className="space-y-4">
@@ -230,14 +243,9 @@ function Inner() {
         </div>
       </BottomSheet>
 
-      <BottomSheet open={confirmReset} onClose={() => setConfirmReset(false)} title={tu("resetDemoData")} footer={
-        <div className="mb-1 grid grid-cols-2 gap-2">
-          <Button variant="ghost" onClick={() => setConfirmReset(false)}>{tu("cancel")}</Button>
-          <Button variant="coral" onClick={() => { s.resetAll(); setConfirmReset(false); toast({ title: tu("demoDataReset") }); }}>{tu("reset")}</Button>
-        </div>
-      }>
-        <p className="text-sm">{tu("thisClearsYourDemoTickets")}</p>
-      </BottomSheet>
+      <ConfirmDialog open={confirmReset} title={tu("resetDemoData")} cancelLabel={tu("cancel")} confirmLabel={tu("reset")} onCancel={() => setConfirmReset(false)} onConfirm={() => { s.resetAll(); setConfirmReset(false); toast({ title: tu("demoDataReset") }); }}>
+        <p>{tu("thisClearsYourDemoTickets")}</p>
+      </ConfirmDialog>
     </div>
   );
 }

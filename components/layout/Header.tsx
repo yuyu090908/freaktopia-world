@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { ArrowLeft, Menu, Search, X } from "lucide-react";
 import { Logo } from "./Logo";
 import { AlertsBell } from "./AlertsBell";
-import { MAIN_NAV, isTopLevel, parentOf } from "./nav";
+import { DESKTOP_NAV, isTopLevel, parentOf } from "./nav";
 import { MenuDrawer } from "./MenuDrawer";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { DemoBadge } from "@/components/ui/primitives";
@@ -68,7 +68,7 @@ export function Header() {
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] focus:rounded-full focus:bg-acid focus:px-4 focus:py-3 focus:text-ink">
         {t("skipToContent")}
       </a>
-      <header className="sticky top-0 z-50 border-b border-purple/20 bg-ink/[.96] shadow-[0_8px_30px_-12px_rgba(162,118,233,0.45)] pt-[env(safe-area-inset-top)]">
+      <header className="sticky top-0 z-50 border-b border-purple/20 bg-ink/[.96] shadow-[0_8px_30px_-12px_rgba(183,139,255,0.35)] pt-[env(safe-area-inset-top)]">
         <div className="mx-auto flex h-[64px] max-w-6xl items-center gap-0.5 px-2 min-[400px]:gap-1 min-[400px]:px-3 md:px-6">
           {!top && (
             <button type="button" onClick={goBack} aria-label={t("goBack")} className="-ml-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
@@ -78,14 +78,14 @@ export function Header() {
           <Logo />
           <span className="ml-1 hidden min-[400px]:inline-flex"><DemoBadge /></span>
           <nav ref={navRef} aria-label={t("main")} className="ml-3 hidden h-11 min-w-0 flex-1 flex-wrap items-center gap-x-0.5 overflow-hidden xl:ml-5 lg:flex">
-            {[...MAIN_NAV.slice(1), { href: "/rankings", key: "ranking" }, { href: "/djs", key: "djArena" }].map((n) => {
-              const active = n.href === "/" ? path === "/" : path.startsWith(n.href);
+            {DESKTOP_NAV.map((n) => {
+              const active = path === n.href || path.startsWith(n.href + "/");
               return (
                 <Link
                   key={n.href}
                   href={href(n.href)}
                   aria-current={active ? "page" : undefined}
-                  className={cn("inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2.5 text-sm font-bold uppercase xl:px-3", active ? "bg-acid text-ink" : "text-cream/80 hover:text-cream")}
+                  className={cn("relative inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2.5 text-sm font-bold uppercase xl:px-3", active ? "text-acid after:absolute after:inset-x-3 after:bottom-1 after:h-[3px] after:rounded-full after:bg-acid" : "text-cream/80 hover:bg-surface hover:text-cream")}
                 >
                   {t(n.key)}
                 </Link>

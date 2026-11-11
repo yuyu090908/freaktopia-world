@@ -184,7 +184,7 @@ function OpenCallSheet({ v, eid, req, onClose, reload }: { v: View; eid: string;
             {others.map((r) => (
               <li key={r.id}>
                 <label className="flex min-h-11 items-center gap-2 text-sm">
-                  <input type="checkbox" className="size-5 accent-[#B6F05C]" checked={ids.includes(r.id)} onChange={(e) => setIds(e.target.checked ? [...ids, r.id] : ids.filter((x) => x !== r.id))} />
+                  <input type="checkbox" className="size-5 accent-acid" checked={ids.includes(r.id)} onChange={(e) => setIds(e.target.checked ? [...ids, r.id] : ids.filter((x) => x !== r.id))} />
                   {t(`req.${r.key}`)} ×{r.quantity}
                 </label>
               </li>

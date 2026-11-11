@@ -88,10 +88,10 @@ export default function HomePage() {
             </h1>
             <p className="mt-3 hidden max-w-md text-[15px] leading-relaxed text-cream/90 [text-shadow:0_1px_8px_rgba(0,0,0,.8)] md:block">{tu("dj")}</p>
             <div className="mt-6 hidden gap-3 md:flex">
-              <ButtonLink href="/world" size="lg" className="whitespace-nowrap px-5">
-                {tu("explore")} <ArrowRight className="size-5" aria-hidden />
+              <ButtonLink href="/events" size="lg" className="whitespace-nowrap px-5" data-testid="hero-explore">
+                {tu("exploreEvents")} <ArrowRight className="size-5" aria-hidden />
               </ButtonLink>
-              <ButtonLink href="/events/create" variant="coral" size="lg" className="whitespace-nowrap px-5 text-[15px]">
+              <ButtonLink href="/events/create" variant="secondary" size="lg" className="whitespace-nowrap px-5 text-[15px]">
                 {tu("createEvent")}
               </ButtonLink>
             </div>
@@ -100,10 +100,10 @@ export default function HomePage() {
         <div className="relative z-10 px-4 md:hidden">
           <p className="mt-1 max-w-md text-[15px] leading-relaxed text-cream/85">{tu("dj")}</p>
           <div className="mt-5 grid grid-cols-2 gap-3">
-            <ButtonLink href="/world" size="lg" className="whitespace-nowrap px-3">
-              {tu("explore")} <ArrowRight className="size-5" aria-hidden />
+            <ButtonLink href="/events" size="lg" className="whitespace-nowrap px-3">
+              {tu("exploreEvents")} <ArrowRight className="size-5" aria-hidden />
             </ButtonLink>
-            <ButtonLink href="/events/create" variant="coral" size="lg" className="whitespace-nowrap px-3 text-[15px]">
+            <ButtonLink href="/events/create" variant="secondary" size="lg" className="whitespace-nowrap px-3 text-[15px]">
               {tu("createEvent")}
             </ButtonLink>
           </div>
@@ -139,33 +139,33 @@ export default function HomePage() {
         </nav>
       </section>
 
-      {/* DISCOVER CITIES: official city posters, numbers from the listed events */}
-      <section aria-labelledby="cities" className="mt-14 md:px-6" data-testid="home-cities">
-        <SectionHeader id="cities" title={tc("title")} sub={tc("sub")} />
-        <ul className="rail rail-grid pb-2 md:grid-cols-5" aria-labelledby="cities">
-          {cityRows().map(({ art, count, genres, country }) => (
-            <li key={art.id} className="flex w-[62vw] max-w-[240px] shrink-0 md:w-auto md:max-w-none">
-              <CityCard
-                art={art}
-                className="w-full"
-                href={count && country ? `/world?city=${encodeURIComponent(`${art.city}|${country}`)}` : "/events/create"}
-                count={count}
-                genres={genres}
-                labels={{ theme: tc(`theme.${art.id}`), events: tc("events", { count }), none: tc("none"), cta: tc("cta"), noneCta: tc("noneCta") }}
-              />
-            </li>
+      {/* EXPLORE */}
+      <section aria-labelledby="explore" className="mt-12 md:px-6">
+        <SectionHeader id="explore" title={tu("explore")} sub={tu("n8Freaktopia")} />
+        <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 md:px-0">
+          {EXPLORE(tu).map((e) => (
+            <IllustratedCard key={e.href} {...e} art={e.art} feature={"feature" in e && e.feature} />
           ))}
-        </ul>
-        <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tc("note")}</p>
+        </div>
       </section>
 
-      {/* SPOTLIGHT */}
-      {spotlight && (
-        <section aria-labelledby="spotlight" className="mt-10 px-4 md:px-6">
-          <h2 id="spotlight" className="sr-only">{tu("spotlightEvent")}</h2>
-          <HomeFeatured event={spotlight} />
-        </section>
-      )}
+      {/* CREATE */}
+      <section aria-labelledby="create" className="mt-14 px-4 md:px-6">
+        <div className="relative grid overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid text-ink md:grid-cols-[1.25fr_1fr]">
+          <div className="relative aspect-[16/9] md:order-2 md:aspect-auto">
+            <Image src={ART.panelStage} alt={tu("createArtAlt")} fill sizes="(min-width:1152px) 460px, (min-width:768px) 40vw, 100vw" className="object-cover" style={{ objectPosition: "50% 35%" }} />
+          </div>
+          <div className="p-6 md:p-10">
+          <h2 id="create" className="text-[22px] uppercase leading-tight sm:text-[28px]">{tu("startSomethingWeird")}</h2>
+          <p className="mt-3 max-w-lg font-medium">{tu("dj2")}</p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1">
+            <Link href="/events/create" className="flex min-h-14 items-center justify-between rounded-full bg-ink px-5 font-extrabold uppercase text-cream">{tu("createEvent")} <ArrowRight className="size-5" aria-hidden /></Link>
+            <Link href="/djs/apply" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("applyAsDj")} <ArrowRight className="size-5" aria-hidden /></Link>
+            <Link href="/venues/new" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("listVenue")} <ArrowRight className="size-5" aria-hidden /></Link>
+          </div>
+          </div>
+        </div>
+      </section>
 
       {/* LIVE NOW strip */}
       {live && (
@@ -184,15 +184,13 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* EXPLORE */}
-      <section aria-labelledby="explore" className="mt-12 md:px-6">
-        <SectionHeader id="explore" title={tu("explore")} sub={tu("n8Freaktopia")} />
-        <div className="grid grid-cols-2 gap-3 px-4 sm:grid-cols-4 md:px-0">
-          {EXPLORE(tu).map((e) => (
-            <IllustratedCard key={e.href} {...e} art={e.art} feature={"feature" in e && e.feature} />
-          ))}
-        </div>
-      </section>
+      {/* SPOTLIGHT */}
+      {spotlight && (
+        <section aria-labelledby="spotlight" className="mt-10 px-4 md:px-6">
+          <h2 id="spotlight" className="sr-only">{tu("spotlightEvent")}</h2>
+          <HomeFeatured event={spotlight} />
+        </section>
+      )}
 
       {/* FEATURED EVENTS */}
       <section aria-labelledby="featured" className="mt-14">
@@ -217,29 +215,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS */}
-      <section aria-labelledby="how" className="mt-14 px-4 md:px-6">
-        <h2 id="how" className="text-[28px] uppercase sm:text-4xl">{tu("howItWorks")}</h2>
-        <p className="mt-2 text-sm text-mute">{tu("discoverSupportEvolveAttendPlay")}</p>
-        <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
-          {STEPS(tu).map((s, i) => (
-            <li key={s.title} className="relative flex gap-4 rounded-3xl border border-line bg-surface p-4 lg:flex-col">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl border-[3px] border-ink text-ink" style={{ background: s.color }}>
-                <s.icon className="size-6" aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <div className="font-display text-xl uppercase">
-                  <span className="mr-1.5 text-mute">{i + 1}</span>
-                  {s.title}
-                </div>
-                <p className="mt-1 text-sm leading-relaxed text-cream/85">{s.body}</p>
-              </div>
+      {/* DISCOVER CITIES: official city posters, numbers from the listed events */}
+      <section aria-labelledby="cities" className="mt-14 md:px-6" data-testid="home-cities">
+        <SectionHeader id="cities" title={tc("title")} sub={tc("sub")} />
+        <ul className="rail rail-grid pb-2 md:grid-cols-5" aria-labelledby="cities">
+          {cityRows().map(({ art, count, genres, country }) => (
+            <li key={art.id} className="flex w-[62vw] max-w-[240px] shrink-0 md:w-auto md:max-w-none">
+              <CityCard
+                art={art}
+                className="w-full"
+                href={count && country ? `/world?city=${encodeURIComponent(`${art.city}|${country}`)}` : "/events/create"}
+                count={count}
+                genres={genres}
+                labels={{ theme: tc(`theme.${art.id}`), events: tc("events", { count }), none: tc("none"), cta: tc("cta"), noneCta: tc("noneCta") }}
+              />
             </li>
           ))}
-        </ol>
-        <Link href="/how-it-works" className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-acid">
-          {tu("learnMoreAboutEventEvolution")} <ArrowRight className="size-4" aria-hidden />
-        </Link>
+        </ul>
+        <p className="mt-2 px-4 text-[12px] text-mute md:px-0">{tc("note")}</p>
+      </section>
+
+      {/* PLAYER STRIP (game teaser) */}
+      <section aria-labelledby="you" className="mt-14 px-4 md:px-6">
+        <HomePlayerStrip />
       </section>
 
       {/* FEATURED DJS */}
@@ -265,27 +263,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PLAYER STRIP (game teaser) */}
-      <section aria-labelledby="you" className="mt-14 px-4 md:px-6">
-        <HomePlayerStrip />
-      </section>
-
-      {/* CREATE */}
-      <section aria-labelledby="create" className="mt-14 px-4 md:px-6">
-        <div className="relative grid overflow-hidden rounded-[32px] border-[3px] border-ink bg-acid text-ink md:grid-cols-[1.25fr_1fr]">
-          <div className="relative aspect-[16/9] md:order-2 md:aspect-auto">
-            <Image src={ART.panelStage} alt={tu("createArtAlt")} fill sizes="(min-width:1152px) 460px, (min-width:768px) 40vw, 100vw" className="object-cover" style={{ objectPosition: "50% 35%" }} />
-          </div>
-          <div className="p-6 md:p-10">
-          <h2 id="create" className="text-[34px] uppercase sm:text-5xl">{tu("startSomethingWeird")}</h2>
-          <p className="mt-3 max-w-lg font-medium">{tu("dj2")}</p>
-          <div className="mt-6 grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-1">
-            <Link href="/events/create" className="flex min-h-14 items-center justify-between rounded-full bg-ink px-5 font-extrabold uppercase text-cream">{tu("createEvent")} <ArrowRight className="size-5" aria-hidden /></Link>
-            <Link href="/djs/apply" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("applyAsDj")} <ArrowRight className="size-5" aria-hidden /></Link>
-            <Link href="/venues/new" className="flex min-h-14 items-center justify-between rounded-full border-[3px] border-ink px-5 font-extrabold uppercase">{tu("listVenue")} <ArrowRight className="size-5" aria-hidden /></Link>
-          </div>
-          </div>
-        </div>
+      {/* HOW IT WORKS */}
+      <section aria-labelledby="how" className="mt-14 px-4 md:px-6">
+        <h2 id="how" className="text-[22px] uppercase leading-tight sm:text-[28px]">{tu("howItWorks")}</h2>
+        <p className="mt-2 text-sm text-mute">{tu("discoverSupportEvolveAttendPlay")}</p>
+        <ol className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {STEPS(tu).map((s, i) => (
+            <li key={s.title} className="relative flex gap-4 rounded-3xl border border-line bg-surface p-4 lg:flex-col">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl border-[3px] border-ink text-ink" style={{ background: s.color }}>
+                <s.icon className="size-6" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <div className="font-display text-xl uppercase">
+                  <span className="mr-1.5 text-mute">{i + 1}</span>
+                  {s.title}
+                </div>
+                <p className="mt-1 text-sm leading-relaxed text-cream/85">{s.body}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+        <Link href="/how-it-works" className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-acid">
+          {tu("learnMoreAboutEventEvolution")} <ArrowRight className="size-4" aria-hidden />
+        </Link>
       </section>
     </div>
   );

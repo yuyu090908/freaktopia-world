@@ -11,11 +11,12 @@ import type { AfterParty, DJ, FreakEvent, Venue } from "@/lib/types";
 import { ExploreArt, VenueArt, type ExploreKind } from "@/components/art/Scenes";
 import { Alien } from "@/components/art/Alien";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
-import { EventProgress } from "@/components/event/EventProgress";
 import { DemoBadge, Tag } from "@/components/ui/primitives";
 import { useDemo, useEventStats } from "@/lib/store";
 import { cn, compact, fmtDate, fmtTime, money } from "@/lib/utils";
-import { getEvent } from "@/lib/data";
+import { getEvent, getVenue } from "@/lib/data";
+import { displayStatus, fromPrice, showsSupport } from "@/lib/event-status";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 /* ---------------- City card (official city poster + live numbers in HTML) ---------------- */
 export function CityCard({ art, href, count, genres, labels, className }: { art: import("@/lib/art").CityArt; href: string; count: number; genres: string[]; labels: { theme: string; events: string; none: string; cta: string; noneCta: string }; className?: string }) {
@@ -106,76 +107,88 @@ export function EventCover({ id, sizes, priority = false, className, hint, art }
   );
 }
 
-/* ---------------- Event card ---------------- */
+/* ---------------- Event card ----------------
+ * Order (docs/DESIGN_SYSTEM.md): image → name → date → city/venue → genres → status → price or support → details.
+ * The whole card is one link (the title's stretched link), so the tap target is the card, not a 34px line of text.
+ * Price only when tickets are on sale; the support rate only while the event collects support. */
+function EventFacts({ event, compactView = false }: { event: FreakEvent; compactView?: boolean }) {
+  const tu = useTranslations("ui");
+  const s = useEventStats(event);
+  const status = displayStatus(event);
+  const price = fromPrice(event);
+  const venue = event.status === "funding" ? null : getVenue(event.venueId)?.name ?? null;
+  return (
+    <>
+      <div className="mt-1.5 flex flex-col gap-0.5 text-[14px] text-mute">
+        <span className="inline-flex items-center gap-1.5"><CalendarDays className="size-4 shrink-0" aria-hidden /><time dateTime={event.startsAt}>{fmtDate(event.startsAt, { month: "short", day: "numeric", year: "numeric" })}</time></span>
+        <span className="inline-flex min-w-0 items-center gap-1.5"><MapPin className="size-4 shrink-0" aria-hidden /><span className="truncate">{event.city}{venue ? ` · ${venue}` : ""}</span></span>
+      </div>
+      {!compactView && (
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {event.genres.map((g) => <Tag key={g}>{g}</Tag>)}
+        </div>
+      )}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <StatusBadge status={status} />
+        {event.djRecruiting && status !== "completed" && <span className="inline-flex min-h-6 items-center rounded-full border border-purple/70 px-2.5 text-[12px] font-extrabold uppercase text-purple">{tu("djsWanted")}</span>}
+        <DemoBadge />
+      </div>
+      {price != null && (
+        <div className="mt-2 text-[15px] font-extrabold" data-testid="card-price">{tu("fromPrice", { price: money(price) })}</div>
+      )}
+      {showsSupport(event) && (
+        <div className="mt-2" data-testid="card-support">
+          <div className="flex items-center justify-between gap-2 text-[13px]">
+            <span className="inline-flex items-center gap-1 font-semibold"><Users className="size-3.5" aria-hidden />{tu("supportersCount", { count: compact(s.supporters) })}</span>
+            <span className="font-bold text-blue">{tu("roundFunded", { round: Math.min(999, Math.round((s.raised / event.goal) * 100)) })}</span>
+          </div>
+          <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-surface" role="presentation">
+            <div className="h-full rounded-full bg-blue" style={{ width: `${Math.min(100, (s.raised / event.goal) * 100)}%` }} />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 export function EventCard({ event, className, wide = false, art }: { event: FreakEvent; className?: string; wide?: boolean; art?: ArtPick }) {
   const tu = useTranslations("ui");
   const s = useEventStats(event);
   return (
-    <article className={cn("flex flex-col overflow-hidden neon rounded-[26px] border bg-surface", wide ? "w-full" : "w-[80vw] max-w-[330px] sm:w-[320px]", className)}>
-      <Link href={`/events/${event.id}`} className="relative block aspect-video overflow-hidden" aria-hidden="true" tabIndex={-1}>
-        <EventCover id={event.id} art={art} sizes="(min-width:1024px) 380px, (min-width:640px) 320px, 80vw" className="transition-transform duration-500 hover:scale-105" />
-        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-surface to-transparent" aria-hidden />
-        {event.djRecruiting && event.status !== "live" && (
-          <span className="absolute bottom-3 left-3 -rotate-3 rounded-xl border-2 border-ink bg-coral px-2.5 py-1 font-display text-[13px] uppercase text-ink shadow-[0_3px_0_#080808]">{tu("eventOpen")}</span>
-        )}
-        <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-          <EventLevelBadge level={s.level} long />
-          {event.status === "live" && <Tag color="#FF625C" dark>{tu("demoLive")}</Tag>}
-        </div>
-        <DemoBadge className="absolute right-3 top-3 bg-ink" />
-      </Link>
-      <div className="flex flex-1 flex-col gap-3 p-4">
-        <div>
-          <h3 className="text-[22px] uppercase leading-none">
-            <Link href={`/events/${event.id}`} className="hover:text-acid">
-              {event.name}
-            </Link>
-          </h3>
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-mute">
-            <span className="inline-flex items-center gap-1"><MapPin className="size-3.5" aria-hidden />{event.city}</span>
-            <span className="inline-flex items-center gap-1"><CalendarDays className="size-3.5" aria-hidden /><time dateTime={event.startsAt}>{fmtDate(event.startsAt, { month: "short", day: "numeric", year: "numeric" })}</time></span>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {event.genres.map((g) => (
-            <Tag key={g}>{g}</Tag>
-          ))}
-          {event.djRecruiting && <Tag color="#A276E9" dark>{tu("djsWanted")}</Tag>}
-        </div>
-        <EventProgress supporters={s.supporters} raised={s.raised} goal={event.goal} compactView />
-        <Link href={`/events/${event.id}`} className="mt-auto inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-coral font-extrabold uppercase text-ink shadow-[0_4px_0_0_#9b2f2b] hover:bg-[#ff7a75]">
-          {tu("viewDetails")} <ArrowRight className="size-4" aria-hidden />
-        </Link>
+    <article data-testid="event-card" className={cn("group relative flex flex-col overflow-hidden rounded-[20px] border border-line bg-surface-2 transition-colors hover:border-cream/40 focus-within:border-acid", wide ? "w-full" : "w-[80vw] max-w-[330px] sm:w-[320px]", className)}>
+      <div className="relative aspect-video overflow-hidden" aria-hidden="true">
+        <EventCover id={event.id} art={art} sizes="(min-width:1024px) 380px, (min-width:640px) 320px, 80vw" className="transition-transform duration-500 group-hover:scale-105" />
+        <div className="absolute left-3 top-3"><EventLevelBadge level={s.level} long /></div>
+      </div>
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="text-[18px] uppercase leading-tight">
+          <Link href={`/events/${event.id}`} className="outline-none after:absolute after:inset-0 after:content-[''] focus-visible:underline">
+            {event.name}
+          </Link>
+        </h3>
+        <EventFacts event={event} />
+        <span className="mt-auto inline-flex min-h-11 items-center gap-1 pt-3 text-[14px] font-extrabold uppercase text-acid" aria-hidden>
+          {tu("viewDetails")} <ArrowRight className="size-4" />
+        </span>
       </div>
     </article>
   );
 }
 
-/* ---------------- Compact event row ---------------- */
+/* ---------------- Compact event row (mobile list) ---------------- */
 export function EventRow({ event, art }: { event: FreakEvent; art?: ArtPick }) {
-  const tu = useTranslations("ui");
-  const s = useEventStats(event);
   return (
-    <Link href={`/events/${event.id}`} className="flex gap-3 rounded-3xl border border-line bg-surface p-3 hover:border-cream/30">
-      <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl sm:w-28">
+    <article data-testid="event-row" className="relative flex gap-3 rounded-[20px] border border-line bg-surface-2 p-3 transition-colors hover:border-cream/40 focus-within:border-acid">
+      <div className="relative aspect-square w-24 shrink-0 overflow-hidden rounded-2xl sm:w-28" aria-hidden="true">
         <EventCover id={event.id} art={art} sizes="112px" />
       </div>
-      <div className="min-w-0 flex-1 py-0.5">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <EventLevelBadge level={s.level} />
-          {event.status === "live" && <Tag color="#FF625C" dark>{tu("demoLive")}</Tag>}
-          {event.djRecruiting && <Tag color="#A276E9" dark>{tu("djsWanted")}</Tag>}
-        </div>
-        <h3 className="mt-2 truncate text-lg uppercase leading-none">{event.name}</h3>
-        <div className="mt-1.5 truncate text-[13px] text-mute">
-          {event.city} · {fmtDate(event.startsAt)} · {event.genres.join(" / ")}
-        </div>
-        <div className="mt-1.5 flex items-center gap-3 text-[13px] font-semibold">
-          <span className="inline-flex items-center gap-1"><Users className="size-3.5" aria-hidden />{compact(s.supporters)}</span>
-          <span className="text-mute">{tu("roundFunded", { round: Math.round((s.raised / event.goal) * 100) })}</span>
-        </div>
+      <div className="min-w-0 flex-1">
+        <h3 className="text-[16px] uppercase leading-tight">
+          <Link href={`/events/${event.id}`} className="outline-none after:absolute after:inset-0 after:content-[''] focus-visible:underline">{event.name}</Link>
+        </h3>
+        <EventFacts event={event} compactView />
       </div>
-    </Link>
+    </article>
   );
 }
 
@@ -193,7 +206,7 @@ export function DJCard({ dj, className }: { dj: DJ; className?: string }) {
   const tu = useTranslations("ui");
   const fav = useDemo((s) => s.favorites.includes(dj.id));
   return (
-    <article className={cn("relative flex w-[62vw] max-w-[240px] flex-col overflow-hidden neon rounded-[26px] border bg-surface sm:w-[230px]", className)}>
+    <article className={cn("relative flex w-[62vw] max-w-[240px] flex-col overflow-hidden rounded-[20px] border border-line bg-surface-2 focus-within:border-acid sm:w-[230px]", className)}>
       <Link href={`/djs/${dj.id}`} className="relative block aspect-square" style={{ background: dj.look.accent }} tabIndex={-1} aria-hidden="true">
         <div className="halftone absolute inset-0" aria-hidden />
         <Alien look={dj.look} className="relative mx-auto h-full w-[86%] pt-3" />
@@ -206,7 +219,7 @@ export function DJCard({ dj, className }: { dj: DJ; className?: string }) {
       </Link>
       <div className="flex flex-1 flex-col p-4">
         <h3 className="text-lg uppercase leading-none">
-          <Link href={`/djs/${dj.id}`} className="hover:text-acid">{dj.name}</Link>
+          <Link href={`/djs/${dj.id}`} className="outline-none after:absolute after:inset-0 after:content-[''] hover:text-acid focus-visible:underline">{dj.name}</Link>
         </h3>
         <div className="mt-1.5 text-[13px] text-mute">{dj.city} · {dj.bpm[0]}–{dj.bpm[1]} BPM</div>
         <div className="mt-2 flex flex-wrap gap-1.5">

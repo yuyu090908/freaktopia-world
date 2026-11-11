@@ -133,7 +133,7 @@ export function ConfirmSheet({ open, onClose, title, statement, children, confir
       <div className="space-y-3">
         {children}
         <label className="flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-line bg-surface p-3 text-sm">
-          <input type="checkbox" className="mt-1 size-5 accent-[#B6F05C]" checked={checked} onChange={(e) => setChecked(e.target.checked)} data-testid="confirm-check" />
+          <input type="checkbox" className="mt-1 size-5 accent-acid" checked={checked} onChange={(e) => setChecked(e.target.checked)} data-testid="confirm-check" />
           <span>{statement}</span>
         </label>
       </div>

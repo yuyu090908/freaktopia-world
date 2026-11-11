@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { ARCHIVE_EVENTS, EVENTS, getEvent } from "@/lib/data";
 import { EventDetail } from "./EventDetail";
 
+/** Statuses follow the clock (lib/clock): re-render at least hourly so an event that ended is not shown as upcoming. */
+export const revalidate = 3600;
+
 export function generateStaticParams() {
   return [...EVENTS, ...ARCHIVE_EVENTS].map((e) => ({ id: e.id }));
 }

@@ -165,7 +165,7 @@ function Inner() {
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-display text-xl uppercase">{c.name}</h3>
                     <label className="inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 text-sm font-bold">
-                      <input type="checkbox" className="size-5 accent-[#B6F05C]" checked={compare.includes(c.id)} onChange={() => setCompare((x) => (x.includes(c.id) ? x.filter((y) => y !== c.id) : x.length < 3 ? [...x, c.id] : x))} />
+                      <input type="checkbox" className="size-5 accent-acid" checked={compare.includes(c.id)} onChange={() => setCompare((x) => (x.includes(c.id) ? x.filter((y) => y !== c.id) : x.length < 3 ? [...x, c.id] : x))} />
                       {tu("compare")}
                     </label>
                   </div>
@@ -288,12 +288,12 @@ function VenueStep({ data, photo, setPhotoId, venue, setVenue, onUploaded, onNex
                 {(["x", "y", "w", "h"] as const).map((k) => (
                   <label key={k} className="text-[12px] font-bold">
                     {tu("zoneTouppercaseRound", { toUpperCase: k.toUpperCase(), round: Math.round(zone[k] * 100) })}
-                    <input type="range" min={k === "w" || k === "h" ? 5 : 0} max={100} value={Math.round(zone[k] * 100)} onChange={(e) => setZone((z) => ({ ...z, [k]: Number(e.target.value) / 100 }))} className="mt-1 w-full accent-[#B6F05C]" />
+                    <input type="range" min={k === "w" || k === "h" ? 5 : 0} max={100} value={Math.round(zone[k] * 100)} onChange={(e) => setZone((z) => ({ ...z, [k]: Number(e.target.value) / 100 }))} className="mt-1 w-full accent-acid" />
                   </label>
                 ))}
                 <label className="text-[12px] font-bold">
                   {tu("rigLineRound", { round: Math.round(ceiling * 100) })}
-                  <input type="range" min={0} max={60} value={Math.round(ceiling * 100)} onChange={(e) => setCeiling(Number(e.target.value) / 100)} className="mt-1 w-full accent-[#A276E9]" />
+                  <input type="range" min={0} max={60} value={Math.round(ceiling * 100)} onChange={(e) => setCeiling(Number(e.target.value) / 100)} className="mt-1 w-full accent-purple" />
                 </label>
               </div>
               <Field id="ph-cap" label={tu("caption")}><Input id="ph-cap" value={caption} onChange={(e) => setCaption(e.target.value)} placeholder={tu("mainHallFromTheBar")} /></Field>
@@ -305,7 +305,7 @@ function VenueStep({ data, photo, setPhotoId, venue, setVenue, onUploaded, onNex
                 </Select>
               </Field>
               <label className="flex min-h-11 items-start gap-3 text-sm">
-                <input type="checkbox" className="mt-1 size-5 accent-[#B6F05C]" checked={attest} onChange={(e) => setAttest(e.target.checked)} />
+                <input type="checkbox" className="mt-1 size-5 accent-acid" checked={attest} onChange={(e) => setAttest(e.target.checked)} />
                 <span>{tu("iConfirmIOwnOr")}</span>
               </label>
               <div className="flex gap-2">
@@ -441,7 +441,7 @@ export function BeforeAfter({ c }: { c: ConceptDto }) {
       </div>
       <label className="block text-sm font-bold">
         {tu("revealOriginalPhotoV", { v })}
-        <input type="range" min={0} max={100} value={v} onChange={(e) => setV(Number(e.target.value))} className="mt-1 w-full accent-[#B6F05C]" />
+        <input type="range" min={0} max={100} value={v} onChange={(e) => setV(Number(e.target.value))} className="mt-1 w-full accent-acid" />
       </label>
     </section>
   );

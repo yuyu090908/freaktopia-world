@@ -64,3 +64,22 @@ describe("GET /api/map", () => {
     expect((await res.json()).error.code).toBe("DATA_SOURCE_NOT_CONFIGURED");
   });
 });
+
+describe("GET /api/map · community parties", () => {
+  it("lists every published upcoming party the events page lists, at its city, without invented figures", async () => {
+    const { upcomingParties } = await import("@/lib/party/service");
+    const parties = (await upcomingParties(500)).filter((p) => p.handle);
+    const body = (await (await GET()).json()) as WorldMapResponse;
+    const community = body.events.filter((e) => e.source === "community");
+    expect(community.length).toBe(parties.length);
+    expect(parties.length).toBeGreaterThan(0); // the labelled demo organizer's party
+    for (const c of community) {
+      expect(c.href).toMatch(/^\/u\/[^/]+\/world\//);
+      expect(c.growth.supporters).toBe(0);
+      expect(c.live).toBeNull();
+      expect(c.tickets.onSale).toBe(false);
+      expect(Number.isFinite(c.location.lat)).toBe(true);
+    }
+    expect(body.events.filter((e) => e.source === "sample").length).toBe(body.events.length - community.length);
+  });
+});

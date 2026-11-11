@@ -12,7 +12,7 @@ test("home → world map → landmark → bottom sheet → event", async ({ page
   await page.goto("/");
   await expect(page.getByRole("heading", { level: 1 })).toContainText("dancefloor", { ignoreCase: true });
   await noHorizontalScroll(page);
-  await page.getByRole("link", { name: /^explore$/i }).click();
+  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "World", exact: true }).click();
   await expect(page).toHaveURL(/\/world$/);
   await expect(page.getByTestId("world-map")).toHaveAttribute("data-ready", "true", { timeout: 20_000 });
   // Search, then pick the festival: the camera flies there and the sheet opens.
@@ -33,7 +33,7 @@ test("home → world map → landmark → bottom sheet → event", async ({ page
 
 test("world map filters reduce results", async ({ page }) => {
   await page.goto("/world");
-  await expect(page.getByTestId("world-count")).toHaveText("18 events");
+  await expect(page.getByTestId("world-count")).toHaveText(/^\d+ events$/);
   await page.getByRole("button", { name: "Live now", exact: true }).click();
   await expect(page.getByTestId("world-count")).toHaveText("1 event");
   await page.getByRole("button", { name: /clear/i }).click();
@@ -67,23 +67,20 @@ test("ticket demo purchase", async ({ page }) => {
   await expect(page.getByText("VOID JELLY RAVE")).toBeVisible();
 });
 
-test("create event in 7 steps (draft persists)", async ({ page }) => {
+test("create event in 5 steps (draft persists)", async ({ page }) => {
   await page.goto("/events/create");
-  await page.getByRole("button", { name: /next/i }).click();
-  await expect(page.getByText("Give your event a name")).toBeVisible();
   await page.getByLabel("Event name", { exact: true }).fill("GOO GALAXY");
-  await page.getByRole("button", { name: "Techno" }).click();
-  await page.getByLabel("City", { exact: true }).fill("Tokyo");
-  await page.getByRole("button", { name: /next/i }).click();
+  await page.getByRole("button", { name: "Techno", exact: true }).click();
+  await page.getByRole("button", { name: /^next/i }).click();
+  await page.getByRole("combobox", { name: "City" }).fill("Tokyo");
   await page.getByLabel("Date", { exact: true }).fill("2027-01-10");
   await page.reload(); // draft + step survive reload
-  await expect(page.getByText("Step 2")).toBeVisible();
+  await expect(page.getByText("Step 2", { exact: false }).first()).toBeVisible();
   await expect(page.getByLabel("Date", { exact: true })).toHaveValue("2027-01-10");
-  await page.getByRole("button", { name: /next/i }).click();
   await page.getByText("KAIJU BASEMENT").click();
-  for (let i = 0; i < 4; i++) await page.getByRole("button", { name: /next/i }).click();
-  await expect(page.getByText("Step 7")).toBeVisible();
-  await expect(page.getByText("GOO GALAXY")).toBeVisible();
+  for (let i = 0; i < 3; i++) await page.getByRole("button", { name: /^next/i }).click();
+  await expect(page.getByText("Step 5", { exact: false }).first()).toBeVisible();
+  await expect(page.getByTestId("create-preview")).toContainText("GOO GALAXY");
   await page.getByRole("button", { name: /publish/i }).click();
   await expect(page.getByRole("heading", { name: /GOO GALAXY is live/ })).toBeVisible();
   await page.getByRole("button", { name: /organizer dashboard/i }).click();
@@ -97,7 +94,7 @@ test("avatar customize and profile reflects it", async ({ page }) => {
   await page.getByRole("button", { name: "Jacket" }).click();
   await page.getByRole("button", { name: /save avatar/i }).click();
   await expect(page.getByText("Avatar saved")).toBeVisible();
-  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "Profile" }).click();
+  await page.getByRole("navigation", { name: "Primary" }).getByRole("link", { name: "My", exact: true }).click();
   await expect(page.getByText(/ZORP/).first()).toBeVisible();
 });
 
@@ -175,7 +172,7 @@ test("header search finds DJs and events", async ({ page }) => {
 test("sticky CTA sits above bottom nav, tap targets ≥ 44px", async ({ page }) => {
   await page.goto("/events/neon-slime-summit");
   const nav = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
-  const cta = await page.getByRole("link", { name: "Tickets" }).last().boundingBox();
+  const cta = await page.locator(".sticky-cta").getByRole("link", { name: "Tickets" }).boundingBox();
   expect(cta!.y + cta!.height).toBeLessThanOrEqual(nav!.y + 1);
   const small = await page.evaluate(() =>
     [...document.querySelectorAll("main button, nav a, main a.rounded-full")]

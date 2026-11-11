@@ -56,6 +56,8 @@ const ACTION_EN: Record<string, string> = { enterDemoLive: "Enter festival (demo
 /** Actions by status. `label` translates a key under world.actions (English by default). */
 export function actionsFor(e: WorldEvent, label: (k: string) => string = (k) => ACTION_EN[k]): Action[] {
   const a: Action[] = [];
+  // A community party has no sample funding, tickets, DAO or DJ calls: only its page in the organizer's world.
+  if (e.source === "community" && e.href) return [{ key: "view", label: label("viewEvent"), href: e.href, icon: <ArrowRight className="size-4" aria-hidden />, tone: "primary" }];
   const ev = `/events/${e.id}`;
   if (e.live) a.push({ key: "live", label: e.live.demo ? label("enterDemoLive") : label("watchLive"), href: `/live/${e.id}`, icon: <Radio className="size-4" aria-hidden />, tone: "live", testId: "map-enter-live" });
   if (e.status === "funding" || e.status === "planning") a.push({ key: "support", label: label("support"), href: ev, icon: <HandHeart className="size-4" aria-hidden />, tone: "primary" });
@@ -157,6 +159,8 @@ function Details({ e }: { e: WorldEvent }) {
         </section>
       )}
 
+      {e.source === "community" && <p className="rounded-2xl border border-line bg-surface p-3 text-[13px] text-mute" data-testid="map-community-note">{t("communityNote")}</p>}
+      {e.source !== "community" && (<>
       <section aria-label={tl("festivalLevel")}>
         <div className="flex items-center justify-between">
           <h3 className="text-[13px] font-extrabold uppercase">{tl("festivalLevel")}</h3>
@@ -210,6 +214,9 @@ function Details({ e }: { e: WorldEvent }) {
         <Row icon={<Ticket className="size-4" />} label={t("facts.tickets")}>
           {e.status === "completed" ? t("facts.eventFinished") : e.tickets.onSale ? t("facts.ticketsLeft", { count: num(e.tickets.remaining), price: usd(e.tickets.fromUsd ?? 0) }) : e.status === "confirmed" || e.status === "live" ? t("facts.soldOut") : t("facts.notOnSale")}
         </Row>
+        </section>
+      </>)}
+      <section aria-label={t("facts.organizer")}>
         {e.organizer && (
           <Row icon={<UserRound className="size-4" />} label={t("facts.organizer")}>
             {e.organizer.handle ? (

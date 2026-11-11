@@ -111,7 +111,7 @@ export function LevelsAdmin() {
                   ))}
                   <td className="p-2">
                     <label className="inline-flex min-h-11 items-center gap-2">
-                      <input type="checkbox" disabled={i === 0} checked={l.venueContract} onChange={(e) => update(i, { venueContract: e.target.checked })} className="size-5 accent-[#B6F05C]" />
+                      <input type="checkbox" disabled={i === 0} checked={l.venueContract} onChange={(e) => update(i, { venueContract: e.target.checked })} className="size-5 accent-acid" />
                       <span className="sr-only">{tu("levelLevelNeedsAVenue", { level: l.level })}</span>
                       {tu("required")}
                     </label>

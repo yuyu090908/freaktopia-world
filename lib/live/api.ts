@@ -19,7 +19,7 @@
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { DJS, EVENTS, getAfterParty, getDJ, getEvent, getVenue } from "@/lib/data";
+import { DJS, EVENTS, getAfterParty, getDJ, getEvent, getVenue, syncEventClock } from "@/lib/data";
 import { hmac, randomId, safeEqual, sha256 } from "@/lib/dao/hash";
 import { sessionSecret } from "@/lib/dao/auth";
 import { allDaoSummaries } from "@/lib/dao/api";
@@ -394,6 +394,7 @@ async function discovery(now: number) {
 
 /** Per-event live status, current DJ and the separate attendance numbers. Also used by the world map API. */
 export async function discoveryEvents(now: number) {
+  syncEventClock(now);
   const metrics = await metricsByEvent();
   const db = getLiveDb(now);
   const daos = new Map(allDaoSummaries(now).map((d) => [d.eventId, d]));

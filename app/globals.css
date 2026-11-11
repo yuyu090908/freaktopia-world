@@ -1,16 +1,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #080808;
-  --color-surface: #141118;
-  --color-surface-2: #201a2a;
-  --color-line: #3b2f52;
-  --color-cream: #f5f2ea;
-  --color-mute: #b9b5ab;
-  --color-acid: #b6f05c;
-  --color-coral: #ff625c;
-  --color-purple: #a276e9;
-  --color-blue: #55bceb;
+  /* Design system 2026 (docs/DESIGN_SYSTEM.md). Background → surface → card; status colours never double as actions. */
+  --color-ink: #0b0910; /* page background */
+  --color-surface: #15111d; /* secondary background */
+  --color-surface-2: #211b2b; /* cards */
+  --color-line: #3b3048; /* borders */
+  --color-cream: #ffffff; /* main text */
+  --color-mute: #bdb5c8; /* secondary text */
+  --color-acid: #c1ff53; /* primary action (one per screen) */
+  --color-pink: #ff79cd; /* accent */
+  --color-blue: #66dfff; /* accent (cyan) */
+  --color-purple: #b78bff; /* accent */
+  --color-coral: #ff6474; /* status: danger / live */
+  --color-danger: #ff6474;
+  --color-success: #58db9b; /* status: success */
   --color-orange: #ffad5b;
 
   --font-display: var(--font-bowlby), "Arial Black", var(--font-noto), "Hiragino Sans", "Noto Sans JP", sans-serif;

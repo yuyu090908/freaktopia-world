@@ -30,7 +30,10 @@ test.describe("world map 7.0", () => {
   test("loads real-geography map with festival landmarks", async ({ page }) => {
     await page.goto("/world");
     await ready(page);
-    await expect(page.getByTestId("world-count")).toHaveText("18 events");
+    // Samples plus published community parties: other tests publish parties, so read the total from the API.
+    // Completed events are hidden until the Completed filter is on.
+    const total = (await (await page.request.get("/api/map")).json()).events.filter((e: { status: string }) => e.status !== "completed").length;
+    await expect(page.getByTestId("world-count")).toHaveText(`${total} events`);
     await expect(page.locator("[data-testid=landmark], [data-testid=landmark-cluster], [data-testid=city-marker]").first()).toBeVisible();
     await expect(page.getByText("Sample events")).toBeVisible();
     // Attribution for the geography and terrain sources is present.
@@ -69,7 +72,10 @@ test.describe("world map 7.0", () => {
     await page.goto("/world");
     await ready(page);
     await page.getByRole("button", { name: "DJ wanted", exact: true }).click();
-    await page.getByRole("button", { name: "Confirmed", exact: true }).click();
+    // "Confirmed" is not a quick chip any more: it is under all conditions in the filter sheet.
+    await page.getByRole("button", { name: /^Filters/ }).click();
+    await page.getByRole("dialog", { name: "Filters" }).getByRole("button", { name: "Confirmed", exact: true }).click();
+    await page.getByRole("dialog", { name: "Filters" }).getByRole("button", { name: /^Show/ }).click();
     await expect(page).toHaveURL(/f=djWanted%2Cconfirmed|f=djWanted,confirmed/);
     const n = await page.getByTestId("world-count").textContent();
     await page.reload();
@@ -320,7 +326,10 @@ test.describe("neon party planet 9.3", () => {
     await expect(page.getByTestId("region-active")).toContainText("Africa");
     await page.getByTestId("region-active").click();
     await expect(page).not.toHaveURL(/rg=/);
-    await expect(page.getByTestId("world-count")).toHaveText("18 events");
+    // Samples plus published community parties: other tests publish parties, so read the total from the API.
+    // Completed events are hidden until the Completed filter is on.
+    const total = (await (await page.request.get("/api/map")).json()).events.filter((e: { status: string }) => e.status !== "completed").length;
+    await expect(page.getByTestId("world-count")).toHaveText(`${total} events`);
 
     await page.getByRole("combobox").fill("oceania");
     await page.getByRole("option", { name: /^Oceania/ }).click();

@@ -111,7 +111,9 @@
     },
     "quickAccess": "Truy cập nhanh",
     "signInForMyWorld": "Đăng nhập để mở thế giới của bạn",
-    "legal": "Pháp lý"
+    "legal": "Pháp lý",
+    "tickets": "Vé",
+    "my": "Của tôi"
   },
   "footer": {
     "disclaimer": "Bản mẫu. Sự kiện, DJ, địa điểm, vé và vật phẩm sưu tầm đều là dữ liệu demo hư cấu. Không có thanh toán, phát trực tiếp, ví hay đúc NFT nào được kết nối.",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "Thao tác này xóa vé demo, sự kiện đã tạo, địa điểm, avatar và XP khỏi trình duyệt này. Không thể hoàn tác.",
     "organizer": "Nhà tổ chức",
     "venueOwner": "Chủ địa điểm",
-    "fan": "Fan"
+    "fan": "Fan",
+    "tabId": "FREAK ID",
+    "tabActivity": "Hoạt động",
+    "tabSettings": "Cài đặt"
   },
   "status": {
     "planning": "Đang lên kế hoạch",
@@ -689,7 +694,8 @@
         "tokyo": "Biển neon, club nhỏ xíu và dàn âm thanh lớn.",
         "london": "Club, nhà kho và cội nguồn radio lậu."
       }
-    }
+    },
+    "communityNote": "Bữa tiệc do nhà tổ chức đăng trên FREAKTOPIA. Đội hình, vé và chi tiết có trên trang của bữa tiệc trong thế giới của nhà tổ chức."
   },
   "ranking": {
     "title": "Xếp hạng thế giới",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName}: thông báo sẽ hiện trong hộp thư của bạn (demo, chỉ trình duyệt này).",
     "eventnameRemovedFromYourFollows": "Đã xóa {eventName} khỏi danh sách theo dõi.",
     "ranking": "xếp hạng",
-    "today": "hôm nay"
+    "today": "hôm nay",
+    "categoryRanking": "Bảng xếp hạng {label}",
+    "rowDetails": "Chi tiết {name}"
   },
   "live": {
     "title": "Lễ hội trực tiếp",
@@ -1237,7 +1245,8 @@
     "ofOf": "trên {of}",
     "paused": "tạm dừng",
     "watching": "đang xem",
-    "festivalsCount": "{n} lễ hội"
+    "festivalsCount": "{n} lễ hội",
+    "emptyBody": "Chỉ sự kiện có luồng phát được cấp phép và đã kết nối mới hiện ở đây. Lễ hội sắp tới ở bên dưới."
   },
   "dao": {
     "title": "DAO lễ hội",
@@ -1885,7 +1894,16 @@
     "none": "Không có",
     "emailReceiptRefundsPolicy": "Biên nhận qua email & chính sách hoàn tiền",
     "enterLiveMap": "Vào bản đồ trực tiếp",
-    "backToEvent": "Quay lại sự kiện"
+    "backToEvent": "Quay lại sự kiện",
+    "validity": "Hiệu lực",
+    "validDemo": "Đơn demo: không dùng để vào cửa",
+    "expired": "Hết hạn: sự kiện đã kết thúc",
+    "entryQr": "QR vào cửa",
+    "qrDemo": "QR: chỉ là mẫu trang trí",
+    "nftNotConnected": "NFT: chưa phát hành (chưa kết nối)",
+    "communityPasses": "Vé miễn phí cho tiệc cộng đồng",
+    "communityPassesBody": "Vé có QR vào cửa thật cho tiệc do nhà tổ chức đăng được lưu cùng đăng ký trong Tiệc của tôi.",
+    "openMyParties": "Mở Tiệc của tôi"
   },
   "events": {
     "title": "Sự kiện",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "Thiết kế vé: {tier}",
     "selected": "Đã chọn",
     "ticketArtNote": "Hình vé là mẫu thiết kế. Ngày, mã QR và ID của vé thật do FREAKTOPIA tạo sau khi thanh toán, không lấy từ hình.",
-    "searchCityOrEvent": "Tìm thành phố hoặc sự kiện"
+    "searchCityOrEvent": "Tìm thành phố hoặc sự kiện",
+    "stepPlaceTime": "Địa điểm & thời gian",
+    "stepSizeBudget": "Quy mô & ngân sách",
+    "stepTicketsRecruit": "Vé & tuyển chọn",
+    "preview": "Xem trước",
+    "errDateInPast": "Chọn hôm nay hoặc ngày sau đó."
   },
   "states": {
     "emptyTitle": "Chưa có gì ở đây",
@@ -2339,7 +2362,11 @@
     "alerts": "Thông báo",
     "stageIllustrationLevelLevel": "Ảnh minh họa sân khấu, cấp {level}",
     "compactFollowers": "{compact} người theo dõi",
-    "seatsleftLeft": "Còn {seatsLeft}"
+    "seatsleftLeft": "Còn {seatsLeft}",
+    "fromPrice": "Từ {price}",
+    "supportersCount": "{count} người ủng hộ",
+    "kpiDefinition": "Cách tính",
+    "asOf": "Tính đến {time}"
   },
   "dashboard": {
     "soldOf": "{name} đã bán",
@@ -2417,7 +2444,23 @@
     "soundLights": "Âm thanh & ánh sáng",
     "staffSecurity": "Nhân sự & an ninh",
     "sSold": "Đã bán {s}",
-    "seatsleftLeft": "Còn {seatsLeft}"
+    "seatsleftLeft": "Còn {seatsLeft}",
+    "kpi": {
+      "events": "Sự kiện bạn đã đăng trên trình duyệt này, cộng sự kiện mẫu.",
+      "djApplicants": "Đơn ứng tuyển DJ cho sự kiện của bạn (gồm đơn mẫu).",
+      "ticketsSold": "Vé đã bán của sự kiện mẫu. Số liệu mẫu cố định, không phải doanh số thật.",
+      "raised": "Tiền ủng hộ sự kiện mẫu (USD). Số liệu mẫu; không thu tiền.",
+      "rank": "Thứ hạng của DJ mẫu trong đấu trường DJ.",
+      "votes": "Lượt bình chọn của fan cho set của DJ mẫu.",
+      "followers": "Số người theo dõi hồ sơ DJ mẫu.",
+      "listed": "Địa điểm bạn đăng trên trình duyệt này, cộng một địa điểm mẫu.",
+      "bookings": "Lượt đặt đã xác nhận trong tháng. Số liệu mẫu cố định.",
+      "revenue": "Doanh thu đặt chỗ tháng này (USD). Số liệu mẫu, không phải thu nhập thật.",
+      "level": "Cấp độ fan của bạn, tính từ XP bên dưới.",
+      "xp": "Điểm từ ủng hộ, mua vé và tạo sự kiện trên trình duyệt này.",
+      "tickets": "Đơn vé lưu trên trình duyệt này.",
+      "following": "DJ bạn theo dõi."
+    }
   },
   "djs": {
     "stars": "{n} sao",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "Phát video nền",
     "heroVideoPause": "Tạm dừng video nền",
-    "heroVideoAlt": "Ba người bạn ngoài hành tinh đi về phía sân khấu lễ hội FREAKTOPIA lúc hoàng hôn."
+    "heroVideoAlt": "Ba người bạn ngoài hành tinh đi về phía sân khấu lễ hội FREAKTOPIA lúc hoàng hôn.",
+    "exploreEvents": "Khám phá sự kiện"
   },
   "afterParty": {
     "lengthAfterParties": "{length} tiệc sau",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "Đã tính lại sự kiện"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "Hiện {count} sự kiện",
+    "place": "Thành phố",
+    "anywhere": "Mọi thành phố",
+    "anyOf": "Khớp với bất kỳ lựa chọn nào",
+    "status": "Trạng thái",
+    "size": "Quy mô sự kiện",
+    "sizeHint": "Cấp độ lễ hội, tăng theo người ủng hộ. Không phải sức chứa địa điểm.",
+    "priceTitle": "Giá",
+    "priceHint": "Giá vé thấp nhất đang bán. Sự kiện không có vé đang bán sẽ bị loại.",
+    "price": {
+      "any": "Mọi mức giá",
+      "free": "Miễn phí",
+      "u30": "Tối đa $30",
+      "u60": "Tối đa $60"
+    },
+    "more": "Khác",
+    "breakdown": "Cộng đồng {community} · Mẫu {sample}",
+    "communitySub": "Các bữa tiệc do nhà tổ chức đăng trên FREAKTOPIA. Tiệc của nhà tổ chức mẫu có nhãn DEMO.",
+    "communityError": "Không tải được tiệc cộng đồng. Danh sách mẫu bên dưới vẫn dùng được.",
+    "sampleTitle": "Sự kiện mẫu",
+    "completedTitle": "Đã kết thúc",
+    "completedSub": "Sự kiện đã qua ngày. Không tính vào sự kiện sắp diễn ra.",
+    "show": "Hiện",
+    "allOf": "Phải khớp tất cả lựa chọn",
+    "notOnSaleEnded": "Sự kiện này đã kết thúc",
+    "notOnSaleEndedBody": "Đã ngừng bán vé. Trang sự kiện vẫn giữ đội hình và kỷ niệm.",
+    "notOnSaleYet": "Vé chưa mở bán",
+    "notOnSaleYetBody": "Vé được bán khi sự kiện được xác nhận. Trước đó bạn có thể ủng hộ trên trang sự kiện.",
+    "backToEvent": "Quay lại sự kiện"
   }
 }

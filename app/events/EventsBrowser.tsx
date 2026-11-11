@@ -1,20 +1,21 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { FilterBar } from "@/components/event/FilterBar";
 import { EventCard, EventRow } from "@/components/cards/Cards";
 import { EmptyState } from "@/components/ui/States";
 import { Button, DemoBadge } from "@/components/ui/primitives";
-import { EVENTS } from "@/lib/data";
-import { EMPTY_FILTERS, filterEvents, type EventFilters } from "@/lib/filters";
+import { ARCHIVE_EVENTS, EVENTS } from "@/lib/data";
+import { EMPTY_FILTERS, filterCommunity, filterEvents, type EventFilters } from "@/lib/filters";
 import { levelFor } from "@/lib/levels";
 import { useDemo } from "@/lib/store";
 import type { FreakEvent } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { UpcomingParties } from "@/components/party/Directory";
+import { UpcomingParties, type Upcoming } from "@/components/party/Directory";
+import { useParty } from "@/components/party/shared";
 import { HomeFeatured } from "@/app/HomeFeatured";
 import { distinctCovers } from "@/lib/art";
 
@@ -24,15 +25,22 @@ export function EventsBrowser() {
   const tu = useTranslations("events");
   const to = useTranslations("ops");
   const tp = useTranslations("party");
+  const tf = useTranslations("eventFilters");
   const [filters, setFilters] = useState<EventFilters>(EMPTY_FILTERS);
   const [sort, setSort] = useState<Sort>("soonest");
   const support = useDemo((s) => s.support);
   const sim = useDemo((s) => s.sim);
   const created = useDemo((s) => s.createdEvents);
+  // The same published community parties the world map shows (lib/party upcomingParties), so both pages count one list.
+  const { data: communityData, error: communityError } = useParty<{ parties: Upcoming[] }>("/api/party/upcoming?limit=500");
   const stats = useMemo(
     () => (e: FreakEvent) => sim[e.id] ?? { supporters: e.supporters + (support[e.id]?.supporters ?? 0), raised: e.raised + (support[e.id]?.raised ?? 0) },
     [support, sim],
   );
+  const communityAll = useMemo(() => (communityData?.parties ?? []).filter((p) => p.handle), [communityData]);
+  const cities = useMemo(() => Array.from(new Set([...EVENTS.map((e) => e.city), ...communityAll.map((p) => p.city)])).sort(), [communityAll]);
+  const countFor = useCallback((f: EventFilters) => filterEvents(EVENTS, f, stats).length + filterCommunity(communityAll, f).length, [communityAll, stats]);
+  const community = useMemo(() => filterCommunity(communityAll, filters), [communityAll, filters]);
   const list = useMemo(() => {
     const r = filterEvents(EVENTS, filters, stats);
     return [...r].sort((a, b) => {
@@ -41,22 +49,26 @@ export function EventsBrowser() {
       return a.startsAt.localeCompare(b.startsAt);
     });
   }, [filters, sort, stats]);
+  // Completed events: kept apart, never mixed into the upcoming count.
+  const past = useMemo(() => filterEvents(ARCHIVE_EVENTS, { ...filters, statuses: [], price: "any", djWanted: false, afterParty: false, levels: [], date: "any" }), [filters]);
   // Featured: the most supported upcoming event that still needs people, shown big above the grid (only without filters).
   const unfiltered = JSON.stringify(filters) === JSON.stringify(EMPTY_FILTERS);
-  const featured = useMemo(() => (unfiltered ? [...list].filter((e) => e.status !== "ended" && e.status !== "live").sort((a, b) => stats(b).supporters - stats(a).supporters)[0] ?? null : null), [list, unfiltered, stats]);
+  const featured = useMemo(() => (unfiltered && sort === "soonest" ? [...list].filter((e) => e.status !== "live").sort((a, b) => stats(b).supporters - stats(a).supporters)[0] ?? null : null), [list, unfiltered, sort, stats]);
   const rest = featured ? list.filter((e) => e.id !== featured.id) : list;
   const covers = useMemo(() => distinctCovers(rest), [rest]);
+  const total = list.length + community.length;
 
   return (
     <div>
-      <FilterBar filters={filters} setFilters={setFilters} />
-      <div className="mt-4 flex flex-wrap items-center gap-2 px-4 md:px-0">
-        <span className="text-sm font-bold" aria-live="polite">{tu("lengthEvents", { length: list.length })}</span>
-        <DemoBadge label={tu("sampleData")} />
-        <Link href="/events/manage" className="inline-flex min-h-11 items-center gap-1 rounded-full border-2 border-acid/60 px-4 text-xs font-extrabold uppercase text-acid" data-testid="link-manage">{to("manageTitle")}</Link>
+      <FilterBar filters={filters} setFilters={setFilters} cities={cities} countFor={countFor} />
+      <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 px-4 md:px-0">
+        <p className="min-w-0 text-sm" aria-live="polite" data-testid="events-count" data-ready={communityData || communityError ? "true" : "false"}>
+          <b className="text-base">{tu("lengthEvents", { length: total })}</b>
+          <span className="ml-2 text-mute">{tf("breakdown", { community: community.length, sample: list.length })}</span>
+        </p>
         <label className="ml-auto flex items-center gap-2 text-sm">
           <span className="text-mute">{tu("sort")}</span>
-          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-full border-2 border-line bg-surface px-3 font-bold">
+          <select value={sort} onChange={(e) => setSort(e.target.value as Sort)} className="min-h-11 rounded-full border border-line bg-surface px-3 font-bold">
             <option value="soonest">{tu("soonest")}</option>
             <option value="popular">{tu("mostSupported")}</option>
             <option value="level">{tu("highestLevel")}</option>
@@ -64,13 +76,13 @@ export function EventsBrowser() {
         </label>
       </div>
 
-      <section className="mx-4 mt-4 rounded-3xl border border-line bg-surface/60 p-4 md:mx-0" aria-labelledby="community-parties">
-        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-          <h2 id="community-parties" className="text-lg uppercase">{tp("communityParties")}</h2>
-          <Link href="/world/universes" className="text-xs font-bold text-acid underline">{tp("universes")}</Link>
+      <section className="mx-4 mt-4 rounded-[20px] border border-line bg-surface p-4 md:mx-0" aria-labelledby="community-parties" data-testid="community-section">
+        <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+          <h2 id="community-parties" className="text-[18px] uppercase">{tp("communityParties")} <span className="text-mute">({community.length})</span></h2>
+          <Link href="/world/universes" className="inline-flex min-h-11 items-center text-sm font-bold text-acid underline underline-offset-4">{tp("universes")}</Link>
         </div>
-        <p className="mb-3 text-xs text-mute">{tp("communityPartiesSub")}</p>
-        <UpcomingParties limit={4} />
+        <p className="mb-3 text-[13px] text-mute">{tf("communitySub")}</p>
+        {communityError ? <p className="text-sm text-danger" role="alert">{tf("communityError")}</p> : communityData ? <UpcomingParties limit={50} parties={community} /> : <div className="h-24 animate-pulse rounded-2xl bg-surface-2" />}
       </section>
 
       {created.length > 0 && (
@@ -103,7 +115,10 @@ export function EventsBrowser() {
               <HomeFeatured event={featured} />
             </section>
           )}
-          <h2 className="sr-only">{tu("eventResults")}</h2>
+          <div className="mt-6 flex flex-wrap items-center gap-2 px-4 md:px-0">
+            <h2 className="text-[18px] uppercase">{tf("sampleTitle")} <span className="text-mute">({list.length})</span></h2>
+            <DemoBadge label={tu("sampleData")} />
+          </div>
           <ul className="mt-4 space-y-3 px-4 md:hidden">
             {rest.map((e) => (
               <li key={e.id} className="cv-auto [contain-intrinsic-size:auto_130px]">
@@ -120,6 +135,25 @@ export function EventsBrowser() {
           </ul>
         </>
       )}
+
+      {past.length > 0 && (
+        <details className="mx-4 mt-8 rounded-[20px] border border-line bg-surface p-4 md:mx-0" data-testid="events-completed">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 text-[18px] font-extrabold uppercase">
+            <span>{tf("completedTitle")} <span className="text-mute">({past.length})</span></span>
+            <span className="text-sm font-bold text-acid">{tf("show")}</span>
+          </summary>
+          <p className="mt-1 text-[13px] text-mute">{tf("completedSub")}</p>
+          <ul className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {past.map((e) => (
+              <li key={e.id} className="flex"><EventRow event={e} /></li>
+            ))}
+          </ul>
+        </details>
+      )}
+
+      <div className="mx-4 mt-6 md:mx-0">
+        <Link href="/events/manage" className="inline-flex min-h-11 items-center text-sm font-bold text-acid underline underline-offset-4" data-testid="link-manage">{to("manageTitle")}</Link>
+      </div>
 
       <Link
         href="/events/create"

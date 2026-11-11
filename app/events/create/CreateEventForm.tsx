@@ -9,7 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, Check, PartyPopper, Save, Sparkles } from "lucide-react";
 import { Field, Input, Select, StepProgress, Textarea, ToggleRow } from "@/components/forms/Fields";
-import { Button, Chip, DemoNotice, PageTitle, Card } from "@/components/ui/primitives";
+import { Button, Chip, DemoBadge, DemoNotice, PageTitle, Card, Tag } from "@/components/ui/primitives";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { appNow } from "@/lib/clock";
 import { GENRES, VENUES } from "@/lib/data";
 import { grantXp, toast, useDemo, useHydrated } from "@/lib/store";
 import { LoadingSkeleton } from "@/components/ui/States";
@@ -23,7 +25,7 @@ const schema = z
     name: z.string().trim().min(3, "errGiveYourEventAName").max(40, "errKeepItUnder40Characters"),
     genres: z.array(genreEnum).min(1, "errPickAtLeastOneGenre").max(3, "errPickUpTo3Genres"),
     city: z.string().trim().min(2, "errWhereIsItHappening"),
-    date: z.string().min(1, "errChooseADate"),
+    date: z.string().min(1, "errChooseADate").refine((d) => d >= new Date(appNow()).toISOString().slice(0, 10), "errDateInPast"),
     startTime: z.string().min(1, "errStartTime"),
     endTime: z.string().min(1, "errEndTime"),
     capacity: z.coerce.number().int().min(20, "errAtLeast20People").max(100000, "errThatsAWholePlanet"),
@@ -54,14 +56,13 @@ const schema = z
 
 type FormValues = z.input<typeof schema>;
 
-const STEPS = ["stepBasics", "stepDateSize", "stepVenue", "stepDjCall", "stepTickets", "stepAfterParty", "stepReview"] as const;
+/** Five steps (docs/DESIGN_SYSTEM.md · Event create). The data model is unchanged; only the grouping is. */
+const STEPS = ["stepBasics", "stepPlaceTime", "stepSizeBudget", "stepTicketsRecruit", "stepReview"] as const;
 const STEP_FIELDS: (keyof FormValues)[][] = [
-  ["name", "genres", "city"],
-  ["date", "startTime", "endTime", "capacity", "budget"],
-  ["venueMode", "venueId", "venueWish"],
-  ["djSlots", "djGenres", "djMinBpm", "djMaxBpm", "djFee", "djNotes"],
-  ["tickets"],
-  ["afterParty", "afterPartyName", "afterPartyVenue", "afterPartyStart", "afterPartyPrice"],
+  ["name", "genres"],
+  ["city", "date", "startTime", "endTime", "venueMode", "venueId", "venueWish"],
+  ["capacity", "budget"],
+  ["tickets", "djSlots", "djGenres", "djMinBpm", "djMaxBpm", "djFee", "djNotes", "afterParty", "afterPartyName", "afterPartyVenue", "afterPartyStart", "afterPartyPrice"],
   [],
 ];
 
@@ -195,6 +196,11 @@ function Inner() {
               />
               {errors.genres && <p role="alert" className="text-sm font-semibold text-coral">{msg(errors.genres.message)}</p>}
             </fieldset>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
             <Field id="city" label={tu("city")} error={msg(errors.city?.message)}>
               <Input id="city" autoComplete="address-level2" placeholder={tu("tokyo")} list="city-list" aria-invalid={!!errors.city} {...register("city")} />
             </Field>
@@ -205,7 +211,7 @@ function Inner() {
         {step === 1 && (
           <>
             <Field id="date" label={tu("date")} error={msg(errors.date?.message)}>
-              <Input id="date" type="date" min="2026-11-10" aria-invalid={!!errors.date} {...register("date")} />
+              <Input id="date" type="date" min={new Date(appNow()).toISOString().slice(0, 10)} aria-invalid={!!errors.date} {...register("date")} />
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field id="startTime" label={tu("starts")} error={msg(errors.startTime?.message)}>
@@ -215,6 +221,11 @@ function Inner() {
                 <Input id="endTime" type="time" {...register("endTime")} />
               </Field>
             </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
             <Field id="capacity" label={tu("expectedAttendance")} error={msg(errors.capacity?.message)}>
               <Input id="capacity" type="number" inputMode="numeric" {...register("capacity")} />
             </Field>
@@ -224,7 +235,7 @@ function Inner() {
           </>
         )}
 
-        {step === 2 && (
+        {step === 1 && (
           <>
             <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label={tu("venueOption")}>
               {(["select", "recruit"] as const).map((m) => (
@@ -238,7 +249,7 @@ function Inner() {
                 <legend className="text-sm font-bold">{tu("availableVenuesDemo")}</legend>
                 {[...VENUES].sort((a, b) => Number(b.city.toLowerCase() === (v.city ?? "").trim().toLowerCase()) - Number(a.city.toLowerCase() === (v.city ?? "").trim().toLowerCase())).map((x) => (
                   <label key={x.id} className={cn("flex min-h-14 cursor-pointer items-center gap-3 rounded-2xl border-2 p-3", v.venueId === x.id ? "border-acid bg-acid/10" : "border-line")}>
-                    <input type="radio" value={x.id} {...register("venueId")} className="size-5 accent-[#B6F05C]" />
+                    <input type="radio" value={x.id} {...register("venueId")} className="size-5 accent-acid" />
                     <span className="min-w-0 flex-1">
                       <span className="block font-bold">{x.name}</span>
                       <span className="block text-xs text-mute">{tu("cityCapCapacityMoneyH", { city: x.city, capacity: x.capacity, money: money(x.hourlyRate) })}</span>
@@ -280,7 +291,7 @@ function Inner() {
           </>
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <fieldset className="space-y-3">
             <legend className="text-sm font-bold">{tu("ticketTypes")}</legend>
             {fields.map((f, i) => (
@@ -300,7 +311,7 @@ function Inner() {
           </fieldset>
         )}
 
-        {step === 5 && (
+        {step === 3 && (
           <>
             <Controller control={control} name="afterParty" render={({ field }) => (
               <ToggleRow checked={field.value} onChange={field.onChange} label={tu("addAnAfterParty")} sub={tu("text6")} />
@@ -318,7 +329,7 @@ function Inner() {
           </>
         )}
 
-        {step === 6 && <Review values={getValues()} onEdit={(s) => setStep(s)} />}
+        {step === 4 && <Review values={getValues()} onEdit={(s) => setStep(s)} />}
 
         <div className="flex items-center gap-3 pt-2">
           {step > 0 && (
@@ -354,14 +365,24 @@ function Review({ values: v, onEdit }: { values: FormValues; onEdit: (s: number)
     [tu("genres"), v.genres.join(", "), 0],
     [tu("city"), v.city, 0],
     [tu("when"), `${v.date} · ${v.startTime}–${v.endTime}`, 1],
-    [tu("sizeBudget"), tu("reviewSize", { n: Number(v.capacity), budget: money(Number(v.budget)) }), 1],
-    [tu("venue"), v.venueMode === "select" ? venue?.name ?? "—" : tu("reviewRecruiting", { wish: v.venueWish ?? "" }), 2],
+    [tu("venue"), v.venueMode === "select" ? venue?.name ?? "—" : tu("reviewRecruiting", { wish: v.venueWish ?? "" }), 1],
+    [tu("sizeBudget"), tu("reviewSize", { n: Number(v.capacity), budget: money(Number(v.budget)) }), 2],
+    [tu("tickets"), v.tickets.filter((t) => t.enabled).map((t) => `${TICKET_NAMES[t.kind]} ${money(Number(t.price))}`).join(", "), 3],
     [tu("djCall"), tu("reviewDjCall", { n: Number(v.djSlots), min: Number(v.djMinBpm), max: Number(v.djMaxBpm), fee: money(Number(v.djFee)) }), 3],
-    [tu("tickets"), v.tickets.filter((t) => t.enabled).map((t) => `${TICKET_NAMES[t.kind]} ${money(Number(t.price))}`).join(", "), 4],
-    [tu("afterParty"), v.afterParty ? `${v.afterPartyName} · ${v.afterPartyStart}` : tu("none"), 5],
+    [tu("afterParty"), v.afterParty ? `${v.afterPartyName} · ${v.afterPartyStart}` : tu("none"), 3],
   ];
   return (
-    <dl className="divide-y divide-line overflow-hidden rounded-3xl border border-line bg-surface">
+    <>
+    {/* Preview: how the listing will read on the events page (card order of the design system). */}
+    <section aria-label={tu("preview")} className="rounded-[20px] border border-line bg-surface-2 p-4" data-testid="create-preview">
+      <p className="text-[12px] font-extrabold uppercase tracking-wider text-mute">{tu("preview")}</p>
+      <h3 className="mt-2 text-[18px] uppercase leading-tight">{v.name || "—"}</h3>
+      <p className="mt-1 text-[14px] text-mute">{v.date || "—"} · {v.startTime}–{v.endTime}</p>
+      <p className="text-[14px] text-mute">{v.city || "—"}{venue ? ` · ${venue.name}` : ""}</p>
+      <div className="mt-2 flex flex-wrap gap-1.5">{v.genres.map((g) => <Tag key={g}>{g}</Tag>)}</div>
+      <div className="mt-2 flex flex-wrap gap-1.5"><StatusBadge status="funding" /><DemoBadge /></div>
+    </section>
+    <dl className="divide-y divide-line overflow-hidden rounded-[20px] border border-line bg-surface">
       {rows.map(([k, val, s]) => (
         <div key={k} className="flex items-start gap-3 p-4">
           <dt className="w-28 shrink-0 text-sm font-bold text-mute">{k}</dt>
@@ -370,5 +391,6 @@ function Review({ values: v, onEdit }: { values: FormValues; onEdit: (s: number)
         </div>
       ))}
     </dl>
+    </>
   );
 }

@@ -69,6 +69,10 @@ export interface MapEventDto {
   isDemo: boolean;
   /** Who runs the event. `handle` links to their party world; sample events have fictional organizers without one. */
   organizer?: { name: string; handle: string | null; demo: boolean };
+  /** "sample" = fictional demo listing; "community" = a party an organizer published (lib/party). */
+  source?: "sample" | "community";
+  /** Where "view event" goes when it is not /events/[id] (community parties open in their organizer's world). */
+  href?: string;
 }
 
 export interface WorldMapResponse {

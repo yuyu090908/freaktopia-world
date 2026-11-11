@@ -48,7 +48,7 @@ export async function GET(req: Request, { params }: Params) {
       return ok(await party.partyEvent(viewer, p[1]));
     }
     if (p[0] === "directory" && p.length === 1) return ok({ worlds: await party.directory() });
-    if (p[0] === "upcoming" && p.length === 1) return ok({ parties: await party.upcomingParties() });
+    if (p[0] === "upcoming" && p.length === 1) return ok({ parties: await party.upcomingParties(Math.min(500, Math.max(1, Number(new URL(req.url).searchParams.get("limit")) || 12))) });
     if (p[0] === "media" && p.length === 2) {
       if (!zId.safeParse(p[1]).success) return fail(404, "NOT_FOUND");
       const b = await party.mediaBlob(viewer, p[1]);

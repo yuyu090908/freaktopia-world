@@ -14,6 +14,10 @@ export interface WorldEvent extends MapEventDto {
 
 export const FLAG_KEYS = ["live", "upcoming", "confirmed", "funding", "djWanted", "dao", "afterParty", "completed"] as const;
 export type FlagKey = (typeof FLAG_KEYS)[number];
+/** Shown as chips above the map; the rest live in the filter sheet ("all conditions"). */
+export const QUICK_FLAGS: FlagKey[] = ["live", "upcoming", "djWanted", "funding"];
+/** Status flags: several = any of them (OR). Feature flags (DJ wanted, DAO, after party) must all match (AND). */
+export const STATUS_FLAGS: FlagKey[] = ["live", "upcoming", "confirmed", "funding", "completed"];
 
 export const FLAG_LABEL: Record<FlagKey, string> = {
   live: "Live now",
@@ -74,13 +78,15 @@ export function matchFlag(e: MapEventDto, k: FlagKey, now = DEMO_NOW.getTime()) 
   }
 }
 
-/** Filters combine with AND. Completed events only show with the Completed filter (or a search). */
+/** Status flags combine with OR, everything else with AND. Completed events only show with the Completed filter (or a search). */
 export function filterWorld<T extends MapEventDto>(events: T[], f: MapFilters, now = DEMO_NOW.getTime()): T[] {
   const q = norm(f.q);
   return events.filter((e) => {
     if (q && !searchText(e).includes(q)) return false;
     if (e.status === "completed" && !f.flags.includes("completed") && !q) return false;
-    for (const k of f.flags) if (!matchFlag(e, k, now)) return false;
+    const st = f.flags.filter((k) => STATUS_FLAGS.includes(k));
+    if (st.length && !st.some((k) => matchFlag(e, k, now))) return false;
+    for (const k of f.flags) if (!STATUS_FLAGS.includes(k) && !matchFlag(e, k, now)) return false;
     if (f.levels.length && !f.levels.includes(e.level)) return false;
     if (f.genres.length && !e.genres.some((g) => f.genres.includes(g))) return false;
     if (f.region && regionOfCountry(e.country) !== f.region) return false;

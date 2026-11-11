@@ -111,7 +111,9 @@
     },
     "quickAccess": "Akses cepat",
     "signInForMyWorld": "Masuk untuk membuka duniamu",
-    "legal": "Legal"
+    "legal": "Legal",
+    "tickets": "Tiket",
+    "my": "Saya"
   },
   "footer": {
     "disclaimer": "Prototipe. Acara, DJ, venue, tiket, dan koleksi adalah data demo fiktif. Tidak ada pembayaran, siaran langsung, dompet, atau minting NFT yang terhubung.",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "Ini menghapus tiket demo, acara yang dibuat, venue, avatar, dan XP dari browser ini. Tidak bisa dibatalkan.",
     "organizer": "Penyelenggara",
     "venueOwner": "Pemilik venue",
-    "fan": "Penggemar"
+    "fan": "Penggemar",
+    "tabId": "FREAK ID",
+    "tabActivity": "Aktivitas",
+    "tabSettings": "Pengaturan"
   },
   "status": {
     "planning": "Perencanaan",
@@ -689,7 +694,8 @@
         "tokyo": "Papan neon, klub mungil, dan sound system besar.",
         "london": "Klub, gudang, dan akar radio bajakan."
       }
-    }
+    },
+    "communityNote": "Pesta yang dipublikasikan penyelenggara di FREAKTOPIA. Lineup, tiket, dan detail ada di halamannya dalam dunia penyelenggara."
   },
   "ranking": {
     "title": "Peringkat dunia",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName}: notifikasi muncul di kotak masukmu (demo, hanya browser ini).",
     "eventnameRemovedFromYourFollows": "{eventName} dihapus dari yang kamu ikuti.",
     "ranking": "peringkat",
-    "today": "hari ini"
+    "today": "hari ini",
+    "categoryRanking": "Peringkat {label}",
+    "rowDetails": "Detail {name}"
   },
   "live": {
     "title": "Festival live",
@@ -1237,7 +1245,8 @@
     "ofOf": "dari {of}",
     "paused": "dijeda",
     "watching": "menonton",
-    "festivalsCount": "{n} festival"
+    "festivalsCount": "{n} festival",
+    "emptyBody": "Hanya acara dengan siaran berlisensi yang terhubung yang tampil di sini. Festival mendatang ada di bawah."
   },
   "dao": {
     "title": "DAO festival",
@@ -1885,7 +1894,16 @@
     "none": "Tidak ada",
     "emailReceiptRefundsPolicy": "Struk email & kebijakan refund",
     "enterLiveMap": "Masuk peta live",
-    "backToEvent": "Kembali ke event"
+    "backToEvent": "Kembali ke event",
+    "validity": "Keabsahan",
+    "validDemo": "Pesanan demo: tidak berlaku untuk masuk",
+    "expired": "Kedaluwarsa: acara sudah selesai",
+    "entryQr": "QR masuk",
+    "qrDemo": "QR: hanya contoh dekoratif",
+    "nftNotConnected": "NFT: belum diterbitkan (belum terhubung)",
+    "communityPasses": "Pass gratis untuk pesta komunitas",
+    "communityPassesBody": "Pass dengan QR masuk yang berlaku untuk pesta dari penyelenggara disimpan bersama RSVP Anda di Pesta saya.",
+    "openMyParties": "Buka Pesta saya"
   },
   "events": {
     "title": "Acara",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "Desain tiket: {tier}",
     "selected": "Dipilih",
     "ticketArtNote": "Gambar pass adalah templat desain. Tanggal, kode QR, dan ID tiket asli dibuat FREAKTOPIA setelah pembayaran, tidak diambil dari gambar.",
-    "searchCityOrEvent": "Cari kota atau acara"
+    "searchCityOrEvent": "Cari kota atau acara",
+    "stepPlaceTime": "Tempat & waktu",
+    "stepSizeBudget": "Skala & anggaran",
+    "stepTicketsRecruit": "Tiket & rekrutmen",
+    "preview": "Pratinjau",
+    "errDateInPast": "Pilih hari ini atau tanggal setelahnya."
   },
   "states": {
     "emptyTitle": "Belum ada apa-apa di sini",
@@ -2339,7 +2362,11 @@
     "alerts": "Notifikasi",
     "stageIllustrationLevelLevel": "Ilustrasi panggung, level {level}",
     "compactFollowers": "{compact} pengikut",
-    "seatsleftLeft": "Sisa {seatsLeft}"
+    "seatsleftLeft": "Sisa {seatsLeft}",
+    "fromPrice": "Mulai {price}",
+    "supportersCount": "{count} pendukung",
+    "kpiDefinition": "Yang dihitung",
+    "asOf": "Per {time}"
   },
   "dashboard": {
     "soldOf": "{name} terjual",
@@ -2417,7 +2444,23 @@
     "soundLights": "Suara & lampu",
     "staffSecurity": "Staf & keamanan",
     "sSold": "{s} terjual",
-    "seatsleftLeft": "Sisa {seatsLeft}"
+    "seatsleftLeft": "Sisa {seatsLeft}",
+    "kpi": {
+      "events": "Acara yang Anda publikasikan di browser ini, ditambah acara contoh.",
+      "djApplicants": "Lamaran DJ untuk acara Anda (termasuk contoh).",
+      "ticketsSold": "Tiket terjual untuk acara contoh. Angka contoh tetap, bukan penjualan.",
+      "raised": "Dukungan yang dijanjikan untuk acara contoh (USD). Angka contoh; tidak ada uang yang ditarik.",
+      "rank": "Peringkat DJ contoh di arena DJ.",
+      "votes": "Suara penggemar untuk set DJ contoh.",
+      "followers": "Orang yang mengikuti profil DJ contoh.",
+      "listed": "Venue yang Anda daftarkan di browser ini, ditambah satu venue contoh.",
+      "bookings": "Pemesanan terkonfirmasi bulan ini. Angka contoh tetap.",
+      "revenue": "Pendapatan pemesanan bulan ini (USD). Angka contoh, bukan pendapatan nyata.",
+      "level": "Level penggemar Anda, dari XP di bawah.",
+      "xp": "Poin dari mendukung, membeli tiket, dan membuat acara di browser ini.",
+      "tickets": "Pesanan tiket yang tersimpan di browser ini.",
+      "following": "DJ yang Anda ikuti."
+    }
   },
   "djs": {
     "stars": "{n} bintang",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "Putar video latar",
     "heroVideoPause": "Jeda video latar",
-    "heroVideoAlt": "Tiga sahabat alien berjalan menuju panggung festival FREAKTOPIA saat matahari terbenam."
+    "heroVideoAlt": "Tiga sahabat alien berjalan menuju panggung festival FREAKTOPIA saat matahari terbenam.",
+    "exploreEvents": "Jelajahi acara"
   },
   "afterParty": {
     "lengthAfterParties": "{length} after party",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "Acara dihitung lagi"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "Tampilkan {count} acara",
+    "place": "Kota",
+    "anywhere": "Semua kota",
+    "anyOf": "Cocok dengan salah satu pilihan",
+    "status": "Status",
+    "size": "Skala acara",
+    "sizeHint": "Level festival yang tumbuh bersama pendukung. Bukan kapasitas venue.",
+    "priceTitle": "Harga",
+    "priceHint": "Harga tiket termurah yang sedang dijual. Acara tanpa tiket yang dijual tidak ditampilkan.",
+    "price": {
+      "any": "Semua harga",
+      "free": "Gratis",
+      "u30": "Maks. $30",
+      "u60": "Maks. $60"
+    },
+    "more": "Lainnya",
+    "breakdown": "Komunitas {community} · Contoh {sample}",
+    "communitySub": "Pesta yang dipublikasikan penyelenggara di FREAKTOPIA. Pesta penyelenggara contoh diberi label DEMO.",
+    "communityError": "Pesta komunitas gagal dimuat. Daftar contoh di bawah tetap bisa dipakai.",
+    "sampleTitle": "Acara contoh",
+    "completedTitle": "Selesai",
+    "completedSub": "Acara yang tanggalnya sudah lewat. Tidak dihitung sebagai acara mendatang.",
+    "show": "Tampilkan",
+    "allOf": "Harus cocok dengan semua pilihan",
+    "notOnSaleEnded": "Acara ini sudah selesai",
+    "notOnSaleEndedBody": "Tiket tidak lagi dijual. Halaman acara tetap menampilkan lineup dan kenangan.",
+    "notOnSaleYet": "Tiket belum dijual",
+    "notOnSaleYetBody": "Tiket dijual setelah acara dikonfirmasi. Sebelum itu Anda bisa mendukungnya di halaman acara.",
+    "backToEvent": "Kembali ke acara"
   }
 }

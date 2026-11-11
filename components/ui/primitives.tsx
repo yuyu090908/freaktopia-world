@@ -5,15 +5,21 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { FlaskConical } from "lucide-react";
 
-type Variant = "primary" | "secondary" | "ghost" | "coral" | "purple" | "blue";
+/**
+ * Button roles (docs/DESIGN_SYSTEM.md): primary (one per screen, lime), secondary (outlined), destructive (danger),
+ * text (inline). coral/purple/blue/ghost are kept for existing screens; new code uses the four roles.
+ */
+type Variant = "primary" | "secondary" | "destructive" | "text" | "ghost" | "coral" | "purple" | "blue";
 type Size = "md" | "lg" | "sm";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-acid text-ink hover:bg-[#c6f77a] shadow-[0_4px_0_0_#5f8a22]",
+  primary: "bg-acid text-ink hover:bg-[#d2ff80] shadow-[0_4px_0_0_#5f8a22]",
+  destructive: "bg-transparent text-danger border-2 border-danger/70 hover:bg-danger/10",
+  text: "bg-transparent text-acid underline-offset-4 hover:underline !px-2 !normal-case !tracking-normal",
   coral: "bg-coral text-ink hover:bg-[#ff7a75] shadow-[0_4px_0_0_#9b2f2b]",
   purple: "bg-purple text-ink hover:bg-[#b28cf0] shadow-[0_4px_0_0_#5b3d8f]",
   blue: "bg-blue text-ink hover:bg-[#71c8f0] shadow-[0_4px_0_0_#2a6f8f]",
-  secondary: "bg-cream text-ink hover:bg-white shadow-[0_4px_0_0_#8d897f]",
+  secondary: "bg-surface-2 text-cream border-2 border-line hover:border-cream/60",
   ghost: "bg-transparent text-cream border-2 border-cream/30 hover:border-cream/70",
 };
 const sizes: Record<Size, string> = {
@@ -60,7 +66,7 @@ export function Chip({ active, className, ...p }: ComponentProps<"button"> & { a
       aria-pressed={active}
       className={cn(
         "inline-flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border-2 px-4 text-sm font-bold transition-colors",
-        active ? "border-acid bg-acid text-ink shadow-[0_0_16px_-2px_rgba(182,240,92,0.6)]" : "border-cream/25 bg-ink/70 text-cream hover:border-cream/60",
+        active ? "border-acid bg-acid/15 text-acid" : "border-line bg-surface text-cream hover:border-cream/60",
         className,
       )}
       {...p}
@@ -98,7 +104,7 @@ export function DemoNotice({ children, className }: { children: ReactNode; class
   );
 }
 
-export function Progress({ value, color = "#B6F05C", className, label }: { value: number; color?: string; className?: string; label?: string }) {
+export function Progress({ value, color = "#C1FF53", className, label }: { value: number; color?: string; className?: string; label?: string }) {
   const pct = Math.max(0, Math.min(100, Math.round(value * 100)));
   return (
     <div
@@ -107,7 +113,7 @@ export function Progress({ value, color = "#B6F05C", className, label }: { value
       aria-valuemin={0}
       aria-valuemax={100}
       aria-label={label}
-      className={cn("h-3 w-full overflow-hidden rounded-full border-2 border-ink bg-[#2a2a2a]", className)}
+      className={cn("h-3 w-full overflow-hidden rounded-full border-2 border-ink bg-surface-2", className)}
     >
       <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${pct}%`, background: color }} />
     </div>
@@ -118,7 +124,7 @@ export function SectionHeader({ title, sub, action, id }: { title: string; sub?:
   return (
     <div className="mb-4 flex items-end justify-between gap-3 px-4 md:px-0">
       <div className="min-w-0">
-        <h2 id={id} className="text-[28px] uppercase sm:text-4xl">
+        <h2 id={id} className="text-[22px] uppercase leading-tight sm:text-[28px]">
           {title}
         </h2>
         {sub && <p className="mt-2 text-sm text-mute">{sub}</p>}
@@ -129,7 +135,7 @@ export function SectionHeader({ title, sub, action, id }: { title: string; sub?:
 }
 
 export function Card({ className, ...p }: ComponentProps<"div">) {
-  return <div className={cn("neon rounded-3xl border bg-surface/90", className)} {...p} />;
+  return <div className={cn("neon rounded-[20px] border bg-surface-2", className)} {...p} />;
 }
 
 export function Stat({ label, value, accent = "#F5F2EA" }: { label: string; value: ReactNode; accent?: string }) {
@@ -154,9 +160,9 @@ export function PageTitle({ kicker, title, sub, children, art }: { kicker?: stri
       )}
       <div className={art ? "relative -mt-12 md:-mt-14 md:px-6" : undefined}>
         {kicker && <div className="mb-2 text-xs font-extrabold uppercase tracking-[0.2em] text-acid drop-shadow-[0_1px_0_#080808]">{kicker}</div>}
-        <h1 className="text-[40px] uppercase drop-shadow-[0_3px_0_#080808] sm:text-6xl">{title}</h1>
+        <h1 className="text-[28px] uppercase leading-tight drop-shadow-[0_3px_0_#0B0910] sm:text-[40px]">{title}</h1>
       </div>
-      {sub && <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-mute">{sub}</p>}
+      {sub && <p className="mt-3 max-w-2xl text-base leading-relaxed text-mute md:text-[15px]">{sub}</p>}
       {children}
     </div>
   );

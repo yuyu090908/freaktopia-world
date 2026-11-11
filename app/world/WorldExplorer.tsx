@@ -19,11 +19,13 @@ import { EventBottomSheet, EventSidePanel, LevelPill, StatusPill } from "@/compo
 import { LiteWorldMap } from "@/components/world/LiteWorldMap";
 import type { CameraPadding, FestivalWorldMapHandle } from "@/components/world/FestivalWorldMap";
 import { GENRES } from "@/lib/data";
-import { DATE_LABELS, type DateRange } from "@/lib/filters";
+import type { DateRange } from "@/lib/filters";
+
+const DATE_KEYS: DateRange[] = ["any", "30d", "90d", "2027"];
 import { DEFAULT_GROWTH_CONFIG, LEVEL_COLORS, normalizeConfig } from "@/lib/map/growth";
 import { STATUS_META, landmarkSvg, type MapStatus } from "@/lib/map/landmarks";
 import type { WorldMapResponse } from "@/lib/map/types";
-import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, filterCount, filterWorld, readWorldUrl, suggest, suggestRegions, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
+import { EMPTY_MAP_FILTERS, FLAG_KEYS, FLAG_LABEL, QUICK_FLAGS, STATUS_FLAGS, filterCount, filterWorld, readWorldUrl, suggest, suggestRegions, toWorldEvents, writeWorldUrl, type MapFilters, type Suggestion, type WorldEvent } from "@/lib/map/view";
 import { buildCities, cityKeyOf } from "@/lib/map/cities";
 import { REGION_COLOR, REGION_KEYS, REGION_VIEW, type RegionKey } from "@/lib/map/regions";
 import { CityPreview } from "@/components/world/CityPreview";
@@ -95,6 +97,7 @@ const SUGGEST_ICON: Record<Suggestion["kind"], React.ReactNode> = {
 export function WorldExplorer() {
   const tu = useTranslations("world");
   const t = useTranslations("world");
+  const tf = useTranslations("eventFilters");
   const tc = useTranslations("common");
   const [load, setLoad] = useState<Load>({ status: "loading" });
   const [filters, setFilters] = useState<MapFilters>(EMPTY_MAP_FILTERS);
@@ -106,6 +109,20 @@ export function WorldExplorer() {
   const [sheetH, setSheetH] = useState(0);
   const [expanded, setExpanded] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  // The search/chip/count overlay wraps to more rows when a region or "clear" is shown,
+  // so the camera controls are placed under its measured height instead of a fixed offset.
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const [overlayBottom, setOverlayBottom] = useState(132);
+  useEffect(() => {
+    const el = overlayRef.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => {
+      const rows = el.lastElementChild as HTMLElement | null;
+      if (rows) setOverlayBottom(Math.round(rows.offsetTop + rows.offsetHeight + 8));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
   const [legendOpen, setLegendOpen] = useState(false);
   const [canLocate, setCanLocate] = useState(false);
   const [urlReady, setUrlReady] = useState(false);
@@ -336,7 +353,7 @@ export function WorldExplorer() {
       )}
 
       {/* top: search + chips */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5">
+      <div ref={overlayRef} className="pointer-events-none absolute inset-x-0 top-0 z-30 bg-gradient-to-b from-[#070A12]/90 via-[#070A12]/45 to-transparent pb-8 pt-2.5">
         <div className="pointer-events-auto mx-auto flex max-w-3xl items-center gap-2 px-3 md:px-4">
           <SearchBox events={all} regionNames={regionNames} value={filters.q} onChange={(q) => setFilters((f) => ({ ...f, q }))} onPick={onSuggestion} onSubmit={() => flyTo(results.map((r) => r.id))} />
           <button type="button" onClick={() => setFiltersOpen(true)} className="relative inline-flex size-12 shrink-0 items-center justify-center rounded-full border-2 border-line bg-[#0D121B]/90 backdrop-blur" aria-label={`${t("filters")}${filterCount(filters) ? ` (${filterCount(filters)})` : ""}`}>
@@ -346,29 +363,30 @@ export function WorldExplorer() {
         </div>
         <div className="pointer-events-auto mx-auto mt-2 max-w-3xl">
           <div className="no-scrollbar flex gap-2 overflow-x-auto px-3 pb-1 md:px-4" role="group" aria-label={t("quickFilters")}>
-            {FLAG_KEYS.map((k) => {
+            {QUICK_FLAGS.map((k) => {
               const on = filters.flags.includes(k);
               return (
-                <Chip key={k} active={on} onClick={() => setFilters((f) => ({ ...f, flags: on ? f.flags.filter((x) => x !== k) : [...f.flags, k] }))} className="min-h-10 bg-[#0D121B]/85 px-3.5 text-[13px] backdrop-blur">
-                  {k === "live" && <span className={cn("size-2 rounded-full", on ? "bg-ink" : "bg-coral")} aria-hidden />}
+                <Chip key={k} active={on} onClick={() => setFilters((f) => ({ ...f, flags: on ? f.flags.filter((x) => x !== k) : [...f.flags, k] }))} className={cn("min-h-11 px-3.5 text-[13px] backdrop-blur", !on && "bg-ink/85")}>
+                  {k === "live" && <span className="size-2 rounded-full bg-danger" aria-hidden />}
                   {t(`chips.${k}`)}
                 </Chip>
               );
             })}
           </div>
         </div>
-        <div className="pointer-events-auto mx-auto mt-1.5 flex max-w-3xl items-center gap-2 px-3 md:px-4">
-          <span className="rounded-full bg-[#0D121B]/85 px-3 py-1 text-xs font-bold" aria-live="polite" data-testid="world-count">
-            {t("count", { count: results.length })}
+        <div className="pointer-events-auto mx-auto mt-1.5 flex max-w-3xl flex-wrap items-center gap-x-2 px-3 md:px-4">
+          <span className="rounded-full bg-ink/85 px-3 py-1 text-xs font-bold" aria-live="polite">
+            <span data-testid="world-count">{t("count", { count: results.length })}</span>
+            <span className="ml-1.5 font-semibold text-mute" data-testid="world-breakdown">{tf("breakdown", { community: results.filter((r) => r.source === "community").length, sample: results.filter((r) => r.source !== "community").length })}</span>
           </span>
-          <DemoBadge label={tc("sampleEvents")} className="bg-[#0D121B]/85" />
+          <DemoBadge label={tc("sampleEvents")} className="bg-ink/85" />
           {filters.region && (
-            <button type="button" onClick={() => focusRegion(null)} className="inline-flex min-h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-extrabold" style={{ borderColor: REGION_COLOR[filters.region], color: REGION_COLOR[filters.region], background: "rgba(13,18,27,.85)" }} data-testid="region-active" aria-label={t("regionClear", { region: tReg(filters.region) })}>
+            <button type="button" onClick={() => focusRegion(null)} className="inline-flex min-h-11 items-center gap-1.5 rounded-full border px-3 text-xs font-extrabold" style={{ borderColor: REGION_COLOR[filters.region], color: REGION_COLOR[filters.region], background: "rgba(13,18,27,.85)" }} data-testid="region-active" aria-label={t("regionClear", { region: tReg(filters.region) })}>
               <Orbit className="size-3.5" aria-hidden /> {tReg(filters.region)} <X className="size-3.5" aria-hidden />
             </button>
           )}
           {filterCount(filters) + (filters.q ? 1 : 0) > 0 && (
-            <button type="button" onClick={() => setFilters(EMPTY_MAP_FILTERS)} className="inline-flex min-h-8 items-center gap-1 rounded-full px-2 text-xs font-bold text-mute hover:text-cream">
+            <button type="button" onClick={() => setFilters(EMPTY_MAP_FILTERS)} className="inline-flex min-h-11 items-center gap-1 rounded-full px-3 text-xs font-bold text-mute hover:text-cream">
               <X className="size-3.5" aria-hidden /> {tc("clear")}
             </button>
           )}
@@ -377,7 +395,7 @@ export function WorldExplorer() {
 
       {/* right: camera controls */}
       {view === "map" && load.status === "ok" && (
-        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel || city ? "right-[436px] top-[132px]" : "right-4 top-[132px]") : "right-3 top-[132px]")} role="group" aria-label={t("controls")}>
+        <div className={cn("absolute z-20 flex flex-col gap-2", desktop ? (sel || city ? "right-[436px]" : "right-4") : "right-3")} style={{ top: overlayBottom }} role="group" aria-label={t("controls")}>
           <MapBtn label={t("zoomIn")} onClick={() => ctl()?.zoomIn()}>
             <Plus className="size-5" />
           </MapBtn>
@@ -404,7 +422,7 @@ export function WorldExplorer() {
         </div>
       )}
 
-      {legendOpen && view === "map" && <Legend onClose={() => setLegendOpen(false)} desktop={desktop} />}
+      {legendOpen && view === "map" && <Legend onClose={() => setLegendOpen(false)} desktop={desktop} top={overlayBottom} />}
 
       {/* empty */}
       {load.status === "ok" && results.length === 0 && (
@@ -583,14 +601,14 @@ const REGION_EN: Record<Exclude<RegionKey, "an">, string> = { na: "North America
 
 const STATUS_ORDER: MapStatus[] = ["planning", "funding", "confirmed", "live", "completed", "cancelled"];
 
-function Legend({ onClose, desktop }: { onClose: () => void; desktop: boolean }) {
+function Legend({ onClose, desktop, top }: { onClose: () => void; desktop: boolean; top: number }) {
   const cfg = DEFAULT_GROWTH_CONFIG;
   const t = useTranslations("world");
   const ts = useTranslations("status");
   const tl = useTranslations("levels");
   const tp = useTranslations("party");
   return (
-    <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px] top-[132px]" : "right-16 top-[132px] max-w-[calc(100%-80px)]")}>
+    <section aria-label={t("legend")} className={cn("absolute z-30 w-[300px] rounded-3xl border-2 border-line bg-[#0D121B]/96 p-4 shadow-[0_16px_40px_rgba(0,0,0,.6)] backdrop-blur", desktop ? "right-[72px]" : "right-16 max-w-[calc(100%-80px)]")} style={{ top }}>
       <div className="flex items-center justify-between">
         <h2 className="text-[14px] font-extrabold uppercase">{t("legendTitle")}</h2>
         <button type="button" onClick={onClose} aria-label={t("closeLegend")} className="inline-flex size-9 items-center justify-center rounded-full bg-surface-2">
@@ -634,6 +652,7 @@ function FilterSheet({ open, onClose, filters, setFilters, count, onRegion }: { 
   const toggle = <T,>(arr: T[], v: T) => (arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
   const t = useTranslations("world");
   const tc = useTranslations("common");
+  const tf = useTranslations("eventFilters");
   const tl = useTranslations("levels");
   const tp = useTranslations("party");
   return (
@@ -654,9 +673,21 @@ function FilterSheet({ open, onClose, filters, setFilters, count, onRegion }: { 
     >
       <div className="space-y-5">
         <fieldset>
-          <legend className="mb-2 text-[13px] font-extrabold uppercase">{t("statusFeatures")}</legend>
+          <legend className="text-[13px] font-extrabold uppercase">{tf("status")}</legend>
+          <p className="mb-2 text-[12px] text-mute">{tf("anyOf")}</p>
           <div className="flex flex-wrap gap-2">
-            {FLAG_KEYS.map((k) => (
+            {FLAG_KEYS.filter((k) => STATUS_FLAGS.includes(k)).map((k) => (
+              <Chip key={k} active={filters.flags.includes(k)} onClick={() => setFilters((f) => ({ ...f, flags: toggle(f.flags, k) }))}>
+                {t(`chips.${k}`)}
+              </Chip>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend className="text-[13px] font-extrabold uppercase">{tf("more")}</legend>
+          <p className="mb-2 text-[12px] text-mute">{tf("allOf")}</p>
+          <div className="flex flex-wrap gap-2">
+            {FLAG_KEYS.filter((k) => !STATUS_FLAGS.includes(k)).map((k) => (
               <Chip key={k} active={filters.flags.includes(k)} onClick={() => setFilters((f) => ({ ...f, flags: toggle(f.flags, k) }))}>
                 {t(`chips.${k}`)}
               </Chip>
@@ -678,7 +709,7 @@ function FilterSheet({ open, onClose, filters, setFilters, count, onRegion }: { 
             <CalendarDays className="size-4" aria-hidden /> {t("date")}
           </legend>
           <div className="flex flex-wrap gap-2">
-            {(Object.keys(DATE_LABELS) as DateRange[]).map((d) => (
+            {DATE_KEYS.map((d) => (
               <Chip key={d} active={filters.date === d} onClick={() => setFilters((f) => ({ ...f, date: d }))}>
                 {t(`dates.${d}`)}
               </Chip>

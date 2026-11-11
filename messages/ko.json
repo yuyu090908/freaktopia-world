@@ -111,7 +111,9 @@
     },
     "quickAccess": "빠른 이동",
     "signInForMyWorld": "로그인하면 내 월드가 열립니다",
-    "legal": "약관"
+    "legal": "약관",
+    "tickets": "티켓",
+    "my": "마이"
   },
   "footer": {
     "disclaimer": "프로토타입입니다. 이벤트, DJ, 공연장, 티켓, 수집품은 모두 가상의 데모 데이터입니다. 결제, 라이브 스트리밍, 지갑, NFT 발행은 연결되어 있지 않습니다.",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "이 브라우저에서 데모 티켓, 만든 이벤트, 공연장, 아바타, XP가 삭제됩니다. 되돌릴 수 없습니다.",
     "organizer": "주최자",
     "venueOwner": "공연장 소유자",
-    "fan": "팬"
+    "fan": "팬",
+    "tabId": "FREAK ID",
+    "tabActivity": "활동",
+    "tabSettings": "설정"
   },
   "status": {
     "planning": "기획 중",
@@ -689,7 +694,8 @@
         "tokyo": "네온사인, 작은 클럽, 큰 사운드 시스템.",
         "london": "클럽, 창고, 해적 라디오의 뿌리."
       }
-    }
+    },
+    "communityNote": "오거나이저가 FREAKTOPIA에 공개한 파티입니다. 라인업, 티켓, 상세 정보는 오거나이저 월드의 페이지에 있습니다."
   },
   "ranking": {
     "title": "월드 랭킹",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName}: 알림이 받은편지함에 표시됩니다(데모, 이 브라우저에서만).",
     "eventnameRemovedFromYourFollows": "{eventName}을(를) 팔로우 목록에서 제거했습니다.",
     "ranking": "랭킹",
-    "today": "오늘"
+    "today": "오늘",
+    "categoryRanking": "{label} 랭킹",
+    "rowDetails": "{name} 상세"
   },
   "live": {
     "title": "라이브 페스티벌",
@@ -1237,7 +1245,8 @@
     "ofOf": "/ {of}",
     "paused": "일시정지됨",
     "watching": "시청 중",
-    "festivalsCount": "페스티벌 {n}개"
+    "festivalsCount": "페스티벌 {n}개",
+    "emptyBody": "연결된 정식 라이선스 스트림이 있는 이벤트만 여기에 표시됩니다. 예정된 페스티벌은 아래에 있습니다."
   },
   "dao": {
     "title": "페스티벌 DAO",
@@ -1885,7 +1894,16 @@
     "none": "없음",
     "emailReceiptRefundsPolicy": "이메일 영수증 및 환불 정책",
     "enterLiveMap": "라이브 맵 입장",
-    "backToEvent": "이벤트로 돌아가기"
+    "backToEvent": "이벤트로 돌아가기",
+    "validity": "유효성",
+    "validDemo": "데모 주문: 입장 불가",
+    "expired": "만료: 이벤트가 종료됨",
+    "entryQr": "입장 QR",
+    "qrDemo": "QR: 장식용 샘플",
+    "nftNotConnected": "NFT: 미발행(미연결)",
+    "communityPasses": "커뮤니티 파티 무료 패스",
+    "communityPassesBody": "오거나이저가 공개한 파티의 실제 입장 QR 패스는 '내 파티'의 참가 신청과 함께 보관됩니다.",
+    "openMyParties": "내 파티 열기"
   },
   "events": {
     "title": "이벤트",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "티켓 디자인: {tier}",
     "selected": "선택됨",
     "ticketArtNote": "패스 그림은 디자인 템플릿입니다. 실제 티켓의 날짜·QR 코드·ID는 결제 후 FREAKTOPIA가 발급하며 그림의 정보는 사용하지 않습니다.",
-    "searchCityOrEvent": "도시나 이벤트 검색"
+    "searchCityOrEvent": "도시나 이벤트 검색",
+    "stepPlaceTime": "장소·일시",
+    "stepSizeBudget": "규모·예산",
+    "stepTicketsRecruit": "티켓·모집",
+    "preview": "미리보기",
+    "errDateInPast": "오늘 이후 날짜를 선택하세요."
   },
   "states": {
     "emptyTitle": "아직 아무것도 없어요",
@@ -2339,7 +2362,11 @@
     "alerts": "알림",
     "stageIllustrationLevelLevel": "스테이지 일러스트, 레벨 {level}",
     "compactFollowers": "팔로워 {compact}명",
-    "seatsleftLeft": "{seatsLeft} 남음"
+    "seatsleftLeft": "{seatsLeft} 남음",
+    "fromPrice": "{price}부터",
+    "supportersCount": "후원자 {count}명",
+    "kpiDefinition": "집계 기준",
+    "asOf": "{time} 기준"
   },
   "dashboard": {
     "soldOf": "{name} 판매량",
@@ -2417,7 +2444,23 @@
     "soundLights": "음향 & 조명",
     "staffSecurity": "스태프 & 보안",
     "sSold": "{s}장 판매",
-    "seatsleftLeft": "{seatsLeft} 남음"
+    "seatsleftLeft": "{seatsLeft} 남음",
+    "kpi": {
+      "events": "이 브라우저에서 공개한 이벤트와 샘플 이벤트의 합계.",
+      "djApplicants": "내 이벤트에 들어온 DJ 지원 수(샘플 지원 포함).",
+      "ticketsSold": "샘플 이벤트의 티켓 판매 수. 고정 샘플 값이며 실제 판매가 아닙니다.",
+      "raised": "샘플 이벤트에 약정된 후원액(미국 달러). 샘플 값이며 실제 결제는 없습니다.",
+      "rank": "샘플 DJ의 DJ 아레나 순위.",
+      "votes": "샘플 DJ 세트에 대한 팬 투표 수.",
+      "followers": "샘플 DJ 프로필을 팔로우하는 사람 수.",
+      "listed": "이 브라우저에서 등록한 공연장과 샘플 공연장 1곳의 합계.",
+      "bookings": "이번 달 확정 예약 수. 고정 샘플 값입니다.",
+      "revenue": "이번 달 예약 매출(미국 달러). 고정 샘플 값이며 실제 수입이 아닙니다.",
+      "level": "아래 XP로 정해지는 팬 레벨.",
+      "xp": "이 브라우저에서 후원, 티켓 구매, 이벤트 생성으로 얻은 포인트.",
+      "tickets": "이 브라우저에 저장된 티켓 주문 수.",
+      "following": "팔로우 중인 DJ 수."
+    }
   },
   "djs": {
     "stars": "별 {n}개",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "배경 영상 재생",
     "heroVideoPause": "배경 영상 일시정지",
-    "heroVideoAlt": "해 질 녘 FREAKTOPIA 페스티벌 무대로 걸어가는 외계인 친구 세 명."
+    "heroVideoAlt": "해 질 녘 FREAKTOPIA 페스티벌 무대로 걸어가는 외계인 친구 세 명.",
+    "exploreEvents": "이벤트 찾기"
   },
   "afterParty": {
     "lengthAfterParties": "애프터 파티 {length}개",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "이벤트 다시 포함"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "{count}개 보기",
+    "place": "도시",
+    "anywhere": "모든 도시",
+    "anyOf": "선택한 항목 중 하나라도 해당",
+    "status": "상태",
+    "size": "이벤트 규모",
+    "sizeHint": "후원자와 함께 성장하는 페스티벌 레벨입니다. 공연장 수용 인원이 아닙니다.",
+    "priceTitle": "가격",
+    "priceHint": "판매 중인 티켓의 최저가입니다. 판매 중인 티켓이 없는 이벤트는 제외됩니다.",
+    "price": {
+      "any": "전체",
+      "free": "무료",
+      "u30": "$30 이하",
+      "u60": "$60 이하"
+    },
+    "more": "기타",
+    "breakdown": "커뮤니티 {community} · 샘플 {sample}",
+    "communitySub": "오거나이저가 FREAKTOPIA에 공개한 파티입니다. 샘플 오거나이저의 파티에는 DEMO 표시가 있습니다.",
+    "communityError": "커뮤니티 파티를 불러오지 못했습니다. 아래 샘플 목록은 계속 볼 수 있습니다.",
+    "sampleTitle": "샘플 이벤트",
+    "completedTitle": "종료된 이벤트",
+    "completedSub": "날짜가 지난 이벤트입니다. 예정 이벤트 수에 포함되지 않습니다.",
+    "show": "보기",
+    "allOf": "선택한 항목을 모두 충족",
+    "notOnSaleEnded": "이 이벤트는 종료되었습니다",
+    "notOnSaleEndedBody": "티켓 판매가 종료되었습니다. 이벤트 페이지에서 라인업과 기록을 볼 수 있습니다.",
+    "notOnSaleYet": "티켓은 아직 판매 전입니다",
+    "notOnSaleYetBody": "이벤트가 확정되면 티켓 판매가 시작됩니다. 그 전까지는 이벤트 페이지에서 후원할 수 있습니다.",
+    "backToEvent": "이벤트로 돌아가기"
   }
 }

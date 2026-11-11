@@ -111,7 +111,9 @@
     },
     "quickAccess": "Quick access",
     "signInForMyWorld": "Sign in to open your world",
-    "legal": "Legal"
+    "legal": "Legal",
+    "tickets": "Tickets",
+    "my": "My"
   },
   "footer": {
     "disclaimer": "Prototype. Events, DJs, venues, tickets and collectibles are fictional demo data. No payments, live streams, wallets or NFT minting are connected.",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "This clears your demo tickets, created events, venues, avatar and XP from this browser. It can’t be undone.",
     "organizer": "Organizer",
     "venueOwner": "Venue owner",
-    "fan": "Fan"
+    "fan": "Fan",
+    "tabId": "FREAK ID",
+    "tabActivity": "Activity",
+    "tabSettings": "Settings"
   },
   "status": {
     "planning": "Planning",
@@ -689,7 +694,8 @@
         "tokyo": "Neon signs, tiny clubs and big sound systems.",
         "london": "Clubs, warehouses and pirate-radio roots."
       }
-    }
+    },
+    "communityNote": "A party an organizer published on FREAKTOPIA. Lineup, tickets and details are on its page in the organizer's world."
   },
   "ranking": {
     "title": "World Ranking",
@@ -825,7 +831,9 @@
     "compareAdd": "Add {name} to compare",
     "compareRemove": "Remove {name} from compare",
     "ranking": "ranking",
-    "today": "today"
+    "today": "today",
+    "categoryRanking": "{label} ranking",
+    "rowDetails": "Details for {name}"
   },
   "live": {
     "title": "Live Festival",
@@ -1237,7 +1245,8 @@
     "ofOf": "of {of}",
     "paused": "paused",
     "watching": "watching",
-    "festivalsCount": "{n, plural, one {# festival} other {# festivals}}"
+    "festivalsCount": "{n, plural, one {# festival} other {# festivals}}",
+    "emptyBody": "Only events with a connected, licensed stream appear here. Upcoming festivals are listed below."
   },
   "dao": {
     "title": "Festival DAO",
@@ -1885,7 +1894,16 @@
     "none": "None",
     "emailReceiptRefundsPolicy": "Email receipt & refunds policy",
     "enterLiveMap": "Enter live map",
-    "backToEvent": "Back to event"
+    "backToEvent": "Back to event",
+    "validity": "Validity",
+    "validDemo": "Demo order: not valid for entry",
+    "expired": "Expired: the event has ended",
+    "entryQr": "Entry QR",
+    "qrDemo": "QR: decorative sample only",
+    "nftNotConnected": "NFT: not issued (not connected)",
+    "communityPasses": "Free passes for community parties",
+    "communityPassesBody": "Passes with a working entry QR for parties organizers published are kept with your RSVP in My parties.",
+    "openMyParties": "Open My parties"
   },
   "events": {
     "title": "Events",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "Ticket design: {tier}",
     "selected": "Selected",
     "ticketArtNote": "Pass artwork is a design template. Dates, QR codes and IDs on real tickets are created by FREAKTOPIA after checkout, never taken from the artwork.",
-    "searchCityOrEvent": "Search city or event"
+    "searchCityOrEvent": "Search city or event",
+    "stepPlaceTime": "Place & time",
+    "stepSizeBudget": "Size & budget",
+    "stepTicketsRecruit": "Tickets & recruiting",
+    "preview": "Preview",
+    "errDateInPast": "Choose today or a later date."
   },
   "states": {
     "emptyTitle": "Nothing here yet",
@@ -2284,7 +2307,8 @@
     },
     "heroVideoPlay": "Play background video",
     "heroVideoPause": "Pause background video",
-    "heroVideoAlt": "Three alien friends walk toward the FREAKTOPIA festival stage at sunset."
+    "heroVideoAlt": "Three alien friends walk toward the FREAKTOPIA festival stage at sunset.",
+    "exploreEvents": "Explore events"
   },
   "djs": {
     "whoRulesTheBooth": "Who rules the booth?",
@@ -2631,7 +2655,23 @@
     "soundLights": "Sound & lights",
     "staffSecurity": "Staff & security",
     "sSold": "{s} sold",
-    "seatsleftLeft": "{seatsLeft} left"
+    "seatsleftLeft": "{seatsLeft} left",
+    "kpi": {
+      "events": "Events you published in this browser, plus the sample event.",
+      "djApplicants": "DJ applications received for your events (including sample applications).",
+      "ticketsSold": "Tickets sold for the sample event. Fixed sample figure, not a sale.",
+      "raised": "Support pledged to the sample event, in US dollars. Sample figure; no money is taken.",
+      "rank": "The sample DJ's place in the DJ arena.",
+      "votes": "Fan votes for the sample DJ's sets.",
+      "followers": "People following the sample DJ's profile.",
+      "listed": "Venues you listed in this browser, plus one sample venue.",
+      "bookings": "Confirmed bookings this month. Fixed sample figure.",
+      "revenue": "Booking revenue this month in US dollars. Fixed sample figure, not real income.",
+      "level": "Your fan level, from the XP below.",
+      "xp": "Points for supporting, buying tickets and creating events in this browser.",
+      "tickets": "Ticket orders saved in this browser.",
+      "following": "DJs you follow."
+    }
   },
   "quests": {
     "support3Events": "Support 3 events",
@@ -2735,7 +2775,11 @@
     "photoOf": "{name} photo",
     "illustrationOf": "{name} illustration",
     "compactFollowers": "{compact} followers",
-    "seatsleftLeft": "{seatsLeft} left"
+    "seatsleftLeft": "{seatsLeft} left",
+    "fromPrice": "From {price}",
+    "supportersCount": "{count} supporters",
+    "kpiDefinition": "What this counts",
+    "asOf": "As of {time}"
   },
   "pages": {
     "messageSavedDemo": "Message saved (demo)",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "Event counted again"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "{count, plural, one {Show # event} other {Show # events}}",
+    "place": "City",
+    "anywhere": "Anywhere",
+    "anyOf": "Matches any of the selected options",
+    "status": "Status",
+    "size": "Event size",
+    "sizeHint": "Festival level, which grows with supporters. It is not venue capacity.",
+    "priceTitle": "Price",
+    "priceHint": "Lowest ticket price on sale. Events with no tickets on sale are left out.",
+    "price": {
+      "any": "Any price",
+      "free": "Free",
+      "u30": "Up to $30",
+      "u60": "Up to $60"
+    },
+    "more": "More",
+    "breakdown": "Community {community} · Sample {sample}",
+    "communitySub": "Parties organizers published on FREAKTOPIA. Parties of the sample organizer are marked DEMO.",
+    "communityError": "Community parties didn't load. The sample list below still works.",
+    "sampleTitle": "Sample events",
+    "completedTitle": "Completed",
+    "completedSub": "Events whose date has passed. They are not counted as upcoming.",
+    "show": "Show",
+    "allOf": "Must match all selected options",
+    "notOnSaleEnded": "This event has ended",
+    "notOnSaleEndedBody": "Tickets are no longer sold. The event page keeps its lineup and memories.",
+    "notOnSaleYet": "Tickets are not on sale yet",
+    "notOnSaleYetBody": "Tickets go on sale once the event is confirmed. Until then you can support it on the event page.",
+    "backToEvent": "Back to the event"
   }
 }

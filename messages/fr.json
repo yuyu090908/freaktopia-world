@@ -111,7 +111,9 @@
     },
     "quickAccess": "Accès rapide",
     "signInForMyWorld": "Connectez-vous pour ouvrir votre monde",
-    "legal": "Mentions légales"
+    "legal": "Mentions légales",
+    "tickets": "Billets",
+    "my": "Mon espace"
   },
   "footer": {
     "disclaimer": "Prototype. Les événements, DJ, lieux, billets et objets de collection sont des données de démonstration fictives. Aucun paiement, streaming, portefeuille ni mint de NFT n’est connecté.",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "Cela efface de ce navigateur vos billets de démo, événements créés, lieux, avatar et XP. Action irréversible.",
     "organizer": "Organisateur",
     "venueOwner": "Propriétaire de lieu",
-    "fan": "Fan"
+    "fan": "Fan",
+    "tabId": "FREAK ID",
+    "tabActivity": "Activité",
+    "tabSettings": "Paramètres"
   },
   "status": {
     "planning": "En préparation",
@@ -689,7 +694,8 @@
         "tokyo": "Enseignes néon, clubs minuscules et gros sound systems.",
         "london": "Clubs, entrepôts et racines de radio pirate."
       }
-    }
+    },
+    "communityNote": "Une soirée publiée par un organisateur sur FREAKTOPIA. Line-up, billets et détails se trouvent sur sa page dans l'univers de l'organisateur."
   },
   "ranking": {
     "title": "Classement mondial",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName} : les alertes arrivent dans votre boîte de réception (démo, ce navigateur uniquement).",
     "eventnameRemovedFromYourFollows": "{eventName} retiré de vos suivis.",
     "ranking": "classement",
-    "today": "aujourd’hui"
+    "today": "aujourd’hui",
+    "categoryRanking": "Classement : {label}",
+    "rowDetails": "Détails de {name}"
   },
   "live": {
     "title": "Festival en live",
@@ -1237,7 +1245,8 @@
     "ofOf": "sur {of}",
     "paused": "en pause",
     "watching": "regardent",
-    "festivalsCount": "{n, plural, one {# festival} other {# festivals}}"
+    "festivalsCount": "{n, plural, one {# festival} other {# festivals}}",
+    "emptyBody": "Seuls les événements avec un flux sous licence connecté apparaissent ici. Les festivals à venir sont listés plus bas."
   },
   "dao": {
     "title": "DAO du festival",
@@ -1885,7 +1894,16 @@
     "none": "Aucun",
     "emailReceiptRefundsPolicy": "Reçu par e-mail et politique de remboursement",
     "enterLiveMap": "Entrer dans la carte en direct",
-    "backToEvent": "Retour à l’événement"
+    "backToEvent": "Retour à l’événement",
+    "validity": "Validité",
+    "validDemo": "Commande démo : non valable pour l'entrée",
+    "expired": "Expiré : l'événement est terminé",
+    "entryQr": "QR d'entrée",
+    "qrDemo": "QR : exemple décoratif uniquement",
+    "nftNotConnected": "NFT : non émis (non connecté)",
+    "communityPasses": "Pass gratuits pour les soirées de la communauté",
+    "communityPassesBody": "Les pass avec un QR d'entrée valable pour les soirées publiées par des organisateurs sont avec votre RSVP dans Mes soirées.",
+    "openMyParties": "Ouvrir Mes soirées"
   },
   "events": {
     "title": "Événements",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "Design du billet : {tier}",
     "selected": "Sélectionné",
     "ticketArtNote": "Le visuel du pass est un modèle de design. La date, le QR code et l’identifiant du vrai billet sont créés par FREAKTOPIA après l’achat, jamais repris du visuel.",
-    "searchCityOrEvent": "Rechercher une ville ou un événement"
+    "searchCityOrEvent": "Rechercher une ville ou un événement",
+    "stepPlaceTime": "Lieu et horaire",
+    "stepSizeBudget": "Taille et budget",
+    "stepTicketsRecruit": "Billets et recrutement",
+    "preview": "Aperçu",
+    "errDateInPast": "Choisissez aujourd'hui ou une date ultérieure."
   },
   "states": {
     "emptyTitle": "Rien ici pour l’instant",
@@ -2339,7 +2362,11 @@
     "alerts": "Alertes",
     "stageIllustrationLevelLevel": "Illustration de la scène, niveau {level}",
     "compactFollowers": "{compact} abonnés",
-    "seatsleftLeft": "Plus que {seatsLeft}"
+    "seatsleftLeft": "Plus que {seatsLeft}",
+    "fromPrice": "À partir de {price}",
+    "supportersCount": "{count} soutiens",
+    "kpiDefinition": "Ce qui est compté",
+    "asOf": "Au {time}"
   },
   "dashboard": {
     "soldOf": "{name} vendus",
@@ -2417,7 +2444,23 @@
     "soundLights": "Son et lumière",
     "staffSecurity": "Équipe et sécurité",
     "sSold": "{s} vendus",
-    "seatsleftLeft": "Plus que {seatsLeft}"
+    "seatsleftLeft": "Plus que {seatsLeft}",
+    "kpi": {
+      "events": "Événements publiés dans ce navigateur, plus l'événement d'exemple.",
+      "djApplicants": "Candidatures de DJ reçues pour vos événements (exemples inclus).",
+      "ticketsSold": "Billets vendus pour l'événement d'exemple. Chiffre fixe, pas une vente.",
+      "raised": "Soutien promis à l'événement d'exemple, en dollars. Chiffre d'exemple ; aucun paiement.",
+      "rank": "Place du DJ d'exemple dans l'arène DJ.",
+      "votes": "Votes des fans pour les sets du DJ d'exemple.",
+      "followers": "Personnes qui suivent le profil du DJ d'exemple.",
+      "listed": "Lieux publiés dans ce navigateur, plus un lieu d'exemple.",
+      "bookings": "Réservations confirmées ce mois-ci. Chiffre fixe d'exemple.",
+      "revenue": "Revenus des réservations ce mois-ci, en dollars. Chiffre d'exemple, pas un revenu réel.",
+      "level": "Votre niveau de fan, d'après les XP ci-dessous.",
+      "xp": "Points gagnés en soutenant, en achetant des billets et en créant des événements dans ce navigateur.",
+      "tickets": "Commandes de billets enregistrées dans ce navigateur.",
+      "following": "DJ que vous suivez."
+    }
   },
   "djs": {
     "stars": "{n, plural, one {# étoile} other {# étoiles}}",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "Lire la vidéo d'arrière-plan",
     "heroVideoPause": "Mettre en pause la vidéo d'arrière-plan",
-    "heroVideoAlt": "Trois amis extraterrestres marchent vers la scène du festival FREAKTOPIA au coucher du soleil."
+    "heroVideoAlt": "Trois amis extraterrestres marchent vers la scène du festival FREAKTOPIA au coucher du soleil.",
+    "exploreEvents": "Explorer les événements"
   },
   "afterParty": {
     "lengthAfterParties": "{length} afters",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "Événement compté à nouveau"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "{count, plural, one {Voir # événement} other {Voir # événements}}",
+    "place": "Ville",
+    "anywhere": "Toutes les villes",
+    "anyOf": "Correspond à l'une des options choisies",
+    "status": "Statut",
+    "size": "Taille de l'événement",
+    "sizeHint": "Niveau du festival, qui grandit avec les soutiens. Ce n'est pas la capacité du lieu.",
+    "priceTitle": "Prix",
+    "priceHint": "Prix le plus bas des billets en vente. Les événements sans billets en vente sont exclus.",
+    "price": {
+      "any": "Tous les prix",
+      "free": "Gratuit",
+      "u30": "Jusqu'à 30 $",
+      "u60": "Jusqu'à 60 $"
+    },
+    "more": "Plus",
+    "breakdown": "Communauté {community} · Exemples {sample}",
+    "communitySub": "Soirées publiées par des organisateurs sur FREAKTOPIA. Celles de l'organisateur d'exemple portent la mention DEMO.",
+    "communityError": "Les soirées de la communauté ne se sont pas chargées. La liste d'exemples ci-dessous fonctionne.",
+    "sampleTitle": "Événements d'exemple",
+    "completedTitle": "Terminés",
+    "completedSub": "Événements dont la date est passée. Ils ne comptent pas parmi les événements à venir.",
+    "show": "Afficher",
+    "allOf": "Doit correspondre à toutes les options choisies",
+    "notOnSaleEnded": "Cet événement est terminé",
+    "notOnSaleEndedBody": "Les billets ne sont plus vendus. La page de l'événement garde le line-up et les souvenirs.",
+    "notOnSaleYet": "Les billets ne sont pas encore en vente",
+    "notOnSaleYetBody": "La vente ouvre une fois l'événement confirmé. D'ici là, vous pouvez le soutenir sur sa page.",
+    "backToEvent": "Retour à l'événement"
   }
 }

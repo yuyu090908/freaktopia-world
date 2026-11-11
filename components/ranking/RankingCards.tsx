@@ -4,7 +4,8 @@ import { Tx } from "@/components/i18n/Tx";
 import { type Tu } from "@/lib/i18n/tu";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ArrowDown, ArrowUp, CalendarDays, Check, GitCompareArrows, HandHeart, Landmark, MapPin, Mic2, Minus, Ticket, Trophy } from "lucide-react";
+import { useState } from "react";
+import { ArrowDown, ArrowUp, CalendarDays, Check, ChevronDown, GitCompareArrows, HandHeart, Landmark, MapPin, Mic2, Minus, Ticket, Trophy } from "lucide-react";
 import { EventCover } from "@/components/cards/Cards";
 import { EventLevelBadge } from "@/components/event/EventLevelBadge";
 import { FollowButton } from "./FollowButton";
@@ -227,6 +228,49 @@ export function TopSmallCard({ e, category }: { e: RankedEntry; category: Rankin
           <RankActions e={e} />
         </div>
       </div>
+    </article>
+  );
+}
+
+/**
+ * Rank 4+ as a row: rank, cover, name, the category's main number. Tapping the row opens the details
+ * (secondary metrics and actions) in place; the name links to the event.
+ */
+export function RankingRow({ e, category }: { e: RankedEntry; category: RankingCategory }) {
+  const tu = useTranslations("ranking");
+  const [open, setOpen] = useState(false);
+  const p = primaryLabel(e, category);
+  const id = `rk-${e.event.id}`;
+  return (
+    <article className="min-w-0 rounded-[16px] border border-line bg-surface-2 focus-within:border-acid" aria-labelledby={id} data-testid="ranking-row">
+      <div className="relative flex min-h-16 items-center gap-3 p-2.5">
+        <div className="flex w-9 shrink-0 flex-col items-center">
+          <span className="font-display text-[20px] leading-none">{e.rank}</span>
+          <RankMove e={e} />
+        </div>
+        <span className="relative size-12 shrink-0 overflow-hidden rounded-xl" aria-hidden="true">
+          <EventCover id={e.event.id} sizes="48px" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 id={id} className="truncate text-[16px] uppercase leading-tight">
+            <Link href={`/events/${e.event.id}`} className="outline-none after:absolute after:inset-0 after:content-[''] hover:text-acid focus-visible:underline">{e.event.name}</Link>
+          </h3>
+          <p className="truncate text-[13px] text-mute">{e.event.city} · {fmtDate(e.event.startsAt, { month: "short", day: "numeric" })}{e.event.isDemo ? " · DEMO" : ""}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <div className="font-display text-[18px] leading-none" style={{ color: CATEGORY_META[category].color }}>{p.value}</div>
+          <div className="mt-0.5 max-w-24 truncate text-[11px] font-bold uppercase text-mute"><Tx>{p.label}</Tx></div>
+        </div>
+        <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-controls={`${id}-more`} aria-label={tu("rowDetails", { name: e.event.name })} className="relative z-10 inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
+          <ChevronDown className={cn("size-5 transition-transform", open && "rotate-180")} aria-hidden />
+        </button>
+      </div>
+      {open && (
+        <div id={`${id}-more`} className="border-t border-line px-3 pb-3">
+          <Metrics e={e} category={category} />
+          <div className="mt-3"><RankActions e={e} /></div>
+        </div>
+      )}
     </article>
   );
 }

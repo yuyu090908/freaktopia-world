@@ -11,7 +11,7 @@ import { useParty } from "./shared";
 import type { AlienLook } from "@/lib/types";
 
 interface Entry { handle: string; name: string | null; look: AlienLook | null; totalEvents: number; uniqueVisitors: number; upcoming: number; stage: number; demo: boolean }
-interface Upcoming { id: string; name: string; city: string; startAt: string; timezone: string; genres: string[]; organizer: string | null; handle: string | null; demo: boolean }
+export interface Upcoming { id: string; name: string; city: string; startAt: string; endAt: string; timezone: string; genres: string[]; organizer: string | null; handle: string | null; demo: boolean }
 
 /** Organizer worlds with verified or upcoming published parties. Real data only; the memory-only demo world is labelled. */
 export function WorldDirectory() {
@@ -41,13 +41,15 @@ export function WorldDirectory() {
   );
 }
 
-export function UpcomingParties({ limit = 6 }: { limit?: number }) {
+/** Published community parties. Pass `parties` when the page already loaded (and filtered) them. */
+export function UpcomingParties({ limit = 6, parties }: { limit?: number; parties?: Upcoming[] }) {
   const t = useTranslations("party");
   const href = useLocalHref();
   const when = useWhen();
-  const { data } = useParty<{ parties: Upcoming[] }>("/api/party/upcoming");
-  if (!data) return <div className="h-24 animate-pulse rounded-3xl bg-surface" />;
-  const list = data.parties.filter((p) => p.handle).slice(0, limit);
+  const { data } = useParty<{ parties: Upcoming[] }>(parties ? null : "/api/party/upcoming");
+  const all = parties ?? data?.parties;
+  if (!all) return <div className="h-24 animate-pulse rounded-3xl bg-surface" />;
+  const list = all.filter((p) => p.handle).slice(0, limit);
   if (list.length === 0) return <p className="text-sm text-mute">{t("noUpcomingParties")}</p>;
   return (
     <ul className="grid gap-2 sm:grid-cols-2" data-testid="upcoming-parties">

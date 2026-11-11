@@ -1,3 +1,48 @@
+# UI/UX redesign 2026 (2026-11-11)
+
+## How these were run
+- **Environment:** a local production build (`next build && next start`) in a cloud container, Chromium headless with software rendering. The deployed Vercel site could not be reached from the container, so **nothing here is measured on production or on a real phone**.
+- **Mock tests:** E2E and unit tests run against the in-memory demo store, with the clock pinned to 2026-11-09 14:00 UTC (`NEXT_PUBLIC_DEMO_CLOCK`). No real stream, payment, email, Google sign-in, NFT or chain is connected.
+- **Real-connection tests:** none. None of these services is connected, so there is nothing real to test yet.
+
+## Results
+- **Unit and integration (vitest):** 232 of 232 pass.
+- **i18n:** all 4,183 keys are present in all 12 locales (`check-i18n.mjs`). Every literal `t()` key exists in its own namespace (`check-i18n-usage.mjs`).
+- **Playwright, full suite (mobile 390px project, 2 workers):** 151 of 152 pass.
+  - The failure is `world.spec` "clusters open into landmarks". It timed out waiting for the map to settle while the full suite was running.
+  - Run on its own, and with `world.spec --repeat-each=2`, it passed every time (48 of 48).
+  - It is timing-dependent under load. It is not hidden or skipped.
+
+## The 10 flows checked
+| # | Flow | Test |
+|---|---|---|
+| 1 | WORLD and EVENTS show the same count and breakdown | `redesign.spec` |
+| 2 | EVENTS: filters are a draft until Apply, chips remove filters, completed events are listed apart, funding cards show support and no price | `redesign.spec` |
+| 3 | A ticket page of an event that is not on sale explains why and sells nothing | `redesign.spec` |
+| 4 | Bottom nav: five destinations, 44px targets, no sideways scroll at 320px | `redesign.spec` |
+| 5 | RANKINGS: top 3 panels, rows from rank 4 open their details | `redesign.spec` |
+| 6 | Dashboard KPIs say what they count and are marked DEMO, two columns on a phone | `redesign.spec` |
+| 7 | Create event: 5 steps, inline errors, past dates refused, preview, the draft survives a reload, publish | `redesign.spec`, `flows.spec` |
+| 8 | LIVE says DEMO LIVE for the simulation, never plain LIVE | `redesign.spec` |
+| 9 | MY: FREAK ID / Activity / Settings tabs with arrow keys, and reset asks first | `redesign.spec` |
+| 10 | WORLD: region focus and filters keep the zoom controls usable (the overlap fix) | `identity.spec` 8.1, `world.spec` |
+
+## Lighthouse 12.6.1 (mobile preset, simulated throttling, real clock)
+These are lab numbers from the container, 2 runs per page (3 for LIVE after the fix). **INP cannot be measured in a lab run**, so TBT is shown instead. These figures are **not** field Core Web Vitals.
+
+| Page | Perf | A11y | LCP | TBT | CLS |
+|---|---|---|---|---|---|
+| / | 72–80 | 100 | 4.6–4.8s | 70–290ms | 0 |
+| /events | 76–77 | 100 | 4.6s | 260–280ms | 0 |
+| /world | 40–41 | 100 | 6.7–6.8s | 6.2–8.1s | 0 |
+| /live (before the fix) | 45–48 | 96 | 4.0–7.2s | 1.4–1.6s | 0–0.299 |
+| /live (after the fix) | 58–59 | 96 | 4.3–4.4s | 1.1–1.3s | 0 |
+| /rankings | 72 | 100 | 4.5–4.6s | 390–410ms | 0 |
+
+- **LIVE CLS 0.299 was found and fixed at its cause.** The loading skeleton was much shorter than the loaded list, so the footer jumped when the data arrived. The skeleton now reserves a screen of height.
+- **The targets (LCP ≤ 2.5s, INP ≤ 200ms) are not met in this lab setup.** WORLD and LIVE are held back by the WebGL map running on a software GPU (high TBT). Real devices have not been measured.
+- **LIVE accessibility is 96.** The audit flags map markers that overlap at world zoom (`target-size`) and accessible names that do not include the visible text: the markers, and the language button, whose name is "Language: English. Change language". These are not fixed yet.
+
 # Test report (2026-11-09)
 
 ## Playwright

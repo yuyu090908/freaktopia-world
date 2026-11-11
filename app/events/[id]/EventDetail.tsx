@@ -1,5 +1,7 @@
 "use client";
 
+import { fromPrice, ticketsOnSale } from "@/lib/event-status";
+
 import { Tx } from "@/components/i18n/Tx";
 import { useTranslations } from "next-intl";
 import { UserContent } from "@/components/i18n/UserContent";
@@ -50,6 +52,8 @@ export function EventDetail({ event }: { event: FreakEvent }) {
   const after = event.afterPartyId ? getAfterParty(event.afterPartyId) : undefined;
   const info = levelInfo(stats.level);
   const ended = event.status === "ended";
+  const onSale = ticketsOnSale(event);
+  const price = fromPrice(event);
   const toggleFollow = useDemo((s) => s.toggleFollow);
 
   // Deep links from WORLD RANKING cards: ?action=support | follow
@@ -137,12 +141,16 @@ export function EventDetail({ event }: { event: FreakEvent }) {
             <Button onClick={() => setSheet(true)} className="col-span-2" size="lg">
               <HandHeart className="size-5" aria-hidden /> {stats.supported ? tu("supportAgain") : tu("supportEvent")}
             </Button>
-            <ButtonLink href={`/events/${event.id}/tickets`} variant="secondary">
-              <Ticket className="size-4" aria-hidden /> {tu("buyTicket")}
-            </ButtonLink>
-            <ButtonLink href={`/djs/apply?event=${event.id}`} variant="purple">
-              <Mic2 className="size-4" aria-hidden /> {tu("applyAsDj")}
-            </ButtonLink>
+            {onSale && (
+              <ButtonLink href={`/events/${event.id}/tickets`} variant="secondary">
+                <Ticket className="size-4" aria-hidden /> {tu("buyTicket")}
+              </ButtonLink>
+            )}
+            {event.djRecruiting && (
+              <ButtonLink href={`/djs/apply?event=${event.id}`} variant="secondary">
+                <Mic2 className="size-4" aria-hidden /> {tu("applyAsDj")}
+              </ButtonLink>
+            )}
             <FollowButton eventId={event.id} eventName={event.name} />
             <Button variant="ghost" onClick={share}>
               <Share2 className="size-4" aria-hidden /> {tu("share")}
@@ -397,14 +405,16 @@ export function EventDetail({ event }: { event: FreakEvent }) {
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="hidden min-w-0 flex-1 sm:block">
             <div className="truncate font-display text-lg uppercase">{event.name}</div>
-            <div className="text-sm text-mute">{tu("fromMoneyDemoCheckout", { money: money(Math.min(...event.tickets.map((t) => t.price))) })}</div>
+            {price != null && <div className="text-sm text-mute">{tu("fromMoneyDemoCheckout", { money: money(price) })}</div>}
           </div>
-          <Button variant="ghost" onClick={() => setSheet(true)} className="flex-1 sm:flex-none" aria-label={tu("supportEvent")}>
+          <Button variant={onSale ? "secondary" : "primary"} onClick={() => setSheet(true)} className="flex-1 sm:flex-none" aria-label={tu("supportEvent")}>
             <HandHeart className="size-5" aria-hidden /> {tu("support")}
           </Button>
-          <ButtonLink href={`/events/${event.id}/tickets`} className="flex-[1.4] sm:flex-none">
-            <Ticket className="size-5" aria-hidden /> {tu("tickets")}
-          </ButtonLink>
+          {onSale && (
+            <ButtonLink href={`/events/${event.id}/tickets`} className="flex-[1.4] sm:flex-none">
+              <Ticket className="size-5" aria-hidden /> {tu("tickets")}
+            </ButtonLink>
+          )}
         </div>
       </div>
       </div>

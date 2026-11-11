@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import { EVENTS, getEvent } from "@/lib/data";
 import { LiveEvent } from "./LiveEvent";
 
+/** Statuses follow the clock (lib/clock): re-render at least hourly so an event that ended is not shown as upcoming. */
+export const revalidate = 3600;
+
 export function generateStaticParams() {
   return EVENTS.map((e) => ({ eventId: e.id }));
 }

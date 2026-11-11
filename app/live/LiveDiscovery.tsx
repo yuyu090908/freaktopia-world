@@ -100,6 +100,7 @@ export function LiveDiscovery() {
   const sel = data?.events.find((e) => e.id === selected) ?? null;
   const featured = data?.featured ? data.events.find((e) => e.id === data.featured) : null;
   const demo = data ? data.events.filter((e) => e.status === "demo_live") : [];
+  const anyOn = !!data && (data.realLiveCount > 0 || demo.length > 0);
   const next = data ? data.nextUp.map((id) => data.events.find((e) => e.id === id)!).filter(Boolean) : [];
 
   return (
@@ -114,14 +115,17 @@ export function LiveDiscovery() {
           <Image src={ART.logo} alt="FREAKTOPIA WORLD" sizes="110px" className="h-9 w-auto" />
           <DemoBadge label={tu("demoData")} />
         </div>
-        <div className="mt-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.2em] text-coral">
-          <Radio className="size-4" aria-hidden /> {tu("liveNow")}
-        </div>
-        <h1 className="mt-1 text-[44px] uppercase leading-[0.95] drop-shadow-[0_3px_0_#080808] sm:text-7xl">{tu("theWorldIsLive")}</h1>
+        {/* Says LIVE only when something is on now (a real stream, or the labelled demo simulation). */}
+        {anyOn && (
+          <div className="mt-4 flex items-center gap-2 text-sm font-extrabold uppercase tracking-[0.2em] text-danger" data-testid="live-kicker">
+            <span className="size-2 rounded-full bg-danger" aria-hidden /> {data?.realLiveCount ? tu("liveNow") : tu("demoLive")}
+          </div>
+        )}
+        <h1 className="mt-3 text-[28px] uppercase leading-tight drop-shadow-[0_3px_0_#0B0910] sm:text-[40px]">{anyOn ? tu("theWorldIsLive") : tu("title")}</h1>
         <p className="mt-2 max-w-xl text-[15px] text-mute">{tu("dj")}</p>
       </header>
 
-      {q.state.status === "loading" && <LoadingSkeleton variant="cards" className="px-4" />}
+      {q.state.status === "loading" && <LoadingSkeleton variant="list" className="pt-2" /* reserves a screen of height so the footer does not jump when the list arrives */ />}
       {q.state.status === "error" && <ErrorState title={tu("liveDataUnavailable")} body={q.state.error.message} retry={<button type="button" className="min-h-11 rounded-full bg-acid px-5 font-bold text-ink" onClick={() => q.reload()}>{tu("retry")}</button>} />}
 
       {data && (
@@ -133,12 +137,18 @@ export function LiveDiscovery() {
               <FeaturedCard e={featured} />
             ) : (
               <div className="space-y-3">
-                <div className="flex items-start gap-2 rounded-2xl border border-line bg-surface p-3 text-sm" data-testid="no-real-live">
-                  <Radio className="mt-0.5 size-4 shrink-0 text-mute" aria-hidden />
-                  <p>
-                    <b>{tu("noFestivalIsStreamingLive")}</b> <span className="text-mute">{tu("onlyEventsWithAConnected")}</span>
-                  </p>
-                </div>
+                {demo.length > 0 ? (
+                  <div className="flex items-start gap-2 rounded-2xl border border-line bg-surface p-3 text-sm" data-testid="no-real-live">
+                    <Radio className="mt-0.5 size-4 shrink-0 text-mute" aria-hidden />
+                    <p>
+                      <b>{tu("noFestivalIsStreamingLive")}</b> <span className="text-mute">{tu("onlyEventsWithAConnected")}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div data-testid="no-real-live">
+                    <EmptyState title={tu("noFestivalIsStreamingLive")} body={tu("emptyBody")} />
+                  </div>
+                )}
                 {demo.map((e) => <FeaturedCard key={e.id} e={e} />)}
                 {next[0] && <NextUp e={next[0]} />}
               </div>

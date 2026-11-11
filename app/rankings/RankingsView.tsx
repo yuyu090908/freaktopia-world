@@ -8,7 +8,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, GitCompareArrows, Landmark, List, Map as MapIcon, RefreshCw, Search, SlidersHorizontal, Sparkles, Trophy, X } from "lucide-react";
 import { RankingArt } from "@/components/ranking/RankingArt";
-import { RankingCard, TopOneCard, TopSmallCard } from "@/components/ranking/RankingCards";
+import { RankingRow, TopOneCard, TopSmallCard } from "@/components/ranking/RankingCards";
 import { BottomSheet } from "@/components/ui/BottomSheet";
 import { Button, DemoNotice } from "@/components/ui/primitives";
 import { EmptyState } from "@/components/ui/States";
@@ -316,10 +316,10 @@ export function RankingsView() {
               </div>
             )}
             {rest.length > 0 && (
-              <ol className="mt-5 grid gap-3 px-4 md:grid-cols-2 md:px-0 [&>*]:min-w-0" aria-label={tu("rank4AndBelow")}>
+              <ol className="mt-5 grid gap-2 px-4 md:grid-cols-2 md:px-0 [&>*]:min-w-0" aria-label={tu("rank4AndBelow")}>
                 {rest.map((e) => (
                   <li key={e.event.id}>
-                    <RankingCard e={e} category={state.category} />
+                    <RankingRow e={e} category={state.category} />
                   </li>
                 ))}
               </ol>

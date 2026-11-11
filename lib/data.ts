@@ -12,6 +12,7 @@ import type {
   TimetableSlot,
   Venue,
 } from "./types";
+import { appNow, clockPinned, effectiveStatus } from "./clock";
 
 export const GENRES: Genre[] = [
   "Techno",
@@ -124,7 +125,7 @@ function makeEvent(s: Seed): FreakEvent {
   };
 }
 
-export const EVENTS: FreakEvent[] = [
+const SEED_EVENTS: FreakEvent[] = [
   makeEvent({ id: "bassmutant-tokyo", name: "BASSMUTANT TOKYO", city: "Tokyo", country: "Japan", lat: 35.659, lng: 139.7, startsAt: "2026-11-09T13:00:00Z", endsAt: "2026-11-09T21:00:00Z", genres: ["Techno", "Hardcore"], supporters: 3240, raised: 71800, goal: 90000, status: "live", djRecruiting: false, afterPartyId: "ap-afterglow", venueId: "v-kaiju", lineup: ["gloopzilla", "mika", "lazernana", "kombu"], palette: ["#B6F05C", "#A276E9", "#FF625C"], tagline: "Shibuya melts tonight.", description: "Four floors of mutant techno beneath Shibuya. The city’s biggest basement turns into a slime-green reactor until sunrise.", capacity: 650, organizer: "Ooze Collective", ticketBase: 48 }),
   makeEvent({ id: "neon-slime-summit", name: "NEON SLIME SUMMIT", city: "Berlin", country: "Germany", lat: 52.5, lng: 13.44, startsAt: "2026-12-12T21:00:00Z", endsAt: "2026-12-14T08:00:00Z", genres: ["Techno", "House"], supporters: 9840, raised: 236500, goal: 260000, status: "confirmed", djRecruiting: false, afterPartyId: "ap-slime-afterhours", venueId: "v-kraftwerk", lineup: ["mika", "gloopzilla", "lazernana", "vulture", "hyperfungi"], palette: ["#55BCEB", "#B6F05C", "#A276E9"], tagline: "A 36-hour summit of the slimiest sounds on the planet.", description: "A weekend-long gathering inside a decommissioned power plant. Three rooms, a rooftop garden and the first ever LV.5 stage in Europe.", capacity: 3500, organizer: "Power Plant 9", ticketBase: 65 }),
   makeEvent({ id: "void-jelly-rave", name: "VOID JELLY RAVE", city: "London", country: "UK", lat: 51.545, lng: -0.055, startsAt: "2026-11-28T22:00:00Z", endsAt: "2026-11-29T06:00:00Z", genres: ["Drum & Bass", "Garage"], supporters: 820, raised: 18400, goal: 30000, status: "confirmed", djRecruiting: true, afterPartyId: "ap-jelly-wobble", venueId: "v-swamp", lineup: ["subtoad", "mika"], palette: ["#FFAD5B", "#55BCEB", "#A276E9"], tagline: "Wobbly. Translucent. Very loud.", description: "Drum & bass and garage in a railway arch. The jelly is wobbling — help it reach festival scale.", capacity: 900, organizer: "Swamp Room", ticketBase: 28 }),
@@ -158,11 +159,37 @@ export const AFTER_PARTIES: AfterParty[] = [
  * event browser keep showing only upcoming/live nights; the WORLD RANKING
  * uses them for "Most attended" and the "Completed" filter.
  */
-export const ARCHIVE_EVENTS: FreakEvent[] = [
+const SEED_ARCHIVE: FreakEvent[] = [
   makeEvent({ id: "spore-party-2026", name: "SPORE PARTY 2026", city: "Amsterdam", country: "Netherlands", lat: 52.37, lng: 4.9, startsAt: "2026-10-17T20:00:00Z", endsAt: "2026-10-18T06:00:00Z", genres: ["Techno", "Psytrance"], supporters: 2650, raised: 58000, goal: 50000, status: "ended", djRecruiting: false, venueId: "v-canal", lineup: ["hyperfungi", "vulture", "mika"], palette: ["#A276E9", "#B6F05C", "#FFAD5B"], tagline: "The mushrooms said yes.", description: "A completed demo event used to show attendance rankings.", capacity: 1800, organizer: "Spore Union", ticketBase: 38 }),
   makeEvent({ id: "wobble-weekender", name: "WOBBLE WEEKENDER", city: "London", country: "UK", lat: 51.51, lng: -0.08, startsAt: "2026-11-01T21:00:00Z", endsAt: "2026-11-02T07:00:00Z", genres: ["Drum & Bass", "Garage"], supporters: 1430, raised: 27500, goal: 25000, status: "ended", djRecruiting: false, venueId: "v-swamp", lineup: ["subtoad", "tentacle"], palette: ["#55BCEB", "#FF625C", "#B6F05C"], tagline: "Three nights of wobble.", description: "A completed demo event used to show attendance rankings.", capacity: 900, organizer: "Swamp Sound", ticketBase: 26 }),
   makeEvent({ id: "kaiju-free-picnic", name: "KAIJU FREE PICNIC", city: "Osaka", country: "Japan", lat: 34.67, lng: 135.5, startsAt: "2026-11-03T03:00:00Z", endsAt: "2026-11-03T10:00:00Z", genres: ["Ambient", "House"], supporters: 610, raised: 3200, goal: 3000, status: "ended", djRecruiting: false, venueId: "v-river", lineup: ["kombu"], palette: ["#B6F05C", "#55BCEB", "#FFAD5B"], tagline: "Free daytime noodles and drones.", description: "A completed free demo event used to show attendance rankings.", capacity: 400, organizer: "Kawa Crew", ticketBase: 0 }),
 ];
+
+/**
+ * Statuses follow the app clock (lib/clock): a sample event whose end has passed moves to the archive as
+ * "ended", so no page lists it as upcoming or live. EVENTS = not ended; ARCHIVE_EVENTS = completed.
+ */
+const NOW0 = appNow();
+const dated = SEED_EVENTS.map((e) => ({ ...e, status: effectiveStatus(e, NOW0) }));
+export const EVENTS: FreakEvent[] = dated.filter((e) => e.status !== "ended");
+export const ARCHIVE_EVENTS: FreakEvent[] = [...dated.filter((e) => e.status === "ended"), ...SEED_ARCHIVE].sort((a, b) => b.startsAt.localeCompare(a.startsAt));
+
+/**
+ * A long-running server (or an open tab) keeps the module loaded past an event's end. This re-derives the
+ * statuses at most once a minute and updates EVENTS / ARCHIVE_EVENTS in place, so every importer sees the change.
+ * Called from getEvent and the server entry points (map, live, rankings).
+ */
+let syncedAt = NOW0;
+export function syncEventClock(now = appNow()) {
+  if (clockPinned || now - syncedAt < 60_000) return;
+  syncedAt = now;
+  const next = SEED_EVENTS.map((e) => ({ ...e, status: effectiveStatus(e, now) }));
+  const changed = next.some((e) => (EVENTS.find((x) => x.id === e.id)?.status ?? "ended") !== e.status);
+  if (!changed) return;
+  EVENTS.splice(0, EVENTS.length, ...next.filter((e) => e.status !== "ended"));
+  ARCHIVE_EVENTS.splice(0, ARCHIVE_EVENTS.length, ...[...next.filter((e) => e.status === "ended"), ...SEED_ARCHIVE].sort((a, b) => b.startsAt.localeCompare(a.startsAt)));
+}
+
 
 export const CITIES = Array.from(new Set(EVENTS.map((e) => e.city))).sort();
 
@@ -172,7 +199,10 @@ export const PAST_EVENTS = [
   { name: "WOBBLE WEEKENDER", city: "London", date: "2025-05-24" },
 ];
 
-export const getEvent = (id: string) => EVENTS.find((e) => e.id === id) ?? ARCHIVE_EVENTS.find((e) => e.id === id);
+export const getEvent = (id: string) => {
+  syncEventClock();
+  return EVENTS.find((e) => e.id === id) ?? ARCHIVE_EVENTS.find((e) => e.id === id);
+};
 export const getDJ = (id: string) => DJS.find((d) => d.id === id);
 export const getVenue = (id: string) => VENUES.find((v) => v.id === id);
 export const getAfterParty = (id: string) => AFTER_PARTIES.find((a) => a.id === id);

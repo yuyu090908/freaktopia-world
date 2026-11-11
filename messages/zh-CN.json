@@ -111,7 +111,9 @@
     },
     "quickAccess": "快捷入口",
     "signInForMyWorld": "登录后打开你的世界",
-    "legal": "条款"
+    "legal": "条款",
+    "tickets": "门票",
+    "my": "我的"
   },
   "footer": {
     "disclaimer": "原型版本。活动、DJ、场地、门票和收藏品均为虚构的演示数据。未连接任何支付、直播、钱包或 NFT 铸造服务。",
@@ -441,7 +443,10 @@
     "thisClearsYourDemoTickets": "这会从此浏览器中清除你的演示门票、创建的活动、场地、头像和 XP。此操作无法撤销。",
     "organizer": "主办方",
     "venueOwner": "场地所有者",
-    "fan": "粉丝"
+    "fan": "粉丝",
+    "tabId": "FREAK ID",
+    "tabActivity": "动态",
+    "tabSettings": "设置"
   },
   "status": {
     "planning": "筹备中",
@@ -689,7 +694,8 @@
         "tokyo": "霓虹招牌、小型俱乐部与强大音响。",
         "london": "俱乐部、仓库与海盗电台的根源。"
       }
-    }
+    },
+    "communityNote": "由组织者在 FREAKTOPIA 发布的派对。阵容、门票和详情请见组织者世界中的页面。"
   },
   "ranking": {
     "title": "世界排行榜",
@@ -825,7 +831,9 @@
     "eventnameAlertsAppearInYour": "{eventName}：提醒会出现在你的收件箱（演示，仅限此浏览器）。",
     "eventnameRemovedFromYourFollows": "已从关注中移除 {eventName}。",
     "ranking": "排行榜",
-    "today": "今天"
+    "today": "今天",
+    "categoryRanking": "{label}排行榜",
+    "rowDetails": "{name} 的详情"
   },
   "live": {
     "title": "直播音乐节",
@@ -1237,7 +1245,8 @@
     "ofOf": "/ {of}",
     "paused": "已暂停",
     "watching": "正在观看",
-    "festivalsCount": "{n} 个音乐节"
+    "festivalsCount": "{n} 个音乐节",
+    "emptyBody": "只有接入了正版授权直播的活动才会显示在这里。即将举办的节日列在下方。"
   },
   "dao": {
     "title": "音乐节 DAO",
@@ -1885,7 +1894,16 @@
     "none": "无",
     "emailReceiptRefundsPolicy": "电子邮件收据和退款政策",
     "enterLiveMap": "进入实时地图",
-    "backToEvent": "返回活动"
+    "backToEvent": "返回活动",
+    "validity": "有效性",
+    "validDemo": "演示订单：不能用于入场",
+    "expired": "已过期：活动已结束",
+    "entryQr": "入场二维码",
+    "qrDemo": "二维码：仅为装饰示例",
+    "nftNotConnected": "NFT：未发行（未接入）",
+    "communityPasses": "社区派对免费通行证",
+    "communityPassesBody": "组织者发布的派对的可用入场二维码通行证，与报名一起保存在“我的派对”中。",
+    "openMyParties": "打开我的派对"
   },
   "events": {
     "title": "活动",
@@ -2109,7 +2127,12 @@
     "ticketDesignAlt": "票券设计：{tier}",
     "selected": "已选择",
     "ticketArtNote": "通行证图案只是设计模板。真实门票的日期、二维码和编号由 FREAKTOPIA 在结账后生成，不取自图案。",
-    "searchCityOrEvent": "搜索城市或活动"
+    "searchCityOrEvent": "搜索城市或活动",
+    "stepPlaceTime": "地点与时间",
+    "stepSizeBudget": "规模与预算",
+    "stepTicketsRecruit": "门票与招募",
+    "preview": "预览",
+    "errDateInPast": "请选择今天或之后的日期。"
   },
   "states": {
     "emptyTitle": "这里还什么都没有",
@@ -2339,7 +2362,11 @@
     "alerts": "提醒",
     "stageIllustrationLevelLevel": "舞台插画，等级 {level}",
     "compactFollowers": "{compact} 名粉丝",
-    "seatsleftLeft": "剩余 {seatsLeft}"
+    "seatsleftLeft": "剩余 {seatsLeft}",
+    "fromPrice": "{price} 起",
+    "supportersCount": "{count} 位支持者",
+    "kpiDefinition": "统计口径",
+    "asOf": "截至 {time}"
   },
   "dashboard": {
     "soldOf": "{name} 已售",
@@ -2417,7 +2444,23 @@
     "soundLights": "音响和灯光",
     "staffSecurity": "工作人员和安保",
     "sSold": "已售 {s}",
-    "seatsleftLeft": "剩余 {seatsLeft}"
+    "seatsleftLeft": "剩余 {seatsLeft}",
+    "kpi": {
+      "events": "你在此浏览器中发布的活动加上示例活动。",
+      "djApplicants": "你的活动收到的 DJ 申请（含示例申请）。",
+      "ticketsSold": "示例活动的售票数。固定示例数值，并非真实销售。",
+      "raised": "示例活动获得的支持金额（美元）。示例数值，不收取任何费用。",
+      "rank": "示例 DJ 在 DJ 竞技场的排名。",
+      "votes": "粉丝为示例 DJ 演出投出的票数。",
+      "followers": "关注示例 DJ 主页的人数。",
+      "listed": "你在此浏览器中发布的场地，加上一个示例场地。",
+      "bookings": "本月已确认的预订。固定示例数值。",
+      "revenue": "本月预订收入（美元）。固定示例数值，并非真实收入。",
+      "level": "由下方 XP 决定的粉丝等级。",
+      "xp": "在此浏览器中支持、购票和创建活动获得的积分。",
+      "tickets": "保存在此浏览器中的门票订单。",
+      "following": "你关注的 DJ。"
+    }
   },
   "djs": {
     "stars": "{n} 星",
@@ -2659,7 +2702,8 @@
     },
     "heroVideoPlay": "播放背景视频",
     "heroVideoPause": "暂停背景视频",
-    "heroVideoAlt": "三个外星朋友在日落时分走向 FREAKTOPIA 音乐节舞台。"
+    "heroVideoAlt": "三个外星朋友在日落时分走向 FREAKTOPIA 音乐节舞台。",
+    "exploreEvents": "探索活动"
   },
   "afterParty": {
     "lengthAfterParties": "{length} 场余兴派对",
@@ -4372,5 +4416,36 @@
         "loyalty_restore": "活动已重新计入"
       }
     }
+  },
+  "eventFilters": {
+    "apply": "显示 {count} 个活动",
+    "place": "城市",
+    "anywhere": "所有城市",
+    "anyOf": "符合任一所选项",
+    "status": "状态",
+    "size": "活动规模",
+    "sizeHint": "随支持者增长的节日等级，并非场地容量。",
+    "priceTitle": "价格",
+    "priceHint": "在售门票的最低价。没有在售门票的活动不会显示。",
+    "price": {
+      "any": "不限",
+      "free": "免费",
+      "u30": "$30 以下",
+      "u60": "$60 以下"
+    },
+    "more": "其他",
+    "breakdown": "社区 {community} · 示例 {sample}",
+    "communitySub": "组织者在 FREAKTOPIA 发布的派对。示例组织者的派对标有 DEMO。",
+    "communityError": "社区派对未能加载。下方示例列表仍可使用。",
+    "sampleTitle": "示例活动",
+    "completedTitle": "已结束",
+    "completedSub": "日期已过的活动，不计入即将举办的数量。",
+    "show": "显示",
+    "allOf": "须符合所有所选项",
+    "notOnSaleEnded": "此活动已结束",
+    "notOnSaleEndedBody": "门票已停止销售。活动页面保留了阵容与回忆。",
+    "notOnSaleYet": "门票尚未开售",
+    "notOnSaleYetBody": "活动确认后才开始售票。在此之前可在活动页面支持它。",
+    "backToEvent": "返回活动"
   }
 }

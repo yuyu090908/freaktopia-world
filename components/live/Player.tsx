@@ -182,7 +182,7 @@ export function Player({
           <IconBtn label={muted ? tu("unmute") : tu("mute")} onClick={() => { setMuted(!muted); if (isDemo) toast({ title: tu("demoHasNoAudio"), body: tu("theAudioControlsWorkOnce") }); }}>{muted ? <VolumeX className="size-5" /> : <Volume2 className="size-5" />}</IconBtn>
           <label className="hidden items-center gap-2 text-[12px] text-mute sm:flex">
             <span className="sr-only">{tu("volume")}</span>
-            <input type="range" min={0} max={100} value={muted ? 0 : volume} onChange={(e) => { setVolume(Number(e.target.value)); setMuted(Number(e.target.value) === 0); }} className="w-24 accent-[#B6F05C]" aria-label={tu("volume")} />
+            <input type="range" min={0} max={100} value={muted ? 0 : volume} onChange={(e) => { setVolume(Number(e.target.value)); setMuted(Number(e.target.value) === 0); }} className="w-24 accent-acid" aria-label={tu("volume")} />
           </label>
           <label className="ml-auto">
             <span className="sr-only">{tu("streamQuality")}</span>

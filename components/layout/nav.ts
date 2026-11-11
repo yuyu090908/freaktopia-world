@@ -4,12 +4,22 @@ import {
 } from "lucide-react";
 
 /** Labels are message keys under "nav" (messages/<locale>.json). */
+/** Mobile bottom navigation: five destinations, each route once (LIVE, RANKINGS and the rest are in the header and menu). */
 export const MAIN_NAV = [
-  { href: "/", key: "home", icon: Home },
-  { href: "/world", key: "world", icon: Globe2 },
-  { href: "/events", key: "events", icon: CalendarDays },
-  { href: "/live", key: "live", icon: Radio },
-  { href: "/profile", key: "profile", icon: UserRound },
+  { href: "/", key: "home", icon: Home, also: [] as string[] },
+  { href: "/world", key: "world", icon: Globe2, also: [] as string[] },
+  { href: "/events", key: "events", icon: CalendarDays, also: [] as string[] },
+  { href: "/tickets", key: "tickets", icon: Ticket, also: [] as string[] },
+  { href: "/profile", key: "my", icon: UserRound, also: ["/dashboard", "/settings", "/u"] },
+] as const;
+
+/** Desktop header links (the logo is HOME; the account button opens MY). */
+export const DESKTOP_NAV = [
+  { href: "/world", key: "world" },
+  { href: "/events", key: "events" },
+  { href: "/live", key: "live" },
+  { href: "/rankings", key: "ranking" },
+  { href: "/djs", key: "djArena" },
 ] as const;
 
 /**
@@ -77,7 +87,7 @@ export const MENU_LEGAL = [
   { href: "/privacy", key: "privacy" },
 ] as const;
 
-export const isTopLevel = (path: string) => MAIN_NAV.some((n) => n.href === path);
+export const isTopLevel = (path: string) => MAIN_NAV.some((n) => n.href === path) || DESKTOP_NAV.some((n) => n.href === path);
 
 export function parentOf(path: string) {
   const parts = path.split("/").filter(Boolean);

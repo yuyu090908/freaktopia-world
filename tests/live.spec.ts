@@ -203,7 +203,9 @@ test.describe("live festival flows", () => {
 
   test("15. mobile navigation: bottom nav + in-event tabs", async ({ page }) => {
     await page.goto("/");
-    await page.getByRole("navigation").getByRole("link", { name: "Live", exact: true }).last().click();
+    // LIVE left the bottom nav (HOME / WORLD / EVENTS / TICKETS / MY); it is one tap away in the menu.
+    await page.getByTestId("menu-open").click();
+    await page.getByRole("dialog").getByRole("link", { name: /Live Festival/ }).first().click();
     await expect(page).toHaveURL(/\/live$/);
     await page.goto(EV);
     for (const t of ["Map", "Schedule", "Community", "More", "Watch"]) {

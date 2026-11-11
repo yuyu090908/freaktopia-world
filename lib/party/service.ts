@@ -15,6 +15,7 @@ import { toLook, traitsFromSeed } from "@/lib/alien/catalog";
 import { getStore as getAuthStore } from "@/lib/auth/store";
 import type { AlienLook } from "@/lib/types";
 import { getOpsStore } from "@/lib/ops/store";
+import { findCity } from "@/lib/ops/geo";
 import { OpsError, effectiveLevel, type Agreement, type Booking, type EventMember, type Listing, type Notification, type OpsEvent } from "@/lib/ops/types";
 import { ensurePartyDemo, DEMO_ORGANIZER_ID, DEMO_WORLD_HANDLE, isDemoUser } from "./seed";
 import {
@@ -879,7 +880,10 @@ export async function upcomingParties(limit = 12) {
       if (!e || e.status === "cancelled" || Date.parse(e.endAt) < Date.now()) continue;
       const who = await identity(e.ownerId);
       const demo = isDemoUser(e.ownerId);
-      out.push({ id: e.id, name: e.name, city: e.city, startAt: e.startAt, timezone: e.timezone, genres: e.genres, organizer: who.name, handle: demo ? DEMO_WORLD_HANDLE : who.publicId, demo });
+      // City centre when the event has none stored, so every listed party can sit on the world map (same list as /events).
+      const centre = e.lat != null && e.lng != null ? { lat: e.lat, lng: e.lng } : findCity(e.city);
+      if (!centre) continue;
+      out.push({ id: e.id, name: e.name, city: e.city, country: e.country, lat: centre.lat, lng: centre.lng, venueName: e.venueName, startAt: e.startAt, endAt: e.endAt, timezone: e.timezone, genres: e.genres, organizer: who.name, handle: demo ? DEMO_WORLD_HANDLE : who.publicId, demo });
     }
   }
   return out.sort((a, b) => a.startAt.localeCompare(b.startAt)).slice(0, limit);
