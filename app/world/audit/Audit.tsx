@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { PageTitle } from "@/components/ui/primitives";
 import { EmptyState } from "@/components/ui/States";
@@ -14,9 +15,12 @@ interface Review {
 /** Admin-only (OPS_ADMIN_EMAILS): anomaly flags and the audit log of every manual correction. Flags are signals for review, not verdicts. */
 export function Audit() {
   const t = useTranslations("party");
+  const tl = useTranslations("loyalty");
   return (
     <div className="mx-auto max-w-5xl pb-24 md:px-6">
-      <PageTitle kicker={t("kicker")} title={t("auditTitle")} sub={t("auditSub")} />
+      <PageTitle kicker={t("kicker")} title={t("auditTitle")} sub={t("auditSub")}>
+        <Link href="/admin/loyalty" className="mt-3 inline-flex min-h-11 items-center text-sm font-bold text-acid underline">{tl("admin.title")}</Link>
+      </PageTitle>
       <div className="px-4 md:px-0">
         <SignInGate returnTo="/world/audit">
           <Inner />

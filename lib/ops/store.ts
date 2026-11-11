@@ -15,7 +15,9 @@ export type Table =
   | "agreements" | "members" | "tasks" | "messages" | "documents" | "schedule" | "budget" | "payments"
   | "safety" | "incidents" | "handovers" | "reviews" | "notifications"
   // 9.0 PERSONAL PARTY UNIVERSE (db/migrations/0008_party_universe.sql)
-  | "attendance" | "checkins" | "guests" | "event_reviews" | "media" | "follows" | "blocks" | "world_privacy" | "world_settings" | "party_audit" | "party_settings";
+  | "attendance" | "checkins" | "guests" | "event_reviews" | "media" | "follows" | "blocks" | "world_privacy" | "world_settings" | "party_audit" | "party_settings"
+  // FREAK ID & LOYALTY (db/migrations/0010_freak_loyalty.sql)
+  | "loyalty_rules" | "loyalty_exclusions";
 
 type Row = Record<string, unknown>;
 export type Where = Record<string, string | number | boolean | null>;
@@ -50,6 +52,7 @@ const KEY: Partial<Record<Table, (r: Row) => string>> = {
   world_privacy: (r) => String(r.userId),
   world_settings: (r) => String(r.ownerId),
   party_settings: (r) => String(r.eventId),
+  loyalty_exclusions: (r) => String(r.eventId),
 };
 export const keyOf = (table: Table, r: Row) => (KEY[table] ? KEY[table]!(r) : String(r.id));
 const clone = <T>(v: T): T => (v == null ? v : (JSON.parse(JSON.stringify(v)) as T));
@@ -153,6 +156,8 @@ const COLS: Record<Table, Record<string, string>> = {
   world_settings: { ownerId: "owner_id" },
   party_settings: { eventId: "event_id" },
   party_audit: { id: "id", eventId: "event_id", actorId: "actor_id" },
+  loyalty_rules: { id: "id" },
+  loyalty_exclusions: { eventId: "event_id" },
 };
 /** Primary-key fields of composite-key tables when they differ from all key columns (extra indexed columns). */
 const KEY_FIELDS: Partial<Record<Table, string[]>> = { attendance: ["eventId", "userId"] };

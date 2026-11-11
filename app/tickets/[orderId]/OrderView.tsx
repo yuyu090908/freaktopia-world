@@ -10,7 +10,7 @@ import { EventCover } from "@/components/cards/Cards";
 import { Alien } from "@/components/art/Alien";
 import { ButtonLink, Card } from "@/components/ui/primitives";
 import { ErrorState, LoadingSkeleton } from "@/components/ui/States";
-import { fmtDateLong, fmtTime, money, rng } from "@/lib/utils";
+import { fmtDateLong, fmtTime, money, moneyCents, rng } from "@/lib/utils";
 
 /** Decorative pseudo-QR pattern. Intentionally not a scannable code. */
 function FakeCode({ seed }: { seed: string }) {
@@ -34,6 +34,7 @@ function FakeCode({ seed }: { seed: string }) {
 
 export function OrderView({ orderId }: { orderId: string }) {
   const tu = useTranslations("tickets");
+  const tl = useTranslations("loyalty");
   const ok = useHydrated();
   const order = useDemo((s) => s.orders.find((o) => o.id === orderId));
   const { look } = useMyAvatar();
@@ -76,7 +77,16 @@ export function OrderView({ orderId }: { orderId: string }) {
             {order.lines.map((l) => (
               <li key={l.kind} className="flex justify-between"><span>{l.qty} × {l.name}</span><span className="font-bold">{money(l.qty * l.price)}</span></li>
             ))}
-            <li className="flex justify-between border-t border-ink/20 pt-1 font-display text-lg"><span>{tu("totalDemo")}</span><span>{money(order.total)}</span></li>
+            {order.pricing && (
+              <>
+                <li className="flex justify-between border-t border-ink/20 pt-1"><span>{tl("checkout.platformFee", { pct: order.pricing.feeRatePct })}</span><span>{moneyCents(order.pricing.regularFeeCents)}</span></li>
+                {order.pricing.discountCents > 0 && (
+                  <li className="flex justify-between font-bold" data-testid="order-loyalty"><span>{tl("checkout.loyaltyDiscount", { rank: tl(`rank.${order.pricing.rank}`), pct: order.pricing.discountPct })}</span><span>−{moneyCents(order.pricing.discountCents)}</span></li>
+                )}
+                <li className="flex justify-between"><span>{tl("checkout.finalFee")}</span><span>{moneyCents(order.pricing.finalFeeCents)}</span></li>
+              </>
+            )}
+            <li className="flex justify-between border-t border-ink/20 pt-1 font-display text-lg"><span>{tu("totalDemo")}</span><span>{order.pricing ? moneyCents(order.pricing.totalCents) : money(order.total)}</span></li>
           </ul>
         </div>
       </div>

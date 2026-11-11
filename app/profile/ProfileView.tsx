@@ -16,6 +16,7 @@ import { fmtDate } from "@/lib/utils";
 import type { Genre } from "@/lib/types";
 import { COLLECTIBLES } from "@/app/nft/collectibles";
 import { AccountCard } from "@/components/profile/AccountCard";
+import { FreakIdCard } from "@/components/profile/FreakIdCard";
 import { useAuth, useMyAvatar } from "@/lib/auth/client";
 import { useTranslations } from "next-intl";
 
@@ -60,6 +61,7 @@ function Inner() {
       <div className="px-4 pt-5 md:px-0 md:pt-8">
         <h1 className="sr-only">{tp("title")}</h1>
         <AccountCard />
+        <div className="mt-5"><FreakIdCard /></div>
       </div>
       {/* Header card: demo progress kept in this browser (tickets, XP, favourites) */}
       <section className="px-4 pt-5 md:px-0" aria-labelledby="pf-name">

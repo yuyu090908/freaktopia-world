@@ -5,6 +5,10 @@ export const cn = (...c: ClassValue[]) => clsx(c);
 export const money = (n: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(n);
 
+/** Exact amount from cents: "$65" for whole dollars, "$3.25" otherwise (fees and totals must not be rounded away). */
+export const moneyCents = (cents: number) =>
+  new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", minimumFractionDigits: cents % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(cents / 100);
+
 export const compact = (n: number) =>
   new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 

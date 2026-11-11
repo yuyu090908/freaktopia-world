@@ -40,11 +40,11 @@ import capeTown from "@/assets/art/cities/cape-town.webp";
 import capeTownScene from "@/assets/art/cities/cape-town-scene.webp";
 import sydney from "@/assets/art/cities/sydney.webp";
 import sydneyScene from "@/assets/art/cities/sydney-scene.webp";
-import ticketBasic from "@/assets/art/tickets/basic.webp";
-import ticketSilver from "@/assets/art/tickets/silver.webp";
-import ticketGold from "@/assets/art/tickets/gold.webp";
-import ticketVip from "@/assets/art/tickets/vip.webp";
-import ticketLegend from "@/assets/art/tickets/legend.webp";
+import ticketBasic from "@/assets/art/tickets/holo-basic.webp";
+import ticketSilver from "@/assets/art/tickets/holo-silver.webp";
+import ticketGold from "@/assets/art/tickets/holo-gold.webp";
+import ticketVip from "@/assets/art/tickets/holo-vip.webp";
+import ticketLegend from "@/assets/art/tickets/holo-legend.webp";
 import type { Genre } from "@/lib/types";
 
 export const ART = {
@@ -115,7 +115,11 @@ export const cityArt = (city: string | null | undefined): CityArt | null => (cit
 
 /* ------------------------------------------------------------------ ticket designs (templates, not real tickets) */
 
-/** Ticket tier art. The dummy date, QR code and ID printed on the originals are cropped off: real passes are drawn by the app. */
+/**
+ * Ticket grade art: the official holographic passes (PASS ONE–FIVE → BASIC–LEGEND, in order). The dummy date and QR code
+ * printed on the originals are blurred out and the outer background is cropped: real passes and entry codes are drawn by
+ * the app, never taken from the art. The design names on the art (AURORA DROP…) are design names, not event names.
+ */
 export const TICKET_ART = {
   basic: { src: ticketBasic, label: "BASIC PASS", tier: 1 },
   silver: { src: ticketSilver, label: "SILVER PASS", tier: 2 },

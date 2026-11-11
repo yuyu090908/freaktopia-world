@@ -7,7 +7,7 @@ import { useDemo, useHydrated } from "@/lib/store";
 import { getEvent, EVENTS } from "@/lib/data";
 import { EmptyState, LoadingSkeleton } from "@/components/ui/States";
 import { ButtonLink, DemoBadge } from "@/components/ui/primitives";
-import { fmtDate, money } from "@/lib/utils";
+import { fmtDate, moneyCents } from "@/lib/utils";
 import { TicketDaoInfo } from "@/components/dao/TicketDaoInfo";
 
 export function MyTickets() {
@@ -36,7 +36,7 @@ export function MyTickets() {
                 <div className="mt-1.5 truncate font-display text-lg uppercase">{e?.name}</div>
                 <div className="text-sm text-mute">{e && fmtDate(e.startsAt, { month: "short", day: "numeric", year: "numeric" })} · {o.lines.map((l) => `${l.qty}× ${l.name}`).join(", ")}</div>
               </div>
-              <span className="shrink-0 font-display">{money(o.total)}</span>
+              <span className="shrink-0 font-display">{moneyCents(Math.round(o.total * 100))}</span>
               <ArrowRight className="size-5 shrink-0" aria-hidden />
             </Link>
             {e && <TicketDaoInfo eventId={e.id} />}

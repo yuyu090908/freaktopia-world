@@ -32,6 +32,7 @@ Requirements: Node 20 or later.
 | `/` | Hero, featured events, quick-start strip |
 | `/world` | WORLD MAP 9.3: a neon party planet (real Natural Earth geography, 7 colour regions, space backdrop with aliens), party-city stages with a city festival preview, region focus and organizer links (see `docs/WORLD_MAP_GLOBE.md`). Zoomed in, every festival is a miniature landmark that grows with its level and shows its status in text and icon. Search with suggestions, URL-synced filters, Map/List, desktop side panel, mobile swipe sheet, LIVE / DAO / ranking / tickets / DJ links. See `docs/WORLD_MAP.md` |
 | Visual system | 9.4: official city posters and ticket designs with rule-based image choice; 9.4.1: official background video in the home hero (poster first, off for reduce motion / Data Saver). See `docs/VISUAL_SYSTEM.md` |
+| FREAK ID & loyalty | Phase 1: FREAK ID on `/profile`, 5 ranks from verified door check-ins, platform-fee discount at checkout (server quote, snapshot on the order), `/admin/loyalty`. See `docs/FREAK_ID_LOYALTY.md` |
 | `/world/levels` | Demo admin for the festival growth level thresholds, plus the landmark gallery (all types, levels and statuses) |
 | `/events`, `/events/[id]` | Browse and filter events. The detail page shows stage evolution, support, and the level simulator |
 | `/events/[id]/tickets` | Ticket selection and **demo** purchase |

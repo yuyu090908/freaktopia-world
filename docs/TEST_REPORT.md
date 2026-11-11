@@ -293,3 +293,14 @@ Details in docs/VISUAL_SYSTEM.md.
 - Not measured: Lighthouse, real devices (iOS Low Power Mode blocks autoplay; the poster stays).
 - `flows.spec` "home → world map → … → event" (flaky since 9.3): logging `history.pushState` showed the app always navigates to `/events/neon-slime-summit`; the old retry loop re-clicked a link that was already gone and reported Playwright's lagging URL. The test now waits for the event page heading and reads `location.pathname`. 6 of 6 repeats passed with two workers.
 - Full run after the change: **Playwright 140 of 140 pass** (two workers), vitest 212 of 212.
+
+## FREAK ID & LOYALTY, Phase 1 (2026-11-11)
+
+Details in docs/FREAK_ID_LOYALTY.md.
+
+- Unit + integration (vitest): 224 passed. New `tests/unit/loyalty-rules.test.ts` (ranks at 0/3/6/15/30, spec fee examples, LEGEND 100 % gate, cap, minimum fee, rule consistency, benefit cuts) and `tests/integration/loyalty-service.test.ts` (own check-ins only, RSVP / pending / cancelled / someone else's attendance never count, duplicate scans, cities and countries, server quotes, unverified e-mail and signed-out get ROOKIE, admin rules with 30-day notice, exclusions with reason and audit). The integration tests also ran on a real PostgreSQL 16 with migrations 0005–0010 applied (twice, to check re-runs): 8 of 8 pass.
+- E2E (Playwright, 390 px project): 142 passed, 1 flaky. New `tests/loyalty.spec.ts` (visitor card and ladder, checkout breakdown without discount, member FREAK ID from the account, order keeps the fee snapshot, Japanese, admin page and API closed to non-admins). The flaky one is `world.spec` "clusters open into landmarks" (not touched; 3 of 3 passed when re-run).
+- Not covered end to end: a member with a higher rank. Verified events need a party that has ended with door scans, which the browser tests cannot create; the integration tests cover it on both stores.
+- Fixed while testing: fees and totals were rounded to whole dollars; they now show cents.
+- i18n: all new keys in 12 dictionaries, 0 hardcoded strings.
+- Screenshots: docs/screenshots/loyalty/.

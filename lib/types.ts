@@ -192,6 +192,23 @@ export interface DemoOrder {
   holder: string;
   /** Always true in Phase 1: no payment was taken. */
   demo: true;
+  /**
+   * FREAK LOYALTY snapshot taken by the server right before the order was stored: the rank and discount that applied
+   * then stay with the order even if the rank or the rules change later. Only the platform fee is discounted.
+   */
+  pricing?: {
+    rank: string;
+    discountPct: number;
+    feeRatePct: number;
+    ticketsCents: number;
+    regularFeeCents: number;
+    discountCents: number;
+    finalFeeCents: number;
+    totalCents: number;
+    rulesVersion: number;
+    signedIn: boolean;
+    quotedAt: string;
+  };
 }
 
 export interface UserProfile {
