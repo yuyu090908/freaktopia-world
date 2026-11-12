@@ -148,16 +148,24 @@ export function SignInGate({ children, returnTo }: { children: ReactNode; return
   const status = useAuth((s) => s.status);
   const verified = useAuth((s) => s.me?.user.emailVerified ?? false);
   if (status === "loading") return <div className="h-40 animate-pulse rounded-3xl bg-surface" aria-busy="true" />;
-  if (status === "signedOut")
+  if (status === "signedOut") {
+    // Event operations keep their own wording; every other gated page (studio, library, admin…) gets a neutral one.
+    const ops = returnTo.startsWith("/events/manage");
     return (
-      <div className="rounded-3xl border-2 border-dashed border-line p-6 text-center">
-        <h2 className="text-2xl uppercase">{t("signInTitle")}</h2>
-        <p className="mt-2 text-sm text-mute">{t("signInBody")}</p>
-        <Link href={href(`/login?returnTo=${encodeURIComponent(returnTo)}`)} className={btnClass("primary", "md", "mt-4")}>
-          {t("signIn")}
-        </Link>
+      <div className="rounded-3xl border-2 border-dashed border-line px-5 py-6 text-center">
+        <h2 className="text-[22px] uppercase leading-tight md:text-2xl">{t(ops ? "signInTitle" : "signInGenericTitle")}</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm text-mute">{t(ops ? "signInBody" : "signInGenericBody")}</p>
+        <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          <Link href={href(`/login?returnTo=${encodeURIComponent(returnTo)}`)} className={btnClass("primary", "md")}>
+            {t("signIn")}
+          </Link>
+          <Link href={href("/signup")} className={btnClass("secondary", "md")}>
+            {t("signUpCta")}
+          </Link>
+        </div>
       </div>
     );
+  }
   if (!verified)
     return (
       <div className="rounded-3xl border-2 border-dashed border-orange/50 p-6 text-center">

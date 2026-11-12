@@ -157,7 +157,7 @@ export function EventsBrowser() {
           </div>
           <ul className="mt-4 space-y-3 px-4 md:hidden">
             {rest.map((e) => (
-              <li key={e.id} className="cv-auto [contain-intrinsic-size:auto_130px]">
+              <li key={e.id} className="cv-auto [contain-intrinsic-block-size:auto_130px]">
                 <EventRow event={e} art={covers.get(e.id)} />
               </li>
             ))}

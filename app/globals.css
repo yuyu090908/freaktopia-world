@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@layer base {
+  /* A grid without grid-cols-* gets one implicit column. Make it shrinkable (minmax(0,1fr)) instead of
+     auto, so a wide child (chip row, table, long word) can't push a single-column phone layout off screen. */
+  .grid { grid-auto-columns: minmax(0, 1fr); }
+}
+
 @theme {
   /* Design system 2026 (docs/DESIGN_SYSTEM.md). Background → surface → card; status colours never double as actions. */
   --color-ink: #0b0910; /* page background */
@@ -116,9 +122,19 @@ h1, h2, h3, .font-display {
   font-family: var(--font-display);
   letter-spacing: -0.01em;
   line-height: 0.95;
-  overflow-wrap: normal;
+  /* Latin: keep words whole, but never let one long word push past the screen edge. */
+  overflow-wrap: break-word;
   word-break: keep-all;
 }
+/* Japanese, Chinese and Thai have no spaces: keep-all would turn a whole heading into one unbreakable
+   line that runs off phone screens. Break by phrase where the browser can, otherwise anywhere. */
+html:lang(ja) :is(h1, h2, h3, .font-display),
+html:lang(zh-CN) :is(h1, h2, h3, .font-display),
+html:lang(th) :is(h1, h2, h3, .font-display) { word-break: normal; overflow-wrap: anywhere; }
+@supports (word-break: auto-phrase) {
+  html:lang(ja) :is(h1, h2, h3, .font-display) { word-break: auto-phrase; }
+}
+html:lang(ko) :is(h1, h2, h3, .font-display) { overflow-wrap: anywhere; }
 /* The home hero title must wrap on phones in every language (keep-all never breaks Japanese/Chinese lines). */
 .hero-title { word-break: normal; overflow-wrap: anywhere; }
 @supports (word-break: auto-phrase) { :lang(ja) .hero-title { word-break: auto-phrase; overflow-wrap: normal; } }
@@ -217,7 +233,8 @@ html[data-kb="open"] .sticky-cta { bottom: 0; }
 .alien-live .fk-eye { animation: var(--animate-blink); }
 
 /* Skip rendering work for off-screen list items */
-.cv-auto { content-visibility: auto; contain-intrinsic-size: auto 380px; }
+/* Only the block size is a placeholder: an intrinsic inline size would force list items wider than phones. */
+.cv-auto { content-visibility: auto; contain-intrinsic-inline-size: none; contain-intrinsic-block-size: auto 380px; }
 
 /* Halftone texture used on illustrated panels */
 .halftone {

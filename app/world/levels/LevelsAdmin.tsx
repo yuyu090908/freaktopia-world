@@ -59,20 +59,20 @@ export function LevelsAdmin() {
 
   return (
     <Container className="pb-24">
-      <Link href="/world" className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-bold text-mute hover:text-cream">
+      <Link href="/world" className="mx-4 mt-4 inline-flex md:mx-0 min-h-11 items-center gap-1 text-sm font-bold text-mute hover:text-cream">
         <ArrowLeft className="size-4" aria-hidden /> {tu("backToTheWorldMap")}
       </Link>
       <PageTitle kicker={tu("worldMapAdminDemo")} title={tu("festivalLevelRules")} sub={tu("thresholdsForTheLandmarkGrowth")} />
-      <DemoNotice className="mt-4">
+      <DemoNotice className="mx-4 mt-4 md:mx-0">
         {tu("demoAdminChangesAreSaved")} <code>event_growth_levels</code> {tu("tableAndOnlyAdminsCan")}
       </DemoNotice>
 
-      <section aria-labelledby="rules-h" className="mt-6">
+      <section aria-labelledby="rules-h" className="mt-6 px-4 md:px-0">
         <h2 id="rules-h" className="text-2xl uppercase">{tu("thresholds")}</h2>
         <p className="mt-1 text-sm text-mute">{tu("anEventReachesALevel")}</p>
         <div className="mt-3 overflow-x-auto rounded-3xl border-2 border-line">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-surface-2 text-left text-[12px] uppercase text-mute">
+            <thead className="bg-surface-2 text-left text-[12px] uppercase text-mute [&_th]:whitespace-nowrap">
               <tr>
                 <th className="p-3">{tu("level")}</th>
                 <th className="p-3">{tu("name")}</th>
@@ -165,7 +165,7 @@ export function LevelsAdmin() {
         </div>
       </section>
 
-      <section aria-labelledby="gal-h" className="mt-10">
+      <section aria-labelledby="gal-h" className="mt-10 px-4 md:px-0">
         <h2 id="gal-h" className="text-2xl uppercase">{tu("landmarkGallery")}</h2>
         <p className="mt-1 text-sm text-mute">{tu("originalFreaktopiaLandmarksGenrePick")}</p>
         <div className="no-scrollbar mt-3 flex gap-2 overflow-x-auto pb-1" role="tablist" aria-label={tu("landmarkType")}>

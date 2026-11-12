@@ -1900,7 +1900,19 @@
     "onChain": "链上",
     "stakeLocked": "已锁定",
     "stakeUnlocking": "解锁中",
-    "stakeWithdrawn": "已提取"
+    "stakeWithdrawn": "已提取",
+    "errors": {
+      "WALLET_REQUIRED": "请先连接钱包并登录。",
+      "STAKE_REQUIRED": "质押最低数量即可加入此 DAO。仅连接钱包并不算成员。",
+      "SUSPENDED": "你的 DAO 账号已被版主暂时停用。",
+      "FORBIDDEN": "你的角色无法执行此操作。",
+      "SIGN_IN_REQUIRED": "请使用已验证的账号登录后投票。",
+      "EMAIL_NOT_VERIFIED": "请先验证邮箱再投票。",
+      "RATE_LIMITED": "请求过多，请稍后再试。",
+      "THREAD_LOCKED": "版主已锁定此话题。",
+      "EVENT_ENDED": "已结束的活动无法发起 DAO。",
+      "ONE_PERSON_ONE_VOTE": "每个账号一票。钱包不会增加投票权重。共用设备、资金来源或短时间大量注册的账号会被标记，其选票将暂缓审核。由于没有身份验证，无法完全保证一人一票。"
+    }
   },
   "tickets": {
     "title": "我的门票",
@@ -3318,6 +3330,9 @@
     "signInTitle": "登录以管理活动",
     "signInBody": "活动运营使用你的 FREAKTOPIA 账号，团队、合同和文件都保持私密。",
     "signIn": "登录",
+    "signInGenericTitle": "登录以继续",
+    "signInGenericBody": "此页面需要使用 FREAKTOPIA 账号，你保存的内容仅自己可见。",
+    "signUpCta": "注册",
     "verifyTitle": "请先验证邮箱",
     "verifyBody": "策划、招募和签约需要已验证的邮箱地址。请查看收件箱中的链接。",
     "newTitle": "策划活动",

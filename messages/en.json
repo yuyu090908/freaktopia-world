@@ -1900,7 +1900,19 @@
     "onChain": "on-chain",
     "stakeLocked": "locked",
     "stakeUnlocking": "unlocking",
-    "stakeWithdrawn": "withdrawn"
+    "stakeWithdrawn": "withdrawn",
+    "errors": {
+      "WALLET_REQUIRED": "Connect a wallet and sign in first.",
+      "STAKE_REQUIRED": "Stake the minimum amount to join this DAO. A connected wallet alone is not membership.",
+      "SUSPENDED": "Your DAO account is temporarily suspended by a moderator.",
+      "FORBIDDEN": "Your role cannot do this.",
+      "SIGN_IN_REQUIRED": "Sign in with a confirmed account to vote.",
+      "EMAIL_NOT_VERIFIED": "Confirm your email to vote.",
+      "RATE_LIMITED": "Too many requests. Try again shortly.",
+      "THREAD_LOCKED": "A moderator locked this thread.",
+      "EVENT_ENDED": "Completed events cannot start a DAO.",
+      "ONE_PERSON_ONE_VOTE": "Votes are one per account. Wallets never add weight. Accounts sharing a device, funding source or a burst of sign-ups are flagged and their ballots held for review. Without identity verification this cannot guarantee one human = one vote."
+    }
   },
   "tickets": {
     "title": "My Tickets",
@@ -3318,6 +3330,9 @@
     "signInTitle": "Sign in to manage events",
     "signInBody": "Event operations use your FREAKTOPIA account so your team, contracts and files stay private.",
     "signIn": "Sign in",
+    "signInGenericTitle": "Sign in to continue",
+    "signInGenericBody": "This page uses your FREAKTOPIA account, so what you save here stays private to you.",
+    "signUpCta": "Create account",
     "verifyTitle": "Confirm your email first",
     "verifyBody": "Planning, recruiting and contracts need a verified email address. Check your inbox for the link.",
     "newTitle": "Plan an event",

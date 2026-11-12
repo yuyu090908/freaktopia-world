@@ -88,7 +88,7 @@ export function Tag({ children, color = "#2a2a2a", dark = false, className }: { 
 /** Marks sample content and simulated features. */
 export function DemoBadge({ className, label = "DEMO" }: { className?: string; label?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border border-orange/60 bg-orange/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-orange", className)}>
+    <span className={cn("inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-orange/60 bg-orange/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-widest text-orange", className)}>
       <FlaskConical className="size-3" aria-hidden />
       {label}
     </span>

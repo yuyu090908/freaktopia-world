@@ -1900,7 +1900,19 @@
     "onChain": "on-chain",
     "stakeLocked": "terkunci",
     "stakeUnlocking": "sedang dibuka",
-    "stakeWithdrawn": "ditarik"
+    "stakeWithdrawn": "ditarik",
+    "errors": {
+      "WALLET_REQUIRED": "Hubungkan dompet dan masuk terlebih dahulu.",
+      "STAKE_REQUIRED": "Stake jumlah minimum untuk bergabung dengan DAO ini. Menghubungkan dompet saja belum menjadikanmu anggota.",
+      "SUSPENDED": "Akun DAO kamu ditangguhkan sementara oleh moderator.",
+      "FORBIDDEN": "Peranmu tidak bisa melakukan ini.",
+      "SIGN_IN_REQUIRED": "Masuk dengan akun terkonfirmasi untuk memberi suara.",
+      "EMAIL_NOT_VERIFIED": "Konfirmasi email kamu untuk memberi suara.",
+      "RATE_LIMITED": "Terlalu banyak permintaan. Coba lagi sebentar lagi.",
+      "THREAD_LOCKED": "Moderator mengunci utas ini.",
+      "EVENT_ENDED": "Acara yang sudah selesai tidak bisa memulai DAO.",
+      "ONE_PERSON_ONE_VOTE": "Satu suara per akun. Dompet tidak pernah menambah bobot. Akun yang berbagi perangkat, sumber dana, atau pendaftaran massal ditandai dan suaranya ditahan untuk ditinjau. Tanpa verifikasi identitas, satu orang = satu suara tidak dapat dijamin."
+    }
   },
   "tickets": {
     "title": "Tiket saya",
@@ -3318,6 +3330,9 @@
     "signInTitle": "Masuk untuk mengelola acara",
     "signInBody": "Operasional acara memakai akun FREAKTOPIA-mu sehingga tim, kontrak, dan file tetap privat.",
     "signIn": "Masuk",
+    "signInGenericTitle": "Masuk untuk melanjutkan",
+    "signInGenericBody": "Halaman ini memakai akun FREAKTOPIA kamu, jadi yang kamu simpan di sini hanya terlihat olehmu.",
+    "signUpCta": "Buat akun",
     "verifyTitle": "Konfirmasi email dulu",
     "verifyBody": "Perencanaan, rekrutmen, dan kontrak butuh alamat email yang terverifikasi. Cek tautan di kotak masukmu.",
     "newTitle": "Rencanakan acara",

@@ -22,7 +22,7 @@ export function AuthShell({ title, lead, children, footer }: { title: string; le
   return (
     <div className="fk-auth relative isolate overflow-hidden">
       <div className="fk-auth-swirl pointer-events-none absolute inset-0 -z-10" aria-hidden />
-      <div className="mx-auto grid w-full max-w-5xl gap-6 px-4 pb-16 pt-6 md:grid-cols-[1fr_minmax(0,440px)] md:items-start md:gap-10 md:px-6 md:pt-12">
+      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 px-4 pb-16 pt-6 md:grid-cols-[1fr_minmax(0,440px)] md:items-start md:gap-10 md:px-6 md:pt-12">
         <div className="relative md:sticky md:top-24" aria-hidden>
           <div className="flex items-end justify-center gap-1 md:justify-start">
             {crew.map((l, i) => (
@@ -56,8 +56,8 @@ export function ConnectionStatus() {
   if (!cfg) return null;
   const row = (label: string, value: string, demo: boolean) => (
     <div className="flex items-start justify-between gap-3 py-1.5">
-      <dt className="text-mute">{label}</dt>
-      <dd className={cn("text-right font-bold", demo ? "text-orange" : "text-acid")}>{value}</dd>
+      <dt className="shrink-0 whitespace-nowrap text-mute">{label}</dt>
+      <dd className={cn("min-w-0 text-right font-bold", demo ? "text-orange" : "text-acid")}>{value}</dd>
     </div>
   );
   return (

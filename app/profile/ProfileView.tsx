@@ -230,7 +230,8 @@ function Inner() {
           <button type="button" onClick={openEdit} className="flex min-h-14 w-full items-center justify-between px-4 text-left font-bold">{tu("editProfile")} <ArrowRight className="size-4" aria-hidden /></button>
           <Link href="/avatar" className="flex min-h-14 items-center justify-between px-4 font-bold">{tu("avatar")} <ArrowRight className="size-4" aria-hidden /></Link>
           <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">{tu("wallet")}</span><span className="text-sm text-mute">{tu("notConnectedPhase3")}</span></div>
-          <div className="flex min-h-14 items-center justify-between px-4"><span className="font-bold">{tu("notifications")}</span><span className="text-sm text-mute">{tu("comingSoon")}</span></div>
+          <Link href="/settings" className="flex min-h-14 items-center justify-between px-4 font-bold">{tu("settings")} <ArrowRight className="size-4" aria-hidden /></Link>
+          <Link href="/alerts" className="flex min-h-14 items-center justify-between px-4 font-bold">{tu("notifications")} <ArrowRight className="size-4" aria-hidden /></Link>
           <button type="button" onClick={() => setConfirmReset(true)} className="flex min-h-14 w-full items-center gap-2 px-4 text-left font-bold text-coral"><Trash2 className="size-4" aria-hidden /> {tu("resetAllDemoData")}</button>
         </Card>
         <DemoNotice className="mt-3">{tu("thisProfileAndEverythingYou")}</DemoNotice>

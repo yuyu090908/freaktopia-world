@@ -1900,7 +1900,19 @@
     "onChain": "en cadena",
     "stakeLocked": "bloqueado",
     "stakeUnlocking": "desbloqueando",
-    "stakeWithdrawn": "retirado"
+    "stakeWithdrawn": "retirado",
+    "errors": {
+      "WALLET_REQUIRED": "Conecta una cartera e inicia sesión primero.",
+      "STAKE_REQUIRED": "Haz stake del mínimo para unirte a esta DAO. Conectar una cartera no te hace miembro.",
+      "SUSPENDED": "Un moderador suspendió temporalmente tu cuenta de la DAO.",
+      "FORBIDDEN": "Tu rol no permite hacer esto.",
+      "SIGN_IN_REQUIRED": "Inicia sesión con una cuenta confirmada para votar.",
+      "EMAIL_NOT_VERIFIED": "Confirma tu email para votar.",
+      "RATE_LIMITED": "Demasiadas solicitudes. Inténtalo de nuevo en un momento.",
+      "THREAD_LOCKED": "Un moderador cerró este hilo.",
+      "EVENT_ENDED": "Los eventos finalizados no pueden iniciar una DAO.",
+      "ONE_PERSON_ONE_VOTE": "Un voto por cuenta. Las carteras nunca suman peso. Las cuentas que comparten dispositivo, fuente de fondos o registros masivos se marcan y sus votos quedan en revisión. Sin verificación de identidad no se puede garantizar una persona = un voto."
+    }
   },
   "tickets": {
     "title": "Mis entradas",
@@ -3318,6 +3330,9 @@
     "signInTitle": "Inicia sesión para gestionar eventos",
     "signInBody": "Las operaciones usan tu cuenta de FREAKTOPIA, así tu equipo, contratos y archivos siguen siendo privados.",
     "signIn": "Iniciar sesión",
+    "signInGenericTitle": "Inicia sesión para continuar",
+    "signInGenericBody": "Esta página usa tu cuenta de FREAKTOPIA, así que lo que guardes aquí solo lo ves tú.",
+    "signUpCta": "Crear cuenta",
     "verifyTitle": "Confirma primero tu email",
     "verifyBody": "Para planificar, reclutar y firmar acuerdos necesitas un email verificado. Busca el enlace en tu bandeja de entrada.",
     "newTitle": "Planificar un evento",
