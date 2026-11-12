@@ -1900,7 +1900,19 @@
     "onChain": "온체인",
     "stakeLocked": "잠김",
     "stakeUnlocking": "잠금 해제 중",
-    "stakeWithdrawn": "인출됨"
+    "stakeWithdrawn": "인출됨",
+    "errors": {
+      "WALLET_REQUIRED": "먼저 지갑을 연결하고 로그인하세요.",
+      "STAKE_REQUIRED": "이 DAO에 참여하려면 최소 금액을 스테이크하세요. 지갑 연결만으로는 멤버가 되지 않습니다.",
+      "SUSPENDED": "DAO 계정이 모더레이터에 의해 일시 정지되었습니다.",
+      "FORBIDDEN": "현재 역할로는 이 작업을 할 수 없습니다.",
+      "SIGN_IN_REQUIRED": "투표하려면 인증된 계정으로 로그인하세요.",
+      "EMAIL_NOT_VERIFIED": "투표하려면 이메일을 인증하세요.",
+      "RATE_LIMITED": "요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+      "THREAD_LOCKED": "모더레이터가 이 스레드를 잠갔습니다.",
+      "EVENT_ENDED": "종료된 이벤트에서는 DAO를 시작할 수 없습니다.",
+      "ONE_PERSON_ONE_VOTE": "투표는 계정당 1표입니다. 지갑은 표의 가중치를 늘리지 않습니다. 기기나 자금 출처를 공유하거나 짧은 시간에 대량 가입한 계정은 표시되며 투표는 검토를 위해 보류됩니다. 본인 확인이 없으므로 1인 1표를 완전히 보장할 수는 없습니다."
+    }
   },
   "tickets": {
     "title": "내 티켓",
@@ -3318,6 +3330,9 @@
     "signInTitle": "로그인하고 이벤트 관리",
     "signInBody": "이벤트 운영은 FREAKTOPIA 계정을 사용하므로 팀, 계약, 파일이 비공개로 유지됩니다.",
     "signIn": "로그인",
+    "signInGenericTitle": "로그인하고 계속하기",
+    "signInGenericBody": "이 페이지는 FREAKTOPIA 계정으로 이용합니다. 저장한 내용은 나만 볼 수 있습니다.",
+    "signUpCta": "회원가입",
     "verifyTitle": "먼저 이메일을 확인하세요",
     "verifyBody": "기획, 모집, 계약에는 확인된 이메일 주소가 필요합니다. 받은편지함의 링크를 확인하세요.",
     "newTitle": "이벤트 기획",

@@ -69,9 +69,9 @@ export function Header() {
         {t("skipToContent")}
       </a>
       <header className="sticky top-0 z-50 border-b border-purple/20 bg-ink/[.96] shadow-[0_8px_30px_-12px_rgba(183,139,255,0.35)] pt-[env(safe-area-inset-top)]">
-        <div className="mx-auto flex h-[64px] max-w-6xl items-center gap-0.5 px-2 min-[400px]:gap-1 min-[400px]:px-3 md:px-6">
+        <div className="mx-auto flex h-[64px] max-w-6xl items-center gap-0 px-1.5 min-[360px]:gap-0.5 min-[360px]:px-2 min-[400px]:gap-1 min-[400px]:px-3 md:px-6">
           {!top && (
-            <button type="button" onClick={goBack} aria-label={t("goBack")} className="-ml-1 inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={goBack} aria-label={t("goBack")} className="-ml-1 inline-flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-surface min-[360px]:size-11">
               <ArrowLeft className="size-5" />
             </button>
           )}
@@ -92,19 +92,19 @@ export function Header() {
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-0.5 min-[400px]:gap-1.5">
+          <div className="ml-auto flex items-center gap-0 min-[360px]:gap-0.5 min-[400px]:gap-1.5">
             <Link href={href("/events/create")} className="hidden min-h-11 items-center whitespace-nowrap rounded-full bg-acid px-4 text-sm font-extrabold uppercase text-ink xl:inline-flex">
               {t("createEvent")}
             </Link>
             <LanguageSwitcher />
-            <button type="button" onClick={() => setSearch(true)} aria-label={t("searchLabel")} className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={() => setSearch(true)} aria-label={t("searchLabel")} className="inline-flex size-10 shrink-0 min-[360px]:size-11 items-center justify-center rounded-full hover:bg-surface">
               <Search className="size-5" />
             </button>
             <span className="hidden sm:contents">
               <AlertsBell />
             </span>
             <AccountButton />
-            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} aria-haspopup="dialog" data-testid="menu-open" className="inline-flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-surface">
+            <button type="button" onClick={() => setMenu(true)} aria-label={t("openMenu")} aria-expanded={menu} aria-haspopup="dialog" data-testid="menu-open" className="inline-flex size-10 shrink-0 min-[360px]:size-11 items-center justify-center rounded-full hover:bg-surface">
               <Menu className="size-5" />
             </button>
           </div>

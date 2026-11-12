@@ -147,7 +147,7 @@ function Metrics({ e, category }: { e: RankedEntry; category: RankingCategory })
 /** Rank 4+ : one-column card. */
 export function RankingCard({ e, category }: { e: RankedEntry; category: RankingCategory }) {
   return (
-    <article className="neon cv-auto min-w-0 rounded-[24px] border bg-surface/95 p-3 [contain-intrinsic-size:auto_330px]" aria-labelledby={`rk-${e.event.id}`}>
+    <article className="neon cv-auto min-w-0 rounded-[24px] border bg-surface/95 p-3 [contain-intrinsic-block-size:auto_330px]" aria-labelledby={`rk-${e.event.id}`}>
       <div className="flex gap-3">
         <div className="flex w-9 shrink-0 flex-col items-center pt-1">
           <span className="font-display text-[26px] leading-none">{e.rank}</span>

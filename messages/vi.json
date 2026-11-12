@@ -1900,7 +1900,19 @@
     "onChain": "trên chuỗi",
     "stakeLocked": "đang khóa",
     "stakeUnlocking": "đang mở khóa",
-    "stakeWithdrawn": "đã rút"
+    "stakeWithdrawn": "đã rút",
+    "errors": {
+      "WALLET_REQUIRED": "Hãy kết nối ví và đăng nhập trước.",
+      "STAKE_REQUIRED": "Stake mức tối thiểu để tham gia DAO này. Chỉ kết nối ví thì chưa phải thành viên.",
+      "SUSPENDED": "Tài khoản DAO của bạn đang bị người kiểm duyệt tạm khóa.",
+      "FORBIDDEN": "Vai trò của bạn không thể làm việc này.",
+      "SIGN_IN_REQUIRED": "Đăng nhập bằng tài khoản đã xác minh để bỏ phiếu.",
+      "EMAIL_NOT_VERIFIED": "Xác nhận email để bỏ phiếu.",
+      "RATE_LIMITED": "Quá nhiều yêu cầu. Vui lòng thử lại sau giây lát.",
+      "THREAD_LOCKED": "Người kiểm duyệt đã khóa chủ đề này.",
+      "EVENT_ENDED": "Sự kiện đã kết thúc không thể khởi tạo DAO.",
+      "ONE_PERSON_ONE_VOTE": "Mỗi tài khoản một phiếu. Ví không bao giờ tăng trọng số. Tài khoản dùng chung thiết bị, nguồn tiền hoặc đăng ký hàng loạt sẽ bị gắn cờ và phiếu được giữ lại để xem xét. Không có xác minh danh tính thì không thể đảm bảo một người = một phiếu."
+    }
   },
   "tickets": {
     "title": "Vé của tôi",
@@ -3318,6 +3330,9 @@
     "signInTitle": "Đăng nhập để quản lý sự kiện",
     "signInBody": "Vận hành sự kiện dùng tài khoản FREAKTOPIA của bạn nên đội, hợp đồng và tệp vẫn được giữ riêng tư.",
     "signIn": "Đăng nhập",
+    "signInGenericTitle": "Đăng nhập để tiếp tục",
+    "signInGenericBody": "Trang này dùng tài khoản FREAKTOPIA của bạn, nên nội dung bạn lưu ở đây chỉ mình bạn thấy.",
+    "signUpCta": "Tạo tài khoản",
     "verifyTitle": "Hãy xác nhận email trước",
     "verifyBody": "Lên kế hoạch, tuyển người và ký hợp đồng cần email đã xác minh. Hãy kiểm tra liên kết trong hộp thư.",
     "newTitle": "Lên kế hoạch sự kiện",

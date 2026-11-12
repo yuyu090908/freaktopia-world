@@ -16,7 +16,7 @@ export function LogoMark({ className = "size-8" }: { className?: string }) {
   );
 }
 
-export function Logo({ className = "h-[42px] w-auto sm:h-[48px]" }: { className?: string }) {
+export function Logo({ className = "h-[34px] w-auto min-[360px]:h-[42px] sm:h-[48px]" }: { className?: string }) {
   const tu = useTranslations("ui");
   return (
     <Link href="/" className="flex min-h-11 shrink-0 items-center rounded-xl" aria-label={tu("freaktopiaWorldHome")}>
